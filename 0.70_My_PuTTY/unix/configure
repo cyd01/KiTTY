@@ -1,0 +1,3 @@
+#!/bin/sh
+
+$(echo "$0" | sed '$s!configure$!../configure!') "$@"

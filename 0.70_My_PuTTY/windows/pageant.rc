@@ -1,0 +1,87 @@
+/*
+ * Windows resources for Pageant.
+ */
+
+#include "rcstuff.h"
+
+#ifdef INTEGRATED_AGENT
+#define APPNAME_AGENT "Kageant"
+#define APPDESC_AGENT "KiTTY SSH authentication agent"
+900 ICON "pageant.ico"
+901 ICON "pageants.ico"
+#else
+#define APPNAME "Pageant"
+#define APPDESC "PuTTY SSH authentication agent"
+200 ICON "pageant.ico"
+201 ICON "pageants.ico"
+#endif
+
+
+210 DIALOG DISCARDABLE 0, 0, 140, 60
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+#ifdef PERSOPORT
+CAPTION "Kageant: Enter Passphrase"
+#else
+CAPTION "Pageant: Enter Passphrase"
+#endif
+FONT 8, "MS Shell Dlg"
+BEGIN
+    CTEXT "Enter passphrase for key", 100, 10, 6, 120, 8
+    CTEXT "", 101, 10, 16, 120, 8
+    EDITTEXT 102, 10, 26, 120, 12, ES_PASSWORD | ES_AUTOHSCROLL
+    DEFPUSHBUTTON "O&K", IDOK, 20, 42, 40, 14
+    PUSHBUTTON "&Cancel", IDCANCEL, 80, 42, 40, 14
+END
+
+211 DIALOG DISCARDABLE 0, 0, 330, 200
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+#ifdef PERSOPORT
+CAPTION "Kageant Key List"
+#else
+CAPTION "Pageant Key List"
+#endif
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LISTBOX 100, 10, 10, 310, 155,
+        LBS_EXTENDEDSEL | LBS_HASSTRINGS | LBS_USETABSTOPS | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON "&Add Key", 101, 75, 162, 60, 14
+    PUSHBUTTON "&Remove Key", 102, 195, 162, 60, 14
+    PUSHBUTTON "&Help", 103, 10, 182, 50, 14
+    DEFPUSHBUTTON "&Close", IDOK, 270, 182, 50, 14
+END
+
+/* Accelerators used: cl */
+213 DIALOG DISCARDABLE 140, 40, 270, 106
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+#ifdef PERSOPORT
+CAPTION "About Kageant"
+#else
+CAPTION "About Pageant"
+#endif
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON "&Close", IDOK, 216, 88, 48, 14
+    PUSHBUTTON "View &Licence", 101, 6, 88, 70, 14
+    PUSHBUTTON "Visit &Web Site", 102, 140, 88, 70, 14
+    EDITTEXT 1000, 10, 6, 250, 80, ES_READONLY | ES_MULTILINE | ES_CENTER, WS_EX_STATICEDGE
+END
+
+/* No accelerators used */
+214 DIALOG DISCARDABLE 50, 50, 326, 231
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PuTTY Licence"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON "OK", IDOK, 148, 211, 44, 14
+
+    EDITTEXT 1000, 10, 10, 306, 192, ES_READONLY | ES_MULTILINE | ES_LEFT, WS_EX_STATICEDGE
+
+END
+
+#ifndef INTEGRATED_AGENT
+#include "version.rc2"
+
+#ifndef NO_MANIFESTS
+1 RT_MANIFEST "pageant.mft"
+#endif /* NO_MANIFESTS */
+#endif

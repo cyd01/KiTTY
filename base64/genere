@@ -1,0 +1,3 @@
+gcc -c base64.c -Wall -O3
+ar cr base64.a base64.o
+ranlib base64.a

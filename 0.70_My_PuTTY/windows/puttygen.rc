@@ -1,0 +1,79 @@
+/*
+ * Windows resources for PuTTYgen.
+ */
+
+#include "rcstuff.h"
+
+#ifdef INTEGRATED_KEYGEN
+#define APPNAME_KEYGEN "PuTTYgen"
+#define APPDESC_KEYGEN "PuTTY SSH key generation utility"
+
+800 ICON "puttygen.ico"
+#else
+#define APPNAME "PuTTYgen"
+#define APPDESC "PuTTY SSH key generation utility"
+
+200 ICON "puttygen.ico"
+#endif
+
+201 DIALOG DISCARDABLE 0, 0, 318, 270
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PuTTY Key Generator"
+FONT 8, "MS Shell Dlg"
+BEGIN
+END
+
+#ifdef INTEGRATED_KEYGEN
+810 DIALOG DISCARDABLE 0, 0, 140, 60
+#else
+210 DIALOG DISCARDABLE 0, 0, 140, 60
+#endif
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PuTTYgen: Enter Passphrase"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    CTEXT "Enter passphrase for key", 100, 10, 6, 120, 8
+    CTEXT "", 101, 10, 16, 120, 8
+    EDITTEXT 102, 10, 26, 120, 12, ES_PASSWORD | ES_AUTOHSCROLL
+    DEFPUSHBUTTON "O&K", IDOK, 20, 42, 40, 14
+    PUSHBUTTON "&Cancel", IDCANCEL, 80, 42, 40, 14
+END
+
+/* Accelerators used: cl */
+#ifdef INTEGRATED_KEYGEN
+813 DIALOG DISCARDABLE 140, 40, 270, 106
+#else
+213 DIALOG DISCARDABLE 140, 40, 270, 106
+#endif
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About PuTTYgen"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON "&Close", IDOK, 216, 88, 48, 14
+    PUSHBUTTON "View &Licence", 101, 6, 88, 70, 14
+    PUSHBUTTON "Visit &Web Site", 102, 140, 88, 70, 14
+    EDITTEXT 1000, 10, 6, 250, 80, ES_READONLY | ES_MULTILINE | ES_CENTER, WS_EX_STATICEDGE
+END
+
+/* No accelerators used */
+#ifdef INTEGRATED_KEYGEN
+814 DIALOG DISCARDABLE 50, 50, 326, 231
+#else
+214 DIALOG DISCARDABLE 50, 50, 326, 231
+#endif
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PuTTY Licence"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON "OK", IDOK, 148, 211, 44, 14
+
+    EDITTEXT 1000, 10, 10, 306, 192, ES_READONLY | ES_MULTILINE | ES_LEFT, WS_EX_STATICEDGE
+END
+
+#ifndef INTEGRATED_KEYGEN
+#include "version.rc2"
+
+#ifndef NO_MANIFESTS
+1 RT_MANIFEST "puttygen.mft"
+#endif /* NO_MANIFESTS */
+#endif

@@ -1,0 +1,66 @@
+/*
+ * Standard Windows version information.
+ * (For inclusion in other .rc files with appropriate macro definitions.)
+ * FIXME: This file is called '.rc2' rather than '.rc' to avoid MSVC trying
+ * to compile it on its own when using the project files. Nicer solutions
+ * welcome.
+ */
+
+#include "version.h"
+#include "licence.h"
+
+/*
+ * The actual VERSIONINFO resource.
+ */
+VS_VERSION_INFO VERSIONINFO
+/* (None of this "fixed" info appears to be trivially user-visible on
+ * Win98SE. The binary version does show up on Win2K.) */
+FILEVERSION	BINARY_VERSION
+PRODUCTVERSION	BINARY_VERSION	/* version of whole suite */
+FILEFLAGSMASK	VS_FF_DEBUG | VS_FF_PRERELEASE | VS_FF_PRIVATEBUILD
+FILEFLAGS	0x0L
+#if defined DEBUG
+		| VS_FF_DEBUG
+#endif
+#if defined SNAPSHOT || defined PRERELEASE
+		| VS_FF_PRERELEASE
+#elif !defined RELEASE
+		| VS_FF_PRIVATEBUILD
+#endif
+FILEOS		VOS__WINDOWS32
+FILETYPE	VFT_APP
+FILESUBTYPE	0x0L /* n/a for VFT_APP */
+BEGIN
+    /* (On Win98SE and Win2K, we can see most of this on the Version tab
+     * in the file properties in Explorer.) */
+    BLOCK "StringFileInfo"
+    BEGIN
+	/* "lang-charset" LLLLCCCC = (UK English, Unicode) */
+	BLOCK "080904B0"
+	BEGIN
+	    VALUE "CompanyName",	"Simon Tatham"  /* required :/ */
+	    VALUE "ProductName",	"PuTTY suite"
+	    VALUE "FileDescription",	APPDESC
+	    VALUE "InternalName",	APPNAME
+	    VALUE "OriginalFilename",	APPNAME
+	    VALUE "FileVersion",	TEXTVER
+#if (defined PERSOPORT) && (!defined FDJ)
+		VALUE "Comments", "Additional features on KiTTY That's all folks! by 9bis.com, 2018"
+		VALUE "Additional Notes", "Ne pas distribuer sans la permission de l'auteur.\0"
+		VALUE "ProductVersion",	TEXTVER " - KiTTY fork"
+#else
+	    VALUE "ProductVersion",	TEXTVER
+#endif
+	    VALUE "LegalCopyright",	"Copyright \251 " SHORT_COPYRIGHT_DETAILS "."
+#if (!defined SNAPSHOT) && (!defined RELEASE) && (!defined PRERELEASE)
+	    /* Only if VS_FF_PRIVATEBUILD. */
+	    VALUE "PrivateBuild",	TEXTVER /* NBI */
+#endif
+	END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+	/* Once again -- same meanings -- apparently necessary */
+	VALUE "Translation", 0x809, 1200
+    END
+END
