@@ -47,4 +47,9 @@ KiTTY has all the features from the original software, and adds many others as d
 * A light chat server is hidden in KiTTY
 * A hidden text editor is integrated into KiTTY
 
+### How to compile
+Jump into the x.yy_My_PuTTY\windows directory then run the command:
+
+    make -f MAKEFILE.MINGW putty.exe
+
 Original website is [http://kitty.9bis.com/](http://kitty.9bis.com/ "KiTTY website").
