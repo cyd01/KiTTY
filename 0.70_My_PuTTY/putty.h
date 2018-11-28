@@ -28,6 +28,7 @@ typedef struct terminal_tag Terminal;
 #include "misc.h"
 
 #ifdef PERSOPORT
+#define ATTR_ITALIC  0x1000000U
 #include <stdint.h>
 void debug_log( const char *fmt, ...) ;
 int switch_private_key_flag( void ) ;

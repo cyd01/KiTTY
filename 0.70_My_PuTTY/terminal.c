@@ -4030,6 +4030,12 @@ static void term_out(Terminal *term)
 				    compatibility(VT100AVO);
 				    term->curr_attr |= ATTR_BOLD;
 				    break;
+#ifdef PERSOPORT
+				  case 3:	/* enable italics */
+				    compatibility(ANSI);
+				    term->curr_attr |= ATTR_ITALIC;
+				    break;
+#endif
 				  case 21:	/* (enable double underline) */
 				    compatibility(OTHER);
 				  case 4:	/* enable underline */
@@ -4065,6 +4071,12 @@ static void term_out(Terminal *term)
 				    compatibility2(OTHER, VT220);
 				    term->curr_attr &= ~ATTR_BOLD;
 				    break;
+#ifdef PERSPORT
+				  case 23:	/* disable italics */
+				    compatibility(ANSI);
+				    term->curr_attr &= ~ATTR_ITALIC;
+				    break;
+#endif
 				  case 24:	/* disable underline */
 				    compatibility2(OTHER, VT220);
 				    term->curr_attr &= ~ATTR_UNDER;

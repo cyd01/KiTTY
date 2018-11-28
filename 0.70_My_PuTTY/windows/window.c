@@ -172,6 +172,22 @@ struct agent_callback {
 #define FONT_BOLD 1
 #define FONT_UNDERLINE 2
 #define FONT_BOLDUND 3
+
+#ifdef PERSOPORT
+#define FONT_ITALIC 4
+#define FONT_WIDE	0x08
+#define FONT_HIGH	0x10
+#define FONT_NARROW	0x20
+
+#define FONT_OEM 	0x40
+#define FONT_OEMBOLD 	0x41
+#define FONT_OEMUND 	0x42
+#define FONT_OEMBOLDUND 0x43
+ 
+#define FONT_MAXNO 	0x4F
+#define FONT_SHIFT	6
+static int use_italics;
+#else
 #define FONT_WIDE	0x04
 #define FONT_HIGH	0x08
 #define FONT_NARROW	0x10
@@ -183,6 +199,8 @@ struct agent_callback {
 
 #define FONT_MAXNO 	0x40
 #define FONT_SHIFT	5
+#endif
+
 static HFONT fonts[FONT_MAXNO];
 static LOGFONT lfont;
 static int fontflag[FONT_MAXNO];
@@ -729,9 +747,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			i++ ;
 			int j = 2, r,g,b ;
 			sscanf( argv[i], "%d:%d:%d", &r, &g, &b ) ;
-			if( r<0 ) r=0 ; if( r>255 ) r=255;
-			if( g<0 ) g=0 ; if( g>255 ) g=255;
-			if( b<0 ) b=0 ; if( b>255 ) b=255;
+			if( r<0 ) { r=0 ; } if( r>255 ) { r=255; }
+			if( g<0 ) { g=0 ; } if( g>255 ) { g=255; }
+			if( b<0 ) { b=0 ; } if( b>255 ) { b=255; }
 			conf_set_int_int(conf, CONF_colours, j*3+0, r);
 			conf_set_int_int(conf, CONF_colours, j*3+1, g);
 			conf_set_int_int(conf, CONF_colours, j*3+2, b);
@@ -2410,6 +2428,15 @@ static void init_fonts(int pick_width, int pick_height)
     font_width = pick_width;
 
     quality = conf_get_int(conf, CONF_font_quality);
+#ifdef PERSOPORT
+#define f(i,c,w,u,t) \
+    fonts[i] = CreateFont (font_height, font_width, 0, 0, w, t, u, FALSE, \
+ 			   c, OUT_DEFAULT_PRECIS, \
+ 		           CLIP_DEFAULT_PRECIS, FONT_QUALITY(quality), \
+ 			   FIXED_PITCH | FF_DONTCARE, font->name)
+ 
+    f(FONT_NORMAL, font->charset, fw_dontcare, FALSE, FALSE);
+#else
 #define f(i,c,w,u) \
     fonts[i] = CreateFont (font_height, font_width, 0, 0, w, FALSE, u, FALSE, \
 			   c, OUT_DEFAULT_PRECIS, \
@@ -2417,7 +2444,7 @@ static void init_fonts(int pick_width, int pick_height)
 			   FIXED_PITCH | FF_DONTCARE, font->name)
 
     f(FONT_NORMAL, font->charset, fw_dontcare, FALSE);
-
+#endif
     SelectObject(hdc, fonts[FONT_NORMAL]);
     GetTextMetrics(hdc, &tm);
 
@@ -2460,7 +2487,61 @@ static void init_fonts(int pick_width, int pick_height)
 	ucsdata.dbcs_screenfont = (cpinfo.MaxCharSize > 1);
     }
 
+#ifdef PERSOPORT
+    /* Check whether italic face is acceptable... */
+    f(FONT_ITALIC, font->charset, fw_dontcare, FALSE, TRUE);
+
+    {
+	LPOUTLINETEXTMETRICA regularOtm, italicOtm;
+
+	use_italics = 0;
+
+	i = GetOutlineTextMetricsA(hdc, 0, NULL);
+	if (i > 0) {
+	    regularOtm = (LPOUTLINETEXTMETRICA)safemalloc(1, i);
+	    regularOtm->otmSize = sizeof(OUTLINETEXTMETRICA);
+	    if (GetOutlineTextMetricsA(hdc, i, regularOtm)) {
+		/* Now get the italic version */
+		SelectObject(hdc, fonts[FONT_ITALIC]);
+		i = GetOutlineTextMetricsA(hdc, 0, NULL);
+		if (i > 0) {
+		    italicOtm = (LPOUTLINETEXTMETRICA)safemalloc(1, i);
+		    italicOtm->otmSize = sizeof(OUTLINETEXTMETRICA);
+		    if (GetOutlineTextMetricsA(hdc, i, italicOtm)) {
+			/* Compare... */
+			char *regStyle = (char*)regularOtm + (int)regularOtm->otmpStyleName;
+			char *itaStyle = (char*)italicOtm + (int)italicOtm->otmpStyleName;
+
+			/* Weed out "italic" fonts that...
+			    - Do not specify an italic slant (probably just the regular font)
+			    - Have the same style as the regular font.  Then it *is* just the regular
+				font with a linear transformation.
+			    - Report the style name of "Oblique".
+			   
+			    My experience is these a) don't look very good b) tend to overhang the
+			    next character and get cut off during paints... which doesn't look very good. */
+			if (strcmp(regStyle, itaStyle) && stricmp(itaStyle, "Oblique") && italicOtm->otmItalicAngle != 0) {
+			    use_italics = 1;
+			}
+		    }
+
+		    safefree(italicOtm);
+		}
+	    }
+
+	    safefree(regularOtm);
+	}
+
+	if (!use_italics) {
+	    DeleteObject(fonts[FONT_ITALIC]);
+	    fonts[FONT_ITALIC] = NULL;
+	}
+    }
+
+    f(FONT_UNDERLINE, font->charset, fw_dontcare, TRUE, FALSE);
+#else
     f(FONT_UNDERLINE, font->charset, fw_dontcare, TRUE);
+#endif
 
     /*
      * Some fonts, e.g. 9-pt Courier, draw their underlines
@@ -2511,7 +2592,11 @@ static void init_fonts(int pick_width, int pick_height)
     }
 
     if (bold_font_mode == BOLD_FONT) {
+#ifdef PERSOPORT
+	f(FONT_BOLD, font->charset, fw_bold, FALSE, FALSE);
+#else
 	f(FONT_BOLD, font->charset, fw_bold, FALSE);
+#endif
     }
 #undef f
 
@@ -2552,7 +2637,11 @@ static void another_font(int fontno)
 {
     int basefont;
     int fw_dontcare, fw_bold, quality;
+#ifdef PERSOPORT
+	int c, u, w, x, t;
+#else
     int c, u, w, x;
+#endif
     char *s;
     FontSpec *font;
 
@@ -2578,6 +2667,9 @@ static void another_font(int fontno)
     u = FALSE;
     s = font->name;
     x = font_width;
+#ifdef PERSOPORT
+    t = FALSE;
+#endif
 
     if (fontno & FONT_WIDE)
 	x *= 2;
@@ -2589,12 +2681,20 @@ static void another_font(int fontno)
 	w = fw_bold;
     if (fontno & FONT_UNDERLINE)
 	u = TRUE;
+#ifdef PERSOPORT
+    if (fontno & FONT_ITALIC && use_italics)
+	t = TRUE;
+#endif
 
     quality = conf_get_int(conf, CONF_font_quality);
 
     fonts[fontno] =
 	CreateFont(font_height * (1 + !!(fontno & FONT_HIGH)), x, 0, 0, w,
+#ifdef PERSOPORT
+    		   t, u, FALSE, c, OUT_DEFAULT_PRECIS,
+#else
 		   FALSE, u, FALSE, c, OUT_DEFAULT_PRECIS,
+#endif
 		   CLIP_DEFAULT_PRECIS, FONT_QUALITY(quality),
 		   DEFAULT_PITCH | FF_DONTCARE, s);
 
@@ -3946,7 +4046,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	  case IDM_RESIZE: //Redmensionner
 		{
 		int w = LOWORD( lParam ), h = HIWORD( lParam ) ;
-		if (w < 1) w = 1 ; if (h < 1) h = 1 ;
+		if (w < 1) { w = 1 ; } if (h < 1) { h = 1 ; }
 		conf_set_int( conf, CONF_width, w ) ; // cfg.width = w ;
 		conf_set_int( conf, CONF_height, h ) ; // cfg.height = h ;
 		term_size( term, h, w, conf_get_int( conf, CONF_savelines) /*cfg.savelines*/ ) ;
@@ -3956,7 +4056,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	  case IDM_REPOS: //Redmensionner
 		{
 		int x = LOWORD( lParam ), y = HIWORD( lParam ) ;
-		if (x < 1) x = 1 ; if (y < 1) y = 1 ;
+		if (x < 1) { x = 1 ; } if (y < 1) { y = 1 ; }
 		conf_set_int( conf, CONF_xpos, x ) ; // cfg.xpos = x ; 
 		conf_set_int( conf, CONF_ypos, y ) ; // cfg.ypos = y ;
 		SetWindowPos( hwnd, 0, x, y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER|SWP_NOACTIVATE ) ;
@@ -5504,8 +5604,13 @@ void do_text_internal(Context ctx, int x, int y, wchar_t *text, int len,
     nbg = ((attr & ATTR_BGMASK) >> ATTR_BGSHIFT);
     if (bold_font_mode == BOLD_FONT && (attr & ATTR_BOLD))
 	nfont |= FONT_BOLD;
+#ifdef PERSOPORT
+    if (attr & ATTR_ITALIC)
+	nfont |= FONT_ITALIC;
+#endif
     if (und_mode == UND_FONT && (attr & ATTR_UNDER))
 	nfont |= FONT_UNDERLINE;
+
     another_font(nfont);
     if (!fonts[nfont]) {
 	if (nfont & FONT_UNDERLINE)
