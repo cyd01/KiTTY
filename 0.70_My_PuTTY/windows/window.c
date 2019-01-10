@@ -1519,7 +1519,8 @@ TrayIcone.hWnd = hwnd ;
         else
             AppendMenu(m, MF_ENABLED, IDM_VISIBLE, "Always visi&ble");
         AppendMenu(m, MF_ENABLED, IDM_PROTECT, "Prote&ct");
-        if( !GetWinrolFlag() ) AppendMenu(m, MF_ENABLED, IDM_WINROL, "Roll-u&p");
+//char b[256];sprintf(b,"%d",GetWinrolFlag());MessageBox(NULL,b,"info",MB_OK);
+        if( GetWinrolFlag() ) AppendMenu(m, MF_ENABLED, IDM_WINROL, "Roll-u&p");
         AppendMenu(m, MF_ENABLED, IDM_SCRIPTFILE, "Send scr&ipt file" ) ;
         if( PSCPPath!=NULL ) AppendMenu(m, MF_ENABLED, IDM_PSCP, "Send wit&h pscp");
         else AppendMenu(m, MF_DISABLED|MF_GRAYED, IDM_PSCP, "Send wit&h pscp");

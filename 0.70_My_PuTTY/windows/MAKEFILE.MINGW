@@ -110,6 +110,22 @@ UPX = upx
 # You may also need to tell windres where to find include files:
 # RCINC = --include-dir c:\cygwin\include\
 
+CFLAGS = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT -D_NO_OLDNAMES -I.././ \
+		-I../charset/ -I../windows/ -I../unix/
+LDFLAGS = -s
+
+RCFLAGS = $(RCINC) --define WIN32=1 --define _WIN32=1 --define WINVER=0x0400 \
+		-I.././ -I../charset/ -I../windows/ -I../unix/ -I../macosx/ \
+		-I ../../ -DPERSOPORT -D$(FDJFLAG)
+
+# XXX GNU-ism, but it's probably all right for a Cygwin/MinGW Makefile.
+RCFLAGS += $(patsubst -D%,--define %,$(VER))
+# _WIN32_IE is required to expose identifiers that only make sense on
+# systems with IE5+ installed, such as some arguments to SHGetFolderPath().
+# WINVER etc perform a similar function for FlashWindowEx().
+CFLAGS += -D_WIN32_IE=0x0500
+CFLAGS += -DWINVER=0x0501 -D_WIN32_WINDOWS=0x0410 -D_WIN32_WINNT=0x0501
+
 # 		-DPERSOPORT -DCYGTERMPORT -DIMAGEPORT -DRECONNECTPORT -DHYPERLINKPORT -DZMODEMPORT -DSTARTBUTTON -DLAUNCHERPORT -DSAVEDUMPPORT -DKEYMAPPINGPORT -DWINCRYPTPORT -DTUTTYPORT -DPORTKNOCKINGPORT -DPUTTYXPORT -DWTSPORT -DPRINTCLIPPORT -DRUTTYPORT -DADBPORT \
 
 # Anciens flags: 
@@ -122,10 +138,8 @@ FDJFLAG = FDJ1
 # Ajouter  -g -ggdb   a CFLAGS pour avoir plus de debug !!!
 # Ajouter  -DNO_PASSWORD \ pour compiler une version sans possibilité de sauvegarder le mot de passe
 
-
-CFLAGS = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT -D$(FDJFLAG) \
-		-DAUTO_WINSOCK \
-		-DUSE_CAPI -DCOVERITY \
+CFLAGS += -DAUTO_WINSOCK -DUSE_CAPI -DCOVERITY -DNO_MULTIMON -DNO_HTMLHELP
+CFLAGS += -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT -D$(FDJFLAG) \
  		-DPERSOPORT \
 		-DCYGTERMPORT \
 		-DIMAGEPORT \
@@ -145,7 +159,7 @@ CFLAGS = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT -D$(FDJFLAG) \
 		-DRUTTYPORT \
 		-DDISABLEALTGRPORT \
 		-DADBPORT \
-		-D_NO_OLDNAMES -DNO_MULTIMON -DNO_HTMLHELP -I.././ -I../../ \
+		-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
 		-I../../base64 -I../../bcrypt -I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
@@ -155,19 +169,7 @@ CFLAGS_PLINK = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT \
 		-I../charset -I../windows -I../unix -I../mac -I.\
 		-I../macosx \
 		-I../../base64 -I../../bcrypt -I../../md5 -I../../regex -I../../url
-LDFLAGS = -s -static-libgcc
 
-RCFLAGS = $(RCINC) --define WIN32=1 --define _WIN32=1 --define WINVER=0x0400 \
-		-I.././ -I../charset/ -I../windows/ -I../unix/ -I../macosx/ \
-		-I ../../ -DPERSOPORT -D$(FDJFLAG)
-
-# XXX GNU-ism, but it's probably all right for a Cygwin/MinGW Makefile.
-RCFLAGS += $(patsubst -D%,--define %,$(VER))
-# _WIN32_IE is required to expose identifiers that only make sense on
-# systems with IE5+ installed, such as some arguments to SHGetFolderPath().
-# WINVER etc perform a similar function for FlashWindowEx().
-CFLAGS += -D_WIN32_IE=0x0500
-CFLAGS += -DWINVER=0x0501 -D_WIN32_WINDOWS=0x0410 -D_WIN32_WINNT=0x0501
 
 .SUFFIXES:
 
@@ -416,6 +418,13 @@ testbn.exe: conf.o misc.o sshbn.o testbn.o tree234.o version.o winmisc.o
 		testbn.o tree234.o version.o winmisc.o -ladvapi32 -lcomctl32 \
 		-lcomdlg32 -lgdi32 -limm32 -lole32 -lshell32 -luser32 \
 		-lwinmm -lwinspool
+
+agentf.o: ../agentf.c ../putty.h ../ssh.h ../pageant.h ../sshchan.h \
+		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
+		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
+		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
+		../charset/charset.h
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../agentf.c
 
 aqsync.o: ../aqsync.c ../putty.h ../puttyps.h ../network.h ../misc.h \
 		../windows/winstuff.h ../unix/unix.h ../puttymem.h \

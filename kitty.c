@@ -288,7 +288,7 @@ static int TitleBarFlag = 1 ;
 int GetTitleBarFlag(void) { return TitleBarFlag ; }
 void SetTitleBarFlag( const int flag ) { TitleBarFlag = flag ; }
 
-// Hauteur de la fenetre pour la fonction winrol
+// Hauteur de la fenetre pour la fonction WinHeight
 static int WinHeight = -1 ;
 int GetWinHeight(void) { return WinHeight ; }
 void SetWinHeight( const int num ) { WinHeight = num ; }
@@ -1402,7 +1402,7 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "#internaldelay", "10" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#readonly", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "slidedelay", "0" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "winrol", "yes" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "winroll", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "wintitle", "yes" ) ;
 #ifdef ZMODEMPORT
 			writeINI( KittyIniFile, INIT_SECTION, "zmodem", "yes" ) ;
@@ -2722,7 +2722,7 @@ void SaveWindowCoord( Conf * conf ) {
 		}
 	}
 
-// Gestion de la fonction winrol
+// Gestion de la fonction winroll
 void ManageWinrol( HWND hwnd, int resize_action ) {
 	RECT rcClient ;
 	int mode = -1 ;
@@ -3761,7 +3761,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 #ifdef LAUNCHERPORT
 	else if( !strcmp( st, "/initlauncher" ) ) { InitLauncherRegistry() ; return 1 ; }
 #endif
-	else if( !strcmp( st, "/winrol" ) ) { WinrolFlag = abs(WinrolFlag-1) ; return 1 ; }
+	else if( !strcmp( st, "/winroll" ) ) { WinrolFlag = abs(WinrolFlag-1) ; return 1 ; }
 	else if( !strcmp( st, "/wintitle" ) ) { TitleBarFlag = abs(TitleBarFlag-1) ; return 1 ; }
 	else if( strstr( st, "/command " ) == st ) { SendCommandAllWindows( hwnd, st+9 ) ; return 1 ; }
 	else if( !strcmp( st, "/sizeall" ) ) { ResizeWinList( hwnd, conf_get_int(conf,CONF_width)/*cfg.width*/, conf_get_int(conf,CONF_height)/*cfg.height*/ ) ; return 1 ; }
@@ -4884,7 +4884,7 @@ int ManageShortcuts( HWND hwnd, int key_num, int shift_flag, int control_flag, i
 
 	if( key == shortcuts_tab.protect )				// Protection
 		{ SendMessage( hwnd, WM_COMMAND, IDM_PROTECT, 0 ) ; InvalidateRect( hwnd, NULL, TRUE ) ; return 1 ; }
-	if( key == shortcuts_tab.rollup ) 				// Fonction winrol
+	if( key == shortcuts_tab.rollup ) 				// Fonction winroll
 			{ SendMessage( hwnd, WM_COMMAND, IDM_WINROL, 0 ) ; return 1 ; }
 	if( key == shortcuts_tab.showportforward ) 				// Fonction show port forward
 			{ SendMessage( hwnd, WM_COMMAND, IDM_SHOWPORTFWD, 0 ) ; return 1 ; }
@@ -5135,7 +5135,7 @@ void LoadParameters( void ) {
 			PSCPOptions[1023] = '\0' ;
 		}
 	}
-	if( ReadParameter( INIT_SECTION, "winrol", buffer ) ) { 
+	if( ReadParameter( INIT_SECTION, "winroll", buffer ) ) { 
 		if( !stricmp( buffer, "no" ) ) WinrolFlag = 0 ;
 		if( !stricmp( buffer, "yes" ) ) WinrolFlag = 1 ;
 	}

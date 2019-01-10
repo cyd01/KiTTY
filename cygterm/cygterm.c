@@ -326,7 +326,7 @@ cygterm_size(void *handle, int width, int height)
 	Local local = handle;
 	cygterm_debug("top");
 	cygterm_debug("size=%d,%d (last=%d,%d)",
-	              width, height, local->cfg.width, local->cfg.height);
+	              width, height, conf_get_int(local->conf,CONF_width), conf_get_int(local->conf,CONF_height));
 	conf_set_int(local->conf,CONF_width,width);
 	conf_set_int(local->conf,CONF_height,height);
 	if (local->s) {
