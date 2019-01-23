@@ -1662,7 +1662,7 @@ void SendKeyboardPlus( HWND hwnd, const char * st ) {
 	int i=0, j=0;
 	//int internal_delay = 10 ;
 	char *buffer = NULL, stb[6] ;
-	if( ( buffer = (char*) malloc( strlen( st ) + 10 ) ) != NULL ) {
+	if( ( buffer = (char*) malloc( 2*strlen( st ) ) ) != NULL ) {
 		buffer[0] = '\0' ;
 		do {
 		if( st[i] == '\\' ) {

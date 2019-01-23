@@ -220,7 +220,7 @@ static INT_PTR CALLBACK LicenceProc(HWND hwnd, UINT msg,
 #if (defined PERSOPORT) && (!defined FDJ)
 
 //static const char MESSAGE[] = "";
-static const char MESSAGE[] = "                                                                                       KiTTY software is developed by Cyd for 9bis.com, copyright \251 2006-2018, thanks to Leo for bcrypt and mini libraries, thanks to all contributors                                                                                       " ;
+static const char MESSAGE[] = "                                                                                       KiTTY software is developed by Cyd for 9bis.com, copyright \251 2006-2019, thanks to Leo for bcrypt and mini libraries, thanks to all contributors                                                                                       " ;
 static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
                                   WPARAM wParam, LPARAM lParam)
 {

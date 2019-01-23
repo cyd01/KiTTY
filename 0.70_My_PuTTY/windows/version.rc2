@@ -45,7 +45,7 @@ BEGIN
 	    VALUE "OriginalFilename",	APPNAME
 	    VALUE "FileVersion",	TEXTVER
 #if (defined PERSOPORT) && (!defined FDJ)
-		VALUE "Comments", "Additional features on KiTTY That's all folks! by 9bis.com, 2018"
+		VALUE "Comments", "Additional features on KiTTY That's all folks! by 9bis.com, 2019"
 		VALUE "Additional Notes", "Ne pas distribuer sans la permission de l'auteur.\0"
 		VALUE "ProductVersion",	TEXTVER " - KiTTY fork"
 #else
