@@ -193,37 +193,3 @@
 #define WINHELP_CTXID_option_cleanup 4
 #define WINHELP_CTX_pgp_fingerprints "pgpfingerprints:pgpkeys"
 #define WINHELP_CTXID_pgp_fingerprints 5
-
-#ifdef PERSOPORT
-#define WINHELP_CTX_behaviour_sendtotray "behaviour.sendtotray:config-sendtotray"
-#define WINHELP_CTX_behaviour_maximize "behaviour.maximize:config-maximize"
-#define WINHELP_CTX_behaviour_fullscreen "behaviour.fullscreen:config-fullscreen"
-#define WINHELP_CTX_behaviour_saveonexit "behaviour.saveonexit:config-saveonexit"
-#define WINHELP_CTX_session_folder "session.folder:config-folder"
-#define WINHELP_CTX_appearance_icone "appearance.icone:config-icone"
-#define WINHELP_CTX_appearance_iconefile "appearance.iconefile:config-iconefile"
-#define WINHELP_CTX_connection_password "connection.password:config-password"
-#define WINHELP_CTX_connection_autocommand "connection.autocommand:config-autocommand"
-#define WINHELP_CTX_connection_antiidle "connection.antiidle:config-antiidle"
-#define WINHELP_CTX_connection_class "connection.class:config-class"
-#define WINHELP_CTX_scriptfile "connection.scriptfile:config-scriptfile"
-#define WINHELP_CTX_logging_logtimestamp "connection.logging.logtimestamp"
-#define WINHELP_CTX_bell_foregroundonbell "bell.foregroundonbell:config-foregroundonbell"
-#endif
-
-#if (defined IMAGEPORT) && (!defined FDJ)
-#define WINHELP_CTX_appearance_background "appearance.background"
-#endif
-
-#ifdef RECONNECTPORT
-#define WINHELP_CTX_connection_wakeup_reconnect "connection.wakeup_reconnect:config-wakeup_reconnect"
-#define WINHELP_CTX_connection_failure_reconnect "connection.failure_reconnect:config-failure_reconnect"
-#endif
-
-#ifdef ZMODEMPORT
-#define WINHELP_CTX_zmodem_rzcommand "zmodem.rzcommand"
-#define WINHELP_CTX_zmodem_rzoptions "zmodem.rzoptions"
-#define WINHELP_CTX_zmodem_szcommand "zmodem.szcommand"
-#define WINHELP_CTX_zmodem_szoptions "zmodem.szoptions"
-#define WINHELP_CTX_zmodem_zdownloaddir "zmodem.zdownloaddir"
-#endif

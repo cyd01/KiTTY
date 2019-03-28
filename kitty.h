@@ -219,7 +219,12 @@ extern char InitialDirectory[4096] ;
 extern char * ConfigDirectory ;
 
 // Positionne un flag permettant de determiner si on est connecte
-extern int backend_connected ;
+extern int is_backend_connected ;
+
+#ifdef RECONNECTPORT
+/* Variable permettant de savoir qu'on a deja ete connecte */
+extern int is_backend_first_connected ; 
+#endif
 
 /* Flag pour interdire l'ouverture de boite configuration */
 extern int force_reconf ; 
@@ -472,10 +477,6 @@ int getpid(void) ;
 #endif
 #ifndef TIMER_RECONNECT
 #define TIMER_RECONNECT 8709
-#endif
-
-#ifdef RECONNECTPORT
-extern int backend_first_connected ; /* Variable permettant de savoir qu'on a deja ete connecte */
 #endif
 
 #ifndef VISIBLE_NO

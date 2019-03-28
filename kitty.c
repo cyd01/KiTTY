@@ -2573,10 +2573,13 @@ function wcl {
   echo -ne '\e''[4i'
   echo "Copied to Windows clipboard" 1>&2
 }
+*/
 /* Lance WinSCP sur un user et un host dans un répertoire donnés
 wt() { printf "\033]0;__wt:"$(hostname)":"${USER}":"`pwd`"\007" ; printf "\033]0;__ti\007" ; }
+*/
 /* Executer une commande locale
 lcmd() { if [ $# -eq 0 ] ; then echo "Usage: cmd command" ; return 0 ; fi ; printf "\033]0;__cm:"$*"\007" ; }
+*/
 /* Lance une session dupliquee dans le meme repertoire 
 ds() { printf "\033]0;__ds:`pwd`\007" ; }
 # Duplique une session sur le meme user, meme host, meme repertoire
@@ -4256,6 +4259,29 @@ void ManageInitScript( const char * input_str, const int len ) {
 	free( st ) ;
 	}
 	
+void ReadAutoCommandFromFile( const char * filename ) {
+	FILE *fp ;
+	long l;
+	int n;
+	char *pst, * buffer = NULL ;
+	if( existfile( filename ) ) {
+		l=filesize(filename) ;
+		buffer=(char*)malloc(5*l);
+		pst = buffer ;
+		if( ( fp = fopen( filename,"rb") ) != NULL ) {
+			while( fgets( pst, 1024, fp ) != NULL ) {
+				pst = buffer + strlen(buffer) ;
+			}
+			fclose( fp ) ;
+		}
+	}
+	while( (n=poss("\r",buffer))>0 ) { del(buffer,n,1) ; }	
+	while( buffer[strlen(buffer)-1]=='\n' ) { buffer[strlen(buffer)-1]='\0' ; }
+	while( (n=poss("\n",buffer))>0 ) { buffer[n-1]='n' ; insert(buffer,"\\",n) ; }
+	conf_set_str(conf, CONF_autocommand, buffer );
+	free(buffer);
+}
+
 void ReadInitScript( const char * filename ) {
 	char * pst, *buffer=NULL, *name=NULL ;
 	FILE *fp ;

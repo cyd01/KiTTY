@@ -495,7 +495,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		  HELPCTX(no_help),
 		  conf_checkbox_handler, I(CONF_maximize)); // dlg_stdcheckbox_handler, I(offsetof(Config,maximize)));
 		ctrl_checkbox(s, "Full screen on startup", NO_SHORTCUT,
-		  HELPCTX(behaviour_fullscreen),
+		  HELPCTX(no_help),
 		  conf_checkbox_handler/*dlg_stdcheckbox_handler*/, I(CONF_fullscreen)/*I(offsetof(Config,fullscreen))*/);
 		ctrl_checkbox(s, "Save position and size on exit", NO_SHORTCUT,
 		  HELPCTX(no_help),
@@ -705,11 +705,11 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 #if (defined IMAGEPORT) && (!defined FDJ)
 	/* Le patch Background image ne marche plus bien sur la version PuTTY 0.61
 		- il est en erreur lorsqu'on passe par la config box
-		- il est ok lorsqu'on démarrer par -load ou par duplicate session
-	   On le désactive dans la config box
+		- il est ok lorsqu'on dï¿½marrer par -load ou par duplicate session
+	   On le dï¿½sactive dans la config box
 	*/
 	// DisableBackgroundImage() ;
-	/* Un fix a été appliqué dans CONFIG.C. Lorsqu'on clique sur Open ou qu'on double-clique on charge la session par -load.
+	/* Un fix a ï¿½tï¿½ appliquï¿½ dans CONFIG.C. Lorsqu'on clique sur Open ou qu'on double-clique on charge la session par -load.
 	*/
 #endif
 #endif

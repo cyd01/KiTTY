@@ -422,7 +422,7 @@ static void start_backend(void)
 	MessageBox(NULL, msg, str, MB_ICONERROR | MB_OK);
 	sfree(str);
 #ifdef RECONNECTPORT
-	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && backend_first_connected ) {
+	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 	    SetConnBreakIcon() ;
 	    back->free(backhandle);
 	    backhandle = NULL;
@@ -716,7 +716,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
 	        ret = cmdline_process_param(p, i+1<argc?argv[i+1]:NULL,
 					    1, conf);
-
 		if (ret == -2) {
 		    cmdline_error("option \"%s\" requires an argument", p);
 		} else if (ret == 2) {
@@ -1604,7 +1603,7 @@ TrayIcone.hWnd = hwnd ;
 			}
 #endif
 		// Lancement du timer auto-command pour les connexions non SSH
-		if(conf_get_int(conf,CONF_protocol) != PROT_SSH) backend_connected = 1 ;
+		if(conf_get_int(conf,CONF_protocol) != PROT_SSH) is_backend_connected = 1 ;
 		SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
 
 		if( IniFileFlag == SAVEMODE_REG ) {
@@ -1652,7 +1651,7 @@ ManagePortKnocking(conf_get_str(conf,CONF_host),conf_get_str(conf,CONF_portknock
 
     start_backend();
 #ifdef RECONNECTPORT
-	if (conf_get_int(conf, CONF_protocol) != PROT_SSH) { backend_first_connected = 1 ; }
+	if (conf_get_int(conf, CONF_protocol) != PROT_SSH) { is_backend_first_connected = 1 ; }
 	last_reconnect = time(NULL);
 #endif
 #ifdef HYPERLINKPORT
@@ -1830,7 +1829,7 @@ void cleanup_exit(int code)
 	Le probleme est que ca retourne a la config box aussi en sortant ... de la config box si une session est chargee ...
 	*/
 	if( !PuttyFlag && GetConfigBoxNoExitFlag() )
-	if( backend_connected && strlen(conf_get_str(conf,CONF_sessionname))>0 ) {
+	if( is_backend_connected && strlen(conf_get_str(conf,CONF_sessionname))>0 ) {
 		char buffer[4096]="",shortname[1024]="" ; ;
 		if( GetModuleFileName( NULL, (LPTSTR)buffer, 1023 ) ) 
 			if( GetShortPathName( buffer, shortname, 1023 ) ) {
@@ -2045,7 +2044,7 @@ void connection_fatal(void *frontend, const char *fmt, ...)
     va_list ap;
 #ifdef RECONNECTPORT
     char *stuff, *morestuff ;
-	if( GetAutoreconnectFlag() && backend_first_connected ) {
+	if( GetAutoreconnectFlag() && is_backend_first_connected ) {
 		SetConnBreakIcon() ;
 		SetSSHConnected(0);
 		ReadInitScript(NULL);
@@ -3128,7 +3127,7 @@ void notify_remote_exit(void *fe)
 	     * we should not generate this informational one. */
 		
 #ifdef RECONNECTPORT
-	if( GetAutoreconnectFlag() && backend_first_connected ) {
+	if( GetAutoreconnectFlag() && is_backend_first_connected ) {
 		SetConnBreakIcon() ;
 		SetSSHConnected(0);
 		ReadInitScript(NULL);
@@ -3197,7 +3196,7 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 	// On charge automatiquement au démarrage (-edit) un fichier dans l'editeur connecté
 	if( !PuttyFlag ) if( LoadFile!=NULL ) { RunPuttyEd( hwnd, LoadFile ) ; free( LoadFile ) ; LoadFile = NULL ; }
 	
-	if( (conf_get_int(conf,CONF_protocol) == PROT_SSH) && (!backend_connected) ) break ; // On sort si en SSH on n'est pas connecte
+	if( (conf_get_int(conf,CONF_protocol) == PROT_SSH) && (!is_backend_connected) ) break ; // On sort si en SSH on n'est pas connecte
 	// Lancement d'une (ou plusieurs separees par \\n) commande(s) automatique(s) a l'initialisation
 	KillTimer( hwnd, TIMER_INIT ) ;
 
@@ -3341,8 +3340,8 @@ else if((UINT_PTR)wParam == TIMER_ANTIIDLE) {  // Envoi de l'anti-idle
 		else if( strlen( AntiIdleStr ) > 0 ) SendAutoCommand( hwnd, AntiIdleStr ) ;
 		}
 #ifdef RECONNECTPORT
-	if(!back||!backend_connected) { // On essaie de se reconnecter en cas de problème de connexion
-		if ( conf_get_int(conf,CONF_failure_reconnect) && backend_first_connected ) {
+	if(!back||!is_backend_connected) { // On essaie de se reconnecter en cas de problème de connexion
+		if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 			logevent(NULL, "No connection, trying to reconnect...") ; 
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 			}
@@ -3607,19 +3606,22 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		logevent(NULL, "----- Session restarted -----");
 		term_pwron(term, FALSE);
 #ifdef PERSOPORT
+#ifdef PORTKNOCKINGPORT
+		ManagePortKnocking(conf_get_str(conf,CONF_host),conf_get_str(conf,CONF_portknockingoptions));
+#endif
 #ifdef RECONNECTPORT
 		SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, 0, SI_INIT ) ;
-		backend_connected = 0 ;
+		is_backend_connected = 0 ;
 		start_backend();
 		if(!back && GetAutoreconnectFlag() ) { 
-		    if ( conf_get_int(conf,CONF_failure_reconnect) && backend_first_connected ) {
+		    if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 			logevent(NULL, "Unable to connect, trying to reconnect...") ; 
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 			}
 			break;
 		}
 #else
-		backend_connected = 0 ;
+		is_backend_connected = 0 ;
 		start_backend();
 #endif
 		SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
@@ -4199,7 +4201,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
       case WM_MBUTTONDOWN:
       case WM_RBUTTONDOWN:
 #ifdef RECONNECTPORT
-	if( !back && GetAutoreconnectFlag() && backend_first_connected ) { // On essaie de se reconnecter
+	if( !back && GetAutoreconnectFlag() && is_backend_first_connected ) { // On essaie de se reconnecter
 		SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; break ; 
 	} 
 #endif
@@ -4212,7 +4214,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	if( (message == WM_LBUTTONUP) && ((wParam & MK_SHIFT)&&(wParam & MK_CONTROL) ) ) { // shift + CTRL + bouton gauche => duplicate session
 		if( back ) SendMessage( hwnd, WM_COMMAND, IDM_DUPSESS, 0 ) ;
 #ifdef RECONNECTPORT
-		else { if( backend_first_connected ) { SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; } }
+		else { if( is_backend_first_connected ) { SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; } }
 #endif
 		break ;
 		}
@@ -5086,8 +5088,8 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
       case WM_SYSKEYUP:
 #endif
 #ifdef RECONNECTPORT
-	//if( !back && GetAutoreconnectFlag() && backend_first_connected && (WM_COMMAND==WM_KEYDOWN) && !(GetKeyState(VK_CONTROL)&0x8000) && !(GetKeyState(VK_SHIFT)&0x8000) && !(GetKeyState(VK_MENU)&0x8000) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
-	if( !back && (message==WM_KEYDOWN) && GetAutoreconnectFlag() && backend_first_connected && (wParam!=VK_CONTROL) && (wParam!=VK_SHIFT) && (wParam!=VK_MENU) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
+	//if( !back && GetAutoreconnectFlag() && is_backend_first_connected && (WM_COMMAND==WM_KEYDOWN) && !(GetKeyState(VK_CONTROL)&0x8000) && !(GetKeyState(VK_SHIFT)&0x8000) && !(GetKeyState(VK_MENU)&0x8000) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
+	if( !back && (message==WM_KEYDOWN) && GetAutoreconnectFlag() && is_backend_first_connected && (wParam!=VK_CONTROL) && (wParam!=VK_SHIFT) && (wParam!=VK_MENU) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
  		logevent(NULL, "No connection on key pressed, trying to reconnect...") ; 
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ;  
 		break ;
@@ -5328,7 +5330,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	return 0;
 #ifdef RECONNECTPORT
       case WM_POWERBROADCAST:
-	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_wakeup_reconnect) && backend_first_connected) {
+	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_wakeup_reconnect) && is_backend_first_connected) {
 		switch(wParam) {
 			case PBT_APMRESUMESUSPEND:
 			case PBT_APMRESUMEAUTOMATIC:
@@ -5345,7 +5347,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 					last_reconnect = tnow;
 					logevent(NULL, "Woken up from suspend, reconnecting...");
 					term_pwron(term, FALSE);
-					backend_connected = 0 ;
+					is_backend_connected = 0 ;
 					start_backend();
 					SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
 					*/
@@ -6704,9 +6706,13 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	}
 #ifdef KEYMAPPINGPORT
 	if( !PuttyFlag ) {
-		if (wParam == VK_TAB && shift_state == 2) { /* Ctrl-Tab */
-		p += sprintf((char *) p, "\x1B[27;5;9~");
-		return p - output;
+		if (wParam == VK_TAB && shift_state == 2) { 	/* Ctrl-Tab */
+			p += sprintf((char *) p, "\x1B[27;5;9~");
+			return p - output;
+		}
+		if (wParam == VK_TAB && shift_state == 3) {	/* Ctrl-Shift-Tab */
+			p += sprintf((char *) p, "\x1B[27;6;9~");
+			return p - output;
 		}
 	}
 #endif

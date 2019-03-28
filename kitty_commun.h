@@ -59,8 +59,10 @@ int ReadParameterLight( const char * key, const char * name, char * value ) ;
 int LoadParametersLight( void ) ;
 
 // Positionne un flag permettant de determiner si on est connecte
-extern int backend_connected ;
-extern int backend_first_connected ;
+extern int is_backend_connected ;
+#ifdef RECONNECTPORT
+extern int is_backend_first_connected ;
+#endif
 
 void SetSSHConnected( int flag ) ;
 

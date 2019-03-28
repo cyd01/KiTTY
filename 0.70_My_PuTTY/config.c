@@ -2,13 +2,13 @@
  * config.c - the platform-independent parts of the PuTTY
  * configuration box.
  */
+
 #include <assert.h>
 #include <stdlib.h>
 
 #include "putty.h"
 #include "dialog.h"
 #include "storage.h"
-
 
 #ifdef RUTTYPORT
 #include "script.h"
@@ -154,9 +154,10 @@ void conf_filesel_handler(union control *ctrl, void *dlg,
 }
 
 #ifdef PERSOPORT
+void ReadAutoCommandFromFile( const char * filename ) ;
 void ReadInitScript( const char * filename ) ;
 int existfile( const char * filename );
-union control * ctrlScriptFileContentEdit = NULL ;
+union control * ctrlScriptFileContentEdit = NULL, * ctrlAutoCommandContentEdit = NULL ;
 void conf_scriptfilesel_handler(union control *ctrl, void *dlg,
 			  void *data, int event)
 {
@@ -169,13 +170,18 @@ void conf_scriptfilesel_handler(union control *ctrl, void *dlg,
 	Filename *filename = dlg_filesel_get(ctrl, dlg);
 	if( filename && existfile(filename->path) ) {
 		//conf_set_filename(conf, key, filename);
-		ReadInitScript(filename->path);
-		if( ctrlScriptFileContentEdit ) dlg_editbox_set(ctrlScriptFileContentEdit, dlg, conf_get_str(conf,CONF_scriptfilecontent));
+		if( (filename->path[strlen(filename->path)-1]=='h') && (filename->path[strlen(filename->path)-2]=='s') && (filename->path[strlen(filename->path)-3]=='.') ) {
+			ReadAutoCommandFromFile(filename->path);
+			if( ctrlAutoCommandContentEdit ) dlg_editbox_set( ctrlAutoCommandContentEdit, dlg, conf_get_str(conf,CONF_autocommand));
+		} else {
+			ReadInitScript(filename->path);
+			if( ctrlScriptFileContentEdit ) dlg_editbox_set(ctrlScriptFileContentEdit, dlg, conf_get_str(conf,CONF_scriptfilecontent));
+		}
 		Filename * fn = filename_from_str( "" ) ;
 		conf_set_filename(conf,CONF_scriptfile,fn);
 		dlg_filesel_set(ctrl, dlg,  fn ) ;
 		filename_free(fn);
-		}
+	}
         filename_free(filename);
     }
 }
@@ -2329,7 +2335,7 @@ void setup_config_box(struct controlbox *b, int midsession,
 	if( !get_param("DIRECTORYBROWSE" ) ) {
 		if ( !midsession && !GetReadOnlyFlag() ) { // Bouton d'arrange de l'ordre de la liste des folders
 		ssd->arrangebutton = ctrl_pushbutton(s, "Up folder", NO_SHORTCUT,
-					  HELPCTX(session_saved),
+					  HELPCTX(no_help),
 					  sessionsaver_handler, P(ssd));
 		ssd->arrangebutton->generic.column = 1;	
 		}
@@ -2410,10 +2416,10 @@ void setup_config_box(struct controlbox *b, int midsession,
 #ifdef PERSOPORT
     ctrl_editbox(s, "Log rotation delay (sec)", NO_SHORTCUT, 50,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, I(CONF_logtimerotation), I(-1) ) ; // dlg_stdeditbox_handler, I(offsetof(Config,logtimerotation)), I(-1));
+		 conf_editbox_handler, I(CONF_logtimerotation), I(-1) ) ; 
     ctrl_editbox(s, "Timestamp", NO_SHORTCUT, 100,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, I(CONF_logtimestamp), I(1) ) ; //  dlg_stdeditbox_handler, I(offsetof(Config,logtimestamp)),I(sizeof(((Config *)0)->logtimestamp)));
+		 conf_editbox_handler, I(CONF_logtimestamp), I(1) ) ;
 #endif
     ctrl_radiobuttons(s, "What to do if the log file already exists:", 'e', 1,
 		      HELPCTX(logging_exists),
@@ -2455,7 +2461,7 @@ void setup_config_box(struct controlbox *b, int midsession,
 
    	s = ctrl_getset(b, "Session/Scripting", "Scripting", NULL);
     
-    ctrl_editbox(s, "line delay (ms)", 'd', 40, HELPCTX(no_help),
+        ctrl_editbox(s, "line delay (ms)", 'd', 40, HELPCTX(no_help),
 		 conf_editbox_handler, I(CONF_script_line_delay), I(-1));
 
 	ctrl_editbox(s, "character delay (ms)", 'b', 40, HELPCTX(no_help),
@@ -2767,13 +2773,13 @@ void setup_config_box(struct controlbox *b, int midsession,
     /**/
     ctrl_checkbox(s, "Remember Window Positions", NO_SHORTCUT,
 		  HELPCTX(no_help),
-		  conf_checkbox_handler, I(CONF_save_windowpos) ) ; //dlg_stdcheckbox_handler, I(offsetof(Config,save_windowpos)));
+		  conf_checkbox_handler, I(CONF_save_windowpos) ) ; 
     ctrl_editbox(s, "Top:", NO_SHORTCUT, 20,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, I(CONF_ypos), I(-1) ) ; // dlg_stdeditbox_handler, I(offsetof(Config,ypos)), I(-1));
+		 conf_editbox_handler, I(CONF_ypos), I(-1) ) ; 
     ctrl_editbox(s, "Left:", NO_SHORTCUT, 20,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, I(CONF_xpos), I(-1) ) ; // dlg_stdeditbox_handler, I(offsetof(Config,xpos)), I(-1));
+		 conf_editbox_handler, I(CONF_xpos), I(-1) ) ; 
 	}
 
     if( !get_param("PUTTY") && (GetIconeFlag()>0) ) {
@@ -2781,11 +2787,11 @@ void setup_config_box(struct controlbox *b, int midsession,
 		    "Define the window icon");
     c = ctrl_editbox(s, "Icon (from internal resources)", NO_SHORTCUT, 40,
 			 HELPCTX(no_help),
-			 conf_editbox_handler, I(CONF_icone), I(-1) ) ; // dlg_stdeditbox_handler, I(offsetof(Config,icone)), I(-1));
+			 conf_editbox_handler, I(CONF_icone), I(-1) ) ; 
     ctrl_filesel(s, "External icon file:", NO_SHORTCUT,
 		     FILTER_ICON_FILES, FALSE, "Select icon file",
 		     HELPCTX(no_help),
-		     conf_filesel_handler, I(CONF_iconefile) ) ; // dlg_stdfilesel_handler, I(offsetof(Config, iconefile)));
+		     conf_filesel_handler, I(CONF_iconefile) ) ; 
 
     }
 #endif
@@ -2804,8 +2810,8 @@ void setup_config_box(struct controlbox *b, int midsession,
             "Background settings");
     ctrl_radiobuttons(s, "Background Style:", NO_SHORTCUT, 3,
               HELPCTX(no_help),
-              conf_radiobutton_handler, //dlg_stdradiobutton_handler,
-              I(CONF_bg_type), //I(offsetof(Config, bg_type)),
+              conf_radiobutton_handler, 
+              I(CONF_bg_type),
               "Solid", NO_SHORTCUT, I(0),  // TODO: Define shortcuts for these.
               "Desktop", NO_SHORTCUT, I(1),
               "Image", NO_SHORTCUT, I(2),
@@ -2815,23 +2821,23 @@ void setup_config_box(struct controlbox *b, int midsession,
             "Desktop and image settings");
     ctrl_editbox(s, "Opacity:", NO_SHORTCUT, 20,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, // dlg_stdeditbox_handler,
-		 I(CONF_bg_opacity), I(-1) ) ; // I(offsetof(Config,bg_opacity)), I(-1));
+		 conf_editbox_handler, 
+		 I(CONF_bg_opacity), I(-1) ) ; 
     ctrl_editbox(s, "Slideshow:", NO_SHORTCUT, 20,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, // dlg_stdeditbox_handler,
-		 I(CONF_bg_slideshow), I(-1) ) ; //I(offsetof(Config,bg_slideshow)), I(-1));
+		 conf_editbox_handler, 
+		 I(CONF_bg_slideshow), I(-1) ) ;
 
     s = ctrl_getset(b, "Window/Back.&Image", "bg_img_settings",
             "Image settings");
     ctrl_filesel(s, "Image file:", NO_SHORTCUT,
 		     FILTER_IMAGE_FILES, FALSE, "Select background image file",
 		     HELPCTX(no_help),
-		     conf_filesel_handler, I(CONF_bg_image_filename)  ); //dlg_stdfilesel_handler, I(offsetof(Config, bg_image_filename)));
+		     conf_filesel_handler, I(CONF_bg_image_filename)  ); 
     ctrl_radiobuttons(s, "Image placement:", NO_SHORTCUT, 3,
               HELPCTX(no_help),
-              conf_radiobutton_handler, // dlg_stdradiobutton_handler,
-              I(CONF_bg_image_style), //I(offsetof(Config, bg_image_style)),
+              conf_radiobutton_handler, 
+              I(CONF_bg_image_style), 
               "Tile", NO_SHORTCUT, I(0),  // TODO: Define shortcuts for these.
               "Center", NO_SHORTCUT, I(1),
               "Stretch", NO_SHORTCUT, I(2),
@@ -2842,16 +2848,16 @@ void setup_config_box(struct controlbox *b, int midsession,
 
     ctrl_editbox(s, "Absolute Left (X):", NO_SHORTCUT, 20,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, //dlg_stdeditbox_handler,
-		 I(CONF_bg_image_abs_x), I(-1) ) ; //I(offsetof(Config,bg_image_abs_x)), I(-1));
+		 conf_editbox_handler, 
+		 I(CONF_bg_image_abs_x), I(-1) ) ;
     ctrl_editbox(s, "Absolute Top (Y):", NO_SHORTCUT, 20,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, //dlg_stdeditbox_handler,
-		 I(CONF_bg_image_abs_y), I(-1) ) ; //I(offsetof(Config,bg_image_abs_y)), I(-1));
+		 conf_editbox_handler,
+		 I(CONF_bg_image_abs_y), I(-1) ) ; 
     ctrl_radiobuttons(s, "Image placement is relative to:", NO_SHORTCUT, 2,
               HELPCTX(no_help),
-              conf_radiobutton_handler, // dlg_stdradiobutton_handler,
-              I(CONF_bg_image_abs_fixed), //I(offsetof(Config, bg_image_abs_fixed)),
+              conf_radiobutton_handler, 
+              I(CONF_bg_image_abs_fixed),
               "Desktop", NO_SHORTCUT, I(0),  // TODO: Define shortcuts for these.
               "Terminal Window", NO_SHORTCUT, I(1),
               NULL);
@@ -2881,8 +2887,8 @@ void setup_config_box(struct controlbox *b, int midsession,
             "Transparency setting");
     ctrl_editbox(s, "Transparency:", NO_SHORTCUT, 20,
 		 HELPCTX(no_help),
-		 conf_editbox_handler, // dlg_stdeditbox_handler,
-		 I(CONF_transparencynumber), I(-1) ) ; // I(offsetof(Config,bg_opacity)), I(-1));
+		 conf_editbox_handler,
+		 I(CONF_transparencynumber), I(-1) ) ; 
     ctrl_text(s, "	from 0 (visible) to 255 (transparent)", HELPCTX(no_help));
     ctrl_text(s, "	-1 to disable completely", HELPCTX(no_help));
 	 }
@@ -3111,7 +3117,6 @@ if( !get_param("PUTTY") ) {
 #ifdef PERSOPORT
     	ctrl_editbox(s, "Anti-idle string", NO_SHORTCUT, 50,
 		HELPCTX(no_help),
-		//dlg_stdeditbox_handler, I(offsetof(Config,antiidle)),I(sizeof(((Config *)0)->antiidle)));
 	        conf_editbox_handler, I(CONF_antiidle), I(1) ) ; 
 #endif
 
@@ -3143,9 +3148,7 @@ if( !get_param("PUTTY") ) {
 	if( !get_param("PUTTY" ) && GetAutoreconnectFlag() ) {
 		s = ctrl_getset(b, "Connection", "reconnect", "Reconnect options");
 		ctrl_checkbox(s, "Attempt to reconnect on system wakeup", NO_SHORTCUT, HELPCTX(no_help), conf_checkbox_handler, I(CONF_wakeup_reconnect)) ;
-		//dlg_stdcheckbox_handler, I(offsetof(Config,wakeup_reconnect)));
 		ctrl_checkbox(s, "Attempt to reconnect on connection failure", NO_SHORTCUT, HELPCTX(no_help), conf_checkbox_handler, I(CONF_failure_reconnect)) ;
-		//dlg_stdcheckbox_handler, I(offsetof(Config,failure_reconnect)));
 	}
 #endif
 
@@ -3211,11 +3214,11 @@ if( !get_param("PUTTY") ) {
 		     conf_editbox_handler, I(CONF_password), I(1) ) ;
 	c->editbox.password = 1;
 #endif
-	ctrl_editbox(s, "Command", NO_SHORTCUT, 74,
+	ctrlAutoCommandContentEdit = ctrl_editbox(s, "Command", NO_SHORTCUT, 74,
 		     HELPCTX(no_help),
 		     conf_editbox_handler, I(CONF_autocommand), I(1) ) ; 
-	ctrl_filesel(s, "Login script file:", NO_SHORTCUT,
-			"Scr Files (*.scr, *.txt)\0*.scr;*.txt\0All Files (*.*)\0*\0\0\0"
+	ctrl_filesel(s, "Auto-command/Login script file:", NO_SHORTCUT,
+			"Auto-command Files (*.sh)\0*.sh\0Login script Files (*.scr, *.txt)\0*.scr;*.txt\0All Files (*.*)\0*\0\0\0"
 			 ,FALSE, "Select the login script file to load",
 			 HELPCTX(no_help),
 			 conf_scriptfilesel_handler, I(CONF_scriptfile) ) ; 

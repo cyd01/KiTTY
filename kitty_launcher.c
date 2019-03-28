@@ -672,8 +672,16 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 	WNDCLASS wndclass ;
 	MSG msg;
 	char buffer[4096] ;
-
-	if( FindWindow("KiTTYLauncher","KiTTYLauncher") ) {
+	char className[1024] = "KiTTYLauncher" ;
+	
+	if( strcmp(KiTTYClassName,appname) ) { strcpy(className,KiTTYClassName) ; }
+	else if( strcmp(KiTTYClassName,"KiTTY") ) { strcpy(className,KiTTYClassName) ; }
+	if( ReadParameter( "Launcher", "classname", buffer ) ) {
+		buffer[1023]='\0' ;
+		if( strlen(buffer)>0 ) { strcpy(className,buffer) ; }
+	}
+	
+	if( FindWindow(className,className) ) {
 		if( ReadParameter( "Launcher", "alreadyRunCheck", buffer ) ) {
 			if( !stricmp( buffer, "yes" ) ) return 0 ;
 		}
@@ -681,7 +689,7 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 	}
 
 	if( strstr( cmdline, "-putty" ) != NULL ) PuttyFlag=1 ;
-	
+
 	wndclass.style = 0;
 	wndclass.lpfnWndProc = Launcher_WndProc;
 	wndclass.cbClsExtra = 0;
@@ -693,7 +701,7 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 	wndclass.hCursor = LoadCursor(NULL, IDC_IBEAM) ;
 	wndclass.hbrBackground = NULL;
 	wndclass.lpszMenuName = NULL;
-	wndclass.lpszClassName = "KiTTYLauncher";
+	wndclass.lpszClassName = className ;
 
 	if( !RegisterClass(&wndclass) ) return 1 ;
 
@@ -702,7 +710,7 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 		}
 	if( LauncherConfReload ) InitLauncherRegistry() ;
 		
-	hwnd = CreateWindowEx(0, "KiTTYLauncher", "KiTTYLauncher",
+	hwnd = CreateWindowEx(0, className, "KiTTYLauncher",
 				0,//WS_OVERLAPPEDWINDOW,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				CW_USEDEFAULT, CW_USEDEFAULT,
