@@ -20,7 +20,7 @@ int cygterm_get_flag( void ) {
 	return CygTermFlag ;
 	}
 
-extern void config_protocolbuttons_handler(union control *, void *, void *, int);
+extern void config_protocolbuttons_handler(union control *, dlgparam *, void *, int);
 
 static int is64Bits() {
 	return (NULL != GetProcAddress(GetModuleHandle("kernel32"), "IsWow64Process")) ? 1 : 0;

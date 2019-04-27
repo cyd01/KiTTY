@@ -25,7 +25,7 @@ void ManagePrint( HWND hwnd ) ;
 int SetTextToClipboard( const char * buf ) ;
 
 // Execute une commande	
-void RunCommand( HWND hwnd, char * cmd ) ;
+void RunCommand( HWND hwnd, const char * cmd ) ;
 
 // Démarre l'éditeur embarqué
 void RunPuttyEd( HWND hwnd, char * filename ) ;

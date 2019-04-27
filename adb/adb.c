@@ -26,27 +26,36 @@ typedef enum {
 } adb_state;
 
 typedef struct adb_backend_data {
-    const struct plug_function_table *fn;
+    //const struct plug_function_table *fn;
     /* the above field _must_ be first in the structure */
 
-    Socket s;
+    Socket *s;
     int bufsize;
+    Seat *seat;
+    LogContext *logctx;
     adb_state state;
-    void *frontend;
-} *Adb;
+    //void *frontend;
+    Conf *conf;
+
+    Plug plug;
+    Backend backend;
+} Adb;
 
 static void adb_size(void *handle, int width, int height);
+size_t win_seat_output_local(Seat *seat, bool is_stderr, const void *data, size_t len) ;
 
-static void c_write(Adb adb, char *buf, int len)
+static void c_write(Adb *adb, const char *buf, int len)
 {
-    int backlog = from_backend(adb->frontend, 0, buf, len);
+    //int backlog = from_backend(adb->frontend, 0, buf, len);
+    int backlog = win_seat_output_local(adb->seat,false,buf,len);
     sk_set_frozen(adb->s, backlog > ADB_MAX_BACKLOG);
 }
 
-static void adb_log(Plug plug, int type, SockAddr addr, int port,
+static void adb_log(Plug *plug, int type, SockAddr *addr, int port,
                     const char *error_msg, int error_code)
 {
-    Adb adb = (Adb) plug;
+    //Adb adb = (Adb) plug;
+    Adb *adb = container_of(plug, Adb, plug);
     char addrbuf[256], *msg;
 
     sk_getaddr(addr, addrbuf, lenof(addrbuf));
@@ -56,39 +65,43 @@ static void adb_log(Plug plug, int type, SockAddr addr, int port,
     else
         msg = dupprintf("Failed to connect to %s: %s", addrbuf, error_msg);
 
-    logevent(adb->frontend, msg);
+    logevent(adb->logctx, msg);
 }
 
-static int adb_closing(Plug plug, const char *error_msg, int error_code,
-                       int calling_back)
+static void adb_closing(Plug * plug, const char *error_msg, int error_code,
+                       bool calling_back)
 {
-    Adb adb = (Adb) plug;
+    //Adb adb = (Adb) plug;
+    Adb *adb = container_of(plug, Adb, plug);
 
     if (adb->s) {
         sk_close(adb->s);
         adb->s = NULL;
-        notify_remote_exit(adb->frontend);
+        //notify_remote_exit(adb->frontend);
+	seat_notify_remote_exit(adb->seat);
     }
     if (error_msg) {
         /* A socket error has occurred. */
-        logevent(adb->frontend, error_msg);
-        connection_fatal(adb->frontend, "%s", error_msg);
+        logevent(adb->logctx, error_msg);
+        //connection_fatal(adb->frontend, "%s", error_msg);
+	seat_connection_fatal(adb->seat, "%s", error_msg);
     } /* Otherwise, the remote side closed the connection normally. */
-    return 0;
+    return ;
 }
 
-static void do_fatal(Adb adb, char *data, int len) {
+static void do_fatal(Adb * adb, const char *data, int len) {
     char* d = (char*)smalloc(len+1);
     memcpy(d, data, len);
     d[len] = '\0';
-    connection_fatal(adb->frontend, "adb failure message: '%s'", d);
+    //connection_fatal(adb->frontend, "adb failure message: '%s'", d);
+    seat_connection_fatal(adb->seat, "adb failure message: '%s'", d);
     sfree(d);
 }
 
 /** the error might not be available when the error occurs; wait
   * a bit for more data to show up then assume that's the error message.
   */
-static void handle_fail(Adb adb, char *data, int len) {
+static void handle_fail(Adb *adb, const char *data, int len) {
     // FAIL0003abc
     char message_length_hex[5];
     unsigned long expected;
@@ -102,9 +115,10 @@ static void handle_fail(Adb adb, char *data, int len) {
         adb->state = STATE_WAITING_FOR_ERROR_MESSAGE;
 }
 
-static int adb_receive(Plug plug, int urgent, char *data, int len)
+static void adb_receive(Plug *plug, int urgent, const char *data, size_t len)
 {
-    Adb adb = (Adb) plug;
+    //Adb adb = (Adb) plug;
+    Adb *adb = container_of(plug, Adb, plug);
     if (adb->state == STATE_SENT_HELLO) {
         if (data[0]=='O') { // OKAY
             sk_write(adb->s,"0006shell:",10);
@@ -113,9 +127,10 @@ static int adb_receive(Plug plug, int urgent, char *data, int len)
              if (data[0]=='F') {
                 handle_fail(adb, data, len);
             } else {
-                connection_fatal(adb->frontend, "Bad response after initial send");
+                //connection_fatal(adb->frontend, "Bad response after initial send");
+		seat_connection_fatal(adb->seat, "%s", "Bad response after initial send");
             }
-            return 0;
+            return ;
         }
     } else if (adb->state == STATE_ASKED_FOR_SHELL) {
         if (data[0]=='O') { //OKAY
@@ -124,21 +139,23 @@ static int adb_receive(Plug plug, int urgent, char *data, int len)
             if (data[0]=='F') {
                 handle_fail(adb, data, len);
             } else {
-                connection_fatal(adb->frontend, "Bad response waiting for shell start");
+                //connection_fatal(adb->frontend, "Bad response waiting for shell start");
+		seat_connection_fatal(adb->seat, "Bad response waiting for shell start");
             }
-            return 0;
+            return ;
         }
     } else if (adb->state == STATE_WAITING_FOR_ERROR_MESSAGE) {
         do_fatal(adb, data, len);
     } else {
         c_write(adb, data, len);
     }
-    return 1;
+    return ;
 }
 
-static void adb_sent(Plug plug, int bufsize)
+static void adb_sent(Plug *plug, size_t bufsize)
 {
-    Adb adb = (Adb) plug;
+    //Adb adb = (Adb) plug;
+    Adb *adb = container_of(plug, Adb, plug);
     adb->bufsize = bufsize;
 }
 
@@ -150,29 +167,43 @@ static void adb_sent(Plug plug, int bufsize)
  * Also places the canonical host name into `realhost'. It must be
  * freed by the caller.
  */
-static const char *adb_init(void *frontend_handle, void **backend_handle,
-                            Conf *conf,
-                            const char *host, int port, char **realhost, int nodelay,
-                            int keepalive)
-{
-    static const struct plug_function_table fn_table = {
+		    
+static const struct PlugVtable Adb_plugvt = {
         adb_log,
         adb_closing,
         adb_receive,
         adb_sent,
-        NULL
     };
-    SockAddr addr;
+
+/*
+static const char *adb_init(void *frontend_handle, void **backend_handle,
+                            Conf *conf,
+                            const char *host, int port, char **realhost, int nodelay,
+                            int keepalive)
+*/	
+static const char *adb_init(Seat *seat, Backend **backend_handle,
+                            LogContext *logctx, 
+			    Conf *conf,
+			    const char *host, int port, char **realhost,
+                            bool nodelay, bool keepalive)
+{
+    SockAddr *addr;
     const char *err;
-    Adb adb;
+    Adb *adb;
 
-    adb = snew(struct adb_backend_data);
-    adb->fn = &fn_table;
+    adb = snew(Adb);
+    adb->plug.vt = &Adb_plugvt;
+    adb->backend.vt = &adb_backend;
+    
     adb->s = NULL;
-    adb->state = STATE_WARMING_UP;
-    *backend_handle = adb;
+    *backend_handle = &adb->backend;
+    adb->bufsize = 0;
+    adb->conf = conf_copy(conf);
 
-    adb->frontend = frontend_handle;
+    adb->seat = seat;
+    adb->logctx = logctx;
+    
+    adb->state = STATE_WARMING_UP;
 
     /*
      * Try to find host.
@@ -183,10 +214,11 @@ static const char *adb_init(void *frontend_handle, void **backend_handle,
                 (conf_get_int(conf, CONF_addressfamily) == ADDRTYPE_IPV4 ? " (IPv4)" :
                  (conf_get_int(conf, CONF_addressfamily) == ADDRTYPE_IPV6 ? " (IPv6)" :
                   "")));
-        logevent(adb->frontend, buf);
+        logevent(adb->logctx, buf);
         sfree(buf);
     }
-    addr = name_lookup("localhost", port, realhost, conf, conf_get_int(conf, CONF_addressfamily), frontend_handle , "ADB connection");
+    addr = name_lookup("localhost", port, realhost, conf, conf_get_int(conf, CONF_addressfamily),  adb->logctx , "ADB connection");
+
     if ((err = sk_addr_error(addr)) != NULL) {
         sk_addr_free(addr);
         return err;
@@ -198,8 +230,9 @@ static const char *adb_init(void *frontend_handle, void **backend_handle,
     /*
      * Open socket.
      */
-    adb->s = new_connection(addr, *realhost, port, 0, 1, nodelay, keepalive,
-                            (Plug) adb, conf);
+    adb->s = new_connection(addr, *realhost, port, false, true, nodelay, keepalive,
+                            &adb->plug, conf);
+	    
     if ((err = sk_socket_error(adb->s)) != NULL)
         return err;
     if (*conf_get_str(conf, CONF_loghost)) {
@@ -261,7 +294,8 @@ static const char *adb_init(void *frontend_handle, void **backend_handle,
 
 static void adb_free(void *handle)
 {
-    Adb adb = (Adb) handle;
+    //Adb adb = (Adb) handle;
+    Adb *adb = container_of(handle, Adb, backend);
 
     if (adb->s)
         sk_close(adb->s);
@@ -280,8 +314,9 @@ static void adb_reconfig(void *handle, Conf *conf)
  */
 static int adb_send(void *handle, const char *buf, int len)
 {
-    Adb adb = (Adb) handle;
-
+    //Adb adb = (Adb) handle;
+    Adb *adb = container_of(handle, Adb, backend);
+    
     if (adb->s == NULL)
         return 0;
 
@@ -295,7 +330,8 @@ static int adb_send(void *handle, const char *buf, int len)
  */
 static int adb_sendbuffer(void *handle)
 {
-    Adb adb = (Adb) handle;
+    //Adb adb = (Adb) handle;
+    Adb *adb = container_of(handle, Adb, backend);
     return adb->bufsize;
 }
 
@@ -311,7 +347,8 @@ static void adb_size(void *handle, int width, int height)
 /*
  * Send adb special codes.
  */
-static void adb_special(void *handle, Telnet_Special code)
+//static void adb_special(void *handle, Telnet_Special code)
+static void adb_special(void *handle, SessionSpecialCode code)
 {
     /* Do nothing! */
     return;
@@ -328,7 +365,8 @@ static const struct telnet_special *adb_get_specials(void *handle)
 
 static int adb_connected(void *handle)
 {
-    Adb adb = (Adb) handle;
+    //Adb adb = (Adb) handle;
+    Adb *adb = container_of(handle, Adb, backend);
     return adb->s != NULL;
 }
 
@@ -339,7 +377,8 @@ static int adb_sendok(void *handle)
 
 static void adb_unthrottle(void *handle, int backlog)
 {
-    Adb adb = (Adb) handle;
+    //Adb adb = (Adb) handle;
+    Adb *adb = container_of(handle, Adb, backend);
     sk_set_frozen(adb->s, backlog > ADB_MAX_BACKLOG);
 }
 
@@ -361,7 +400,8 @@ static void adb_provide_logctx(void *handle, void *logctx)
 
 static int adb_exitcode(void *handle)
 {
-    Adb adb = (Adb) handle;
+    //Adb adb = (Adb) handle;
+    Adb *adb = container_of(handle, Adb, backend);
     if (adb->s != NULL)
         return -1;                     /* still connected */
     else
@@ -377,7 +417,7 @@ static int adb_cfg_info(void *handle)
     return 0;
 }
 
-Backend adb_backend = {
+const struct BackendVtable adb_backend = {
     adb_init,
     adb_free,
     adb_reconfig,
@@ -390,7 +430,6 @@ Backend adb_backend = {
     adb_exitcode,
     adb_sendok,
     adb_ldisc,
-    adb_provide_ldisc,
     adb_provide_logctx,
     adb_unthrottle,
     adb_cfg_info,

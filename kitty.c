@@ -97,7 +97,8 @@ extern int IniFileFlag ;
 
 // Flag permettant la gestion de l'arborscence (dossier=folder) dans le cas d'un savemode=dir, defini dans kitty_commun.c
 extern int DirectoryBrowseFlag ;
-
+int GetDirectoryBrowseFlag(void) { return DirectoryBrowseFlag ; }
+void SetDirectoryBrowseFlag( const int flag ) { DirectoryBrowseFlag = flag ; }
 
 #ifdef ZMODEMPORT
 #define IDM_XYZSTART  0x0810
@@ -147,7 +148,7 @@ int GetPasteCommandFlag(void) { return PasteCommandFlag ; }
 int HyperlinkFlag = 1 ;
 #else
 #ifdef HYPERLINKPORT
-int HyperlinkFlag = 0 ;
+int HyperlinkFlag = 1 ;
 #else
 int HyperlinkFlag = 0 ;
 #endif
@@ -156,15 +157,15 @@ int GetHyperlinkFlag(void) { return HyperlinkFlag ; }
 void SetHyperlinkFlag( const int flag ) { HyperlinkFlag = flag ; }
 
 // Flag de gestion de la fonction "rutty" (script automatique)
-static int RuTTYFlag = 1 ;
-int GetRuTTYFlag(void) { return RuTTYFlag ; } 
-void SetRuTTYFlag( const int flag ) { RuTTYFlag = flag ; }
+static int RuttyFlag = 1 ;
+int GetRuttyFlag(void) { return RuttyFlag ; } 
+void SetRuttyFlag( const int flag ) { RuttyFlag = flag ; }
 
 // Flag de gestion de la Transparence
 #ifdef FDJ
 static int TransparencyFlag = 1 ;
 #else
-static int TransparencyFlag = 0 ;
+static int TransparencyFlag = 1 ;
 #endif
 int GetTransparencyFlag(void) { return TransparencyFlag ; }
 void SetTransparencyFlag( const int flag ) { TransparencyFlag = flag ; }
@@ -333,6 +334,8 @@ void SetCtrlTabFlag( const int flag ) { CtrlTabFlag  = flag ; }
 
 // Flag pour repasser en mode Putty basic
 int PuttyFlag = 0 ;
+int GetPuttyFlag(void) { return PuttyFlag ; }
+void SetPuttyFlag( const int flag ) { PuttyFlag = flag ; }
 
 #ifdef RECONNECTPORT
 // Flag pour inhiber le mécanisme de reconnexion automatique
@@ -354,15 +357,8 @@ int BackgroundImageFlag = 0 ;
 #else
 int BackgroundImageFlag = 0 ;
 #endif
-
-// Flag pour afficher l'image de fond vi la patch IV
-#ifdef IVPORT
-#ifndef FDJ
-static int BackgroundImageIVFlag = 1 ;
-#else
-static int BackgroundImageIVFlag = 0 ;
-#endif
-#endif
+int GetBackgroundImageFlag(void) { return BackgroundImageFlag ; }
+void SetBackgroundImageFlag( const int flag ) { BackgroundImageFlag = flag ; }
 
 // Flag pour inhiber les fonctions ZMODEM
 static int ZModemFlag = 0 ;
@@ -417,7 +413,7 @@ char PSCPOptions[1024] = "-scp -r"  ;
 char * PlinkPath = NULL ;
 
 // Repertoire de lancement
-char InitialDirectory[4096] ; 
+char InitialDirectory[4096]="" ; 
 
 // Chemin complet des fichiers de configuration kitty.ini et kitty.sav
 static char * KittyIniFile = NULL ;
@@ -664,8 +660,8 @@ return ;
 	}
 
 char *dupvprintf(const char *fmt, va_list ap) ;
-void logevent(void *frontend, const char *string);
-
+void logevent(LogContext *logctx, const char *event);
+	
 // Affichage d'un message dans l'event log
 void debug_logevent( const char *fmt, ... ) {
 	va_list ap;
@@ -690,9 +686,6 @@ int get_param( const char * val ) {
 #endif
 #ifdef IMAGEPORT
 	else if( !stricmp( val, "BACKGROUNDIMAGE" ) ) return BackgroundImageFlag ;
-#endif
-#ifdef IVPORT
-	else if( !stricmp( val, "BACKGROUNDIMAGEIV" ) ) return BackgroundImageIVFlag ;
 #endif
 #ifdef CYGTERMPORT
 	else if( !stricmp( val, "CYGTERM" ) ) return cygterm_get_flag() ;
@@ -723,7 +716,50 @@ char * get_param_str( const char * val ) {
 	else if( !stricmp( val, "CLASS" ) ) return KiTTYClassName ;
 	return NULL ;
 	}
-	
+
+// Fonctions permettant de formatter les chaînes de caractères avec %XY	
+void mungestr( const char *in, char *out ) {
+	char hex[16] = "0123456789ABCDEF";
+	int candot = 0 ;
+	while( *in ) {
+		if( *in == ' ' || *in == '\\' || *in == '*' || *in == '?' ||
+			*in ==':' || *in =='/' || *in =='\"' || *in =='<' || *in =='>' || *in =='|' ||
+			*in == '%' || *in < ' ' || *in > '~' || (*in == '.'
+			&& !candot) ) {
+			*out++ = '%' ;
+			*out++ = hex[((unsigned char) *in) >> 4] ;
+			*out++ = hex[((unsigned char) *in) & 15] ;
+		} else {
+			*out++ = *in ;
+		}
+		in++ ;
+		candot = 1 ;
+	}
+	*out = '\0' ;
+	return ;
+}
+void unmungestr( const char *in, char *out, int outlen ) {
+	while (*in) {
+		if( *in == '%' && in[1] && in[2] ) {
+			int i, j ;
+			i = in[1] - '0' ;
+			i -= (i > 9 ? 7 : 0) ;
+			j = in[2] - '0' ;
+			j -= (j > 9 ? 7 : 0) ;
+			*out++ = (i << 4) + j ;
+			if( !--outlen )
+				return ;
+			in += 3	;
+		} else {
+			*out++ = *in++ ;
+			if( !--outlen )
+				return;
+		}
+	}
+	*out = '\0' ;
+	return ;
+}
+
 #ifdef ZMODEMPORT
 void xyz_updateMenuItems(Terminal *term)
 {
@@ -1046,6 +1082,30 @@ void SetPasswordInConfig( const char * password ) {
 		conf_set_str(conf,CONF_password,bufpass);
 	}
 }
+
+void GetPasswordInConfig( char * p ) {
+	if( strlen(conf_get_str(conf,CONF_password)) == 0 ) return ;
+	/* On decrypte le password */
+	char bufpass[4096] ;
+	memcpy( bufpass, conf_get_str(conf,CONF_password), 4095 ) ; bufpass[4095]='\0';
+	MASKPASS(bufpass);
+	memcpy( p, bufpass, strlen(bufpass)+1 ) ;
+	memset(bufpass,0,strlen(bufpass));
+}
+
+int IsPasswordInConf(void) {
+	int len = 0 ;
+	if( strlen(conf_get_str(conf,CONF_password)) == 0 ) return 0 ;
+	/* On decrypte le password */
+	char bufpass[4096] ;
+	memcpy( bufpass, conf_get_str(conf,CONF_password), 4095 ) ; bufpass[4095]='\0';
+	MASKPASS(bufpass);
+	len = strlen( bufpass ) ;
+	memset(bufpass,0,strlen(bufpass));
+	return len ;
+}
+
+void CleanPassword( char * p ) { memset(p,0,strlen(p)); }
 	
 void SetUsernameInConfig( char * username ) {
 	int len ;
@@ -1319,9 +1379,6 @@ void CreateDefaultIniFile( void ) {
 
 #if (defined IMAGEPORT) && (!defined FDJ)
 			writeINI( KittyIniFile, INIT_SECTION, "backgroundimage", "no" ) ;
-#endif
-#ifdef IVPORT
-			writeINI( KittyIniFile, INIT_SECTION, "backgroundimageiv", "no" ) ;
 #endif
 			writeINI( KittyIniFile, INIT_SECTION, "capslock", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "conf", "yes" ) ;
@@ -1853,6 +1910,7 @@ int ResizeWinList( HWND hwnd, int width, int height ) {
 	return NbWindows ;
 	}
 
+void set_title( TermWin *win, const char *title ) { return win_set_title(win,title) ; } // Disparue avec la version 0.71
 void ManageProtect( HWND hwnd, char * title ) {
 	HMENU m ;
 	if( ( m = GetSystemMenu (hwnd, FALSE) ) != NULL ) {
@@ -1860,7 +1918,7 @@ void ManageProtect( HWND hwnd, char * title ) {
 		if (!(fdwMenu & MF_CHECKED)) {
 			CheckMenuItem( m, (UINT)IDM_PROTECT, MF_BYCOMMAND|MF_CHECKED ) ;
 			ProtectFlag = 1 ;
-			set_title(NULL, title ) ;
+			set_title(NULL, title) ;
 			}
 		else {
 			CheckMenuItem( m, (UINT)IDM_PROTECT, MF_BYCOMMAND|MF_UNCHECKED ) ;
@@ -2199,7 +2257,7 @@ void SendFile( HWND hwnd ) {
 run() { printf "\033]0;__pl:$*\007" ; }
 */
 int SearchPlink( void ) ;
-void RunExternPlink( HWND hwnd, char * cmd ) {
+void RunExternPlink( HWND hwnd, const char * cmd ) {
 	char buffer[4096], plinkpath[4096]="", b1[256] ;
 	
 	if( PlinkPath==NULL ) {
@@ -2270,7 +2328,7 @@ for file in ${*} ; do echo "\033]0;__rv:"${file}"\007" ; done
 Il faut ensuite simplement taper: get filename
 C'est traite dans KiTTY par la fonction ManageLocalCmd
 */
-void GetOneFile( HWND hwnd, char * directory, char * filename ) {
+void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 	char buffer[4096], pscppath[4096]="", pscpport[4096]="22", dir[4096]=".", b1[256] ;
 	int p;
 	
@@ -2473,43 +2531,6 @@ void GetFile( HWND hwnd ) {
 		}
 	}
 	
-// Grep
-#ifdef URLPORT
-const char* urlhack_default_regex = "(^|[ ]|((https?|ftp):\\/\\/))(([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost|([a-zA-Z0-9\\-]+\\.)*[a-zA-Z0-9\\-]+\\.(com|net|org|info|biz|gov|name|edu|[a-zA-Z][a-zA-Z]))(:[0-9]+)?((\\/|\\?)[^ \"]*[^ ,;\\.:\">)])?";
-int grep( const char * pattern, const char * str ) {
-	int return_code = 1 ;
-	regex_t preg ;
- 
-	if( (return_code = regcomp (&preg, pattern, REG_NOSUB | REG_EXTENDED ) ) == 0 ) {
-		return_code = regexec( &preg, str, 0, NULL, 0 ) ;
-		regfree( &preg ) ;
-		}
-	return !return_code ;
-	}
-	
-// test un lien
-void URLclick( HWND hwnd ) {
-	char buffer[4096]="", * pst = NULL ;
-	
-	if (!IsClipboardFormatAvailable(CF_TEXT)) return ;
-	
-	if( OpenClipboard(NULL) ) {
-		HGLOBAL hglb ;
-		
-		if( (hglb = GetClipboardData( CF_TEXT ) ) != NULL ) {
-			if( ( pst = GlobalLock( hglb ) ) != NULL ) {
-				sprintf( buffer, "%s", pst ) ;
-				GlobalUnlock( hglb ) ;
-				if( grep( urlhack_default_regex, (const char*)buffer ) ) 
-					ShellExecute(hwnd,"open",buffer,NULL,NULL,SW_SHOWNORMAL) ;
-				}
-			}
-
-		CloseClipboard();
-		}
-	}
-#endif
-
 // Lancement d'un commande locale (Lancement Internet Explorer par exemple)
 void RunCmd( HWND hwnd ) {
 	char buffer[4096]="", * pst = NULL ;
@@ -2585,7 +2606,7 @@ ds() { printf "\033]0;__ds:`pwd`\007" ; }
 # Duplique une session sur le meme user, meme host, meme repertoire
 dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
 */
-int ManageLocalCmd( HWND hwnd, char * cmd ) {
+int ManageLocalCmd( HWND hwnd, const char * cmd ) {
 	char buffer[1024] = "", title[1024] = "" ;
 	if( debug_flag ) { debug_logevent( "LocalCmd: %s", cmd ) ;  }
 	if( cmd == NULL ) return 0 ; 
@@ -3595,9 +3616,6 @@ int InternalCommand( HWND hwnd, char * st ) {
 	else if( !strcmp( st, "/copytokitty" ) ) 
 		{ RegCopyTree( HKEY_CURRENT_USER, "Software\\SimonTatham\\PuTTY", PUTTY_REG_POS ) ; return 1 ; }
 	else if( !strcmp( st, "/backgroundimage" ) ) { BackgroundImageFlag = abs( BackgroundImageFlag - 1 ) ; return 1 ; }
-#ifdef IVPORT
-	else if( !strcmp( st, "/backgroundimageiv" ) ) { BackgroundImageIVFlag = abs( BackgroundImageIVFlag - 1 ) ; return 1 ; }
-#endif
 	else if( !strcmp( st, "/debug" ) ) { debug_flag = abs( debug_flag - 1 ) ; return 1 ; }
 #ifdef HYPERLINKPORT
 	else if( !strcmp( st, "/hyperlink" ) ) { HyperlinkFlag = abs( HyperlinkFlag - 1 ) ; return 1 ; }
@@ -4897,7 +4915,7 @@ void InitShortcuts( void ) {
 		}
 	}
 
-int ManageShortcuts( HWND hwnd, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) {
+int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) {
 	int key, i ;
 	key = key_num ;
 	if( alt_flag ) key = key + ALTKEY ;
@@ -4946,7 +4964,7 @@ int ManageShortcuts( HWND hwnd, int key_num, int shift_flag, int control_flag, i
 	if( key == shortcuts_tab.editor ) 			// Lancement d'un putty-ed
 		{ RunPuttyEd( hwnd, NULL ) ; return 1 ; }
 	if( key == (shortcuts_tab.editorclipboard ) ) 		// Lancement d'un putty-ed qui charge le contenu du presse-papier
-		{ term_copyall(term) ; RunPuttyEd( hwnd, "1" ) ; return 1 ; }
+		{ term_copyall(term,clips_system,lenof(clips_system)) ; RunPuttyEd( hwnd, "1" ) ; return 1 ; }
 	else if( key == shortcuts_tab.winscp )			// Lancement de WinSCP
 		{ SendMessage( hwnd, WM_COMMAND, IDM_WINSCP, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.autocommand ) 		// Rejouer la commande de demarrage
@@ -5062,16 +5080,10 @@ void LoadParameters( void ) {
 		autocommand_delay = (int)(1000*atof( buffer )) ;
 		if(autocommand_delay<5) autocommand_delay = 5 ; 
 	}
-#if (defined IVPORT) && (!defined FDJ)
-	if( ReadParameter( INIT_SECTION, "backgroundimageiv", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) BackgroundImageIVFlag = 0 ; 
-		if( !stricmp( buffer, "YES" ) ) BackgroundImageIVFlag = 1 ;
-	}
-#endif
 #if (defined IMAGEPORT) && (!defined FDJ)
 	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) BackgroundImageFlag = 0 ; 
-		if( !stricmp( buffer, "YES" ) ) BackgroundImageFlag = 1 ;
+		// if( !stricmp( buffer, "YES" ) ) BackgroundImageFlag = 1 ;  // Broken en 0.71 ==> on desactive
 	}
 #endif
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
@@ -5105,8 +5117,8 @@ void LoadParameters( void ) {
 #endif
 #ifdef RUTTYPORT
 	if( ReadParameter( INIT_SECTION, "scriptmode", buffer ) ) { 
-		if( !stricmp( buffer, "YES" ) ) RuTTYFlag = 1 ;
-		if( !stricmp( buffer, "NO" ) ) RuTTYFlag = 0 ;
+		if( !stricmp( buffer, "YES" ) ) RuttyFlag = 1 ;
+		if( !stricmp( buffer, "NO" ) ) RuttyFlag = 0 ;
 	}
 #endif
 	if( ReadParameter( INIT_SECTION, "KiPP", buffer ) != 0 ) {
@@ -5513,7 +5525,7 @@ void WriteCountUpAndPath( void ) ;
 void InitWinMain( void ) ;
 
 // Gestion de commandes a distance
-int ManageLocalCmd( HWND hwnd, char * cmd ) ;
+int ManageLocalCmd( HWND hwnd, const char * cmd ) ;
 	
 // Nettoie la clé de PuTTY pour enlever les clés et valeurs spécifique à KiTTY
 // Se trouve dans le fichier kitty_registry.c

@@ -4,7 +4,7 @@
   record and replay putty, scripting the easy way
 */
 
-extern void *ldisc;  /* defined in window.c */
+extern Ldisc *ldisc;  /* defined in window.c */
 extern HWND hwnd;    /* in winstuff.h */
 
 

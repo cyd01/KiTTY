@@ -236,7 +236,8 @@ int PrintText( const char * Text ) {
 	int return_code = 0 ; 
 	PRINTDLG	pd;
 	DOCINFO		di;
-	int i, TextLen = 0, Index1 = 0, Index2 = 2, Exit = 0 ;
+	int i, TextLen = 0, Index1 = 0, Index2 = 2;
+	//int Exit = 0 ;
 	char*		LinePrint = NULL ;
 	char*		szMessage = NULL ;
 
@@ -263,7 +264,8 @@ int PrintText( const char * Text ) {
 				TextLen = strlen( Text ) ;
 				if( TextLen > 0 ) {
 					LinePrint = (char*) malloc( TextLen + 2 ) ;
-					Index1 = 0 ; Index2 = 2 ; Exit = 0 ;
+					Index1 = 0 ; Index2 = 2 ; 
+					//Exit = 0 ;
 					for( i = 0 ; i < TextLen ; i++ ) {
 						if( Text[i]=='\r' ) i++;
                     				LinePrint[Index1] = Text[i] ;
@@ -358,7 +360,7 @@ int SetTextToClipboard( const char * buf ) {
 	}
 
 // Execute une commande	
-void RunCommand( HWND hwnd, char * cmd ) {
+void RunCommand( HWND hwnd, const char * cmd ) {
 	PROCESS_INFORMATION ProcessInformation ;
 	ZeroMemory( &ProcessInformation, sizeof(ProcessInformation) );
 	

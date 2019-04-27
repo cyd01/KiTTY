@@ -29,30 +29,38 @@ void SearchCtHelper( void ) ;
 
 #define putenv _putenv
 
+size_t win_seat_output_local(Seat *seat, bool is_stderr, const void *data, size_t len) ;
+
 typedef struct cygterm_backend_data {
-	const struct plug_function_table *fn;
-	void *frontend;
-	Socket a;
-	Socket s;
+	//const struct plug_function_table *fn;
+	//void *frontend;
+	
+	Socket *a;
+    Socket *s;
+    Seat *seat;
+    LogContext *logctx;
 	PROCESS_INFORMATION pi;
 	HANDLE ctl;
 	Conf * conf;
+    Plug plug;
+    Backend backend;
 	int bufsize;
 	int editing, echoing;
 	int exitcode;
-} *Local;
+} Local;
 
 /* Plug functions for cthelper data connection */
-static void
-cygterm_log(Plug p, int type, SockAddr addr, int port, const char *error_msg, int error_code)
+static void cygterm_log(Plug *p, int type, SockAddr *addr, int port, const char *error_msg, int error_code)
 {
 	/* Do nothing */
 }
 
-static int
-cygterm_closing(Plug plug, const char *error_msg, int error_code, int calling_back)
+
+static int cygterm_closing(Plug *plug, const char *error_msg, int error_code, bool calling_back)
 {
-	Local local = (Local)plug;
+	//Local local = (Local)plug;
+	Local *local = container_of(plug,Local,plug);
+	 
 	cygterm_debug("top");
 	if (local->s) {
 		sk_close(local->s);
@@ -86,32 +94,36 @@ cygterm_closing(Plug plug, const char *error_msg, int error_code, int calling_ba
 		}
 	}
 	/* this calls cygterm_exitcode() */
-	notify_remote_exit(local->frontend);
+	//notify_remote_exit(local->frontend);
+	seat_notify_remote_exit(local->seat);
 	if (error_msg) {
 		cygterm_debug("error_msg: %s", error_msg);
-		connection_fatal(local->frontend, "%s", error_msg);
+		//connection_fatal(local->frontend, "%s", error_msg);
+		seat_connection_fatal(local->seat, "%s", error_msg);
 	}
 	return 0;
 }
 
-static int
-cygterm_receive(Plug plug, int urgent, char *data, int len)
+static int cygterm_receive(Plug * plug, int urgent, const char *data, size_t len)
 {
-	Local local = (Local)plug;
+	//Local local = (Local)plug;
+	Local *local = container_of(plug,Local,plug);
+	
 	int backlog;
 	cygterm_debug("backend -> display %u", len);
 //	dmemdump(data, len);
-	backlog = from_backend(local->frontend, 0, data, len);
+	//backlog = from_backend(local->frontend, 0, data, len);
+	backlog = win_seat_output_local(local->seat,false,data,len);
 //	dmemdumpl(data, len);
 	sk_set_frozen(local->s, backlog > CYGTERM_MAX_BACKLOG);
 	cygterm_debug("OK");
 	return 1;
 }
 
-static void
-cygterm_sent(Plug plug, int bufsize)
+static void cygterm_sent(Plug * plug, size_t bufsize)
 {
-	Local local = (Local)plug;
+	//Local local = (Local)plug;
+	Local *local = container_of(plug,Local,plug);
 	local->bufsize = bufsize;
 }
 
@@ -121,9 +133,10 @@ cygterm_size(void *handle, int width, int height);
 
 Socket sk_tcp_accept(accept_ctx_t ctx, Plug plug);
 static int
-cygterm_accepting(Plug plug, accept_fn_t constructor, accept_ctx_t ctx)
+cygterm_accepting(Plug * plug, accept_fn_t constructor, accept_ctx_t ctx)
 {
-	Local local = (Local)plug;
+	//Local local = (Local)plug;
+	Local *local = container_of(plug,Local,plug);
 	cygterm_debug("top");
 	local->s = constructor(ctx, plug);
 	sk_set_frozen(local->s, 0);
@@ -142,8 +155,22 @@ static const char *spawnChild(char *cmd, Conf *conf, LPPROCESS_INFORMATION ppi, 
 /* Backend functions for the cygterm backend */
 void RunCommand( HWND hwnd, char * cmd ) ;
 	
-static const char *
-cygterm_init(void *frontend_handle, void **backend_handle,
+	
+static const struct PlugVtable Cygterm_plugvt = {
+        cygterm_log,
+        cygterm_closing,
+        cygterm_receive,
+        cygterm_sent,
+};
+	
+/*
+static const char * cygterm_init(void *frontend_handle, void **backend_handle,
+             Conf *conf,
+             const char *unused_host, int unused_port,
+             char **realhost, int nodelay, int keepalive)
+*/
+static const char * cygterm_init(Seat *seat, Backend **backend_handle,
+	     LogContext *logctx,
              Conf *conf,
              const char *unused_host, int unused_port,
              char **realhost, int nodelay, int keepalive)
@@ -153,14 +180,8 @@ cygterm_init(void *frontend_handle, void **backend_handle,
 	 * (local->a) while the cygterm_closing, cygterm_receive, and cygterm_sent
 	 * should be used only for the actual connection (local->s).
 	 */
-	static const struct plug_function_table fn_table = {
-		cygterm_log,
-		cygterm_closing,
-		cygterm_receive,
-		cygterm_sent,
-		cygterm_accepting
-	};
-	Local local;
+
+	Local *local;
 	const char *command;
 	char cmdline[2 * MAX_PATH];
 	int cport;
@@ -169,23 +190,30 @@ cygterm_init(void *frontend_handle, void **backend_handle,
 
 	cygterm_debug("top");
 
-	local = snew(struct cygterm_backend_data);
-	local->fn = &fn_table;
+	local = snew(Local);
+	//local->fn = &fn_table;
+	local->plug.vt = &Cygterm_plugvt;
+        local->backend.vt = &cygterm_backend;
 	local->a = NULL;
 	local->s = NULL;
 	local->conf = conf;
 	local->editing = 0;
 	local->echoing = 0;
 	local->exitcode = 0;
-	*backend_handle = local;
+	*backend_handle = &local->backend;
 
-	local->frontend = frontend_handle;
+        local->seat = seat;
+        local->logctx = logctx;
+    
+	//local->frontend = frontend_handle;
 	
 	/* set up listen socket for communication with child */
 	cygterm_debug("setupCygTerm");
 
 	/* let sk use INADDR_LOOPBACK and let WinSock choose a port */
-	local->a = sk_newlistener(0, 0, (Plug)local, 1, ADDRTYPE_IPV4);
+	//local->a = sk_newlistener(0, 0, (Plug)local, 1, ADDRTYPE_IPV4);
+	local->a = sk_newlistener(0, 0, (Plug*)local, 1, ADDRTYPE_IPV4);		// local-> ou seat  ou local tout court
+		
 	if ((err = sk_socket_error(local->a)) != NULL)
 		goto fail_free;
 
@@ -276,7 +304,8 @@ fail_free:
 static void
 cygterm_free(void *handle)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("top");
 	sfree(local);
 }
@@ -284,7 +313,8 @@ cygterm_free(void *handle)
 static void
 cygterm_reconfig(void *handle, Conf *conf)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("top");
 	local->conf = conf;
 }
@@ -292,7 +322,8 @@ cygterm_reconfig(void *handle, Conf *conf)
 static int
 cygterm_send(void *handle, const char *buf, int len)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("frontend -> pty %u", len);
 //	dmemdump(buf, len);
 #if 0
@@ -315,7 +346,8 @@ cygterm_send(void *handle, const char *buf, int len)
 static int
 cygterm_sendbuffer(void *handle)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("top");
 	return local->bufsize;
 }
@@ -323,7 +355,8 @@ cygterm_sendbuffer(void *handle)
 static void
 cygterm_size(void *handle, int width, int height)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("top");
 	cygterm_debug("size=%d,%d (last=%d,%d)",
 	              width, height, conf_get_int(local->conf,CONF_width), conf_get_int(local->conf,CONF_height));
@@ -342,14 +375,13 @@ cygterm_size(void *handle, int width, int height)
 	}
 }
 
-static void
-cygterm_special(void *handle, Telnet_Special code)
+//static void cygterm_special(void *handle, Telnet_Special code)
+static void cygterm_special(void *handle, SessionSpecialCode code)
 {
 	cygterm_debug("top");
 }
 
-static const struct telnet_special *
-cygterm_get_specials(void *handle)
+static const struct telnet_special * cygterm_get_specials(void *handle)
 {
 	cygterm_debug("top");
 	return NULL;
@@ -358,7 +390,8 @@ cygterm_get_specials(void *handle)
 static int
 cygterm_connected(void *handle)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("top");
 	return local->s != NULL;
 }
@@ -366,7 +399,8 @@ cygterm_connected(void *handle)
 static int
 cygterm_exitcode(void *handle)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("top");
 	return local->exitcode;
 }
@@ -381,7 +415,8 @@ cygterm_sendok(void *handle)
 static void
 cygterm_unthrottle(void *handle, int backlog)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("top");
 	sk_set_frozen(local->s, backlog > CYGTERM_MAX_BACKLOG);
 }
@@ -389,7 +424,8 @@ cygterm_unthrottle(void *handle, int backlog)
 static int
 cygterm_ldisc(void *handle, int option)
 {
-	Local local = handle;
+	//Local local = handle;
+	Local *local = container_of(handle, Local, backend);
 	cygterm_debug("cygterm_ldisc: %d", option);
 	switch (option) {
 	case LD_EDIT:
@@ -418,7 +454,7 @@ cygterm_cfg_info(void *handle)
 	return 0;
 }
 
-Backend cygterm_backend = {
+const struct BackendVtable cygterm_backend = {
 	cygterm_init,
 	cygterm_free,
 	cygterm_reconfig,
@@ -431,8 +467,7 @@ Backend cygterm_backend = {
 	cygterm_exitcode,
 	cygterm_sendok,
 	cygterm_ldisc,
-	cygterm_provide_ldisc,
-	cygterm_provide_logctx,
+        cygterm_provide_logctx,
 	cygterm_unthrottle,
 	cygterm_cfg_info,
 	NULL /* test_for_upstream */,

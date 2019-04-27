@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <time.h>
 
+void c_write(Ldisc *ldisc, const void *buf, int len);
+
 void xyz_updateMenuItems(Terminal *term);
 
 void xyz_ReceiveInit(Terminal *term);
@@ -128,9 +130,11 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 					}
 #endif
 					if (outerr) {
-						back->send(backhandle, buf, bread);
+						// back->send(backhandle, buf, bread);
+						backend_send( backhandle, buf, bread );
 					} else {
-						from_backend(term, 1, buf, bread);
+						//from_backend(term, 1, buf, bread);
+						c_write(term->ldisc, buf, bread);
 					}
 					continue;
 				}

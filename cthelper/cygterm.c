@@ -36,7 +36,7 @@ typedef struct cygterm_backend_data {
 	int exitcode;
 } *Local;
 
-
+
 /* Plug functions for cthelper data connection */
 static void
 cygterm_log(Plug p, int type, SockAddr addr, int port, const char *error_msg, int error_code)

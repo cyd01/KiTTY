@@ -755,10 +755,13 @@ void RunConfig( Conf * conf ) {
 		     * config structure.
 		     */
 		    SECURITY_ATTRIBUTES sa;
+		    strbuf *serbuf;
 		    void *p;
 		    int size;
 
-		    size = conf_serialised_size(conf);
+		    serbuf = strbuf_new();
+		    conf_serialise(BinarySink_UPCAST(serbuf), conf);
+		    size = serbuf->len;
 
 		    sa.nLength = sizeof(sa);
 		    sa.lpSecurityDescriptor = NULL;
@@ -770,11 +773,12 @@ void RunConfig( Conf * conf ) {
 		    if (filemap && filemap != INVALID_HANDLE_VALUE) {
 			p = MapViewOfFile(filemap, FILE_MAP_WRITE, 0, 0, size);
 			if (p) {
-			    conf_serialise(conf, p);
+			    memcpy(p, serbuf->s, size);
 			    UnmapViewOfFile(p);
 			}
 		    }
-		    inherit_handles = TRUE;
+		    strbuf_free(serbuf);
+		    inherit_handles = true;
 		    cl = dupprintf("putty %s&%p:%u", argprefix,
                                    filemap, (unsigned)size);
 		    

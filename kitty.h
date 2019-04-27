@@ -15,8 +15,9 @@ extern HWND MainHwnd ;
 ** ET DE LEUR FONCTIONS D'ACCES ET DE MODIFICATION
 *****************************************************/
 // Flag pour repasser en mode Putty basic
-extern int PuttyFlag ;
-
+//extern int PuttyFlag ;
+int GetPuttyFlag(void) ;
+void SetPuttyFlag( const int flag ) ;
 
 // Flag pour retourner à la Config Box en fin d'execution
 // extern int ConfigBoxNoExitFlag ;
@@ -50,7 +51,9 @@ extern int internal_delay ;
 extern char KiTTYClassName[128] ;
 
 // Flag pour afficher l'image de fond
-extern int BackgroundImageFlag ;
+//extern int BackgroundImageFlag ;
+int GetBackgroundImageFlag(void) ;
+void SetBackgroundImageFlag( const int flag ) ;
 
 // Flag pour imposer le passage en majuscule
 // extern int CapsLockFlag ;
@@ -124,15 +127,17 @@ int GetHyperlinkFlag(void) ;
 void SetHyperlinkFlag( const int flag ) ;
 
 // Flag de gestion de la fonction "rutty" (script automatique)
-//extern int RuTTYFlag ;
-int GetRuTTYFlag(void) ;
-void SetRuTTYFlag( const int flag ) ;
+//extern int RuttyFlag ;
+int GetRuttyFlag(void) ;
+void SetRuttyFlag( const int flag ) ;
 
 // Flag pour le fonctionnement en mode "portable" (gestion par fichiers), defini dans kitty_commun.c
 extern int IniFileFlag ;
 
 // Flag permettant la gestion de l'arborscence (dossier=folder) dans le cas d'un savemode=dir, defini dans kitty_commun.c
-extern int DirectoryBrowseFlag ;
+//extern int DirectoryBrowseFlag ;
+int GetDirectoryBrowseFlag(void) ;
+void SetDirectoryBrowseFlag( const int flag ) ;
 
 // Renvoi automatiquement dans le tray (pour les tunnel), fonctionne avec le l'option -send-to-tray
 //extern int AutoSendToTray ;
@@ -303,7 +308,7 @@ int WriteParameter( const char * key, const char * name, char * value ) ;
 int DelParameter( const char * key, const char * name ) ;
 void GetSessionFolderName( const char * session_in, char * folder ) ;
 int MakeDirTree( const char * Directory, const char * s, const char * sd ) ;
-int ManageShortcuts( HWND hwnd, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
+int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
 void mungestr(const char *in, char *out);
 void unmungestr(const char *in, char *out, int outlen);
 void print_log( const char *fmt, ...) ;
@@ -316,7 +321,7 @@ void set_sshver( const char * vers ) ;
 int ResizeWinList( HWND hwnd, int width, int height ) ;
 int SendCommandAllWindows( HWND hwnd, char * cmd ) ;
 int decode64 (char *buffer) ;
-void RunCommand( HWND hwnd, char * cmd ) ;
+void RunCommand( HWND hwnd, const char * cmd ) ;
 void timestamp_change_filename( void ) ;
 int InternalCommand( HWND hwnd, char * st ) ;
 // Convertit la base de registre en repertoire pour le mode savemode=dir
@@ -376,7 +381,7 @@ void DisplaySystemTrayMenu( HWND hwnd ) ;
 void SetPasteCommand( void ) ;
 // Recupere les coordonnees de la fenetre
 void GetWindowCoord( HWND hwnd ) ;
-int ManageLocalCmd( HWND hwnd, char * cmd ) ;
+int ManageLocalCmd( HWND hwnd, const char * cmd ) ;
 // Gestion du script au lancement
 void ManageInitScript( const char * input_str, const int len ) ;
 void SetNewIcon( HWND hwnd, char * iconefile, int icone, const int mode ) ;
@@ -388,7 +393,10 @@ void addkeypressed( UINT message, WPARAM wParam, LPARAM lParam, int shift_flag, 
 
 char * get_param_str( const char * val ) ;
 
-
+// Fonctions permettant de formatter les chaînes de caractères avec %XY	
+void mungestr( const char *in, char *out ) ;
+void unmungestr( const char *in, char *out, int outlen ) ;
+	
 void NegativeColours(HWND hwnd) ;
 void BlackOnWhiteColours(HWND hwnd) ;
 void ChangeFontSize(HWND hwnd, int dec) ;

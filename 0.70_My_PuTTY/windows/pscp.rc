@@ -1,8 +1,0 @@
-#include "rcstuff.h"
-
-#define APPNAME "PSCP"
-#define APPDESC "Command-line SCP/SFTP client"
-
-200 ICON "pscp.ico"
-
-#include "version.rc2"
