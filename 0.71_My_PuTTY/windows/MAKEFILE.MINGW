@@ -156,13 +156,13 @@ CFLAGS += 	-DPERSOPORT \
 		-DZMODEMPORT \
 		-DADBPORT \
 		-DIMAGEPORT \
+		-DCYGTERMPORT \
 		-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
 		-I../../base64 -I../../bcrypt -I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
 		
 #		-DWINCRYPTPORT \
-#		-DCYGTERMPORT \
 
 
 # Autre flag a gérer

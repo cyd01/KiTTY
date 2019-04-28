@@ -501,7 +501,8 @@ void SettingsAddItem( HSettingsList list, const char * name, const char * value 
 
 void SettingsFreeItem( HSettingsItem item ) {
 	if( item != NULL ) {
-		//if( item->value != NULL ) { free( item->value ) ; item->value = NULL ; } // POURQUOI CA PLANTE ???
+//debug_log("%s=%s\n",item->name,item->value);
+		if( item->value != NULL ) { free( item->value ) ; item->value = NULL ; } // POURQUOI CA PLANTE ???
 		if( item->name != NULL ) { free( item->name ) ; item->name = NULL ; }
 		item->pPrevious = NULL ;
 		item->pNext = NULL ;

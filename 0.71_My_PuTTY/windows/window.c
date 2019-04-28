@@ -929,6 +929,12 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-notrans") ) {
 			SetTransparencyFlag( 0 ) ;
 			conf_set_int(conf,CONF_transparencynumber, -1) ;
+#ifdef CYGTERMPORT
+		} else if( !strcmp(p, "-cygterm") ) {
+			cygterm_set_flag( 1 ) ;
+		} else if( !strcmp(p, "-nocygterm") ) {
+			cygterm_set_flag( 0 ) ;
+#endif
 #ifdef SAVEDUMPPORT	
 		} else if( !strcmp(p, "-savedump") ) {			
 			SaveDump() ;

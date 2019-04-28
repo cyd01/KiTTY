@@ -226,6 +226,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, bool has_help,
 		  HELPCTX(keyboard_ctrlalt),
 		  conf_checkbox_handler, I(CONF_ctrlaltkeys));
 #ifdef CYGTERMPORT
+    if( cygterm_get_flag() )
     ctrl_checkbox(s, "Set meta bit on alt (instead of escape)", NO_SHORTCUT,
 		  HELPCTX(no_help),
 		  conf_checkbox_handler, I(CONF_alt_metabit));
@@ -619,6 +620,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, bool has_help,
     /*
      * cygterm back end is available on Windows.
      */
+    if( cygterm_get_flag() )
     if (!midsession || (protocol == PROT_CYGTERM))
         cygterm_setup_config_box(b, midsession);
 #endif

@@ -1383,7 +1383,7 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "capslock", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "conf", "yes" ) ;
 #ifndef FDJ
-			writeINI( KittyIniFile, INIT_SECTION, "cygterm", "yes" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "cygterm", "no" ) ;
 #else
 			writeINI( KittyIniFile, INIT_SECTION, "cygterm", "no" ) ;
 #endif
@@ -2939,7 +2939,7 @@ void InfoBoxClose( HWND hwnd ) { EndDialog(hwnd, LOWORD(0)) ; DestroyWindow( hwn
 //CallBack du dialog InputBox
 static int InputBox_Flag = 0 ;
 
-static LRESULT CALLBACK InputCallBack (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ) {
+static LRESULT CALLBACK InputCallBack(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ) {
 	HWND handle;
 	switch (message) {
 		case WM_INITDIALOG:
@@ -5083,7 +5083,7 @@ void LoadParameters( void ) {
 #if (defined IMAGEPORT) && (!defined FDJ)
 	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) BackgroundImageFlag = 0 ; 
-		// if( !stricmp( buffer, "YES" ) ) BackgroundImageFlag = 1 ;  // Broken en 0.71 ==> on desactive
+		//if( !stricmp( buffer, "YES" ) ) BackgroundImageFlag = 1 ;  // Broken en 0.71 ==> on desactive
 	}
 #endif
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
@@ -5228,7 +5228,7 @@ void LoadParameters( void ) {
 	}
 #ifdef CYGTERMPORT
 	if( ReadParameter( INIT_SECTION, "cygterm", buffer ) ) {
-		if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; 
+		//if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
 		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
 	}
 #endif

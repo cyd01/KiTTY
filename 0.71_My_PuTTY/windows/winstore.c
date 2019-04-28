@@ -194,7 +194,7 @@ settings_r *open_settings_r(const char *sessionname)
 		}
 		
 		if( strcmp(sessionname,"Default Settings") && (hFile == INVALID_HANDLE_VALUE) ) {
-			errorShow("Unable to load file for reading", p);
+			//errorShow("Unable to load file for reading", p);
 			SetCurrentDirectory(oldpath);
 			SettingsFree(toret->list);
 			sfree(toret);

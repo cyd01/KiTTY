@@ -257,9 +257,9 @@ static void config_host_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_label_change(ctrl, dlg, "Serial line");
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_serline));
 #ifdef CYGTERMPORT
-	} else if ( conf_get_int(conf, CONF_protocol) /*cfg->protocol*/ == PROT_CYGTERM) {
+	} else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) {
 	    dlg_label_change(ctrl, dlg, "Command (use - for login shell, ? for exe)");
-	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_cygcmd) /*cfg->cygcmd*/);
+	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_cygcmd) );
 #endif
 #ifdef ADBPORT
         } else if (conf_get_int(conf, CONF_protocol) == PROT_ADB) {
@@ -278,8 +278,8 @@ static void config_host_handler(union control *ctrl, dlgparam *dlg,
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_str(conf, CONF_serline, s);
 #ifdef CYGTERMPORT
-	else if ( conf_get_int(conf, CONF_protocol) /*cfg->protocol*/ == PROT_CYGTERM) {
-	char *s = dlg_editbox_get(ctrl, dlg);
+	else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) {
+	    char *s = dlg_editbox_get(ctrl, dlg);
 	    conf_set_str(conf, CONF_cygcmd, s);
 	}
 #endif
@@ -309,7 +309,7 @@ static void config_port_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_label_change(ctrl, dlg, "Speed");
 	    sprintf(buf, "%d", conf_get_int(conf, CONF_serspeed));
 #ifdef CYGTERMPORT
-	} else if ( conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
+	} else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) {
 	    dlg_label_change(ctrl, dlg, "Port (ignored)");
 	    strcpy(buf, "-");
 #endif
@@ -330,7 +330,7 @@ static void config_port_handler(union control *ctrl, dlgparam *dlg,
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_int(conf, CONF_serspeed, i);
 #ifdef CYGTERMPORT
-	else if ( conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ;
+	else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) ;
 #endif
 	else
 	    conf_set_int(conf, CONF_port, i);
