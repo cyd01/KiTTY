@@ -209,7 +209,7 @@ static bool gppmap(settings_r *sesskey, const char *name,
      * Now read a serialised list from the settings and unmarshal it
      * into its components.
      */
-    buf = gpps_raw(sesskey, name, NULL);
+    buf = gpps_raw(sesskey, name, NULL) ;
     if (!buf)
 	return false;
 

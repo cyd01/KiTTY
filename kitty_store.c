@@ -468,13 +468,21 @@ void SettingsDelItem( HSettingsList list, const char * key ) {
 		while( current != NULL ) {
 			if( current->name != NULL ) {
 				if( !strcmp( current->name, key ) ) {
-					if( current->value != NULL ) { free( current->value ) ; }
-					free( current->name ) ;
-					if( current->pPrevious != NULL ) current->pPrevious->pNext = current->pNext ;
-					if( current->pNext !=NULL ) current->pNext->pPrevious = current->pPrevious ;
+					if( current->value != NULL ) { free( current->value ) ; current->value = NULL ; }
+					free( current->name ) ; current->name = NULL ;
+					if( current->pPrevious != NULL ) { 
+						current->pPrevious->pNext = current->pNext ;
+					} else {
+						list->first = current->pNext ;
+					}
+					if( current->pNext != NULL )	{
+						current->pNext->pPrevious = current->pPrevious ;
+					} else {
+						list->last = current->pPrevious ;
+					}
 				} 
-				current = current->pNext ;
 			}
+			current = current->pNext ;
 		}
 	}
 }
@@ -547,7 +555,7 @@ char * SettingsKey_str( HSettingsList list, const char * key ) {
 		while( current != NULL ) {
 			if( current->name != NULL ) {
 				if( !strcmp( current->name, key ) ) {
-					return current->value ;
+					return dupstr( current->value ) ;
 				}
 			}
 			current = current->pNext ;
@@ -576,7 +584,7 @@ void SettingsLoad( HSettingsList list, const char * filename ) {
 	char buffer[4096] ;
 	int p ;
 	
-	if( (fp=fopen(filename,"r")) != NULL ) {
+	if( (fp=fopen(filename,"rb")) != NULL ) {
 		list->filename = (char*) malloc( strlen(filename)+1 ) ; strcpy( list->filename, filename ) ;
 		while( fgets(buffer,4096,fp) != NULL ) {
 			char *name, *value, *value2 ;

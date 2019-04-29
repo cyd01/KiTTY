@@ -21,6 +21,7 @@ void packstr(const char *in, char *out) ;
 DWORD errorShow(const char* pcErrText, const char* pcErrParam) ;
 char *itoa(int value, char *string, int radix);
 int createPath(char* dir) ;
+char *dupstr(const char *s);
 
 extern char sesspath[2 * MAX_PATH] ;
 extern char oldpath[2 * MAX_PATH] ;

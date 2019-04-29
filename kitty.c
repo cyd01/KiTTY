@@ -1850,7 +1850,7 @@ void SendAutoCommand( HWND hwnd, const char * cmd ) {
 			}
 		else { SendKeyboardPlus( hwnd, cmd ) ; }
 		}
-	else { if( debug_flag ) logevent(NULL, "No automatic command !" ) ; }
+	else { if( debug_flag ) debug_logevent( "No automatic command !" ) ; }
 	}
 	
 // Command sender (envoi d'une meme commande a toutes les fenetres)
@@ -3049,7 +3049,7 @@ BOOL FAR PASCAL EditMultilineCallBack(HWND hwnd, UINT message, WPARAM wParam, LP
 			if( (wParam==VK_RETURN) && (GetKeyState( VK_SHIFT )& 0x8000) )
 				return 0;
 			else if( (wParam==VK_F2) && (GetKeyState( VK_SHIFT )& 0x8000) ) { // Charge une Notes
-				sprintf( key_name, "%s\\Sessions\\%s", TEXT(PUTTY_REG_POS), conf_get_str(conf,CONF_sessionname)/*cfg.sessionname*/ ) ;
+				sprintf( key_name, "%s\\Sessions\\%s", TEXT(PUTTY_REG_POS), conf_get_str(conf,CONF_sessionname) ) ;
 				if( GetValueData(HKEY_CURRENT_USER, key_name, "Notes", buffer) != NULL ) {
 					if( GetWindowTextLength(hwnd) > 0 ) 
 						if( MessageBox(hwnd, "Are you sure you want to load Notes\nand erase this edit box ?","Load Warning", MB_YESNO|MB_ICONWARNING ) != IDYES ) break ;
@@ -3057,11 +3057,11 @@ BOOL FAR PASCAL EditMultilineCallBack(HWND hwnd, UINT message, WPARAM wParam, LP
 					}
 				}
 			else if( (wParam==VK_F3) && (GetKeyState( VK_SHIFT )& 0x8000) ) { // Sauve une Notes
-				GetSessionField( conf_get_str(conf,CONF_sessionname)/*cfg.sessionname*/, conf_get_str(conf,CONF_folder)/*cfg.folder*/, "Notes", buffer ) ;
+				GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "Notes", buffer ) ;
 				if( strlen( buffer ) > 0 ) 
 					if( MessageBox(hwnd, "Are you sure you want to save Edit box\ninto Notes registry ?","Save Warning", MB_YESNO|MB_ICONWARNING ) != IDYES ) break ;
 				GetWindowText( hwnd, buffer, 4096 ) ;
-				sprintf( key_name, "%s\\Sessions\\%s", TEXT(PUTTY_REG_POS), conf_get_str(conf,CONF_sessionname) /*cfg.sessionname*/ ) ;
+				sprintf( key_name, "%s\\Sessions\\%s", TEXT(PUTTY_REG_POS), conf_get_str(conf,CONF_sessionname) ) ;
 				RegTestOrCreate( HKEY_CURRENT_USER, key_name, "Notes", buffer ) ;
 				}
 			else 
@@ -4961,10 +4961,16 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 			{ SendMessage( hwnd, WM_COMMAND, IDM_USERCMD+key_num-'A', 0 ) ; return 1 ; }
 		}
 		
-	if( key == shortcuts_tab.editor ) 			// Lancement d'un putty-ed
-		{ RunPuttyEd( hwnd, NULL ) ; return 1 ; }
-	if( key == (shortcuts_tab.editorclipboard ) ) 		// Lancement d'un putty-ed qui charge le contenu du presse-papier
-		{ term_copyall(term,clips_system,lenof(clips_system)) ; RunPuttyEd( hwnd, "1" ) ; return 1 ; }
+	if( key == shortcuts_tab.editor ) {			// Lancement d'un putty-ed
+		if( debug_flag ) { debug_logevent( "Start empty internal editor" ) ; }
+		RunPuttyEd( hwnd, NULL ) ; 
+		return 1 ; 
+	}
+	if( key == (shortcuts_tab.editorclipboard ) ) {		// Lancement d'un putty-ed qui charge le contenu du presse-papier
+		if( debug_flag ) { debug_logevent( "Start internal editor fullfiled with clipboard" ) ; }
+		term_copyall(term,clips_system,lenof(clips_system)) ; RunPuttyEd( hwnd, "1" ) ; 
+		return 1 ; 
+	}
 	else if( key == shortcuts_tab.winscp )			// Lancement de WinSCP
 		{ SendMessage( hwnd, WM_COMMAND, IDM_WINSCP, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.autocommand ) 		// Rejouer la commande de demarrage
@@ -5340,6 +5346,8 @@ void appendPath(const char *append) ;
 void InitWinMain( void ) {
 	char buffer[4096];
 	int i ;
+	
+	if( existfile("kitty.log") ) { unlink( "kitty.log" ) ; }
 	
 #ifdef FDJ
 	CreateSSHHandler();

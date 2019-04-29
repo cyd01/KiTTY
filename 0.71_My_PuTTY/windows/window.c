@@ -699,7 +699,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 #endif
 #ifdef PERSOPORT
     // Initialisation specifique a KiTTY
-    SethInstIcons( hinst ) ; 
+    SethInstIcons( hinst ) ;
     InitWinMain();
 #endif
 #ifdef NO_TRANSPARENCY
@@ -738,7 +738,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	do_defaults(NULL, conf);
 	
 	p = cmdline;
-
 	/*
 	 * Process a couple of command-line options which are more
 	 * easily dealt with before the line is broken up into words.
