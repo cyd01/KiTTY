@@ -358,7 +358,7 @@ void ManageSpecialCommand( HWND hwnd, int menunum ) ;
 int fileno(FILE *stream) ;
 // Sauvegarde de la cle de registre
 void SaveRegistryKeyEx( HKEY hMainKey, LPCTSTR lpSubKey, const char * filename ) ;
-void ManageProtect( HWND hwnd, char * title ) ;
+void ManageProtect( HWND hwnd, TermWin *tw, char * title ) ;
 // Gere l'option always visible
 void ManageVisible( HWND hwnd ) ;
 // Sauvegarde de la cle de registre

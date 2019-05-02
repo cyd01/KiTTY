@@ -3963,8 +3963,8 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		SendMessage( hwnd, MYWM_NOTIFYICON, 0, WM_LBUTTONDBLCLK ) ;
 		PostQuitMessage( 0 ) ;
 		break ;
-	  case IDM_PROTECT: 
-	  	ManageProtect( hwnd, conf_get_str(conf,CONF_wintitle) ) ;
+	  case IDM_PROTECT:
+	  	ManageProtect( hwnd, wintw, conf_get_str(conf, CONF_wintitle) ) ;
 		break ;
 	  case IDM_VISIBLE: 
 	  	ManageVisible( hwnd ) ;
@@ -7065,14 +7065,14 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 		if( ManageLocalCmd( MainHwnd, title+2 ) ) { free(title); return ; }
 		}
 	
-	if( !GetTitleBarFlag() ) { set_title_internal( tw, title ) ; free(title); return ; }
+	if( !GetTitleBarFlag() ) { set_title_internal( tw, title ) ; free(title) ; return ; }
 		
 	if( strstr(title, " (PROTECTED)")==(title+strlen(title)-12) ) 
 		{ title[strlen(title)-12]='\0' ; }
 
 #if (defined IMAGEPORT) && (!defined FDJ)
 	buffer = (char*) malloc( strlen( title ) + strlen( conf_get_str(conf,CONF_host)) + strlen( conf_get_filename(conf,CONF_bg_image_filename)->path ) + 40 ) ; 
-	if( GetBackgroundImageFlag() && GetImageViewerFlag() && (!PuttyFlag) ) {sprintf( buffer, "%s", conf_get_filename(conf,CONF_bg_image_filename)->path ) ; }
+	if( GetBackgroundImageFlag() && GetImageViewerFlag() && (!PuttyFlag) ) { sprintf( buffer, "%s", conf_get_filename(conf,CONF_bg_image_filename)->path ) ; }
 	else 
 #else
 	buffer = (char*) malloc( strlen( title ) + strlen( conf_get_str(conf,CONF_host)) + 40 ) ; 
@@ -7091,13 +7091,11 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 		if( strlen( title ) > 0 ) make_title( buffer, "%s", title ) ;
 		else sprintf( buffer, "%s - %s", conf_get_str(conf,CONF_host), appname ) ;
 		}
-	
 	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) strcat( buffer, " (PROTECTED)" ) ;
 	set_title_internal( tw, buffer ) ;
-	
 	free(title);
 	free(buffer);
-	}
+}
 	
 static void wintw_set_icon_title(TermWin *tw, const char *title2)
 {

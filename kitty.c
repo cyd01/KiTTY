@@ -1910,23 +1910,22 @@ int ResizeWinList( HWND hwnd, int width, int height ) {
 	return NbWindows ;
 	}
 
-void set_title( TermWin *win, const char *title ) { return win_set_title(win,title) ; } // Disparue avec la version 0.71
-void ManageProtect( HWND hwnd, char * title ) {
+void set_title( TermWin *tw, const char *title ) { return win_set_title(tw,title) ; } // Disparue avec la version 0.71
+void ManageProtect( HWND hwnd, TermWin *tw, char * title ) {
 	HMENU m ;
 	if( ( m = GetSystemMenu (hwnd, FALSE) ) != NULL ) {
 		DWORD fdwMenu = GetMenuState( m, (UINT) IDM_PROTECT, MF_BYCOMMAND); 
 		if (!(fdwMenu & MF_CHECKED)) {
 			CheckMenuItem( m, (UINT)IDM_PROTECT, MF_BYCOMMAND|MF_CHECKED ) ;
 			ProtectFlag = 1 ;
-			set_title(NULL, title) ;
-			}
-		else {
+			set_title(tw, title) ;
+		} else {
 			CheckMenuItem( m, (UINT)IDM_PROTECT, MF_BYCOMMAND|MF_UNCHECKED ) ;
 			ProtectFlag = 0 ;
-			set_title(NULL, title);
-			}
+			set_title(tw, title);
 		}
 	}
+}
 
 // Affiche un menu dans le systeme Tray
 void DisplaySystemTrayMenu( HWND hwnd ) {
@@ -2756,31 +2755,30 @@ void ManageWinrol( HWND hwnd, int resize_action ) {
 		resize_action = RESIZE_TERM ;
 		SetWindowLongPtr( hwnd, GWL_STYLE, mode|WS_THICKFRAME|WS_MAXIMIZEBOX ) ;
 		SetWindowPos( hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
-		}
+	}
 
 	if( WinHeight == -1 ) {
 		GetWindowRect(hwnd, &rcClient) ;
 		WinHeight  = rcClient.bottom-rcClient.top ;
 		resize(0, rcClient.right-rcClient.left) ;
 		MoveWindow( hwnd, rcClient.left, rcClient.top, rcClient.right-rcClient.left, 0, TRUE ) ;
-    		}
-	else {
+	} else {
 		GetWindowRect(hwnd, &rcClient) ;
 		rcClient.bottom = rcClient.top + WinHeight ;
 		resize(WinHeight, -1) ;
 		MoveWindow( hwnd, rcClient.left, rcClient.top, rcClient.right-rcClient.left, WinHeight, TRUE ) ;
 		WinHeight = -1 ;
-		}
+	}
 		
 	if( mode != -1 ) {
 	    //winmode &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
 		SetWindowLongPtr(hwnd, GWL_STYLE, mode ) ;
 		SetWindowPos( hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
 		resize_action = RESIZE_DISABLED ;
-		}
+	}
 
 	InvalidateRect(hwnd, NULL, TRUE);
-	}
+}
 	
 #if (defined IMAGEPORT) && (!defined FDJ)
 BOOL load_bg_bmp() ;
@@ -5398,7 +5396,8 @@ void InitWinMain( void ) {
 
 	// Initialise la taille de la ConfigBox (en cas de DPI speciaux)
 	double ScaleY = GetDeviceCaps(GetDC(hwnd),LOGPIXELSY)/96.0 ; // La police standard (100%) vaut 96ppp (pixels per pouce)
-	if( ScaleY!=1.0 ) { ConfigBoxWindowHeight = (int)( 597*ScaleY ) ; }
+	int MySize = 610 ;
+	if( ScaleY!=1.0 ) { ConfigBoxWindowHeight = (int)( MySize*ScaleY ) ; }
 
 	// Initialisation des parametres à partir du fichier kitty.ini
 	LoadParameters() ;
