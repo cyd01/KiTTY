@@ -3943,7 +3943,7 @@ Le chemin vers l'exécutable WinSCP est défini dans la variable WInSCPPath. Ell
 @ECHO OFF
 start "C:\Program Files\WinSCP\WinSCP.exe" "%1" "%2" "%3" "%4" "%5" "%6" "%7" "%8" "%9"
 */	
-// winscp.exe [(sftp|ftp|scp)://][user[:password]@]host[:port][/path/[file]] [/privatekey=key_file]
+// winscp.exe [(sftp|ftp|scp)://][user[:password]@]host[:port][/path/[file]] [/privatekey=key_file] [/rawsettings (Compression=1|AgentFwd=1)]
 void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 	char cmd[4096], shortpath[1024], buffer[4096], proto[10] ;
 	
@@ -4001,6 +4001,9 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 				strcat( cmd, " /privatekey=" ) ;
 				strcat( cmd, shortpath ) ;
 				}
+			}
+		if( conf_get_int(conf,CONF_compression) > 1 ) {
+			strcat( cmd, " /rawsettings Compression=1" ) ;
 			}
 	} else {
 		sprintf( cmd, "%s ftp://%s", shortpath, conf_get_str(conf,CONF_username) ) ;
