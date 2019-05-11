@@ -1,4 +1,4 @@
 #include <windows.h>
 
-/* Procedure de vérification de la signature */
+/* Procedure de vÃ©rification de la signature */
 BOOL CheckMD5Integrity(void) ;
