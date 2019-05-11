@@ -1318,6 +1318,8 @@ TrayIcone.hWnd = hwnd ;
 			      winmode, CW_USEDEFAULT, CW_USEDEFAULT,
 			      guess_width, guess_height,
 			      NULL, NULL, inst, NULL);
+			      
+	if( GetBackgroundImageFlag() ) init_dc_blend() ;
 #else
 	hwnd = CreateWindowExW(exwinmode|WS_EX_ACCEPTFILES, uappname, uappname,
 			      winmode, CW_USEDEFAULT, CW_USEDEFAULT,
@@ -1509,10 +1511,11 @@ TrayIcone.hWnd = hwnd ;
 #ifdef ZMODEMPORT
 	if( (!GetPuttyFlag()) && GetZModemFlag() ) {
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
+	    //AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
+	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_DISABLED, IDM_XYZSTART, "&Zmodem Receive (broken)");
 	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload");
 	    AppendMenu(m, !term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZABORT, "Zmodem &Abort");
-		}
+	}
 #endif
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    if (has_help())
@@ -1587,10 +1590,9 @@ TrayIcone.hWnd = hwnd ;
 			}
 
 		// Lancement du rafraichissement toutes les 10 minutes (pour l'image de fond, pour pallier bug d'affichage)
-		if( ReadParameter( INIT_SECTION, "redraw", reg_buffer ) ) {
+		if( GetBackgroundImageFlag() && ReadParameter( INIT_SECTION, "redraw", reg_buffer ) ) {
 			if( stricmp( reg_buffer, "NO" ) ) SetTimer(hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
-			}
-		else SetTimer(hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
+		} else SetTimer(hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
 		
 		// Lancement du timer d'anti-idle
 		SetTimer(hwnd, TIMER_ANTIIDLE, (int)(30*1000), NULL) ;
@@ -3217,13 +3219,13 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 				strcat( buffer, "\\n" ) ;
 				}
 			}
-		if( strlen( conf_get_str(conf,CONF_autocommand)/*cfg.autocommand*/ ) > 0 ) {
+		if( strlen( conf_get_str(conf,CONF_autocommand) ) > 0 ) {
 			strcat( buffer, "\\n\\p" ) ; 
-			strcat( buffer, conf_get_str(conf,CONF_autocommand)/*cfg.autocommand*/ ) ;
+			strcat( buffer, conf_get_str(conf,CONF_autocommand) ) ;
 			strcat( buffer, "\\n" ) ;
 			}
 		if( strlen(buffer) > 0 ) { 
-			conf_set_str( conf, CONF_autocommand, buffer ); //strcpy( cfg.autocommand, buffer ) ; 
+			conf_set_str( conf, CONF_autocommand, buffer ); 
 			}
 		}
 
@@ -3231,22 +3233,22 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 	if( GetAutoSendToTray() ) ManageToTray( hwnd ) ;
 	
 	// Maximize automatic
-	if( conf_get_int(conf,CONF_maximize) /*cfg.maximize*/ ) { PostMessage( hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, (LPARAM)NULL ) ; }
+	if( conf_get_int(conf,CONF_maximize) ) { PostMessage( hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, (LPARAM)NULL ) ; }
 
 	// Fullscreen automatic
-	if( conf_get_int(conf,CONF_fullscreen) /*cfg.fullscreen*/ ) { PostMessage( hwnd, WM_COMMAND, IDM_FULLSCREEN, (LPARAM)NULL ) ; }
+	if( conf_get_int(conf,CONF_fullscreen) ) { PostMessage( hwnd, WM_COMMAND, IDM_FULLSCREEN, (LPARAM)NULL ) ; }
 
 	// Affichage d'une note de la session s'il y en a une
-	if( GetSessionField( conf_get_str( conf, CONF_sessionname)/*cfg.sessionname*/, conf_get_str( conf, CONF_folder)/*cfg.folder*/, "Notes", buffer )  )
+	if( GetSessionField( conf_get_str( conf, CONF_sessionname), conf_get_str( conf, CONF_folder), "Notes", buffer )  )
 		{ if( strlen( buffer ) > 0 ) MessageBox( hwnd, buffer, "Notes", MB_OK ) ; }
 
-	RenewPassword( conf/*&cfg*/ ) ;
+	RenewPassword( conf ) ;
 
-	if( strlen( conf_get_str(conf,CONF_autocommand)/*cfg.autocommand*/ ) > 0 ) {
+	if( strlen( conf_get_str(conf,CONF_autocommand) ) > 0 ) {
 		SetTimer(hwnd, TIMER_AUTOCOMMAND, autocommand_delay, NULL) ;
 		}
-	if( conf_get_int(conf,CONF_logtimerotation)/*cfg.logtimerotation*/ > 0 ) {
-		SetTimer(hwnd, TIMER_LOGROTATION, (int)( conf_get_int(conf,CONF_logtimerotation)/*cfg.logtimerotation*/*1000), NULL) ;
+	if( conf_get_int(conf,CONF_logtimerotation) > 0 ) {
+		SetTimer(hwnd, TIMER_LOGROTATION, (int)( conf_get_int(conf,CONF_logtimerotation)*1000), NULL) ;
 		logevent(NULL, "Start log rotation" );
 		}
 
@@ -3257,7 +3259,7 @@ else if((UINT_PTR)wParam == TIMER_DND){
 	KillTimer(hwnd, TIMER_DND) ;
 	recupNomFichierDragDrop(hwnd, &hDropInf) ;
 	if( hDropInf != NULL ) { free(hDropInf) ; hDropInf = NULL ; }
-	InvalidateRect( hwnd, NULL, TRUE ) ;
+	InvalidateRect( hwnd, NULL, true ) ;
 	}
 
 else if((UINT_PTR)wParam == TIMER_AUTOCOMMAND) {  // Autocommand au demarrage
@@ -3267,13 +3269,7 @@ else if((UINT_PTR)wParam == TIMER_AUTOCOMMAND) {  // Autocommand au demarrage
 		ValidateRect( hwnd, NULL ) ; 
 		AutoCommand = (char*) malloc( strlen(conf_get_str(conf,CONF_autocommand))+10 ) ;
 		strcpy( AutoCommand, conf_get_str(conf,CONF_autocommand) ) ;
-		
-		//char bufauto[8192]="";
-		//GetSessionField( conf_get_str(conf,CONF_sessionname)/*cfg.sessionname*/, conf_get_str(conf,CONF_folder)/*cfg.folder*/, "Autocommand", bufauto/*cfg.autocommand*/ ) ;
-		//conf_set_str( conf,CONF_autocommand, bufauto);
-		//AutoCommand = conf_get_str(conf,CONF_autocommand)/*cfg.autocommand */;  // Probleme ou pas ?
-//logevent(NULL, AutoCommand );
-		}
+	}
 
 
 	char buffer[8192] = "" ;
@@ -3298,16 +3294,11 @@ else if((UINT_PTR)wParam == TIMER_AUTOCOMMAND) {  // Autocommand au demarrage
 		}
 	}
 		
-	//if( AutoCommand[i] != '\0' ) { AutoCommand += i ; }
 	del( AutoCommand, 1, i ) ; //AutoCommand += i ;
 	if( strlen( buffer ) > 0 ) { SendAutoCommand( hwnd, buffer ) ; }
 	if( AutoCommand[0] == '\0' ) { 
 		free( AutoCommand ) ; AutoCommand = NULL ; 
-		InvalidateRect( hwnd, NULL, TRUE ) ;
-		
-		//char bufauto[8192]="";
-		//GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "Autocommand", bufauto) ;
-		//conf_set_str( conf,CONF_autocommand,bufauto);
+		InvalidateRect( hwnd, NULL, true ) ;
 		}
 	else { SetTimer(hwnd, TIMER_AUTOCOMMAND, autocommand_delay, NULL) ; }
 	}
@@ -3334,12 +3325,12 @@ else if((UINT_PTR)wParam == TIMER_AUTOPASTE) {  // AutoPaste
 #if (defined IMAGEPORT) && (!defined FDJ)
 else if( GetBackgroundImageFlag() && ((UINT_PTR)wParam == TIMER_SLIDEBG) ) {  // Changement automatique de l'image de fond
 	NextBgImage( hwnd ) ;
-	InvalidateRect( hwnd, NULL, TRUE ) ;
+	InvalidateRect( hwnd, NULL, true ) ;
 	}
 #endif
 else if((UINT_PTR)wParam == TIMER_REDRAW) {  // rafraichissement automatique (bug d'affichage)
 	RefreshBackground( hwnd ) ; // On inhibe cette fonction a cause du probleme de fuite memoire due a l'image de fond !!! 
-	//InvalidateRect( hwnd, NULL, TRUE ) ; // On remplace par
+	//InvalidateRect( hwnd, NULL, true ) ; // On remplace par
 	}
 else if((UINT_PTR)wParam == TIMER_ANTIIDLE) {  // Envoi de l'anti-idle
 	AntiIdleCount += 1 ;
@@ -3411,7 +3402,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 
 #if (defined IMAGEPORT) && (!defined FDJ)
 		if( GetIconeFlag() == -1 ) conf_set_int( conf, CONF_bg_type, 0 ) ; 
-		if( !GetBackgroundImageFlag() ) conf_set_int( conf, CONF_bg_type,0 ); 
+		if( !GetBackgroundImageFlag() ) conf_set_int( conf, CONF_bg_type, 0 ); 
 #endif
 		if( !PuttyFlag )
 		if( conf_get_int( conf,CONF_saveonexit) && conf_get_int( conf,CONF_windowstate) ) 
@@ -4541,7 +4532,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	     * current terminal appearance so that WM_PAINT becomes
 	     * completely trivial. However, this should do for now.
 	     */
-//            assert(!wintw_hdc);
+            //assert(!wintw_hdc);
             wintw_hdc = hdc;
 #if (defined IMAGEPORT) && (!defined FDJ)
 	if( GetBackgroundImageFlag() && (!GetPuttyFlag()) ) {
@@ -4808,7 +4799,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
     {
         // When using a background image based on the desktop, correct display
         // may depend on the current position of the window.
-        InvalidateRect(hwnd, NULL, TRUE);
+        InvalidateRect(hwnd, NULL, true);
     }
 	sys_cursor_update();
 	
@@ -4848,7 +4839,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 
     if(textdc || backgrounddc || backgroundblenddc)
     {
-        InvalidateRect(hwnd, NULL, TRUE);
+        InvalidateRect(hwnd, NULL, true );
     }
 
     break;
@@ -5007,8 +4998,12 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	if( conf_get_int(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
 #endif
 #ifdef IMAGEPORT
+	/*
 	if( ((wParam == SIZE_RESTORED)&&(resizing!=TRUE)) || (wParam == SIZE_MAXIMIZED) ) {
 		if( GetBackgroundImageFlag() && (conf_get_int(conf,CONF_bg_image_abs_fixed)==1) && (conf_get_int(conf,CONF_bg_type)!=0) ) RefreshBackground( hwnd ) ;
+	}*/
+	if( (wParam == SIZE_RESTORED) || (wParam == SIZE_MAXIMIZED) ) {
+		RefreshBackground( hwnd ) ;
 	}
 #endif
 	sys_cursor_update();
@@ -5727,11 +5722,8 @@ static void do_text_internal(
                  GetBValue(fg) * 2 / 3);
     }
 #if (defined IMAGEPORT) && (!defined FDJ)
-    HDC hdc = make_hdc();
-    // HDC hdc = wintw_hdc ;
-    //HDC hdc = GetDC(hwnd);		// 0.71: peut-être faut-il remplacer hdc par wintw_hdc ?
-    //  hdc ==> /*hdc*/ wintw_hdc
-    if( GetBackgroundImageFlag() && (!PuttyFlag) ) {
+    HDC hdc = wintw_hdc ; 
+    if( GetBackgroundImageFlag() && (!GetPuttyFlag()) ) {
 	line_box.left = x;
 	line_box.top = y;
 	line_box.right = x + char_width * len;
@@ -5750,11 +5742,11 @@ static void do_text_internal(
 			ClientToScreen(hwnd, &bgloc);
         
 		if(bg == backgroundcolor) {
-			// Use fast screen fill for default background.
+		// Use fast screen fill for default background.
 			BitBlt(textdc, x, y, width, height, backgroundblenddc, bgloc.x, bgloc.y, SRCCOPY);
 		} else {
 			BitBlt(textdc, x, y, width, height, backgrounddc, bgloc.x, bgloc.y, SRCCOPY);
-                        color_blend(textdc, x, y, width, height, bg, conf_get_int(conf,CONF_bg_opacity));
+			color_blend(textdc, x, y, width, height, bg, conf_get_int(conf,CONF_bg_opacity)) ;
 		}
 		hdc = textdc;
 	}
@@ -5766,17 +5758,17 @@ static void do_text_internal(
 	else
 		SetBkMode(hdc, OPAQUE);
     } else {
-    SelectObject(wintw_hdc, fonts[nfont]);
-    SetTextColor(wintw_hdc, fg);
-    SetBkColor(wintw_hdc, bg);
-    if (attr & TATTR_COMBINING)
-	SetBkMode(wintw_hdc, TRANSPARENT);
-    else
-	SetBkMode(wintw_hdc, OPAQUE);
-    line_box.left = x;
-    line_box.top = y;
-    line_box.right = x + char_width * len;
-    line_box.bottom = y + font_height;
+	SelectObject(hdc, fonts[nfont]);
+	SetTextColor(hdc, fg);
+	SetBkColor(hdc, bg);
+	if (attr & TATTR_COMBINING)
+		SetBkMode(hdc, TRANSPARENT);
+	else
+		SetBkMode(hdc, OPAQUE);
+	line_box.left = x;
+	line_box.top = y;
+	line_box.right = x + char_width * len;
+	line_box.bottom = y + font_height;
     }
 #else
     SelectObject(wintw_hdc, fonts[nfont]);
@@ -5921,7 +5913,7 @@ static void do_text_internal(
 	// ExtTextOutW(hdc, x,
 	//	    y - font_height * (lattr == LATTR_BOT) + text_adjust,
 	//	    ETO_CLIPPED | etoFlagOpaque, &line_box, uni_buf, nlen, lpDx);
-		ExtTextOutW(wintw_hdc, x + xoffset,
+		ExtTextOutW(hdc, x + xoffset,
 		    y - font_height * (lattr == LATTR_BOT) + text_adjust,
 		    ETO_CLIPPED | etoFlagOpaque, 
 	            &line_box, uni_buf, nlen, 
@@ -5954,7 +5946,7 @@ static void do_text_internal(
 	// ExtTextOut(hdc, x,
 	// 	   y - font_height * (lattr == LATTR_BOT) + text_adjust,
 	// 	   ETO_CLIPPED | etoFlagOpaque, &line_box, directbuf, len, lpDx);
-		ExtTextOut(wintw_hdc, x + xoffset,
+		ExtTextOut(hdc, x + xoffset,
 		   y - font_height * (lattr == LATTR_BOT) + text_adjust,
 		   ETO_CLIPPED | etoFlagOpaque, 
 		   &line_box, directbuf, len, lpDx_maybe);
@@ -6000,7 +5992,7 @@ static void do_text_internal(
 	if( GetBackgroundImageFlag() && (!PuttyFlag) )
  	// exact_textout(hdc, x, y - font_height * (lattr == LATTR_BOT) + text_adjust,
 	// 	      &line_box, wbuf, len, lpDx, !(attr & TATTR_COMBINING) &&!transBg);
-		exact_textout(wintw_hdc, x + xoffset, 
+		exact_textout(hdc, x + xoffset, 
 			y - font_height * (lattr == LATTR_BOT) + text_adjust,
 			&line_box, wbuf, len, lpDx, 
 			!(attr & TATTR_COMBINING) &&!transBg);

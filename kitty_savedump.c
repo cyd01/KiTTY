@@ -655,7 +655,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	if( KiTTYClassName != NULL ) fprintf( fp, "KiTTYClassName=%s\n", KiTTYClassName ) ;
 	if( CtHelperPath!= NULL ) fprintf( fp, "CtHelperPath=%s\n", CtHelperPath ) ;
 	if( strlen(ManagePassPhrase(NULL))>0 ) fprintf( fp, "PassPhrase=%s\n", ManagePassPhrase(NULL)) ;
-	}
+}
 
 // recupere la configuration des shortcuts
 void SaveShortCuts( FILE *fp ) {
@@ -697,7 +697,6 @@ void SaveSpecialMenu( FILE *fp ) {
 	}
 
 // Recupere une copie d'ecran
-#if (defined IMAGEPORT) && (!defined FDJ)
 void MakeScreenShot() ;
 
 void SaveScreenShot( FILE *fp ) {
@@ -714,7 +713,6 @@ void SaveScreenShot( FILE *fp ) {
 	}
 	unlink( "screenshot.jpg.bcr" ) ;
 }
-#endif
 	
 // Exporte la configuration courante
 void SaveCurrentConfig( FILE *fp, Conf * conf ) {
@@ -820,10 +818,10 @@ void SaveDumpFile( char * filename ) {
 			}
 		fflush( fpout ) ;
 
-		fputs( "\n@ RunningConfig @\n\n", fpout ) ;
+		fputs( "\n@ RunningConfig @\n\n", fpout ) ; fflush( fpout ) ;
 		SaveDumpConfig( fpout, conf ) ; fflush( fpout ) ;
 
-		fputs( "\n@ RunningConfig in KTX file format @\n\n", fpout ) ;
+		fputs( "\n@ RunningConfig in KTX file format @\n\n", fpout ) ; fflush( fpout ) ;
 		SaveCurrentConfig( fpout, conf ) ; fputs( "\n", fpout ) ; fflush( fpout ) ;
 				
 		if( IniFileFlag==SAVEMODE_DIR ) {
@@ -857,10 +855,8 @@ void SaveDumpFile( char * filename ) {
 			SaveDebugFile( conf_get_filename(conf,CONF_script_filename)->path, fpout ) ;
 		}
 #endif
-#if (defined IMAGEPORT)
 		fputs( "\n@ ScreenShot @\n\n", fpout ) ;
 		SaveScreenShot( fpout ) ; fflush( fpout ) ;
-#endif
 			
 		fclose( fpout ) ;
 

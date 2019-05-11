@@ -335,8 +335,9 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 			}
 			p--;
 		}
+debug_log("%s %s\n",incommand,inparams);
 		sprintf(params, "%s %s", p, inparams);
-
+debug_log("%s %s\n",incommand,params);
 		if (!CreateProcess(incommand,params,NULL, NULL,TRUE,CREATE_NEW_CONSOLE, NULL,conf_get_str(term->conf,CONF_zdownloaddir),&si,&term->xyz_Internals->pi))
 		{
 			//DWORD err = GetLastError();
@@ -388,13 +389,20 @@ int xyz_ReceiveData(Terminal *term, const u_char *buffer, int len)
 		OutputDebugString(debugbuff);
 	}
 #endif
-	
-	//if( !
+//	if( !
 		WriteFile(term->xyz_Internals->write_stdin,buffer,len,&written,NULL)
 	;
-	//) { char buf[1024]; sprintf(buf, "Unable to write %d characters", len); MessageBox(NULL,buf,"Error",MB_OK|MB_ICONERROR); }
+//	) { char buf[1024]; sprintf(buf, "Unable to write %d characters", len); MessageBox(NULL,buf,"Error",MB_OK|MB_ICONERROR); }
 
 	return 0 ;
 }
 
 #endif
+
+
+
+/*
+E:\DEV\MinGW\msys\1.0\home\cyril\putty-0.71\zmodem\rz.exe rz.exe -e -v
+
+E:\DEV\MinGW\msys\1.0\home\cyril\putty-0.71\zmodem\sz.exe sz.exe -e -v "E:\DEV\windiff.exe"
+*/

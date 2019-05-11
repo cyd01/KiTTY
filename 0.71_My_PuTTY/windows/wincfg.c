@@ -634,13 +634,6 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, bool has_help,
 		"Application (*.exe)\0*.exe\0All files (*.*)\0*.*\0\0", TRUE,
 		"Select executable to scp/sftp transfer", HELPCTX(no_help),
 		conf_filesel_handler, I(CONF_url_browser)); 
-		
-	//ctrl_checkbox(s, "Use the default browser", 'b',
-	//	  HELPCTX(no_help),
-	//	  dlg_stdcheckbox_handler, I(offsetof(Config,url_defbrowser)));
-
-	//ctrl_text(s, "The single white space will be cropped in front of the link, if exists.",
-	//	  HELPCTX(no_help));
 	}
 
 #if (defined IMAGEPORT) && (!defined FDJ)

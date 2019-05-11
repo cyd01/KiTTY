@@ -1074,7 +1074,7 @@ bool do_reconfig(HWND hwnd, int protcfginfo)
 		if((conf_get_int(conf,CONF_bg_type)!=0)&&(conf_get_int(conf,CONF_bg_slideshow)>0)) 
 			SetTimer(hwnd, TIMER_SLIDEBG, (int)(conf_get_int(conf,CONF_bg_slideshow)*1000), NULL) ;
 		InvalidateRect(hwnd, NULL, TRUE);
-		}
+	}
 #endif
 
     conf_free(backup_conf);

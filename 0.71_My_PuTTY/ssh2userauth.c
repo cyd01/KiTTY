@@ -596,10 +596,16 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                         ppl_logevent("Keyboard-interactive authentication "
                                      "failed");
                         ppl_printf("Access denied\r\n");
+#ifdef PERSOPORT
+			SetPasswordInConfig("") ;
+#endif
                     } else {
                         assert(s->type == AUTH_TYPE_PASSWORD);
                         ppl_logevent("Password authentication failed");
                         ppl_printf("Access denied\r\n");
+#ifdef PERSOPORT
+			SetPasswordInConfig("") ;
+#endif
 
                         if (s->change_username) {
                             /* XXX perhaps we should allow

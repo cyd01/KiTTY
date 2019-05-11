@@ -66,7 +66,6 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 // BEGIN COPY/PASTE
     int i;
     const char *p;
-
     write_setting_i_forced(sesskey, "Present", 1);
     write_setting_s_forced(sesskey, "HostName", conf_get_str(conf, CONF_host));
     write_setting_filename_forced(sesskey, "LogFileName", conf_get_filename(conf, CONF_logfilename));
@@ -246,6 +245,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "RectSelect", conf_get_bool(conf, CONF_rect_select));
     write_setting_b_forced(sesskey, "PasteControls", conf_get_bool(conf, CONF_paste_controls));
     write_setting_b_forced(sesskey, "MouseOverride", conf_get_bool(conf, CONF_mouse_override));
+
     for (i = 0; i < 256; i += 32) {
 	char buf[20], buf2[256];
 	int j;
@@ -258,6 +258,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 	}
 	write_setting_s_forced(sesskey, buf, buf2);
     }
+
     write_setting_b_forced(sesskey, "MouseAutocopy",
                     conf_get_bool(conf, CONF_mouseautocopy));
     write_clip_setting_forced(sesskey, "MousePaste", conf,
@@ -1123,6 +1124,7 @@ void write_setting_i_forced(void *handle, const char *key, int value) {
 	if( CryptFileFlag ) { cryptstring(buf,MASTER_PASSWORD); }
 	//fprintf( (FILE*)handle, "%s\\%i\\\n", key, value ) ;
 	fprintf( (FILE*)handle, "%s\n", buf ) ;
+	fflush(handle);
 }
 
 void write_setting_s_forced(void *handle, const char *key, const char *value) {
@@ -1134,6 +1136,7 @@ void write_setting_s_forced(void *handle, const char *key, const char *value) {
 	sprintf( buf, "%s\\%s\\", key, p ) ;
 	if( CryptFileFlag ) { cryptstring(buf,MASTER_PASSWORD); }
 	fprintf( (FILE*)handle, "%s\n", buf ) ;
+	fflush(handle);
 	free(buf);
 	free(p);
 }
@@ -1147,6 +1150,7 @@ void write_setting_filename_forced(void *handle, const char *key, Filename *valu
 	sprintf( buf, "%s\\%s\\", key, p ) ;
 	if( CryptFileFlag ) { cryptstring(buf,MASTER_PASSWORD); }
 	fprintf( (FILE*)handle, "%s\n", buf ) ;
+	fflush(handle);
 	free(buf) ;
 	free(p);
 }
@@ -1163,6 +1167,7 @@ void write_setting_fontspec_forced(void *handle, const char *name, FontSpec *fon
     settingname = dupcat(name, "Height", NULL);
     write_setting_i_forced(handle, settingname, font->height);
     sfree(settingname);
+    fflush(handle);
 }
 
 static void wmap_forced(void *handle, char const *outkey, Conf *conf, int primary,int include_values) {

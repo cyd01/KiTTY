@@ -2788,11 +2788,11 @@ void RedrawBackground( HWND hwnd ) ;
 
 void RefreshBackground( HWND hwnd ) {
 #if (defined IMAGEPORT) && (!defined FDJ)
-	if( BackgroundImageFlag ) RedrawBackground( hwnd ) ; 
+	if( BackgroundImageFlag ) RedrawBackground( hwnd ) ;
 	else
 #endif
-	InvalidateRect(hwnd, NULL, TRUE) ;
-	}
+	InvalidateRect( hwnd, NULL, true ) ;
+}
 
 #if (defined IMAGEPORT) && (!defined FDJ)
 /* Changement du fond d'ecran */

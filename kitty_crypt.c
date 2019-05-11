@@ -59,7 +59,7 @@ static char PassPhrase[256] = "" ;
 char * ManagePassPhrase( const char * st ) {
 	if( st != NULL ) strcpy( PassPhrase, st ) ;
 	return PassPhrase ;
-	}
+}
 
 #ifdef NO_PRIVKEY
 /* Flag utiliser pour essayer une fois une clé privée stockée en interne dans le binaire

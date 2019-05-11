@@ -1836,6 +1836,10 @@ void select_result(WPARAM wParam, LPARAM lParam)
 	if (ret <= 0) {
             int err = p_WSAGetLastError();
 	    plug_closing(s->plug, winsock_error_string(err), err, 0);
+#ifdef ZMODEMPORT
+	} else if( (!GetPuttyFlag()) && GetZModemFlag() && s->closing) {
+		return ;
+#endif
 	} else {
 	    plug_receive(s->plug, 2, buf, ret);
 	}
