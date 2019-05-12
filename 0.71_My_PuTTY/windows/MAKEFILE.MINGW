@@ -105,8 +105,10 @@ RC = $(TOOLPATH)windres
 # You may also need to tell windres where to find include files:
 # RCINC = --include-dir c:\cygwin\include\
 
-CFLAGS = -Wall -O2 -std=gnu99 -Wvla -D_WINDOWS -DWIN32S_COMPAT \
-		-D_NO_OLDNAMES -D__USE_MINGW_ANSI_STDIO=1 -I.././ \
+# CFLAGS = -Wall -O2 -std=gnu99 -Wvla -D_WINDOWS -DWIN32S_COMPAT \
+
+CFLAGS = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT \
+		-D_NO_OLDNAMES -I.././ \
 		-I../charset/ -I../windows/ -I../unix/
 LDFLAGS = -s
 RCFLAGS = $(RCINC) --define WIN32=1 --define _WIN32=1 --define WINVER=0x0400 \
@@ -120,7 +122,7 @@ CFLAGS += -D_WIN32_IE=0x0500
 
 ################################################################################
 # BEGIN PERSOPORT
-# Ne pas oublier de commenter CFLAGS juste au-dessus (remplacé par en-dessous)
+# Ne pas oublier de commenter 2 lignes CFLAGS au-dessus (remplacé par en-dessous)
 ################################################################################
 CFLAGS += -DWINVER=0x0501 -D_WIN32_WINDOWS=0x0410 -D_WIN32_WINNT=0x0501
 
@@ -137,8 +139,8 @@ FDJFLAG = FDJ1
 
 RCFLAGS += -I ../../ -DPERSOPORT -D$(FDJFLAG)
 
-CFLAGS += -DAUTO_WINSOCK -DUSE_CAPI -DCOVERITY -D_NO_OLDNAMES -DNO_MULTIMON -DNO_HTMLHELP -DNO_SECUREZEROMEMORY
-CFLAGS += -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT -D$(FDJFLAG)
+CFLAGS += -DAUTO_WINSOCK -DUSE_CAPI -DCOVERITY -DNO_MULTIMON -DNO_HTMLHELP -DNO_SECUREZEROMEMORY
+CFLAGS += -D$(FDJFLAG)
 CFLAGS += 	-DPERSOPORT \
 		-DSTARTBUTTON \
 		-DSAVEDUMPPORT \
@@ -160,9 +162,9 @@ CFLAGS += 	-DPERSOPORT \
 		-I../macosx \
 		-I../../base64 -I../../bcrypt -I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
 		
-#		-DWINCRYPTPORT \
 #		-DCYGTERMPORT \
 #		-DIMAGEPORT \
+#		-DWINCRYPTPORT \
 
 
 # Autre flag a gérer

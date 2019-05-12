@@ -1511,7 +1511,7 @@ TrayIcone.hWnd = hwnd ;
 #ifdef ZMODEMPORT
 	if( (!GetPuttyFlag()) && GetZModemFlag() ) {
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    //AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
+//	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
 	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_DISABLED, IDM_XYZSTART, "&Zmodem Receive (broken)");
 	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload");
 	    AppendMenu(m, !term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZABORT, "Zmodem &Abort");

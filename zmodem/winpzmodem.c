@@ -12,6 +12,9 @@ void xyz_updateMenuItems(Terminal *term);
 void xyz_ReceiveInit(Terminal *term);
 int xyz_ReceiveData(Terminal *term, const u_char *buffer, int len);
 static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *inparams);
+void xyz_Cancel(Terminal *term) ;
+
+int existfile( const char * filename ) ;
 
 #define MAX_UPLOAD_FILES 512
 
@@ -54,15 +57,13 @@ void xyz_Done(Terminal *term)
 	}
 }
 
-static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr);
+static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr) ;
 
-int xyz_Process(Backend *back, void *backhandle, Terminal *term)
-{
+int xyz_Process(Backend *back, void *backhandle, Terminal *term) {
 	return xyz_Check(back, backhandle, term, 0) + xyz_Check(back, backhandle, term, 1);
 }
 
-static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr)
-{
+static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr) {
 	DWORD exitcode = 0;
 	DWORD bread, avail;
 	char buf[1024];
@@ -155,8 +156,14 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 	return 0;
 }
 
-void xyz_ReceiveInit(Terminal *term)
-{
+void xyz_ReceiveInit(Terminal *term) {
+	if( !existfile( conf_get_filename(term->conf,CONF_rzcommand)->path ) ) {
+		char b[512] ; 
+		sprintf( b, "Unable to find Zmodem receive program: \n%s", conf_get_filename(term->conf,CONF_rzcommand)->path ) ;
+		xyz_Cancel( term ) ;
+		MessageBox( NULL, b, "Error", MB_OK|MB_ICONERROR ) ;
+		return ;
+	}
 	if (xyz_SpawnProcess(term, conf_get_filename(term->conf,CONF_rzcommand)->path, conf_get_str(term->conf,CONF_rzoptions)) == 0) {
 		term->xyz_transfering = 1;
 	} else {
@@ -164,8 +171,7 @@ void xyz_ReceiveInit(Terminal *term)
 	}
 }
 
-void xyz_StartSending(Terminal *term)
-{
+void xyz_StartSending(Terminal *term) {
 	OPENFILENAME fn;
 	char filenames[32000];
 	BOOL res;
@@ -200,6 +206,14 @@ void xyz_StartSending(Terminal *term)
 					break;
 				curparams += sprintf(curparams, " \"%s\\%s\"", filenames, p);
 			}
+		}
+
+		if( !existfile( conf_get_filename(term->conf,CONF_szcommand)->path ) ) {
+			char b[512] ; 
+			sprintf( b, "Unable to find Zmodem send program: \n%s", conf_get_filename(term->conf,CONF_szcommand)->path ) ;
+			xyz_Cancel( term ) ;
+			MessageBox( NULL, b, "Error", MB_OK|MB_ICONERROR ) ;
+			return ;
 		}
 
 		if (xyz_SpawnProcess(term, conf_get_filename(term->conf,CONF_szcommand)->path, sz_full_params) == 0) {
@@ -335,11 +349,9 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 			}
 			p--;
 		}
-debug_log("%s %s\n",incommand,inparams);
+
 		sprintf(params, "%s %s", p, inparams);
-debug_log("%s %s\n",incommand,params);
-		if (!CreateProcess(incommand,params,NULL, NULL,TRUE,CREATE_NEW_CONSOLE, NULL,conf_get_str(term->conf,CONF_zdownloaddir),&si,&term->xyz_Internals->pi))
-		{
+		if (!CreateProcess(incommand,params,NULL, NULL,TRUE,CREATE_NEW_CONSOLE, NULL,conf_get_str(term->conf,CONF_zdownloaddir),&si,&term->xyz_Internals->pi)) {
 			//DWORD err = GetLastError();
 			//ErrorMessage("CreateProcess");
 			CloseHandle(newstdin);

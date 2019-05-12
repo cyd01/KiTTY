@@ -761,11 +761,11 @@ void unmungestr( const char *in, char *out, int outlen ) {
 }
 
 #ifdef ZMODEMPORT
-void xyz_updateMenuItems(Terminal *term)
-{
+void xyz_updateMenuItems(Terminal *term) {
 	if( !ZModemFlag ) return ;
 	HMENU m = GetSystemMenu(hwnd, FALSE);
-	EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+//	EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+	EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_DISABLED);
 	EnableMenuItem(m, IDM_XYZUPLOAD, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
 	EnableMenuItem(m, IDM_XYZABORT, !term->xyz_transfering?MF_GRAYED:MF_ENABLED);
 
@@ -1841,7 +1841,7 @@ void SendAutoCommand( HWND hwnd, const char * cmd ) {
 		buf=(char*)malloc( strlen(cmd)+30 ) ;
 		strcpy( buf, "Send automatic command" ) ;
 		if( debug_flag ) { strcat( buf, ": ") ; strcat( buf, cmd ) ; }
-		if( conf_get_int(conf,CONF_protocol) != PROT_TELNET) logevent(NULL, buf ) ; // On logue que si on est pas en telnet (à cause du password envoyé en clair)
+		if( conf_get_int(conf,CONF_protocol) != PROT_TELNET ) logevent(NULL, buf ) ; // On logue que si on est pas en telnet (à cause du password envoyé en clair)
 		free(buf);
 		if( existfile( cmd ) ) RunScriptFile( hwnd, cmd ) ;
 		else if( (toupper(cmd[0])=='C')&&(toupper(cmd[1])==':')&&(toupper(cmd[2])=='\\') ) {
@@ -4935,9 +4935,11 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		
 	if( NbShortCuts ) {
 		for( i=0 ; i<NbShortCuts ; i++ )
-		if( shortcuts_tab2[i].num == key ) 
-			{ SendKeyboardPlus( hwnd, shortcuts_tab2[i].st ) ; return 1 ; }
+		if( shortcuts_tab2[i].num == key ) {
+			SendKeyboardPlus( hwnd, shortcuts_tab2[i].st ) ;
+			return 1 ; 
 		}
+	}
 	
 #if (defined IMAGEPORT) && (!defined FDJ)
 	if( BackgroundImageFlag && ImageViewerFlag ) { // Gestion du mode image
@@ -4946,18 +4948,18 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 #endif
 	if( control_flag && shift_flag && (key_num==VK_F12) ) {
 		ResizeWinList( hwnd, conf_get_int(conf,CONF_width), conf_get_int(conf,CONF_height) ) ; return 1 ; 
-		} // Retaille toutes les autres fenetres a la dimension de celle-ci
+	} // Retaille toutes les autres fenetres a la dimension de celle-ci
 
 	if( key == shortcuts_tab.printall ) {		
 		SendMessage( hwnd, WM_COMMAND, IDM_COPYALL, 0 ) ;
 		SendMessage( hwnd, WM_COMMAND, IDM_PRINT, 0 ) ;
 		return 1 ;
-		}
+	}
 
 	if( ( IniFileFlag != SAVEMODE_DIR ) && shift_flag && control_flag ) {		
 		if( ( key_num >= 'A' ) && ( key_num <= 'Z' ) ) // Raccourci commandes speciales (SpecialMenu) CTRL+SHIFT+'A' ... CTRL+SHIFT+'Z'
 			{ SendMessage( hwnd, WM_COMMAND, IDM_USERCMD+key_num-'A', 0 ) ; return 1 ; }
-		}
+	}
 		
 	if( key == shortcuts_tab.editor ) {			// Lancement d'un putty-ed
 		if( debug_flag ) { debug_logevent( "Start empty internal editor" ) ; }
@@ -4979,7 +4981,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 	if( key == shortcuts_tab.print ) {	// Impression presse papier
 		SendMessage( hwnd, WM_COMMAND, IDM_PRINT, 0 ) ; 
 		return 1 ; 
-		}
+	}
 #ifndef FDJ
 	if( key == shortcuts_tab.inputm )	 		// Fenetre de controle
 		{
