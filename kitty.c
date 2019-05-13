@@ -4038,7 +4038,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		if( strlen(conf_get_str(conf,CONF_proxy_username))>0 ) { strcat( cmd, " ProxyUsername=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_username) ) ; }
 		if( strlen(conf_get_str(conf,CONF_proxy_password))>0 ) { strcat( cmd, " ProxyPassword=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_password) ) ; }
 	}
-	if( conf_get_int(conf,CONF_compression) > 1 ) {
+	if( conf_get_int(conf,CONF_compression) ) {
 		if( raw == 0 ) {
 			strcat( cmd, " -rawsettings" ) ;
 			raw++;
