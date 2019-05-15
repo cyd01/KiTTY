@@ -2239,7 +2239,7 @@ void SendFileList( HWND hwnd, char * filelist ) {
 void SendFile( HWND hwnd ) {
 	char filename[32768] ;
 
-	if( conf_get_int(conf,CONF_protocol)/*cfg.protocol*/ != PROT_SSH ) {
+	if( conf_get_int(conf,CONF_protocol) != PROT_SSH ) {
 		MessageBox( hwnd, "This function is only available with SSH connections.", "Error", MB_OK|MB_ICONERROR ) ;
 		return ;
 		}
@@ -2428,7 +2428,7 @@ void GetFile( HWND hwnd ) {
 	char dir[4096], pscppath[4096]="", pscpport[4096]="22" ;
 	int p;
 	
-	if( conf_get_int(conf,CONF_protocol)/*cfg.protocol*/ != PROT_SSH ) {
+	if( conf_get_int(conf,CONF_protocol) != PROT_SSH ) {
 		MessageBox( hwnd, "This function is only available with SSH connections.", "Error", MB_OK|MB_ICONERROR ) ;
 		return ;
 		}
@@ -2509,7 +2509,7 @@ void GetFile( HWND hwnd ) {
 				} else {		
 
 					strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
-					if( poss( ":", conf_get_str(conf,CONF_host))>0 ) { strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host)/*cfg.host*/ ) ; strcat( buffer, "]" ) ; }
+					if( poss( ":", conf_get_str(conf,CONF_host))>0 ) { strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; }
 					else { strcat( buffer, conf_get_str(conf,CONF_host) ) ; }
 				}
 				strcat( buffer, ":" ) ;
@@ -2713,7 +2713,7 @@ void GetWindowCoord( HWND hwnd ) {
 // Sauve les coordonnees de la fenetre
 void SaveWindowCoord( Conf * conf ) {
 	char key[1024], session[1024] ;
-	if( conf_get_int(conf,CONF_saveonexit) )
+	if( conf_get_bool(conf,CONF_saveonexit) )
 	if( conf_get_str(conf,CONF_sessionname)!= NULL )
 	if( strlen( conf_get_str(conf,CONF_sessionname) ) > 0 ) {
 		if( IniFileFlag == SAVEMODE_REG ) {
@@ -2813,7 +2813,7 @@ int PreviousBgImage( HWND hwnd ) {
 	DIR * dir ;
 	struct dirent * de ;
 
-	strcpy( basename, conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path ) ;
+	strcpy( basename, conf_get_filename(conf,CONF_bg_image_filename)->path ) ;
 
 	for( i=(strlen(basename)-1) ; i>=0 ; i-- ) 
 		if( (basename[i]=='\\')||(basename[i]=='/') ) { basename[i]='\0' ; break ; }
@@ -2825,7 +2825,7 @@ int PreviousBgImage( HWND hwnd ) {
 		if( strcmp(de->d_name,".") && strcmp(de->d_name,"..") ) {
 			sprintf( buffer,"%s\\%s", basename, de->d_name ) ;
 			if( !(GetFileAttributes( buffer ) & FILE_ATTRIBUTE_DIRECTORY) ) {
-				if( !strcmp(buffer, conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path ) )
+				if( !strcmp(buffer, conf_get_filename(conf,CONF_bg_image_filename)->path ) )
 					if( strcmp( previous, "" ) ) break ;
 		
 				GetExt( de->d_name, ext ) ;
@@ -2836,7 +2836,7 @@ int PreviousBgImage( HWND hwnd ) {
 		}
 	if( strcmp( previous, "" ) ){
 		Filename * fn = filename_from_str( previous ) ;
-		conf_set_filename(conf,CONF_bg_image_filename,fn); //strcpy( cfg.bg_image_filename.path, previous ) ;
+		conf_set_filename(conf,CONF_bg_image_filename,fn); 
 		filename_free(fn);
 		RefreshBackground( hwnd ) ;
 		}
@@ -2849,7 +2849,7 @@ int NextBgImage( HWND hwnd ) {
 	DIR * dir ;
 	struct dirent * de ;
 
-	strcpy( basename, conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path ) ;
+	strcpy( basename, conf_get_filename(conf,CONF_bg_image_filename)->path ) ;
 
 	for( i=(strlen(basename)-1) ; i>=0 ; i-- ) 
 		if( (basename[i]=='\\')||(basename[i]=='/') ) { basename[i]='\0' ; break ; }
@@ -2865,7 +2865,7 @@ int NextBgImage( HWND hwnd ) {
 			) {
 			sprintf( buffer,"%s\\%s", basename, de->d_name ) ;
 			if( !(GetFileAttributes( buffer ) & FILE_ATTRIBUTE_DIRECTORY) ) {
-				if( !stricmp( buffer, conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path ) ) {
+				if( !stricmp( buffer, conf_get_filename(conf,CONF_bg_image_filename)->path ) ) {
 					if( ( de = readdir(dir) ) != NULL ) 
 						GetExt( de->d_name, ext ) ; 
 					else 
@@ -2891,7 +2891,7 @@ int NextBgImage( HWND hwnd ) {
 	if( de != NULL  ) {
 		sprintf( buffer,"%s\\%s", basename, de->d_name ) ;
 		Filename * fn = filename_from_str( buffer ) ;
-		conf_set_filename( conf,CONF_bg_image_filename,fn); //strcpy( cfg.bg_image_filename.path, buffer ) ;
+		conf_set_filename( conf,CONF_bg_image_filename,fn);
 		filename_free(fn);
 		RefreshBackground( hwnd );
 		}
@@ -3085,7 +3085,7 @@ static LRESULT CALLBACK InputMultilineCallBack (HWND hwnd, UINT message, WPARAM 
 		case WM_INITDIALOG: {
 			char * buffer ;
 			buffer=(char*)malloc(1024);
-			sprintf( buffer, "%s - Text input", conf_get_str(conf,CONF_wintitle)/*cfg.wintitle*/ ) ;
+			sprintf( buffer, "%s - Text input", conf_get_str(conf,CONF_wintitle) ) ;
 			SetWindowText( hwnd, buffer ) ;
 			free(buffer);
 			handle = GetDlgItem(hwnd,IDC_RESULT) ;
@@ -3630,7 +3630,6 @@ int InternalCommand( HWND hwnd, char * st ) {
 #ifdef SAVEDUMPPORT
 	else if( !strcmp( st, "/savedump" ) ) { SaveDump() ; return 1 ; }
 #endif
-#if (defined IMAGEPORT) && (!defined FDJ)
 	else if( !strcmp( st, "/screenshot" ) ) { 
 		char screenShotFile[1024] ;
 		sprintf( screenShotFile, "%s\\screenshot-%d-%ld.jpg", InitialDirectory, getpid(), time(0) );
@@ -3639,7 +3638,6 @@ int InternalCommand( HWND hwnd, char * st ) {
 		//screenCaptureAll( screenShotFile, 100 ) ;
 		//MakeScreenShot() ; 
 		return 1 ; }
-#endif
 	else if( !strcmp( st, "/fileassoc" ) ) { CreateFileAssoc() ; return 1 ; }
 	else if( !strcmp( st, "/savereg" ) ) { chdir( InitialDirectory ) ; SaveRegistryKey() ; return 1 ; }
 	else if( !strcmp( st, "/savesessions" ) ) { 
@@ -3658,7 +3656,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 	else if( !strcmp( st, "/icon" ) ) { 
 		//sprintf( buffer, "%d / %d = %d", IconeNum, NB_ICONES, NumberOfIcons );
 		//MessageBox( hwnd, buffer, "info", MB_OK ) ;
-		IconeFlag = abs( IconeFlag - 1 ) ; conf_set_int(conf,CONF_icone,IconeNum) /*cfg.icone = IconeNum*/ ; return 1 ; }
+		IconeFlag = abs( IconeFlag - 1 ) ; conf_set_int(conf,CONF_icone,IconeNum) ; return 1 ; }
 	else if( !strcmp( st, "/savemode" ) ) {
 		//IniFileFlag = abs( IniFileFlag - 1 ) ;
 		IniFileFlag++ ; if( IniFileFlag>SAVEMODE_DIR ) IniFileFlag = 0 ;
@@ -3690,15 +3688,14 @@ int InternalCommand( HWND hwnd, char * st ) {
 		SetWindowPos( hwnd, 0, 10, 10, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER|SWP_NOACTIVATE ) ;
 		return 1 ; 
 		}
-	else if( !strcmp( st, "/size" ) ) { SizeFlag = abs( SizeFlag - 1 ) ; set_title( NULL, conf_get_str(conf,CONF_wintitle)/*cfg.wintitle*/ ) ; return 1 ; }
+	else if( !strcmp( st, "/size" ) ) { SizeFlag = abs( SizeFlag - 1 ) ; set_title( NULL, conf_get_str(conf,CONF_wintitle) ) ; return 1 ; }
 	else if( !strcmp( st, "/transparency" ) ) {
 #ifndef NO_TRANSPARENCY
 		if( (conf_get_int(conf,CONF_transparencynumber) == -1) || (TransparencyFlag == 0 ) ) {
 			TransparencyFlag = 1 ;
 			SetWindowLongPtr(MainHwnd, GWL_EXSTYLE, GetWindowLong(MainHwnd, GWL_EXSTYLE) | WS_EX_LAYERED ) ;
 			SetWindowPos( MainHwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
-			if( conf_get_int(conf,CONF_transparencynumber) == -1 ) conf_set_int(conf,CONF_transparencynumber,0) ; //cfg.transparencynumber = 0 ;
-			//SetLayeredWindowAttributes(hwnd, 0, TransparencyNumber, LWA_ALPHA) ;
+			if( conf_get_int(conf,CONF_transparencynumber) == -1 ) conf_set_int(conf,CONF_transparencynumber,0) ; 
 			SetTransparency( MainHwnd, 255-conf_get_int(conf,CONF_transparencynumber) ) ;
 			SetForegroundWindow( hwnd ) ;
 			}
@@ -3717,9 +3714,9 @@ int InternalCommand( HWND hwnd, char * st ) {
 	else if( strstr( st, "/bcdelay " ) == st ) { between_char_delay=atoi( st+9 ) ; return 1 ; }
 	else if( strstr( st, "/title " ) == st ) { set_title( NULL, st+7 ) ; return 1 ; }
 	else if( !strcmp( st, "/session" ) ) {
-		if( strlen( conf_get_str(conf,CONF_sessionname) /*cfg.sessionname*/ ) > 0 ) {
+		if( strlen( conf_get_str(conf,CONF_sessionname) ) > 0 ) {
 			char buffer[1024] ;
-			sprintf( buffer, "Your session name is\n-%s-", conf_get_str(conf,CONF_sessionname) /*cfg.sessionname*/ ) ;
+			sprintf( buffer, "Your session name is\n-%s-", conf_get_str(conf,CONF_sessionname) ) ;
 			MessageBox( hwnd, buffer, "Session name", MB_OK|MB_ICONWARNING ) ;
 			}
 		else
@@ -3783,7 +3780,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 	else if( !strcmp( st, "/winroll" ) ) { WinrolFlag = abs(WinrolFlag-1) ; return 1 ; }
 	else if( !strcmp( st, "/wintitle" ) ) { TitleBarFlag = abs(TitleBarFlag-1) ; return 1 ; }
 	else if( strstr( st, "/command " ) == st ) { SendCommandAllWindows( hwnd, st+9 ) ; return 1 ; }
-	else if( !strcmp( st, "/sizeall" ) ) { ResizeWinList( hwnd, conf_get_int(conf,CONF_width)/*cfg.width*/, conf_get_int(conf,CONF_height)/*cfg.height*/ ) ; return 1 ; }
+	else if( !strcmp( st, "/sizeall" ) ) { ResizeWinList( hwnd, conf_get_int(conf,CONF_width), conf_get_int(conf,CONF_height) ) ; return 1 ; }
 	else if( !strcmp( st, "/zmodem" ) ) { ZModemFlag = abs(ZModemFlag-1) ; }
 	return 0 ;
 	}
@@ -3895,14 +3892,7 @@ void StartNewSession( HWND hwnd, char * directory, char * host, char * user ) {
 			strcat(cmd,"\"") ; strcat(cmd,bufpass) ; strcat(cmd,"\"") ;
 			memset(bufpass,0,strlen(bufpass));
 			}
-		strcat( cmd, " -P " ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port)/*cfg.port*/ ); strcat( cmd, buffer ) ;
-		/*if( strlen( cfg.keyfile.path ) > 0 ) {
-				if( GetShortPathName( cfg.keyfile.path, shortpath, 4095 ) ) {
-				strcat( cmd, " /privatekey=\"" ) ;
-				strcat( cmd, shortpath ) ;
-				strcat( cmd, "\"" ) ;
-				}
-			}*/
+		strcat( cmd, " -P " ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port) ); strcat( cmd, buffer ) ;
 		}
 	else if( conf_get_int(conf,CONF_protocol) == PROT_TELNET ){
 		sprintf( cmd, "%s -telnet %s", shortpath, conf_get_str(conf,CONF_username) ) ;
@@ -3915,7 +3905,7 @@ void StartNewSession( HWND hwnd, char * directory, char * host, char * user ) {
 			strcat(cmd,"\"") ; strcat(cmd,bufpass) ; strcat(cmd,"\"") ;
 			memset(bufpass,0,strlen(bufpass));
 			}
-		strcat( cmd, " -P " ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port)/*cfg.port*/ ); strcat( cmd, buffer ) ;
+		strcat( cmd, " -P " ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port) ); strcat( cmd, buffer ) ;
 		}
 
 	if( directory!=NULL ) if( strlen(directory)>0 ) {
@@ -4682,33 +4672,29 @@ void ChangeSettings(HWND hwnd) {
 int ManageViewer( HWND hwnd, WORD wParam ) { // Gestion du mode image
 	if( wParam==VK_BACK ) 
 		{ if( PreviousBgImage( hwnd ) ) InvalidateRect(hwnd, NULL, TRUE) ; 
-		set_title(NULL, conf_get_str(conf,CONF_wintitle)/*cfg.wintitle*/) ; 
+		set_title(NULL, conf_get_str(conf,CONF_wintitle) ) ; 
 		return 1 ; 
 		}
 	else if( wParam==VK_SPACE ) 
 		{ if( NextBgImage( hwnd ) ) InvalidateRect(hwnd, NULL, TRUE) ;
-		set_title(NULL, conf_get_str(conf,CONF_wintitle)/*cfg.wintitle*/) ; 
+		set_title(NULL, conf_get_str(conf,CONF_wintitle)) ; 
 		return 1 ; 
 		}
 	else if( wParam == VK_DOWN ) 	// Augmenter l'opacite de l'image de fond
-		{ if( conf_get_int(conf,CONF_bg_type)/*cfg.bg_type*/ != 0 ) {
+		{ if( conf_get_int(conf,CONF_bg_type) != 0 ) {
 			int n=conf_get_int(conf,CONF_bg_opacity) ;
 			n += 5 ; if( n>100 ) n = 0 ;
 			conf_set_int( conf, CONF_bg_opacity, n ) ;
-			/*cfg.bg_opacity += 5 ; 
-			if( cfg.bg_opacity>100 ) cfg.bg_opacity = 0 ;*/
 			RefreshBackground( hwnd ) ;
 			return 1 ; 
 			}
 		}
 	else if( wParam == VK_UP ) 		// Diminuer l'opacite de l'image de fond
-		{ if( conf_get_int(conf,CONF_bg_type)/*cfg.bg_type*/ != 0 ) {
+		{ if( conf_get_int(conf,CONF_bg_type) != 0 ) {
 			int n=conf_get_int(conf,CONF_bg_opacity) ;
 			n -= 5 ;
 			if( n<0 ) n = 100 ;
 			conf_set_int( conf, CONF_bg_opacity, n ) ;
-			/*cfg.bg_opacity -= 5 ; 
-			if( cfg.bg_opacity<0 ) cfg.bg_opacity = 100 ;*/
 			RefreshBackground( hwnd ) ; 
 			return 1 ; 
 			}
@@ -4975,7 +4961,6 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		{ SendMessage( hwnd, WM_COMMAND, IDM_WINSCP, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.autocommand ) 		// Rejouer la commande de demarrage
 		{ RenewPassword( conf ) ; 
-			//SendAutoCommand( hwnd, cfg.autocommand ) ; 
 			SetTimer(hwnd, TIMER_AUTOCOMMAND,autocommand_delay, NULL) ;
 			return 1 ; }
 	if( key == shortcuts_tab.print ) {	// Impression presse papier
@@ -4990,7 +4975,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		}
 #endif
 	if( key == shortcuts_tab.viewer ) 			// Switcher le mode visualiseur d'image
-		{ ImageViewerFlag = abs(ImageViewerFlag-1) ; set_title(NULL, conf_get_str(conf,CONF_wintitle)/*cfg.wintitle*/) ; return 1 ; }
+		{ ImageViewerFlag = abs(ImageViewerFlag-1) ; set_title(NULL, conf_get_str(conf,CONF_wintitle) ) ; return 1 ; }
 
 	if( key == shortcuts_tab.script ) 			// Chargement d'un fichier de script
 		{ OpenAndSendScriptFile( hwnd ) ; return 1 ; }

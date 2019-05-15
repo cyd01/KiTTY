@@ -362,13 +362,13 @@ static BOOL load_wallpaper_bmp(HBITMAP* rawImage, int* style, int* x, int* y)
 
 static BOOL load_file_bmp(HBITMAP* rawImage, int* style, int* x, int* y)
 {
-    *x = conf_get_int( conf,CONF_bg_image_abs_x); // cfg.bg_image_abs_x;
-    *y = conf_get_int( conf,CONF_bg_image_abs_y ); // cfg.bg_image_abs_y;
-    *style = conf_get_int( conf,CONF_bg_image_style); // cfg.bg_image_style;
+    *x = conf_get_int( conf,CONF_bg_image_abs_x); 
+    *y = conf_get_int( conf,CONF_bg_image_abs_y );
+    *style = conf_get_int( conf,CONF_bg_image_style);
 
     if( *rawImage!=NULL ) { DeleteObject( *rawImage ) ; *rawImage=NULL ; }
     *rawImage = LoadImage(
-        NULL, conf_get_filename( conf, CONF_bg_image_filename )/*cfg.bg_image_filename.*/->path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
+        NULL, conf_get_filename( conf, CONF_bg_image_filename )->path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE
     );
     if(*rawImage == 0)
         return FALSE; // TODO: Should the error be reported to the user here?
@@ -580,15 +580,15 @@ while (cinfo.output_scanline < cinfo.output_height) {
 
 
 static BOOL load_file_jpeg(HBITMAP* rawImage, int* style, int* x, int* y) {
-    *x = conf_get_int( conf, CONF_bg_image_abs_x ); // cfg.bg_image_abs_x;
-    *y = conf_get_int( conf, CONF_bg_image_abs_y ); // cfg.bg_image_abs_y;
-    *style = conf_get_int( conf, CONF_bg_image_style ); // cfg.bg_image_style;
+    *x = conf_get_int( conf, CONF_bg_image_abs_x );
+    *y = conf_get_int( conf, CONF_bg_image_abs_y );
+    *style = conf_get_int( conf, CONF_bg_image_style );
     int res=TRUE, LsizeX, LsizeY ;
     FILE *fp ;
     HGLOBAL LimageBitmap = NULL ;
 
 	
-    if(  ( fp=fopen( conf_get_filename( conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path, "rb" ) ) == NULL ) return FALSE ;
+    if(  ( fp=fopen( conf_get_filename( conf,CONF_bg_image_filename)->path, "rb" ) ) == NULL ) return FALSE ;
     
     if( *rawImage!=NULL ) { DeleteObject( *rawImage ) ; *rawImage=NULL ; }
 *rawImage = loadJPEGimage(fp, &LimageBitmap,&LsizeX, &LsizeY) ;
@@ -621,46 +621,6 @@ static HBITMAP CreateDIBSectionWithFileMapping(HDC dc, int width, int height, HA
 
 
 /***********SCREEN CAPTURE*******************/
-int screenCapturePart(int x, int y, int w, int h, LPCSTR fname,int quality) {
-    int return_code = 0 ;
-    HDC hdcSource = GetDC(NULL);
-    HDC hdcMemory = CreateCompatibleDC(hdcSource);
-
-    //int capX = GetDeviceCaps(hdcSource, HORZRES);
-    //int capY = GetDeviceCaps(hdcSource, VERTRES);
-
-    HBITMAP hBitmap = CreateCompatibleBitmap(hdcSource, w, h);
-    HBITMAP hBitmapOld = (HBITMAP)SelectObject(hdcMemory, hBitmap);
-
-    BitBlt(hdcMemory, 0, 0, w, h, hdcSource, x, y, SRCCOPY);
-    hBitmap = (HBITMAP)SelectObject(hdcMemory, hBitmapOld);
-
-    DeleteDC(hdcSource);
-    DeleteDC(hdcMemory);
-
-    //HPALETTE hpal = NULL;
-    if( HBITMAP_to_JPG( hBitmap,fname, quality) ) { return_code = 1 ; }
-    DeleteObject(hBitmap);
-	
-    return return_code ;
-}
-int screenCaptureClientRect( HWND hwnd, LPCSTR fname, int quality ) {
-	RECT rc;
-	POINT p;
-	GetClientRect(hwnd, &rc);
-	p.x=rc.left; p.y=rc.top,
-	ClientToScreen(hwnd,&p);
-	rc.left=p.x;rc.top=p.y;
-	return screenCapturePart(rc.left,rc.top,rc.right,rc.bottom,fname,quality) ;
-}
-int screenCaptureWinRect( HWND hwnd, LPCSTR fname, int quality ) {
-	RECT r;
-	GetWindowRect(hwnd, &r);
-	return screenCapturePart(r.left,r.top,r.right-r.left,r.bottom-r.top,fname,quality) ;
-}
-int screenCaptureAll( LPCSTR fname, int quality ) {
-	return screenCapturePart(0,0,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics (SM_CYSCREEN),fname,quality) ;
-}
 
 /******************************/
 
@@ -769,7 +729,7 @@ static void color_opacity_gradient( HDC destDc, int x, int y, int width, int hei
 	int OpacityMin = 0, OpacityMax = 100 ;
 	
 	char buf[256] = "" ;
-	if( GetSessionField( conf_get_str(conf,CONF_sessionname)/*cfg.sessionname*/, conf_get_str(conf,CONF_folder)/*cfg.folder*/, "BgOpacityRange", buf ) ) { 
+	if( GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "BgOpacityRange", buf ) ) { 
 		sscanf( buf, "%d-%d", &OpacityMin, &OpacityMax ) ; 
 		if( OpacityMin == OpacityMax ) { OpacityMin = 0 ; OpacityMax = 100 ; }
 		}
@@ -931,24 +891,19 @@ BOOL load_bg_bmp()
     int x, y;
     int style;
 
-    // TODO: If cfg.bg_image_style == 1, we should use the system wallpaper
-    // background color instead of this.  Probably just pass this as a parameter
-    // to load_wallpaper_bmp so it can override this default while it's
-    // accessing the registry anyway.
-	
     //COLORREF backgroundcolor = colours[258]; // Default Background
     COLORREF backgroundcolor = return_colours258() ;
     COLORREF alphacolor = backgroundcolor;
 
     // Start off assuming this is true.
-    bBgRelToTerm = conf_get_int( conf,CONF_bg_image_abs_fixed); // cfg.bg_image_abs_fixed;
+    bBgRelToTerm = conf_get_int( conf,CONF_bg_image_abs_fixed);
 	
     RECT clientRect;
     GetWindowRect( MainHwnd, &clientRect ) ;
     clientWidth = clientRect.right-clientRect.left+1 ;
     clientHeight = clientRect.bottom-clientRect.top+1 ;
 
-    switch( conf_get_int( conf,CONF_bg_type)/*cfg.bg_type*/ )
+    switch( conf_get_int( conf,CONF_bg_type) )
     {
         // Solid
     case 0:
@@ -967,19 +922,19 @@ BOOL load_bg_bmp()
     case 2:
     	{
 	backgroundcolor = GetSysColor(COLOR_BACKGROUND) ;
-	if( conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path[0] == '#' ) {
+	if( conf_get_filename(conf,CONF_bg_image_filename)->path[0] == '#' ) {
 		int r=0,g=0,b=0;
-		sscanf( conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path, "#%02X%02X%02X", &r, &g, &b ) ;
+		sscanf( conf_get_filename(conf,CONF_bg_image_filename)->path, "#%02X%02X%02X", &r, &g, &b ) ;
 		backgroundcolor = RGB( r, g, b ) ;
 		BYTE *pDst = NULL;
 		rawImage = CreateHBitmap(10, 10, (void**)&pDst);
 		style = 4 ;
 		}
-    	else if( !stricmp( conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path+strlen(conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path)-4, ".jpg" ) ) {
+    	else if( !stricmp( conf_get_filename(conf,CONF_bg_image_filename)->path+strlen(conf_get_filename(conf,CONF_bg_image_filename)->path)-4, ".jpg" ) ) {
     		if(!load_file_jpeg(&rawImage, &style, &x, &y))
         	    rawImage = NULL; // Make sure rawImage is still NULL.
     		}
-    	else if( !stricmp( conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path+strlen(conf_get_filename(conf,CONF_bg_image_filename)/*cfg.bg_image_filename.*/->path)-5, ".jpeg" ) ) {
+    	else if( !stricmp( conf_get_filename(conf,CONF_bg_image_filename)->path+strlen(conf_get_filename(conf,CONF_bg_image_filename)->path)-5, ".jpeg" ) ) {
     		if(!load_file_jpeg(&rawImage, &style, &x, &y))
         	    rawImage = NULL; // Make sure rawImage is still NULL.
     		}
@@ -996,7 +951,6 @@ BOOL load_bg_bmp()
 
 
 	// Securite pour ne pas depacer les limites de l'ecran principal
-//debug_log("%d %d %d %d %d %d %d\n",cfg.bg_image_abs_fixed,clientRect.left,clientRect.top,clientRect.right,clientRect.bottom,deskWidth,deskHeight );
 	if( (bBgRelToTerm == 0) 
 		&&((clientRect.right>deskWidth)||(clientRect.bottom>deskHeight)) ) {
 		//DeleteObject(rawImage); rawImage = NULL ;
@@ -1126,8 +1080,8 @@ BOOL load_bg_bmp()
             backgrounddc, 0, 0, SRCCOPY
         );
 	
-	if( conf_get_int(conf,CONF_bg_opacity)/*cfg.bg_opacity*/ >= 0 ) 
-		{ color_blend( backgroundblenddc, 0, 0, deskWidth, deskHeight, alphacolor, conf_get_int(conf,CONF_bg_opacity)/*cfg.bg_opacity*/); }
+	if( conf_get_int(conf,CONF_bg_opacity) >= 0 ) 
+		{ color_blend( backgroundblenddc, 0, 0, deskWidth, deskHeight, alphacolor, conf_get_int(conf,CONF_bg_opacity)); }
 	else 
 		{ 
 		if( bBgRelToTerm == 1 ) {
@@ -1135,7 +1089,7 @@ BOOL load_bg_bmp()
 			deskHeight = clientHeight ;
 			}
 		
-		color_opacity_gradient( backgroundblenddc, 0, 0, deskWidth, deskHeight, alphacolor, -conf_get_int(conf,CONF_bg_opacity)/*cfg.bg_opacity*/ ); 
+		color_opacity_gradient( backgroundblenddc, 0, 0, deskWidth, deskHeight, alphacolor, -conf_get_int(conf,CONF_bg_opacity) ); 
 		}
     }
 
@@ -1513,4 +1467,46 @@ HBITMAP hbm = HWND_to_HBITMAP(GetDesktopWindow());
     HBITMAP_to_JPG(hbm, "screenshot.jpg", 85) ;
     DeleteObject(hbm);
   }
+}
+
+int screenCapturePart(int x, int y, int w, int h, LPCSTR fname,int quality) {
+    int return_code = 0 ;
+    HDC hdcSource = GetDC(NULL);
+    HDC hdcMemory = CreateCompatibleDC(hdcSource);
+
+    //int capX = GetDeviceCaps(hdcSource, HORZRES);
+    //int capY = GetDeviceCaps(hdcSource, VERTRES);
+
+    HBITMAP hBitmap = CreateCompatibleBitmap(hdcSource, w, h);
+    HBITMAP hBitmapOld = (HBITMAP)SelectObject(hdcMemory, hBitmap);
+
+    BitBlt(hdcMemory, 0, 0, w, h, hdcSource, x, y, SRCCOPY);
+    hBitmap = (HBITMAP)SelectObject(hdcMemory, hBitmapOld);
+
+    DeleteDC(hdcSource);
+    DeleteDC(hdcMemory);
+
+    //HPALETTE hpal = NULL;
+    if( HBITMAP_to_JPG( hBitmap,fname, quality) ) { return_code = 1 ; }
+    DeleteObject(hBitmap);
+	
+    return return_code ;
+}
+
+int screenCaptureClientRect( HWND hwnd, LPCSTR fname, int quality ) {
+	RECT rc;
+	POINT p;
+	GetClientRect(hwnd, &rc);
+	p.x=rc.left; p.y=rc.top,
+	ClientToScreen(hwnd,&p);
+	rc.left=p.x;rc.top=p.y;
+	return screenCapturePart(rc.left,rc.top,rc.right,rc.bottom,fname,quality) ;
+}
+int screenCaptureWinRect( HWND hwnd, LPCSTR fname, int quality ) {
+	RECT r;
+	GetWindowRect(hwnd, &r);
+	return screenCapturePart(r.left,r.top,r.right-r.left,r.bottom-r.top,fname,quality) ;
+}
+int screenCaptureAll( LPCSTR fname, int quality ) {
+	return screenCapturePart(0,0,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics (SM_CYSCREEN),fname,quality) ;
 }

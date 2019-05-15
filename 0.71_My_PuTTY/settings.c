@@ -635,7 +635,11 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_b(sesskey, "RFCEnviron", conf_get_bool(conf, CONF_rfc_environ));
     write_setting_b(sesskey, "PassiveTelnet", conf_get_bool(conf, CONF_passive_telnet));
     write_setting_b(sesskey, "BackspaceIsDelete", conf_get_bool(conf, CONF_bksp_is_delete));
+#ifdef PERSOPORT
+    write_setting_i(sesskey, "RXVTHomeEnd", conf_get_int(conf, CONF_rxvt_homeend));
+#else
     write_setting_b(sesskey, "RXVTHomeEnd", conf_get_bool(conf, CONF_rxvt_homeend));
+#endif
     write_setting_i(sesskey, "LinuxFunctionKeys", conf_get_int(conf, CONF_funky_type));
     write_setting_b(sesskey, "NoApplicationKeys", conf_get_bool(conf, CONF_no_applic_k));
     write_setting_b(sesskey, "NoApplicationCursors", conf_get_bool(conf, CONF_no_applic_c));
@@ -878,7 +882,7 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_i(sesskey, "SendToTray", conf_get_int(conf, CONF_sendtotray) );
     write_setting_i(sesskey, "Maximize", conf_get_int(conf, CONF_maximize) );
     write_setting_i(sesskey, "Fullscreen", conf_get_int(conf, CONF_fullscreen) );
-    write_setting_i(sesskey, "SaveOnExit", conf_get_int(conf, CONF_saveonexit) );
+    write_setting_b(sesskey, "SaveOnExit", conf_get_bool(conf, CONF_saveonexit) );
     write_setting_i(sesskey, "Icone", conf_get_int(conf, CONF_icone) );
     write_setting_filename(sesskey, "IconeFile", conf_get_filename(conf, CONF_iconefile) );
     write_setting_s(sesskey, "SFTPConnect", conf_get_str(conf, CONF_sftpconnect) );
@@ -1176,7 +1180,11 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppb(sesskey, "RFCEnviron", false, conf, CONF_rfc_environ);
     gppb(sesskey, "PassiveTelnet", false, conf, CONF_passive_telnet);
     gppb(sesskey, "BackspaceIsDelete", true, conf, CONF_bksp_is_delete);
+#ifdef PERSOPORT
+    gppi(sesskey, "RXVTHomeEnd", 0, conf, CONF_rxvt_homeend);
+#else
     gppb(sesskey, "RXVTHomeEnd", false, conf, CONF_rxvt_homeend);
+#endif
     gppi(sesskey, "LinuxFunctionKeys", 0, conf, CONF_funky_type);
     gppb(sesskey, "NoApplicationKeys", false, conf, CONF_no_applic_k);
     gppb(sesskey, "NoApplicationCursors", false, conf, CONF_no_applic_c);
@@ -1509,7 +1517,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppi(sesskey, "SendToTray", 0, conf, CONF_sendtotray );
     gppi(sesskey, "Maximize", 0, conf, CONF_maximize );
     gppi(sesskey, "Fullscreen", 0, conf, CONF_fullscreen );
-    gppi(sesskey, "SaveOnExit", 0, conf, CONF_saveonexit );
+    gppb(sesskey, "SaveOnExit", false, conf, CONF_saveonexit );
     gppi(sesskey, "Icone", 1, conf, CONF_icone );
     gppfile(sesskey, "IconeFile", conf, CONF_iconefile );
     gpps(sesskey, "SFTPConnect", "", conf, CONF_sftpconnect );

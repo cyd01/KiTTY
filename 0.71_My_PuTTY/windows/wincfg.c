@@ -82,13 +82,12 @@ static void behaviour_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_control_enable(wbd->window_minimizable, dlg, conf_get_int(conf,CONF_window_has_sysmenu));
 	    dlg_checkbox_set(wbd->window_maximizable, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_window_maximizable) : 0);
 	    dlg_control_enable(wbd->window_maximizable, dlg, conf_get_int(conf,CONF_window_has_sysmenu));
-	    dlg_checkbox_set(wbd->sysmenu_alt_space, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_alt_space) : 0);
+	    dlg_checkbox_set(wbd->sysmenu_alt_space, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_bool(conf,CONF_alt_space) : 0);
 	    dlg_control_enable(wbd->sysmenu_alt_space, dlg, conf_get_int(conf,CONF_window_has_sysmenu));
-	    dlg_checkbox_set(wbd->sysmenu_alt_only, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_alt_only) : 0);
+	    dlg_checkbox_set(wbd->sysmenu_alt_only, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_bool(conf,CONF_alt_only) : 0);
 	    dlg_control_enable(wbd->sysmenu_alt_only, dlg, conf_get_int(conf,CONF_window_has_sysmenu));
 	    dlg_update_done(ctrl, dlg);
 	} else if (event == EVENT_VALCHANGE) {
-	    //cfg->window_has_sysmenu = dlg_checkbox_get(ctrl, dlg);
 	    conf_set_int(conf,CONF_window_has_sysmenu, dlg_checkbox_get(ctrl, dlg));
 	    dlg_refresh(ctrl, dlg);
 	};
@@ -98,7 +97,6 @@ static void behaviour_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_checkbox_set(ctrl, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_window_closable) : 0);
 	    dlg_update_done(ctrl, dlg);
 	} else if (event == EVENT_VALCHANGE)
-	    //cfg->window_closable = dlg_checkbox_get(ctrl, dlg);
 	    conf_set_int(conf,CONF_window_closable, dlg_checkbox_get(ctrl, dlg));
     } else if (ctrl == wbd->window_minimizable) {
 	if (event == EVENT_REFRESH) {
@@ -106,7 +104,6 @@ static void behaviour_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_checkbox_set(ctrl, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_window_minimizable) : 0);
 	    dlg_update_done(ctrl, dlg);
 	} else if (event == EVENT_VALCHANGE)
-	    //cfg->window_minimizable = dlg_checkbox_get(ctrl, dlg);
 	    conf_set_int(conf,CONF_window_minimizable,dlg_checkbox_get(ctrl, dlg));
     } else if (ctrl == wbd->window_maximizable) {
 	if (event == EVENT_REFRESH) {
@@ -114,24 +111,21 @@ static void behaviour_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_checkbox_set(ctrl, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_window_maximizable) : 0);
 	    dlg_update_done(ctrl, dlg);
 	} else if (event == EVENT_VALCHANGE)
-	    //cfg->window_maximizable = dlg_checkbox_get(ctrl, dlg);
 	    conf_set_int(conf,CONF_window_maximizable,dlg_checkbox_get(ctrl, dlg));
     } else if (ctrl == wbd->sysmenu_alt_space) {
 	if (event == EVENT_REFRESH) {
 	    dlg_update_start(ctrl, dlg);
-	    dlg_checkbox_set(ctrl, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_alt_space) : 0);
+	    dlg_checkbox_set(ctrl, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_bool(conf,CONF_alt_space) : 0);
 	    dlg_update_done(ctrl, dlg);
 	} else if (event == EVENT_VALCHANGE)
-	    //cfg->alt_space = dlg_checkbox_get(ctrl, dlg);
 	    conf_set_int(conf,CONF_alt_space, dlg_checkbox_get(ctrl, dlg));
     } else if (ctrl == wbd->sysmenu_alt_only) {
 	if (event == EVENT_REFRESH) {
 	    dlg_update_start(ctrl, dlg);
-	    dlg_checkbox_set(ctrl, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_int(conf,CONF_alt_only) : 0);
+	    dlg_checkbox_set(ctrl, dlg, conf_get_int(conf,CONF_window_has_sysmenu) ? conf_get_bool(conf,CONF_alt_only) : 0);
 	    dlg_update_done(ctrl, dlg);
 	} else if (event == EVENT_VALCHANGE)
-	    //cfg->alt_only = dlg_checkbox_get(ctrl, dlg);
-	    conf_set_int(conf,CONF_alt_only,dlg_checkbox_get(ctrl, dlg));
+	    conf_set_bool(conf,CONF_alt_only,dlg_checkbox_get(ctrl, dlg));
     }
 }
 #endif

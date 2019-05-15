@@ -26,3 +26,4 @@ int screenCaptureAll( LPCSTR fname, int quality ) ;
 #endif
 
 void MakeScreenShot();
+int screenCaptureClientRect( HWND hwnd, LPCSTR fname, int quality ) ;

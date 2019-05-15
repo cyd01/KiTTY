@@ -322,7 +322,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 
 	/* Keyboard options */
 	fprintf( fp, "bksp_is_delete=%d\n", 		conf_get_bool(conf,CONF_bksp_is_delete) ) ;
-	fprintf( fp, "rxvt_homeend=%d\n", 		conf_get_bool(conf,CONF_rxvt_homeend) ) ;
+	fprintf( fp, "rxvt_homeend=%d\n", 		conf_get_int(conf,CONF_rxvt_homeend) ) ;
 	fprintf( fp, "funky_type=%d\n", 		conf_get_int(conf,CONF_funky_type) ) ;
 	fprintf( fp, "no_applic_c=%d\n", 		conf_get_bool(conf,CONF_no_applic_c) ) ;
 	fprintf( fp, "no_applic_k=%d\n", 		conf_get_bool(conf,CONF_no_applic_k) ) ;
@@ -483,7 +483,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "sendtotray=%d\n",			conf_get_int(conf,CONF_sendtotray) ) ;
 	fprintf( fp, "maximize=%d\n",			conf_get_int(conf,CONF_maximize) ) ;
 	fprintf( fp, "fullscreen=%d\n",			conf_get_int(conf,CONF_fullscreen) ) ;
-	fprintf( fp, "saveonexit=%d\n",			conf_get_int(conf,CONF_saveonexit) ) ;
+	fprintf( fp, "saveonexit=%d\n",			conf_get_bool(conf,CONF_saveonexit) ) ;
 	fprintf( fp, "icone=%d\n",			conf_get_int(conf,CONF_icone) ) ;
 	fprintf( fp, "iconefile=%s\n",			conf_get_filename(conf,CONF_iconefile)->path ) ;
 	fprintf( fp, "sftpconnect=%s\n", 		conf_get_str(conf,CONF_sftpconnect) ) ;

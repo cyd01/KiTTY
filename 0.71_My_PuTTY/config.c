@@ -2584,11 +2584,21 @@ void setup_config_box(struct controlbox *b, bool midsession,
 		      conf_radiobutton_bool_handler,
 		      I(CONF_bksp_is_delete),
 		      "Control-H", I(0), "Control-? (127)", I(1), NULL);
+#ifdef PERSOPORT
+    ctrl_radiobuttons(s, "The Home and End keys", 'e', 3,
+		      HELPCTX(keyboard_homeend),
+		      conf_radiobutton_handler,
+		      I(CONF_rxvt_homeend),
+		      "Standard", I(0), "rxvt", I(1), "urxvt", I(2),
+		      "xterm", I(3), "FreeBSD1", I(4), "FreeBSD2", I(5),
+		      NULL);
+#else
     ctrl_radiobuttons(s, "The Home and End keys", 'e', 2,
 		      HELPCTX(keyboard_homeend),
 		      conf_radiobutton_bool_handler,
 		      I(CONF_rxvt_homeend),
 		      "Standard", I(false), "rxvt", I(true), NULL);
+#endif
     ctrl_radiobuttons(s, "The Function keys and keypad", 'f', 3,
 		      HELPCTX(keyboard_funkeys),
 		      conf_radiobutton_handler,

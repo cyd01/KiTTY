@@ -1373,7 +1373,11 @@ NORETURN void cleanup_exit(int);
     X(INT, NONE, serflow) /* SER_FLOW_NONE, SER_FLOW_XONXOFF, ... */ \
     /* Keyboard options */ \
     X(BOOL, NONE, bksp_is_delete) \
-    X(BOOL, NONE, rxvt_homeend) \
+/* #ifdef PERSOPORT */ \
+    X(INT, NONE, rxvt_homeend) \
+/* #else */ \
+/*    X(BOOL, NONE, rxvt_homeend) */\
+/* #endif */ \
     X(INT, NONE, funky_type) /* FUNKY_XTERM, FUNKY_LINUX, ... */ \
     X(BOOL, NONE, no_applic_c) /* totally disable app cursor keys */ \
     X(BOOL, NONE, no_applic_k) /* totally disable app keypad */ \
@@ -1540,7 +1544,7 @@ NORETURN void cleanup_exit(int);
 	X(INT, NONE, sendtotray) \
 	X(INT, NONE, maximize) \
 	X(INT, NONE, fullscreen) \
-	X(INT, NONE, saveonexit) \
+	X(BOOL, NONE, saveonexit) \
 	X(INT, NONE, icone) \
 	X(FILENAME, NONE, iconefile) \
 	X(STR, NONE, sftpconnect) \

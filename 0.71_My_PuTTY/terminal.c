@@ -1518,7 +1518,11 @@ void term_copy_stuff_from_conf(Terminal *term)
     term->utf8linedraw = conf_get_bool(term->conf, CONF_utf8linedraw);
     term->rect_select = conf_get_bool(term->conf, CONF_rect_select);
     term->remote_qtitle_action = conf_get_int(term->conf, CONF_remote_qtitle_action);
+#ifdef PERSOPORT
+    term->rxvt_homeend = conf_get_int(term->conf, CONF_rxvt_homeend);
+#else
     term->rxvt_homeend = conf_get_bool(term->conf, CONF_rxvt_homeend);
+#endif
     term->scroll_on_disp = conf_get_bool(term->conf, CONF_scroll_on_disp);
     term->scroll_on_key = conf_get_bool(term->conf, CONF_scroll_on_key);
     term->xterm_256_colour = conf_get_bool(term->conf, CONF_xterm_256_colour);

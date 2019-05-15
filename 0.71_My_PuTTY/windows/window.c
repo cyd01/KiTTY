@@ -886,7 +886,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			conf_set_filename( conf, CONF_logfilename,filename_from_str(argv[i])) ;
 			conf_set_int( conf, CONF_logtype,1 ) ;
 			conf_set_int( conf, CONF_logxfovr,1 ) ;
-			conf_set_int( conf, CONF_logflush,1 ) ;
+			conf_set_bool( conf, CONF_logflush, true ) ;
 		} else if( !strcmp(p, "-nofiles") ) {
 			SetNoKittyFileFlag( 1 ) ;
 		} else if( !strcmp(p, "-edit") ) {
@@ -968,14 +968,14 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if( atoi(argv[i])>=0 ) { 
 				conf_set_int( conf, CONF_xpos,atoi(argv[i]));
 				if( conf_get_int( conf, CONF_ypos)<0 ) conf_set_int( conf, CONF_ypos,0);
-				conf_set_int( conf, CONF_save_windowpos, 1 ) ; 
+				conf_set_bool( conf, CONF_save_windowpos, true ) ;
 				}
 		} else if( !strcmp(p, "-ypos") ) {
 			i++ ;
 			if( atoi(argv[i])>=0 ) { 
 				conf_set_int( conf, CONF_ypos, atoi(argv[i]));
 				if( conf_get_int( conf, CONF_xpos)<0) conf_set_int( conf, CONF_xpos,0);
-				conf_set_int( conf, CONF_save_windowpos,1);
+				conf_set_bool( conf, CONF_save_windowpos, true ) ;
 				}
 #if (defined IMAGEPORT) && (!defined FDJ)
 		} else if( !strcmp(p, "-nobgimage") ) {
@@ -1178,7 +1178,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     icon = LoadIcon(inst, MAKEINTRESOURCE(IDI_MAINICON));
 #ifdef PERSOPORT
 int xpos_init=0, ypos_init=0 ;
-	if( (conf_get_int(conf,CONF_saveonexit)||conf_get_int(conf,CONF_save_windowpos))
+	if( (conf_get_bool(conf,CONF_saveonexit)||conf_get_bool(conf,CONF_save_windowpos))
 		&& (conf_get_int(conf,CONF_xpos)>=0) && (conf_get_int(conf,CONF_ypos)>=0) ) {
 		xpos_init=conf_get_int(conf,CONF_xpos) ;
 		ypos_init=conf_get_int(conf,CONF_ypos) ;
@@ -1378,7 +1378,7 @@ TrayIcone.hWnd = hwnd ;
 		 SWP_NOMOVE | SWP_NOREDRAW | SWP_NOZORDER);
 #ifdef PERSOPORT
     if( !PuttyFlag )
-    if( (conf_get_int(conf,CONF_saveonexit)||conf_get_int(conf,CONF_save_windowpos)) 
+    if( (conf_get_bool(conf,CONF_saveonexit)||conf_get_bool(conf,CONF_save_windowpos)) 
 	&& (xpos_init>=0) && (ypos_init>=0) ) {
 	MoveWindow(hwnd, xpos_init, ypos_init, guess_width, guess_height, TRUE );
 	}
@@ -1478,7 +1478,7 @@ TrayIcone.hWnd = hwnd ;
         // if( !IsWow64() ) { AppendMenu(m, MF_ENABLED, IDM_PRINT, "Print clip&board") ; }  // Le menu print clipboard avait été desactivé un temps sur les machine 64bits
 	AppendMenu(m, MF_ENABLED, IDM_PRINT, "Print clip&board") ;
         AppendMenu(m, MF_ENABLED, IDM_TOTRAY, "Send to tra&y");
-        if( conf_get_int(conf,CONF_alwaysontop)/*cfg.alwaysontop*/ )
+        if( conf_get_bool(conf,CONF_alwaysontop) )
             AppendMenu(m, MF_ENABLED|MF_CHECKED, IDM_VISIBLE, "Always visi&ble");
         else
             AppendMenu(m, MF_ENABLED, IDM_VISIBLE, "Always visi&ble");
@@ -1788,7 +1788,7 @@ void cleanup_exit(int code)
      */
 #ifdef PERSOPORT
 	chdir( InitialDirectory ) ;
-	if( conf_get_int(conf,CONF_saveonexit)/*cfg.saveonexit*/ ) { SaveWindowCoord( conf/*cfg*/ ) ; }
+	if( conf_get_bool(conf,CONF_saveonexit) ) { SaveWindowCoord( conf ) ; }
 
 	if( IniFileFlag == SAVEMODE_REG ) { // Mode de sauvegarde registry
 		//SaveRegistryKey() ; 
@@ -3405,7 +3405,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		if( !GetBackgroundImageFlag() ) conf_set_int( conf, CONF_bg_type, 0 ); 
 #endif
 		if( !PuttyFlag )
-		if( conf_get_int( conf,CONF_saveonexit) && conf_get_int( conf,CONF_windowstate) ) 
+		if( conf_get_bool( conf,CONF_saveonexit) && conf_get_int( conf,CONF_windowstate) ) 
 			PostMessage( hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, (LPARAM)NULL );
 		if( conf_get_int(conf, CONF_ctrl_tab_switch) && GetCtrlTabFlag() ) {
 			int wndExtra = GetClassLong(hwnd, GCL_CBWNDEXTRA);
@@ -3449,7 +3449,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		}
 		else
 #endif /* rutty */
-	    if ( !conf_get_int(conf,CONF_warn_on_close) || session_closed ||
+	    if ( !conf_get_bool(conf,CONF_warn_on_close) || session_closed ||
 		MessageBox(hwnd,
 			   "Are you sure you want to close this session?",
 			   str, MB_ICONWARNING | MB_OKCANCEL | MB_DEFBUTTON1)
@@ -4792,7 +4792,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	case WM_MOVE:
 	      if( (!GetBackgroundImageFlag()) || GetPuttyFlag() ) {
 		sys_cursor_update();
-		if( conf_get_int(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
+		if( conf_get_bool(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
 		break;
 		}
     if(backgrounddc)
@@ -4803,7 +4803,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
     }
 	sys_cursor_update();
 	
-	if( conf_get_int(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
+	if( conf_get_bool(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
 
 	break;
 
@@ -4846,7 +4846,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #else
       case WM_MOVE:
 	sys_cursor_update();
-	if( conf_get_int(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
+	if( conf_get_bool(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
 	break;
 #endif
 #else
@@ -4995,7 +4995,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	}
 #ifdef PERSOPORT
 	if( GetTitleBarFlag() )  wintw_set_title( NULL, conf_get_str(conf,CONF_wintitle) ) ;		// Pour refaire la barre de titre si option SizeFlag
-	if( conf_get_int(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
+	if( conf_get_bool(conf,CONF_saveonexit) ) GetWindowCoord( hwnd ) ;
 #endif
 #ifdef IMAGEPORT
 	/*
@@ -6980,7 +6980,7 @@ void set_title_internal(TermWin *tw, const char *title) {
     sfree(window_name);
     window_name = snewn(1 + strlen(title), char);
     strcpy(window_name, title);
-    if (conf_get_int(conf, CONF_win_name_always) || !IsIconic(hwnd))
+    if (conf_get_bool(conf, CONF_win_name_always) || !IsIconic(hwnd))
 	SetWindowText(hwnd, title);
 }
 
@@ -7073,7 +7073,7 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 		if( strlen( title ) > 0 ) {
 			if( title[strlen(title)-1] == ']' ) make_title( buffer, "%s", title ) ;
 			else { 
-				sprintf( fmt, "%%s [%dx%d]", conf_get_int(conf,CONF_height)/*cfg.height*/, conf_get_int(conf,CONF_width)) ;
+				sprintf( fmt, "%%s [%dx%d]", conf_get_int(conf,CONF_height), conf_get_int(conf,CONF_width)) ;
 				make_title( buffer, fmt, title ) ;
 				}
 			}
@@ -7101,7 +7101,7 @@ static void wintw_set_icon_title(TermWin *tw, const char *title2)
     sfree(icon_name);
     icon_name = snewn(1 + strlen(title), char);
     strcpy(icon_name, title);
-    if (!conf_get_int(conf,CONF_win_name_always) && IsIconic(hwnd))
+    if (!conf_get_bool(conf,CONF_win_name_always) && IsIconic(hwnd))
 	SetWindowText(hwnd, title);
 }
 #else
@@ -7954,7 +7954,7 @@ static void wintw_bell(TermWin *tw, int mode)
     if (!term->has_focus) {
 #ifdef PERSOPORT
 	if( GetVisibleFlag()!=VISIBLE_TRAY ) {
-		if(conf_get_int(conf,CONF_foreground_on_bell) ) {		// Tester avec   sleep 4 ; echo -e '\a'
+		if(conf_get_bool(conf,CONF_foreground_on_bell) ) {		// Tester avec   sleep 4 ; echo -e '\a'
 			if( IsIconic(hwnd) ) SwitchToThisWindow( hwnd, TRUE ) ; 
 			else SetForegroundWindow( MainHwnd ) ;
 			}
@@ -7968,7 +7968,7 @@ static void wintw_bell(TermWin *tw, int mode)
 			else { if( conf_get_int(conf,CONF_beep_ind)==B_IND_FLASH ) flash_window(2) ; }
 			}
 	} else if( GetVisibleFlag()==VISIBLE_TRAY ) {
-		if( conf_get_int(conf,CONF_foreground_on_bell)/*cfg.foreground_on_bell*/ ) { SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 ); }
+		if( conf_get_bool(conf,CONF_foreground_on_bell) ) { SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 ); }
 		else if(mode == BELL_VISUAL) SetTimer(hwnd, TIMER_BLINKTRAYICON, (int)500, NULL) ;
 		//SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 );
 		//flash_window(2);	       /* start */

@@ -335,7 +335,11 @@ struct terminal_tag {
     bool utf8linedraw;
     bool rect_select;
     int remote_qtitle_action;
+#ifdef PERSOPORT
+    int rxvt_homeend;
+#else
     bool rxvt_homeend;
+#endif
     bool scroll_on_disp;
     bool scroll_on_key;
     bool xterm_256_colour;

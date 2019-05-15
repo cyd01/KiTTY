@@ -491,7 +491,7 @@ makeAttributes(char *buf, Conf *conf)
 {
 	char *e = buf;
 
-	if (conf_get_int(conf,CONF_bksp_is_delete))
+	if (conf_get_bool(conf,CONF_bksp_is_delete))
 		e = strecpy(e, ":erase=^?");
 	else
 		e = strecpy(e, ":erase=^H");
