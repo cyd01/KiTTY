@@ -6,13 +6,8 @@
  */
 #include <windows.h>
 #include <wincrypt.h>
-#include "ssh.h"
 
-#include "mpint.h"
-#include "mpint_i.h"
-
-typedef BignumInt Bignum ;
-void SHA_Simple(unsigned char *, int, BYTE* );
+#include "sshbn.c"
 
 /*
  * Defines and declarations due to missing declarations in mingw32 and BCC55 headers.
@@ -89,8 +84,7 @@ void capi_sha1_to_binary(PSTR szHex, PBYTE pbBin)
 /*
  * Windows XP do not support CryptBinaryToString with raw hex.
  */
-PSTR capi_binary_to_hex(PBYTE pbBinary, DWORD cbBinary)
-{
+PSTR capi_binary_to_hex(PBYTE pbBinary, DWORD cbBinary) {
 	PSTR szHex;
 	DWORD idx;
 	BYTE b;
@@ -133,7 +127,7 @@ void capi_select_cert_2(PBYTE pbSHA1, LPWSTR wszCN, PCCERT_CONTEXT *ppCertCtx, H
 	HCRYPTPROV_OR_NCRYPT_KEY_HANDLE hCryptProvOrNCryptKey;
 	DWORD dwCertCount = 0, dwKeySpec;
 	BOOL fCallerFreeProvAlwaysFalse;
-	if (!(hStoreMY = CertOpenStore((LPCSTR)CERT_STORE_PROV_SYSTEM, 0, 0, CERT_SYSTEM_STORE_CURRENT_USER, L"MY"))) {
+	if (!(hStoreMY = CertOpenStore((LPSTR)CERT_STORE_PROV_SYSTEM, 0, 0, CERT_SYSTEM_STORE_CURRENT_USER, L"MY"))) {
 		goto error;
 	}
 	if (pbSHA1) {

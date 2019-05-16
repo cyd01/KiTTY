@@ -37,8 +37,7 @@ static const char hex[16] = "0123456789ABCDEF";
 
 static void fatal_error(const char *p, ...) { exit(0) ; }
 
-static void *safemalloc(size_t n, size_t size)
-{
+static void *safemalloc(size_t n, size_t size) {
     void *p;
 
     if (n > INT_MAX / size) {

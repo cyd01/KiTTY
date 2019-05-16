@@ -272,6 +272,14 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     ppl_logevent("Key file contains public key only");
                 s->privatekey_encrypted =
                     ssh2_userkey_encrypted(s->keyfile, NULL);
+#ifdef WINCRYPTPORT
+#ifdef USE_CAPI
+			if(s->publickey_comment && 0 == strncmp("cert://", s->publickey_comment, 7)) {
+				sfree(s->keyfile->path);
+				s->keyfile->path = strdup(s->publickey_comment);
+			}
+#endif /* USE_CAPI */
+#endif
             } else {
                 ppl_logevent("Unable to load key (%s)", error);
                 ppl_printf("Unable to load key file \"%s\" (%s)\r\n",

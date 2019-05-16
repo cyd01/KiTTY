@@ -3933,19 +3933,20 @@ Le chemin vers l'exécutable WinSCP est défini dans la variable WInSCPPath. Ell
 @ECHO OFF
 start "C:\Program Files\WinSCP\WinSCP.exe" "%1" "%2" "%3" "%4" "%5" "%6" "%7" "%8" "%9"
 */	
-// winscp.exe [(sftp|ftp|scp)://][user[:password]@]host[:port][/path/[file]] [/privatekey=key_file]
+// winscp.exe [(sftp|ftp|scp)://][user[:password]@]host[:port][/path/[file]] [/privatekey=key_file] [/rawsettings (ProxyMethod=1) (Compression=1)]
 void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 	char cmd[4096], shortpath[1024], buffer[4096], proto[10] ;
+	int raw = 0;
 	
 	if( directory == NULL ) { directory = kitty_current_dir(); } 
 	if( WinSCPPath==NULL ) {
 		if( IniFileFlag == SAVEMODE_REG ) return ;
 		else if( !SearchWinSCP() ) return ;
-		}
+	}
 	if( !existfile( WinSCPPath ) ) {
 		if( IniFileFlag == SAVEMODE_REG ) return ;
 		else if( !SearchWinSCP() ) return ;
-		}
+	}
 		
 	if( !GetShortPathName( WinSCPPath, shortpath, 4095 ) ) return ;
 
@@ -3954,44 +3955,44 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		if( ReadParameter( INIT_SECTION, "WinSCPProtocol", buffer ) ) { 
 			if( (!strcmp( buffer, "scp" )) || (!strcmp( buffer, "sftp" )) || (!strcmp( buffer, "ftp" )) ) 
 				strcpy( proto, buffer) ;
-			}
+		}
 		sprintf( cmd, "%s %s://", shortpath, proto ) ;
 			
 		if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
 			strcat( cmd, conf_get_str(conf, CONF_sftpconnect) ) ;
 		} else {
-		if( user!=NULL ) {
-			strcat( cmd, user ) ; 
-		} else { 
-			strcat( cmd, conf_get_str(conf,CONF_username) ) ; 
-		}
-		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) { 
-			char bufpass[1024] ;
-			strcat( cmd, ":" ); 
-			strcpy(bufpass,conf_get_str(conf,CONF_password));
-			MASKPASS(bufpass);
-			strcat(cmd,bufpass);
-			memset(bufpass,0,strlen(bufpass));
+			if( user!=NULL ) {
+				strcat( cmd, user ) ; 
+			} else { 
+				strcat( cmd, conf_get_str(conf,CONF_username) ) ; 
 			}
-		strcat( cmd, "@" ) ; 
-		if( host!=NULL ) {
-			strcat( cmd, host ) ; 
-		} else {
-			strcat( cmd, conf_get_str(conf,CONF_host) ) ; 
-		}
-		strcat( cmd, ":" ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port) ); strcat( cmd, buffer ) ;
+			if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) { 
+				char bufpass[1024] ;
+				strcat( cmd, ":" ); 
+				strcpy(bufpass,conf_get_str(conf,CONF_password));
+				MASKPASS(bufpass);
+				strcat(cmd,bufpass);
+				memset(bufpass,0,strlen(bufpass));
+			}
+			strcat( cmd, "@" ) ; 
+			if( host!=NULL ) {
+				strcat( cmd, host ) ; 
+			} else {
+				strcat( cmd, conf_get_str(conf,CONF_host) ) ; 
+			}
+			strcat( cmd, ":" ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port) ); strcat( cmd, buffer ) ;
 		}
 		
 		if( directory!=NULL ) if( strlen(directory)>0 ) {
 			strcat( cmd, directory ) ;
 			if( directory[strlen(directory)-1]!='/' ) strcat( cmd, "/" ) ;
-			}
+		}
 		if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
-				if( GetShortPathName( conf_get_filename(conf,CONF_keyfile)->path, shortpath, 4095 ) ) {
+			if( GetShortPathName( conf_get_filename(conf,CONF_keyfile)->path, shortpath, 4095 ) ) {
 				strcat( cmd, " /privatekey=" ) ;
 				strcat( cmd, shortpath ) ;
-				}
 			}
+		}
 	} else {
 		sprintf( cmd, "%s ftp://%s", shortpath, conf_get_str(conf,CONF_username) ) ;
 		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
@@ -4001,7 +4002,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 			MASKPASS(bufpass);
 			strcat(cmd,bufpass);
 			memset(bufpass,0,strlen(bufpass));
-			}
+		}
 		strcat( cmd, "@" ) ; 
 		if( poss( ":", conf_get_str(conf,CONF_host) )>0 ) { strcat( cmd, "[" ) ; strcat( cmd, conf_get_str(conf,CONF_host) ) ; strcat( cmd, "]" ) ; }
 		else { strcat( cmd, conf_get_str(conf,CONF_host) ) ; }
@@ -4009,10 +4010,13 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		if( directory!=NULL ) if( strlen(directory)>0 ) {
 			strcat( cmd, directory ) ;
 			if( directory[strlen(directory)-1]!='/' ) strcat( cmd, "/" ) ;
-			}
+		}
 	}
 	if( conf_get_int(conf,CONF_proxy_type)!=I(PROXY_NONE) ) {
-		strcat( cmd, " -rawsettings" ) ;
+		if( raw == 0 ) {
+			strcat( cmd, " -rawsettings" ) ;
+			raw++;
+		}
 		switch( conf_get_int(conf,CONF_proxy_type) ) {
 			case 2: strcat( cmd, " ProxyMethod=2" ) ; break ;
 			case 3: strcat( cmd, " ProxyMethod=3" ) ; break ;
@@ -4024,11 +4028,18 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		if( strlen(conf_get_str(conf,CONF_proxy_username))>0 ) { strcat( cmd, " ProxyUsername=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_username) ) ; }
 		if( strlen(conf_get_str(conf,CONF_proxy_password))>0 ) { strcat( cmd, " ProxyPassword=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_password) ) ; }
 	}
+	if( conf_get_bool(conf,CONF_compression) ) {
+		if( raw == 0 ) {
+			strcat( cmd, " -rawsettings" ) ;
+			raw++;
+		}
+		strcat( cmd, " Compression=1" ) ;
+	}
 	
 	if( debug_flag ) { debug_logevent( "Run: %s", cmd ) ; }
 	RunCommand( hwnd, cmd ) ;
 	memset(cmd,0,strlen(cmd));
-	}
+}
 
 	
 // Recherche le chemin vers le programme PSCP

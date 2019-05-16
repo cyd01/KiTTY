@@ -11,6 +11,14 @@
 #include "mpint.h"
 #include "misc.h"
 
+#ifdef WINCRYPTPORT
+#ifdef USE_CAPI
+#ifdef _WINDOWS
+#include "wincrypto.h"
+#endif /* _WINDOWS */
+#endif /* USE_CAPI */
+#endif
+
 void BinarySource_get_rsa_ssh1_pub(
     BinarySource *src, RSAKey *rsa, RsaSsh1Order order)
 {
@@ -295,6 +303,16 @@ bool rsa_verify(RSAKey *key)
 {
     mp_int *n, *ed, *pm1, *qm1;
     unsigned ok = 1;
+
+#ifdef WINCRYPTPORT
+#ifdef USE_CAPI
+#ifdef _WINDOWS
+	if(capi_is_capikey(key)) {
+		return 1;
+	}
+#endif /* _WINDOWS */
+#endif /* USE_CAPI */
+#endif
 
     /* Preliminary checks: p,q must actually be nonzero. */
     if (mp_eq_integer(key->p, 0) | mp_eq_integer(key->q, 0))
