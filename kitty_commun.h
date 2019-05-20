@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include "winstuff.h"
+#include "putty.h"
 
 // Flag permettant d'activer l'acces a du code particulier permettant d'avoir plus d'info dans le kitty.dmp
 extern int debug_flag ;
@@ -78,4 +79,13 @@ int GetShowBalloonOnKeyUsage( void ) ;
 /* Fonction permettant d'affiche un message sur l'icone dans le tray */
 int ShowBalloonTip( NOTIFYICONDATA tnid, TCHAR  title[], TCHAR msg[] ) ;
 
+// Fonctions permettant de formatter les chaînes de caractères avec %XY	
+void mungestr( const char *in, char *out ) ;
+void unmungestr( const char *in, char *out, int outlen ) ;
+
+// Fonctions de gestion du mot de passe
+void MASKPASS( char * password ) ;
+void GetPasswordInConfig( char * p ) ;
+int IsPasswordInConf(void) ;
+void CleanPassword( char * p ) ;
 #endif

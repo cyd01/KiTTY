@@ -28,6 +28,7 @@
 static char *cmdline_keyfile = NULL;
 
 #ifndef INTEGRATED_KEYGEN
+int GetZModemFlag() { return 0 ; }
 /*
  * Print a modal (Really Bad) message box and perform a fatal exit.
  */

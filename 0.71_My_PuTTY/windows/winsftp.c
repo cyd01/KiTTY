@@ -30,7 +30,9 @@ int get_param( const char * val ) {
 	return 0 ;
 	}
 
-void SetPasswordInConfig( char * password ) {
+int GetPuttyFlag() { return 1 ; }
+
+void SetPasswordInConfig( const char * password ) {
 	int len ;
 	if( password!=NULL ) {
 		len = strlen( password ) ;

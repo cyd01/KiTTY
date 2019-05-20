@@ -816,7 +816,7 @@ int verify_host_key(const char *hostname, int port,
 		return 0;		       
 	}
     }
-return 0;
+//return 0;
 #endif
 
     if (RegOpenKey(HKEY_CURRENT_USER, PUTTY_REG_POS "\\SshHostKeys",

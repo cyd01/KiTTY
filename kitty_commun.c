@@ -298,4 +298,73 @@ int ShowBalloonTip( NOTIFYICONDATA tnid, TCHAR  title[], TCHAR msg[] ) {
 	res = Shell_NotifyIcon(NIM_MODIFY, &tnid);
 	return res ;	
 }
+
+// Fonctions permettant de formatter les chaînes de caractères avec %XY	
+void mungestr( const char *in, char *out ) {
+	char hex[16] = "0123456789ABCDEF";
+	int candot = 0 ;
+	while( *in ) {
+		if( *in == ' ' || *in == '\\' || *in == '*' || *in == '?' ||
+			*in ==':' || *in =='/' || *in =='\"' || *in =='<' || *in =='>' || *in =='|' ||
+			*in == '%' || *in < ' ' || *in > '~' || (*in == '.'
+			&& !candot) ) {
+			*out++ = '%' ;
+			*out++ = hex[((unsigned char) *in) >> 4] ;
+			*out++ = hex[((unsigned char) *in) & 15] ;
+		} else {
+			*out++ = *in ;
+		}
+		in++ ;
+		candot = 1 ;
+	}
+	*out = '\0' ;
+	return ;
+}
+void unmungestr( const char *in, char *out, int outlen ) {
+	while (*in) {
+		if( *in == '%' && in[1] && in[2] ) {
+			int i, j ;
+			i = in[1] - '0' ;
+			i -= (i > 9 ? 7 : 0) ;
+			j = in[2] - '0' ;
+			j -= (j > 9 ? 7 : 0) ;
+			*out++ = (i << 4) + j ;
+			if( !--outlen )
+				return ;
+			in += 3	;
+		} else {
+			*out++ = *in++ ;
+			if( !--outlen )
+				return;
+		}
+	}
+	*out = '\0' ;
+	return ;
+}
+
+// Fonctions de gestion du mot de passe
+void GetPasswordInConfig( char * p ) {
+	if( strlen(conf_get_str(conf,CONF_password)) == 0 ) return ;
+	/* On decrypte le password */
+	char bufpass[4096] ;
+	memcpy( bufpass, conf_get_str(conf,CONF_password), 4095 ) ; bufpass[4095]='\0';
+	MASKPASS(bufpass);
+	memcpy( p, bufpass, strlen(bufpass)+1 ) ;
+	memset(bufpass,0,strlen(bufpass));
+}
+
+int IsPasswordInConf(void) {
+	int len = 0 ;
+	if( strlen(conf_get_str(conf,CONF_password)) == 0 ) return 0 ;
+	/* On decrypte le password */
+	char bufpass[4096] ;
+	memcpy( bufpass, conf_get_str(conf,CONF_password), 4095 ) ; bufpass[4095]='\0';
+	MASKPASS(bufpass);
+	len = strlen( bufpass ) ;
+	memset(bufpass,0,strlen(bufpass));
+	return len ;
+}
+
+void CleanPassword( char * p ) { memset(p,0,strlen(p)); }
+
 #endif

@@ -309,8 +309,6 @@ int DelParameter( const char * key, const char * name ) ;
 void GetSessionFolderName( const char * session_in, char * folder ) ;
 int MakeDirTree( const char * Directory, const char * s, const char * sd ) ;
 int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
-void mungestr(const char *in, char *out);
-void unmungestr(const char *in, char *out, int outlen);
 void print_log( const char *fmt, ...) ;
 char * SetInitialSessPath( void ) ;
 char * SetSessPath( const char * dec ) ;

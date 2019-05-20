@@ -35,9 +35,9 @@ char keysuffix[16] = "\0";
 
 static const char hex[16] = "0123456789ABCDEF";
 
-static void fatal_error(const char *p, ...) { exit(0) ; }
-
-static void *safemalloc(size_t n, size_t size) {
+void fatal_error(const char *p, ...) { exit(0) ; }
+/*
+void *safemalloc(size_t n, size_t size) {
     void *p;
 
     if (n > INT_MAX / size) {
@@ -57,7 +57,7 @@ static void *safemalloc(size_t n, size_t size) {
 
     return p;
 }
-static void safefree(void *ptr)
+void safefree(void *ptr)
 {
     if (ptr) {
 #ifdef MINEFIELD
@@ -67,7 +67,7 @@ static void safefree(void *ptr)
 #endif
     }
 }
-
+*/
 /* JK: my generic function for simplyfing error reporting */
 DWORD errorShow(const char* pcErrText, const char* pcErrParam) {
 	HWND hwRodic;
@@ -645,14 +645,13 @@ void SettingsSave( HSettingsList list, const char * filename ) {
 }
 
 
-
+/*
 void SettingsPrint( HSettingsList list ) {
 	if( list != NULL ) {
 		debug_log( "->filename=%s\n", list->filename ) ;
 		debug_log( "->num=%d\n", list->num ) ;
 		debug_log( "->first=%ld\n", list->first ) ;
 		debug_log( "->last=%ld\n", list->last ) ;
-	
 		HSettingsItem current = list->first ;
 		while( current != NULL ) {
 			if( current->name !=NULL ) {
@@ -680,4 +679,4 @@ void SettingTest( void ) {
 	debug_log( "FIN\n\n" ) ;
 
 }
-
+*/

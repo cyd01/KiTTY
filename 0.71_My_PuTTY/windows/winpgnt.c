@@ -1287,7 +1287,6 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
     hwnd = NULL;
 
 #ifdef PERSOPORT
-	debug_flag=0;
 	IniFileFlag = 0 ;
 	DirectoryBrowseFlag = 0 ;
 	LoadParametersLight() ;
