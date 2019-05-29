@@ -677,18 +677,26 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 	RECT rcClient ;
 	int h ;
 	GetWindowRect(hwnd, &rcClient) ;
+      
+        int NormalSize = 555 ;
 	
 	if( GetConfigBoxWindowHeight() > 0 ) { h = GetConfigBoxWindowHeight() ; }
 	else if( GetConfigBoxHeight() >= 100 ) { h = GetConfigBoxHeight() ; }
 	else {
 		if( GetConfigBoxHeight() <= 7 ) { h = ceil(12*7+354) ; }
-		else if( GetConfigBoxHeight() <= 15 ) { h = 515 ; }
+		else if( GetConfigBoxHeight() <= 16 ) { h = NormalSize ; }
 		else {
-			h = ceil( (584-530)*GetConfigBoxHeight()/(20-16)+310 ) ;
-			if( h < 515 ) h = 515 ; 
+			h = NormalSize + 12 * ( GetConfigBoxHeight()-16 ) ;
+			if( h < NormalSize ) h = NormalSize ; 
 			}
 		}
-	
+	if( get_param("INIFILE")==SAVEMODE_DIR ) {
+		h = h - 12 ; // il n'y a pas la liste déroulant des folders en mode portable
+	}
+      
+	// Initialise la taille de la ConfigBox (en cas de DPI speciaux)
+	double ScaleY = GetDeviceCaps(GetDC(hwnd),LOGPIXELSY)/96.0 ; // La police standard (100%) vaut 96ppp (pixels per pouce)
+	if( ScaleY!=1.0 ) { h = (int)( h*ScaleY ) ; }
 	MoveWindow( hwnd, rcClient.left, rcClient.top, rcClient.right-rcClient.left, h, TRUE ) ;
 	}
 #endif
@@ -949,7 +957,7 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 
 	/* Grrr Explorer will maximize Dialogs! */
       case WM_SIZE:
-	if (wParam == SIZE_MAXIMIZED)
+	    if (wParam == SIZE_MAXIMIZED)
 	    force_normal(hwnd);
 	return 0;
 

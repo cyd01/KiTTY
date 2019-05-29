@@ -16,6 +16,7 @@
 
 #ifdef PERSOPORT
 #include <string.h>
+#include <windows.h>
 const char ver[] = "Custom build" ;
 char sshver[] = "PuTTY-KiTTY\0                           " ;
 void set_sshver( char * vers ) { 
@@ -30,6 +31,7 @@ void set_sshver( char * vers ) {
 const char ver[] = TEXTVER;
 const char sshver[] = SSHVER;
 #endif
+
 const char commitid[] = SOURCE_COMMIT;
 
 /*

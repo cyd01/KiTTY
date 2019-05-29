@@ -24,7 +24,7 @@ void SearchCtHelper( void ) ;
 #if !defined(DEBUG)
 #define cygterm_debug(f,...)
 #elif !defined(cygterm_debug)
-#define cygterm_debug(f,...) debug(("%s:%d:%s: "f"\n",__FILE__,__LINE__,__FUNCTION__,##__VA_ARGS__))
+#define cygterm_debug(f,...) debug(("\n%s:%d:%s: "f"\n",__FILE__,__LINE__,__FUNCTION__,##__VA_ARGS__))
 #endif
 
 #define putenv _putenv

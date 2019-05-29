@@ -2033,8 +2033,8 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 		SetSSHConnected(0);
 		ReadInitScript(NULL);
 	
-    char *title = dupprintf("%s Fatal Error", appname);
-    MessageBox(hwnd, msg, title, MB_ICONERROR | MB_OK);
+    char *title = dupprintf("%s Fatal Error: %s", appname,msg);
+    logevent(NULL,title);//MessageBox(hwnd, msg, title, MB_ICONERROR | MB_OK);
     sfree(title);
 	
 		if( conf_get_int(conf,CONF_failure_reconnect) ) {

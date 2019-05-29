@@ -529,10 +529,10 @@ void debug_log( const char *fmt, ... ) {
 	if( ( fp = fopen( filename, "ab" ) ) != NULL ) {
 		vfprintf( fp, fmt, ap ) ; // ecriture dans un fichier
 		fclose( fp ) ;
-		}
+	}
  
 	va_end( ap ) ;
-	}
+}
 
 // Procedure d'affichage d'un message
 void debug_msg( const char *fmt, ... ) {
@@ -542,7 +542,7 @@ void debug_msg( const char *fmt, ... ) {
 	vsprintf( buffer, fmt, ap ) ;
 	MessageBox( NULL, buffer, "Debug", MB_OK ) ;
 	va_end( ap ) ;
-	}
+}
 	
 // Affiche un message avec l'usage memoire
 void debug_mem( const char *fmt, ... ) {
@@ -5024,7 +5024,7 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
 	if( ReadParameter( INIT_SECTION, "bcdelay", buffer ) ) { between_char_delay = atoi( buffer ) ; }
 	if( ReadParameter( INIT_SECTION, "browsedirectory", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) DirectoryBrowseFlag = 0 ; 
+		if( !stricmp( buffer, "NO" ) ) { DirectoryBrowseFlag = 0 ; }
 		else if( (!stricmp( buffer, "YES" )) && (IniFileFlag==SAVEMODE_DIR) ) DirectoryBrowseFlag = 1 ;
 	}
 	if( ReadParameter( INIT_SECTION, "capslock", buffer ) ) { if( !stricmp( buffer, "YES" ) ) CapsLockFlag = 1 ; }
@@ -5163,7 +5163,7 @@ void LoadParameters( void ) {
 	}
 #ifdef CYGTERMPORT
 	if( ReadParameter( INIT_SECTION, "cygterm", buffer ) ) {
-		//if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
+		if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
 		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
 	}
 #endif
@@ -5324,11 +5324,6 @@ void InitWinMain( void ) {
 	
 	// Test le mode de fonctionnement de la sauvegarde des sessions
 	GetSaveMode() ;
-
-	// Initialise la taille de la ConfigBox (en cas de DPI speciaux)
-	double ScaleY = GetDeviceCaps(GetDC(hwnd),LOGPIXELSY)/96.0 ; // La police standard (100%) vaut 96ppp (pixels per pouce)
-	int MySize = 610 ;
-	if( ScaleY!=1.0 ) { ConfigBoxWindowHeight = (int)( MySize*ScaleY ) ; }
 
 	// Initialisation des parametres à partir du fichier kitty.ini
 	LoadParameters() ;

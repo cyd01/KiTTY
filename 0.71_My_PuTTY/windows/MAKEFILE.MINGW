@@ -136,6 +136,8 @@ FDJFLAG = FDJ1
 
 # Ajouter  -g -ggdb   a CFLAGS pour avoir plus de debug !!!
 
+# Ajout du DEBIG
+# CFLAGS += -DDEBUG
 
 RCFLAGS += -I ../../ -DPERSOPORT -D$(FDJFLAG)
 
@@ -1783,11 +1785,13 @@ xpmputty.o: ../unix/xpmputty.c
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../unix/xpmputty.c
 
 
+FORCE:
+
+.PHONY: clean
 
 clean:
 	rm -f *.o *.exe *.res.o *.so *.map
 
-FORCE:
 
 
 

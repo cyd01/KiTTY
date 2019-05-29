@@ -2337,43 +2337,40 @@ void setup_config_box(struct controlbox *b, bool midsession,
     
     if( GetConfigBoxHeight() > 7 ) { // On n'affiche les boutons KiTTY que si la taille de la config box le permet
 	if (!midsession && !GetReadOnlyFlag()) { // Bouton de creation d'un folder
-	ssd->createbutton = ctrl_pushbutton(s, "New folder", NO_SHORTCUT,
+		ssd->createbutton = ctrl_pushbutton(s, "New folder", NO_SHORTCUT,
 					  HELPCTX(session_saved),
 					  sessionsaver_handler, P(ssd));
-	ssd->createbutton->generic.column = 1;
-	}
-	else {
-	ssd->createbutton = NULL ;
+		ssd->createbutton->generic.column = 1;
+	} else {
+		ssd->createbutton = NULL ;
 	}
 
 	if( !GetDirectoryBrowseFlag() ) {
 		if (!midsession && !GetReadOnlyFlag()) { // Bouton de suppression d'un folder
-		ssd->delfolderbutton = ctrl_pushbutton(s, "Del folder", NO_SHORTCUT,
+			ssd->delfolderbutton = ctrl_pushbutton(s, "Del folder", NO_SHORTCUT,
 					  HELPCTX(session_saved),
 					  sessionsaver_handler, P(ssd));
-		ssd->delfolderbutton->generic.column = 1;	
-		}
-		else {
-		ssd->delfolderbutton = NULL ;
+			ssd->delfolderbutton->generic.column = 1;	
+		} else {
+			ssd->delfolderbutton = NULL ;
 		}
 	}
 	
 	if( !GetDirectoryBrowseFlag() ) {
 		if ( !midsession && !GetReadOnlyFlag() ) { // Bouton d'arrange de l'ordre de la liste des folders
-		ssd->arrangebutton = ctrl_pushbutton(s, "Up folder", NO_SHORTCUT,
+			ssd->arrangebutton = ctrl_pushbutton(s, "Up folder", NO_SHORTCUT,
 					  HELPCTX(no_help),
 					  sessionsaver_handler, P(ssd));
-		ssd->arrangebutton->generic.column = 1;	
-		}
-		else {
-		ssd->arrangebutton = NULL ;
+			ssd->arrangebutton->generic.column = 1;	
+		} else {
+			ssd->arrangebutton = NULL ;
 		}
 	}
 	
 	if( !GetDirectoryBrowseFlag() )
-	ctrl_droplist(s, "Folder", NO_SHORTCUT, 80,
+		ctrl_droplist(s, "Folder", NO_SHORTCUT, 80,
 			  HELPCTX(no_help),
-			  folder_handler, I(CONF_folder)) ; // folder_handler, I(offsetof(Config,folder)));
+			  folder_handler, I(CONF_folder)) ;
 	}
 #else
     ssd->savebutton = ctrl_pushbutton(s, "Save", 'v',

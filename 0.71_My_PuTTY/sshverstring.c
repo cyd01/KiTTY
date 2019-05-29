@@ -160,10 +160,17 @@ static void ssh_verstring_send(struct ssh_verstring_state *s)
     /*
      * Construct our outgoing version string.
      */
+#ifdef PERSOPORT
+    s->our_vstring = dupprintf(
+        "%.*s%s-%s",
+        (int)s->prefix_wanted.len, (const char *)s->prefix_wanted.ptr,
+        s->our_protoversion, sshver);
+#else
     s->our_vstring = dupprintf(
         "%.*s%s-%s%s",
         (int)s->prefix_wanted.len, (const char *)s->prefix_wanted.ptr,
         s->our_protoversion, s->impl_name, sshver);
+#endif
     sv_pos = s->prefix_wanted.len + strlen(s->our_protoversion) + 1;
 
     /* Convert minus signs and spaces in the software version string
