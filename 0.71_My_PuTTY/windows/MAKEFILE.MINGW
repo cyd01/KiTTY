@@ -141,7 +141,7 @@ FDJFLAG = FDJ1
 
 RCFLAGS += -I ../../ -DPERSOPORT -D$(FDJFLAG)
 
-CFLAGS += -DAUTO_WINSOCK -DUSE_CAPI -DCOVERITY -DNO_MULTIMON -DNO_HTMLHELP -DNO_SECUREZEROMEMORY
+CFLAGS += -DAUTO_WINSOCK -DCOVERITY -DNO_MULTIMON -DNO_HTMLHELP
 CFLAGS += -D$(FDJFLAG)
 CFLAGS += 	-DPERSOPORT \
 		-DSTARTBUTTON \
@@ -165,14 +165,14 @@ CFLAGS += 	-DPERSOPORT \
 		
 #		-DCYGTERMPORT \
 #		-DIMAGEPORT \
-#		-DWINCRYPTPORT \
+#		-DUSE_CAPI -DWINCRYPTPORT \
 #		-DZMODEMPORT \
 
 
 # Autre flag a gérer
 # Ajouter  -DNO_PASSWORD \ pour compiler une version sans possibilité de sauvegarder le mot de passe
 # Ajouter  -DNO_TRANSPARENCY \ pour compiler une version desactivant la transparence
-# Ajouter  -DPORTABLE \ pour forcer lemode portable
+# Ajouter  -DPORTABLE \ pour forcer le mode portable
 
 CFLAGS_PLINK = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT \
 		-DPERSOPORT -DPUTTYCYG -DRECONNECTPORT -DNO_RUTTYPORT \
@@ -1787,14 +1787,6 @@ xpmputty.o: ../unix/xpmputty.c
 
 FORCE:
 
-.PHONY: clean
-
-clean:
-	rm -f *.o *.exe *.res.o *.so *.map
-
-
-
-
 ################################################################################
 # BEGIN PERSOPORT
 ################################################################################
@@ -2118,6 +2110,12 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		-luser32 -lwsock32  -lwtsapi32 \
 		# -lcomctl32 -lwinmm -lwinspool -lole32 -lcrypt32
 
+.PHONY: clean 9bis
+
+clean:
+	rm -f *.o *.exe *.res.o *.so *.map
+
+9bis: putty.exe putty_portable.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
 
 # AJOUTER
 # -DMASTER_PASSWORD=`cat ../../masterpassword.txt` 			à la compilation de cmdline.o
