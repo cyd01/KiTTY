@@ -53,3 +53,4 @@ Jump into the x.yy_My_PuTTY\windows directory then run the command:
     make -f MAKEFILE.MINGW putty.exe
 
 Original website is [http://kitty.9bis.com/](http://kitty.9bis.com/ "KiTTY website").
+
