@@ -1360,13 +1360,12 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 	{ // Log de l'envoi du password
 	char *userlog = dupprintf("\nSend automatic password (Using keyboard-interactive authentication)" );
 	logevent(NULL,userlog);
-	/*
+	
 	if (flags & FLAG_INTERACTIVE &&
-		(!((flags & FLAG_STDERR) && (flags & FLAG_VERBOSE)))) {
-		c_write_str(ssh, userlog);
-		c_write_str(ssh, "\r\n");
+		(flags & FLAG_VERBOSE)) {
+		ppl_printf("%s\r\n",userlog);
 		}
-		*/
+		
 	sfree(userlog);
 	}
 	} else
@@ -1521,7 +1520,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 #ifdef PERSOPORT
 		if( IsPasswordInConf() ) {
 		    GetPasswordInConfig(bufpass);
-		    while( (bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\') ) { 
+		    while( ((bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\')) || ((bufpass[strlen(bufpass)-1]=='r')&&(bufpass[strlen(bufpass)-2]=='\\')) ) { 
 				bufpass[strlen(bufpass)-2]='\0'; 
 				bufpass[strlen(bufpass)-1]='\0'; 
 		    }
@@ -1531,13 +1530,10 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 	{ // Log de l'envoi du password
 	char *userlog = dupprintf("Send automatic password" );
 	logevent(NULL,userlog);
-	/*
 	if (flags & FLAG_INTERACTIVE &&
-		(!((flags & FLAG_STDERR) && (flags & FLAG_VERBOSE)))) {
-		c_write_str(ssh, "\r\n");
-		c_write_str(ssh, userlog);
-		c_write_str(ssh, "\r\n");
-		}*/
+		(flags & FLAG_VERBOSE)) {
+		ppl_printf("\r\n%s\r\n",userlog);
+		}
 	sfree(userlog);
 	}
 	} else {
