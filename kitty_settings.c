@@ -466,7 +466,6 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     versioninfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&versioninfo);
 #endif
-
     conf_set_bool(conf, CONF_ssh_subsys, false); /* FIXME: load this properly */
     conf_set_str(conf, CONF_remote_cmd, "");
     conf_set_str(conf, CONF_remote_cmd2, "");
@@ -1391,7 +1390,7 @@ FontSpec *read_setting_fontspec_forced(void *handle, const char *name)
 
 static bool gppb_raw_forced(void *sesskey, const char *name, bool def) {
     def = platform_default_b(name, def);
-    return sesskey ? read_setting_i(sesskey, name, def) != 0 : def;
+    return sesskey ? read_setting_i_forced(sesskey, name, def) != 0 : def;
 }
 
 static void gppb_forced(void *sesskey, const char *name, bool def, Conf *conf, int primary) {

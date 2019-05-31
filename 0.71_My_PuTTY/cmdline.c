@@ -524,7 +524,7 @@ int cmdline_process_param(const char *p, char *value,
 	/* This parameter must be processed immediately rather than being
 	 * saved. */
 	load_open_settings_forced( value, conf ) ;
-	loaded_session = TRUE;
+	loaded_session = true;
 	cmdline_session_name = dupstr(value);
 	return 2;
     }
