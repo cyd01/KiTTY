@@ -1222,7 +1222,7 @@ int win_seat_verify_ssh_host_key(
 	char *caption = dupprintf(mbtitle, appname);
 #ifdef PERSOPORT
 	if( GetAutoStoreSSHKeyFlag() ) { 
-	    logevent(NULL, "Auto update host key") ;
+	    lp_eventlog(default_logpolicy, "Auto update host key") ;
 	    mbret=IDYES ; 
 	} else 
 #endif
@@ -1246,7 +1246,7 @@ int win_seat_verify_ssh_host_key(
 	char *caption = dupprintf(mbtitle, appname);
 #ifdef PERSOPORT
 	if( GetAutoStoreSSHKeyFlag() ) { 
-	    logevent(NULL, "Auto store host key") ;
+	    lp_eventlog(default_logpolicy, "Auto store host key") ;
 	    mbret=IDYES ; 
 	} else 
 #endif

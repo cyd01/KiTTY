@@ -333,6 +333,7 @@ typedef enum _WTS_VIRTUAL_CLASS {
 #ifdef RECONNECTPORT
 static time_t last_reconnect = 0;
 void SetConnBreakIcon( void ) ;
+static void close_session(void *ignored_context);
 #endif
 /* rutty: */
 #ifdef RUTTYPORT
@@ -544,9 +545,9 @@ static void start_backend(void)
 #ifdef RECONNECTPORT
 	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 	    SetConnBreakIcon() ;
-	    backend_free(backend);
-	    backend = NULL;
-	    logevent(NULL, "Unable to connect, trying to reconnect...") ; 
+	    SetSSHConnected(0) ;
+	    queue_toplevel_callback(close_session, NULL);
+	    lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
 	    SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 	    return ;
 	    }
@@ -2031,15 +2032,16 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 	if( GetAutoreconnectFlag() && is_backend_first_connected ) {
 		SetConnBreakIcon() ;
 		SetSSHConnected(0);
+		queue_toplevel_callback(close_session, NULL);
 		ReadInitScript(NULL);
 	
     char *title = dupprintf("%s Fatal Error: %s", appname,msg);
-    logevent(NULL,title);//MessageBox(hwnd, msg, title, MB_ICONERROR | MB_OK);
+    lp_eventlog(default_logpolicy, title);//MessageBox(hwnd, msg, title, MB_ICONERROR | MB_OK);
     sfree(title);
 	
 		if( conf_get_int(conf,CONF_failure_reconnect) ) {
 			queue_toplevel_callback(close_session, NULL);
-			logevent(NULL, "Lost connection, trying to reconnect...") ;
+			lp_eventlog(default_logpolicy, "Lost connection, trying to reconnect...") ;
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ;
 		}
 	} else {
@@ -3114,8 +3116,9 @@ static void win_seat_notify_remote_exit(Seat *seat)
 	if( GetAutoreconnectFlag() && is_backend_first_connected ) {
 		SetConnBreakIcon() ;
 		SetSSHConnected(0);
+		queue_toplevel_callback(close_session, NULL);
 		ReadInitScript(NULL);
-		logevent(NULL, "Connection closed by remote host");
+		lp_eventlog(default_logpolicy, "Connection closed by remote host");
 	} else
 #endif
 	    if (exitcode != INT_MAX)
@@ -3249,7 +3252,7 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 		}
 	if( conf_get_int(conf,CONF_logtimerotation) > 0 ) {
 		SetTimer(hwnd, TIMER_LOGROTATION, (int)( conf_get_int(conf,CONF_logtimerotation)*1000), NULL) ;
-		logevent(NULL, "Start log rotation" );
+		lp_eventlog(default_logpolicy, "Start log rotation" );
 		}
 
 	RefreshBackground( hwnd ) ;
@@ -3342,7 +3345,7 @@ else if((UINT_PTR)wParam == TIMER_ANTIIDLE) {  // Envoi de l'anti-idle
 #ifdef RECONNECTPORT
 	if(!backend||!is_backend_connected) { // On essaie de se reconnecter en cas de problème de connexion
 		if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
-			logevent(NULL, "No connection, trying to reconnect...") ; 
+			lp_eventlog(default_logpolicy, "No connection, trying to reconnect...") ; 
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 			}
 			break;
@@ -3373,7 +3376,7 @@ else if((UINT_PTR)wParam == TIMER_BLINKTRAYICON) {  // Clignotement de l'icone d
 #ifdef RECONNECTPORT
 else if((UINT_PTR)wParam == TIMER_RECONNECT) {
 	if( !backend && GetAutoreconnectFlag() ) { 
-		logevent(NULL, "No backend connection, reconnecting...") ;
+		lp_eventlog(default_logpolicy, "No backend connection, reconnecting...") ;
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
 	} else {
 		KillTimer( hwnd, TIMER_RECONNECT ) ;
@@ -3390,7 +3393,8 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	      {
 		// Initialiation
 		MainHwnd = hwnd ;
-		if( GetIconeFlag() != -1 )
+		lp_eventlog(default_logpolicy,"Init");
+      		if( GetIconeFlag() != -1 )
 			SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_INIT ) ;
 
 		// Gestion de la transparence
@@ -3619,10 +3623,10 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, 0, SI_INIT ) ;
 		is_backend_connected = 0 ;
 		start_backend();
-		if(!backend && GetAutoreconnectFlag() ) { 
+		if( (!backend || !is_backend_connected) && GetAutoreconnectFlag() ) { 
 		    if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
-			logevent(NULL, "Unable to connect, trying to reconnect...") ; 
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
+			lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
 			}
 			break;
 		}
@@ -3930,7 +3934,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #ifdef RUTTYPORT
 	  case IDM_SCRIPTHALT:
 		script_close(&scriptdata);
-		logevent(NULL, "script stopped");
+		lp_eventlog(default_logpolicy, "script stopped");
 		break;
 	  case IDM_SCRIPTSEND:
     {
@@ -4215,8 +4219,10 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
       case WM_MBUTTONDOWN:
       case WM_RBUTTONDOWN:
 #ifdef RECONNECTPORT
-	if( !backend && GetAutoreconnectFlag() && is_backend_first_connected ) { // On essaie de se reconnecter
-		SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; break ; 
+	if( ((!backend) || (!is_backend_connected)) && GetAutoreconnectFlag() && is_backend_first_connected ) { // On essaie de se reconnecter
+		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
+		lp_eventlog(default_logpolicy, "No connection on mouse click, trying to reconnect...") ;
+		break ; 
 	} 
 #endif
       case WM_LBUTTONUP:
@@ -4226,9 +4232,17 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	if( GetProtectFlag() ) { break ; }
         if(!PuttyFlag && GetMouseShortcutsFlag() ) {
 	if( (message == WM_LBUTTONUP) && ((wParam & MK_SHIFT)&&(wParam & MK_CONTROL) ) ) { // shift + CTRL + bouton gauche => duplicate session
-		if( backend ) SendMessage( hwnd, WM_COMMAND, IDM_DUPSESS, 0 ) ;
+		if( backend && is_backend_connected ) {
+			lp_eventlog(default_logpolicy, "Duplicate session") ;
+			SendMessage( hwnd, WM_COMMAND, IDM_DUPSESS, 0 ) ;
+		}
 #ifdef RECONNECTPORT
-		else { if( is_backend_first_connected ) { SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; } }
+		else { 
+			if( is_backend_first_connected && GetAutoreconnectFlag() ) {
+				SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
+				lp_eventlog(default_logpolicy, "No connection on mouse click, trying to reconnect...") ;
+			} 
+		}
 #endif
 		break ;
 		}
@@ -5105,8 +5119,8 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #endif
 #ifdef RECONNECTPORT
 	//if( !back && GetAutoreconnectFlag() && is_backend_first_connected && (WM_COMMAND==WM_KEYDOWN) && !(GetKeyState(VK_CONTROL)&0x8000) && !(GetKeyState(VK_SHIFT)&0x8000) && !(GetKeyState(VK_MENU)&0x8000) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
-	if( !backend && (message==WM_KEYDOWN) && GetAutoreconnectFlag() && is_backend_first_connected && (wParam!=VK_CONTROL) && (wParam!=VK_SHIFT) && (wParam!=VK_MENU) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
- 		logevent(NULL, "No connection on key pressed, trying to reconnect...") ; 
+	if( (!backend || !is_backend_connected) && (message==WM_KEYDOWN) && GetAutoreconnectFlag() && is_backend_first_connected && (wParam!=VK_CONTROL) && (wParam!=VK_SHIFT) && (wParam!=VK_MENU) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
+ 		lp_eventlog(default_logpolicy, "No connection on key pressed, trying to reconnect...") ; 
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ;  
 		break ;
 	}
@@ -5358,23 +5372,23 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 					time_t tnow = time(NULL);
 					
 					if(last_reconnect && ((tnow - last_reconnect) < GetReconnectDelay()) ) {
-						logevent(NULL, "Woken up from suspend, waiting for delay..." );
+						lp_eventlog(default_logpolicy, "Woken up from suspend, waiting for delay..." );
 						Sleep(GetReconnectDelay()*1000);
 					}
 					last_reconnect = tnow;
-					logevent(NULL, "Woken up from suspend, reconnecting...");
+					lp_eventlog(default_logpolicy, "Woken up from suspend, reconnecting...");
 					term_pwron(term, FALSE);
 					is_backend_connected = 0 ;
 					start_backend();
 					SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
 					*/
-					logevent(NULL, "Unable to connect on wakeup, trying to reconnect...") ; 
+					lp_eventlog(default_logpolicy, "Unable to connect on wakeup, trying to reconnect...") ; 
 					SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ;
 				}
 				break;
 			case PBT_APMSUSPEND:
 				if(!session_closed && backend) {
-					logevent(NULL, "Suspend detected, disconnecting cleanly...");
+					lp_eventlog(default_logpolicy, "Suspend detected, disconnecting cleanly...");
 					queue_toplevel_callback(close_session, NULL); // close_session();
 				}
 				break;

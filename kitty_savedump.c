@@ -9,6 +9,9 @@ int GetUserPassSSHNoSave(void) ;
 // Buffer contenant du texte a ecrire au besoin dans le fichier kitty.dmp
 static char * DebugText = NULL ;
 
+extern int is_backend_connected ;
+extern int is_backend_first_connected ;
+
 void set_debug_text( const char * txt ) {
 	if( DebugText!=NULL ) { free( DebugText ) ; DebugText = NULL ; }
 	if( txt != NULL ) {
@@ -655,6 +658,8 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	if( KiTTYClassName != NULL ) fprintf( fp, "KiTTYClassName=%s\n", KiTTYClassName ) ;
 	if( CtHelperPath!= NULL ) fprintf( fp, "CtHelperPath=%s\n", CtHelperPath ) ;
 	if( strlen(ManagePassPhrase(NULL))>0 ) fprintf( fp, "PassPhrase=%s\n", ManagePassPhrase(NULL)) ;
+	fprintf( fp, "is_backend_connected=%d\n", is_backend_connected ) ;
+	fprintf( fp, "is_backend_first_connected=%d\n", is_backend_first_connected ) ;
 }
 
 // recupere la configuration des shortcuts
