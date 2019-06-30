@@ -25,14 +25,17 @@ typedef enum {
     STATE_WAITING_FOR_ERROR_MESSAGE,
 } adb_state;
 
+size_t win_seat_output_local(Seat *seat, bool is_stderr, const void *data, size_t len) ;
+
 typedef struct adb_backend_data {
     //const struct plug_function_table *fn;
     /* the above field _must_ be first in the structure */
 
-    Socket *s;
     int bufsize;
+    Socket *s;
     Seat *seat;
     LogContext *logctx;
+    
     adb_state state;
     //void *frontend;
     Conf *conf;
@@ -42,7 +45,6 @@ typedef struct adb_backend_data {
 } Adb;
 
 static void adb_size(void *handle, int width, int height);
-size_t win_seat_output_local(Seat *seat, bool is_stderr, const void *data, size_t len) ;
 
 static void c_write(Adb *adb, const char *buf, int len)
 {

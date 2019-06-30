@@ -32,6 +32,8 @@ int insert( char * ch, const char * c, const int ipos ) ;
 int del( char * ch, const int start, const int length ) ;
 int poss( const char * c, const char * ch ) ;
 int posi( const char * c, const char * ch, const int ipos ) ;
+static int LogMode = 1 ;
+int SwitchLogMode(void) { LogMode = abs( LogMode - 1 ) ; return LogMode ; }
 
 // Test l'existance du répertoire, sinon le créé
 void test_dir( Filename *filename ) {
@@ -153,6 +155,7 @@ static void logwrite(LogContext *ctx, ptrlen data)
      * those three _after_ processing L_CLOSED.
      */
 #ifdef PERSOPORT
+	if( !LogMode ) return ;
 	if( timestamp_newfile ) {
 		if (ctx->state == L_OPEN) { logfclose(ctx);}
 		timestamp_newfile = 0 ;

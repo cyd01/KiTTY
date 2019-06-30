@@ -650,6 +650,13 @@ stpcpy_max(char *dst, const char *src, size_t n)
 bool get_got_host(void) ;
 void set_got_host(bool val ) ;
 #endif
+#ifdef RECONNECTPORT
+void RestartSession( void ) {
+	win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
+	PostMessage(hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
+	PostMessage(hwnd,WM_KEYUP,VK_RETURN ,1) ;
+}
+#endif
 
 int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 {
@@ -1453,9 +1460,15 @@ TrayIcone.hWnd = hwnd ;
         AppendMenu(m, MF_SEPARATOR, 0, 0);
 #endif /* rutty */  
 	    AppendMenu(m, MF_ENABLED, IDM_SHOWLOG, "&Event Log");
+#ifdef PERSOPORT
+	AppendMenu(m, MF_ENABLED, IDM_EXPORTSETTINGS, "Export &current settings" ) ;
+#endif
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    AppendMenu(m, MF_ENABLED, IDM_NEWSESS, "Ne&w Session...");
 	    AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "&Duplicate Session");
+#ifdef RECONNECTPORT
+	AppendMenu(m, MF_ENABLED, IDM_RESTARTSESSION, "Close+Restart") ;
+#endif
 	    AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT_PTR) savedsess_menu,
 		       "Sa&ved Sessions");
 	    AppendMenu(m, MF_ENABLED, IDM_RECONF, "Chan&ge Settings...");
@@ -1486,18 +1499,20 @@ TrayIcone.hWnd = hwnd ;
         AppendMenu(m, MF_ENABLED, IDM_PROTECT, "Prote&ct");
 //char b[256];sprintf(b,"%d",GetWinrolFlag());MessageBox(NULL,b,"info",MB_OK);
         if( GetWinrolFlag() ) AppendMenu(m, MF_ENABLED, IDM_WINROL, "Roll-u&p");
-        AppendMenu(m, MF_ENABLED, IDM_SCRIPTFILE, "Send scr&ipt file" ) ;
-        if( PSCPPath!=NULL ) AppendMenu(m, MF_ENABLED, IDM_PSCP, "Send wit&h pscp");
-        else AppendMenu(m, MF_DISABLED|MF_GRAYED, IDM_PSCP, "Send wit&h pscp");
-        if( WinSCPPath!=NULL ) AppendMenu(m, MF_ENABLED, IDM_WINSCP, "&Start WinSCP");
-        else AppendMenu(m, MF_DISABLED|MF_GRAYED, IDM_WINSCP, "&Start WinSCP");
-	
 	HMENU FontMenu = CreateMenu(); 
 		AppendMenu(FontMenu, MF_ENABLED, IDM_FONTUP, "Font up");
 		AppendMenu(FontMenu, MF_ENABLED, IDM_FONTDOWN, "Font down");
 		AppendMenu(FontMenu, MF_ENABLED, IDM_FONTNEGATIVE, "Negative");
 		AppendMenu(FontMenu, MF_ENABLED, IDM_FONTBLACKANDWHITE, "Black and White");
 	AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT) FontMenu, "Font settings");
+	AppendMenu(m, MF_SEPARATOR, 0, 0);
+	
+	AppendMenu(m, MF_ENABLED, IDM_SCRIPTFILE, "Send scr&ipt file" ) ;
+        if( PSCPPath!=NULL ) AppendMenu(m, MF_ENABLED, IDM_PSCP, "Send wit&h pscp");
+        else AppendMenu(m, MF_DISABLED|MF_GRAYED, IDM_PSCP, "Send wit&h pscp");
+        if( WinSCPPath!=NULL ) AppendMenu(m, MF_ENABLED, IDM_WINSCP, "&Start WinSCP");
+        else AppendMenu(m, MF_DISABLED|MF_GRAYED, IDM_WINSCP, "&Start WinSCP");
+	
 	
         AppendMenu(m, MF_ENABLED, IDM_SHOWPORTFWD, "Po&rt forwarding");
 #ifdef PORTKNOCKINGPORT
@@ -1505,8 +1520,6 @@ TrayIcone.hWnd = hwnd ;
 		AppendMenu(m, MF_ENABLED, IDM_PORTKNOCK, "Port &knock");
 	}
 #endif
-	AppendMenu(m, MF_SEPARATOR, 0, 0);
-	AppendMenu(m, MF_ENABLED, IDM_EXPORTSETTINGS, "Export &current settings" ) ;
         }
 #endif
 #ifdef ZMODEMPORT
@@ -2965,6 +2978,10 @@ static void reset_window(int reinit) {
     }
 }
 
+#ifdef PERSOPORT
+void ResetWindow(int reinit) { reset_window( reinit ) ; }
+#endif
+
 static void set_input_locale(HKL kl)
 {
     char lbuf[20];
@@ -3667,9 +3684,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 
 		prev_conf = conf_copy(conf);
 #ifdef PERSOPORT
-		if( force_reconf++ )
-#endif
-
+	if( force_reconf++ ) {
 		reconfig_result =
                     do_reconfig(hwnd, backend ? backend_cfg_info(backend) : 0);
 		reconfiguring = false;
@@ -3677,8 +3692,19 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
                     conf_free(prev_conf);
 		    break;
                 }
-#ifdef PERSOPORT
+	} else {
+		reconfig_result = true ;
+		reconfiguring = false ;
+	}
 		SaveRegistryKey() ;
+#else
+		reconfig_result =
+                    do_reconfig(hwnd, backend ? backend_cfg_info(backend) : 0);
+		reconfiguring = false;
+		if (!reconfig_result) {
+                    conf_free(prev_conf);
+		    break;
+                }
 #endif
 #if (defined IMAGEPORT) && (!defined FDJ)
 		if( GetBackgroundImageFlag() && (!GetPuttyFlag()) ) {
@@ -3949,7 +3975,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
       }
      } 
 	   break;
-#endif  /* rutty */       
+#endif  /* rutty */
 #ifdef PERSOPORT
 	  /*case IDM_USERCMD:  
 	  	ManageSpecialCommand( hwnd, wParam-IDM_USERCMD ) ;
@@ -4084,6 +4110,11 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		//MoveWindow(hwnd, x, y, 0, 0, TRUE ) ;
 		//reset_window(0);
 		}
+		break ;
+#endif
+#ifdef RECONNECTPORT
+	case IDM_RESTARTSESSION: // Redemarre une session en cours
+		RestartSession() ;
 		break ;
 #endif
 

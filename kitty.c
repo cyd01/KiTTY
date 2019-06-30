@@ -504,6 +504,7 @@ static struct TShortcuts {
 	int viewer ;
 	int visible ;
 	int winscp ;
+	int switchlogmode ;
 	int showportforward ;
 	int resetterminal ;
 	int duplicate ;
@@ -660,20 +661,7 @@ return ;
 	}
 
 char *dupvprintf(const char *fmt, va_list ap) ;
-void logevent(LogContext *logctx, const char *event);
 	
-// Affichage d'un message dans l'event log
-void debug_logevent( const char *fmt, ... ) {
-	va_list ap;
-	char *buf;
-	va_start(ap, fmt);
-	buf = dupvprintf(fmt, ap) ;
-	va_end(ap);
-	//MessageBox(NULL,buf,"logevent",MB_OK);
-	logevent(NULL,buf);
-	free(buf);
-	}
-
 // Procedure de recuperation de la valeur d'un flag
 int get_param( const char * val ) {
 	if( !stricmp( val, "PUTTY" ) ) return PuttyFlag ;
@@ -1409,9 +1397,10 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, "Print", "maxline", "60" ) ;
 			writeINI( KittyIniFile, "Print", "maxchar", "85" ) ;
 			
+			writeINI( KittyIniFile, "Shortcuts", "#switchlogmode", "{SHIFT}{F5}" ) ;
+			writeINI( KittyIniFile, "Shortcuts", "#showportforward", "{SHIFT}{F6}" ) ;
 			writeINI( KittyIniFile, "Shortcuts", "print", "{SHIFT}{F7}" ) ;
 			writeINI( KittyIniFile, "Shortcuts", "printall", "{F7}" ) ;
-
 			}
 		if( !existfile( KittyIniFile ) ) { MessageBox( NULL, "Unable to create configuration file !", "Error", MB_OK|MB_ICONERROR ) ; }
 		}
@@ -1774,7 +1763,7 @@ void SendAutoCommand( HWND hwnd, const char * cmd ) {
 		buf=(char*)malloc( strlen(cmd)+30 ) ;
 		strcpy( buf, "Send automatic command" ) ;
 		if( debug_flag ) { strcat( buf, ": ") ; strcat( buf, cmd ) ; }
-		if( conf_get_int(conf,CONF_protocol) != PROT_TELNET ) logevent(NULL, buf ) ; // On logue que si on est pas en telnet (à cause du password envoyé en clair)
+		if( conf_get_int(conf,CONF_protocol) != PROT_TELNET ) debug_logevent( buf ) ; // On logue que si on est pas en telnet (à cause du password envoyé en clair)
 		free(buf);
 		if( existfile( cmd ) ) RunScriptFile( hwnd, cmd ) ;
 		else if( (toupper(cmd[0])=='C')&&(toupper(cmd[1])==':')&&(toupper(cmd[2])=='\\') ) {
@@ -2246,7 +2235,7 @@ void RunExternPlink( HWND hwnd, const char * cmd ) {
 	strcat( buffer, "\"" ) ; strcat( buffer, cmd ) ; strcat(buffer,"\"") ;
 	
 	chdir( InitialDirectory ) ;
-	if( debug_flag ) {debug_logevent( "Run: %s", buffer); }
+	if( debug_flag ) { debug_logevent( "Run: %s", buffer) ; }
 	if( system( buffer ) ) MessageBox( NULL, buffer, "Execute problem", MB_OK|MB_ICONERROR  ) ;
 }
 	
@@ -2350,7 +2339,7 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 
 	chdir( InitialDirectory ) ;
 
-	if( debug_flag ) {debug_logevent( "Run: %s", buffer); }
+	if( debug_flag ) { debug_logevent( "Run: %s", buffer) ; }
 	if( system( buffer ) ) MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ;
 	//debug_log("%s\n",buffer);//MessageBox( NULL, buffer, "Info",MB_OK );
 	}
@@ -2457,7 +2446,7 @@ void GetFile( HWND hwnd ) {
 		}
 	if( strlen( buffer ) > 0 ) {
 		chdir( InitialDirectory ) ;
-		if( debug_flag ) { debug_logevent("Run: %s", buffer); }
+		if( debug_flag ) { debug_logevent("Run: %s", buffer) ; }
 		if( system( buffer ) ) MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ;
 		//if( !system( buffer ) ) unlink( "kitty.log" ) ;
 		}
@@ -2566,7 +2555,7 @@ int ManageLocalCmd( HWND hwnd, const char * cmd ) {
 		return 1 ;
 		}
 	else if( (cmd[0]=='i')&&(cmd[1]=='n')&&(cmd[2]==':') ) { // __in: Affiche d'information dans le log
-		logevent(NULL,cmd+3);
+		debug_logevent(cmd+3) ;
 		return 1 ;
 		}
 	else if( (cmd[0]=='w')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ws: Lance WinSCP dans un repertoire donne
@@ -4536,9 +4525,11 @@ int Convert1Reg( const char * filename ) {
 	return 0 ;
 }
 
+void ResetWindow(int reinit) ;
 #ifndef IDM_RECONF    
 #define IDM_RECONF    0x0050
 #endif
+
 void NegativeColours(HWND hwnd) {
 	int i ;
 #ifdef TUTTYPORT
@@ -4550,10 +4541,12 @@ void NegativeColours(HWND hwnd) {
 	conf_set_int_int(conf, CONF_colours, i*3+1, 256-conf_get_int_int(conf, CONF_colours, i*3+1));
 	conf_set_int_int(conf, CONF_colours, i*3+2, 256-conf_get_int_int(conf, CONF_colours, i*3+2));
     }
-    force_reconf=0;
-    PostMessage(hwnd,WM_COMMAND,IDM_RECONF,0);
-    RefreshBackground(hwnd);
+    force_reconf = 0 ;
+    PostMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ;
+    
+    RefreshBackground( hwnd ) ;
 }
+
 static int * BlackOnWhiteColoursSave = NULL ;
 void BlackOnWhiteColours(HWND hwnd) {
 	if( BlackOnWhiteColoursSave==NULL ) {
@@ -4579,13 +4572,16 @@ void BlackOnWhiteColours(HWND hwnd) {
 			conf_set_int_int(conf, CONF_colours, 6, BlackOnWhiteColoursSave[3]) ;
 			conf_set_int_int(conf, CONF_colours, 7, BlackOnWhiteColoursSave[4]) ;
 			conf_set_int_int(conf, CONF_colours, 8, BlackOnWhiteColoursSave[5]) ;
-			free(BlackOnWhiteColoursSave); BlackOnWhiteColoursSave=NULL;
+			free(BlackOnWhiteColoursSave) ; 
+			BlackOnWhiteColoursSave=NULL ;
 		}
 	}
-	force_reconf=0;
-	PostMessage(hwnd,WM_COMMAND,IDM_RECONF,0);
-	RefreshBackground(hwnd);
+	force_reconf = 0 ;
+	PostMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ;
+
+	ResetWindow(2);
 }
+
 static int original_fontsize = -1 ;
 void ChangeFontSize(HWND hwnd, int dec) {
 	FontSpec *fontspec = conf_get_fontspec(conf, CONF_font);
@@ -4597,17 +4593,15 @@ void ChangeFontSize(HWND hwnd, int dec) {
 	}
 	conf_set_fontspec(conf, CONF_font, fontspec);
         fontspec_free(fontspec);
-	force_reconf=0;
-	
-	//char b[256];sprintf(b,"%d %d",hwnd,fontspec->height);MessageBox(NULL,b,"ici",MB_OK);
-	
-	SendMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ;
-	RefreshBackground(hwnd);
+	force_reconf = 0 ;
+	PostMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ;
+
+	ResetWindow(2);
 }
 void ChangeSettings(HWND hwnd) {
 	//NegativeColours(hwnd);
-	//BlackOnWhiteColours(hwnd);
-	ChangeFontSize(hwnd,1);
+	BlackOnWhiteColours(hwnd);
+	//ChangeFontSize(hwnd,1);
 	//ChangeFontSize(hwnd,-1);
 }
 	
@@ -4775,6 +4769,8 @@ void InitShortcuts( void ) {
 		shortcuts_tab.editorclipboard = CONTROLKEY+SHIFTKEY+VK_F2 ;
 	if( !readINI(KittyIniFile,"Shortcuts","winscp",buffer) || ( (shortcuts_tab.winscp=DefineShortcuts(buffer))<=0 ) )
 		shortcuts_tab.winscp = SHIFTKEY+VK_F3 ;
+	if( !readINI(KittyIniFile,"Shortcuts","switchlogmode",buffer) || ( (shortcuts_tab.switchlogmode=DefineShortcuts(buffer))<=0 ) )
+		shortcuts_tab.switchlogmode = SHIFTKEY+VK_F5 ;
 	if( !readINI(KittyIniFile,"Shortcuts","showportforward",buffer) || ( (shortcuts_tab.showportforward=DefineShortcuts(buffer))<=0 ) )
 		shortcuts_tab.showportforward = SHIFTKEY+VK_F6 ;
 	if( !IsWow64() ) {
@@ -4843,6 +4839,7 @@ void InitShortcuts( void ) {
 		}
 	}
 
+int SwitchLogMode(void) ;
 int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) {
 	int key, i ;
 	key = key_num ;
@@ -4858,6 +4855,11 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		{ SendMessage( hwnd, WM_COMMAND, IDM_PROTECT, 0 ) ; InvalidateRect( hwnd, NULL, TRUE ) ; return 1 ; }
 	if( key == shortcuts_tab.rollup ) 				// Fonction winroll
 			{ SendMessage( hwnd, WM_COMMAND, IDM_WINROL, 0 ) ; return 1 ; }
+	if( key == shortcuts_tab.switchlogmode ) {
+		i = SwitchLogMode() ;
+		if( i==1 ) { debug_logevent( "Enable logging" ) ; } else { debug_logevent( "Disable logging" ) ; }
+		return 1 ;
+	}
 	if( key == shortcuts_tab.showportforward ) 				// Fonction show port forward
 			{ SendMessage( hwnd, WM_COMMAND, IDM_SHOWPORTFWD, 0 ) ; return 1 ; }
 
@@ -4988,7 +4990,7 @@ void SetPasteCommand( void ) {
 				PasteCommand = (char*) malloc( strlen(pst)+1 ) ;
 				strcpy( PasteCommand, pst ) ;
 				SetTimer(hwnd, TIMER_AUTOPASTE, autocommand_delay, NULL) ;
-				logevent(NULL,"Sent paste command");
+				debug_logevent( "Sent paste command" ) ;
 				GlobalUnlock( hglb ) ;
 				}
 			}
@@ -5423,7 +5425,7 @@ void InitWinMain( void ) {
 	i = 4095 ;
 	GetComputerName( hostname, (void*)&i ) ;
 	sprintf( buffer, "Starting %ld from %s@%s", GetCurrentProcessId(), username, hostname ) ;
-	logevent(NULL,buffer);
+	debug_logevent(buffer) ;
 }
 
 

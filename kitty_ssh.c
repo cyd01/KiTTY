@@ -2,16 +2,13 @@
 #include "kitty_tools.h"
 
 #ifdef PORTKNOCKINGPORT
-
-void logevent(void *frontend, const char *string);
-
 void vprint(char *fmt, ...)
 {	char buf[1024];
 	va_list args;
 	va_start(args, fmt);
 	vsprintf(buf,fmt, args);
 	if( buf[strlen(buf)-1]=='\n' ) buf[strlen(buf)-1]='\0';
-	logevent(NULL,buf);
+	printf(buf) ;
 	va_end(args);
 }
 
@@ -94,7 +91,7 @@ int ManagePortKnocking( char* host, char *portknockseqorig ) {
 			if( !stricmp(protostr,"s") ) {
 				Sleep( atof(portstr)*1000 ) ; 
 			} else {
-				if( knock(host,port,proto) ) logevent( NULL, "Unable to knock port" ) ;
+				if( knock(host,port,proto) ) fprintf(stderr, "Unable to knock port" ) ;
 				Sleep( 40 ) ;
 			}
 		}

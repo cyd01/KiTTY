@@ -251,4 +251,5 @@ int MakeDir( const char * directory ) {
 	}
 		
 	return existdirectory(fullpath) ;
-	}
+}
+

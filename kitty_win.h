@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <windows.h>
+#include "putty.h"
 
 void SetTransparency( HWND hwnd, int value ) ;
 void GetOSInfo( char * version ) ;
@@ -33,4 +34,6 @@ void RunPuttyEd( HWND hwnd, char * filename ) ;
 // Verifie si une mise a jour est disponible sur le site web
 void CheckVersionFromWebSite( HWND hwnd ) ;
 
+// Affichage d'un message dans l'event log
+void debug_logevent( const char *fmt, ... ) ;
 #endif

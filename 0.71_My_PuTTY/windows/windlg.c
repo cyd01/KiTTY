@@ -1037,7 +1037,7 @@ bool do_config(void)
 
 #ifdef PERSOPORT
 	GotoConfigDirectory() ;
-	if( ret==0 ) SaveRegistryKey( ) ; // On sort de la config box par ESCAPE ou cancel
+	if( ret==false ) SaveRegistryKey( ) ; // On sort de la config box par ESCAPE ou cancel
 	else _beginthread( routine_SaveRegistryKey, 0, (void*)NULL ) ; // On démarre une session
 #endif
     return ret;
@@ -1067,8 +1067,8 @@ bool do_reconfig(HWND hwnd, int protcfginfo)
     dp.shortcuts['g'] = true;	       /* the treeview: `Cate&gory' */
 
     ret = SaneDialogBox(hinst, MAKEINTRESOURCE(IDD_MAINBOX), NULL,
-		  GenericMainDlgProc);
-
+		  GenericMainDlgProc) ;
+		  
     ctrl_free_box(ctrlbox);
     winctrl_cleanup(&ctrls_base);
     winctrl_cleanup(&ctrls_panel);

@@ -580,6 +580,12 @@ int getpid(void) ;
 #define IDM_CLEARLOGFILE 0x0610
 #endif
 
+#ifdef RECONNECTPORT
+#ifndef IDM_RESTARTSESSION
+#define IDM_RESTARTSESSION 0x0450
+#endif
+#endif
+
 // Doit etre le dernier
 #ifndef IDM_LAUNCHER
 #define IDM_LAUNCHER	0x1000

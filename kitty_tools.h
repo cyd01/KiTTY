@@ -60,6 +60,4 @@ int add_env( char * name, char * value ) ;
 // Creer un repertoire recurssif (rep1 / rep2 / ...)
 int MakeDir( const char * directory ) ;
 
-// Affichage d'un message dans l'event log
-void debug_logevent( const char *fmt, ... ) ;
 #endif

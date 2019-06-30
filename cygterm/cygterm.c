@@ -33,15 +33,17 @@ size_t win_seat_output_local(Seat *seat, bool is_stderr, const void *data, size_
 
 typedef struct cygterm_backend_data {
 	//const struct plug_function_table *fn;
-	//void *frontend;
 	
 	Socket *a;
     Socket *s;
     Seat *seat;
     LogContext *logctx;
+	//void *frontend;
+
 	PROCESS_INFORMATION pi;
 	HANDLE ctl;
 	Conf * conf;
+	
     Plug plug;
     Backend backend;
 	int bufsize;
@@ -55,11 +57,18 @@ static void cygterm_log(Plug *p, int type, SockAddr *addr, int port, const char 
 	/* Do nothing */
 }
 
-
+/*
+static void c_write(Local *local, const char *buf, int len)
+{
+    //int backlog = from_backend(local->frontend, 0, buf, len);
+    int backlog = win_seat_output_local(local->seat,false,buf,len);
+    sk_set_frozen(local->s, backlog > CYGTERM_MAX_BACKLOG);
+}
+*/
 static int cygterm_closing(Plug *plug, const char *error_msg, int error_code, bool calling_back)
 {
 	//Local local = (Local)plug;
-	Local *local = container_of(plug,Local,plug);
+	Local *local = container_of(plug, Local, plug) ;
 	 
 	cygterm_debug("top");
 	if (local->s) {
@@ -196,7 +205,7 @@ static const char * cygterm_init(Seat *seat, Backend **backend_handle,
         local->backend.vt = &cygterm_backend;
 	local->a = NULL;
 	local->s = NULL;
-	local->conf = conf;
+	local->conf = conf_copy(conf);
 	local->editing = 0;
 	local->echoing = 0;
 	local->exitcode = 0;
@@ -212,7 +221,7 @@ static const char * cygterm_init(Seat *seat, Backend **backend_handle,
 
 	/* let sk use INADDR_LOOPBACK and let WinSock choose a port */
 	//local->a = sk_newlistener(0, 0, (Plug)local, 1, ADDRTYPE_IPV4);
-	local->a = sk_newlistener(0, 0, (Plug*)local, 1, ADDRTYPE_IPV4);		// local-> ou seat  ou local tout court
+	local->a = sk_newlistener(0, 0, (Plug*)&local->plug, 1, ADDRTYPE_IPV4);		// local-> ou seat  ou local tout court
 		
 	if ((err = sk_socket_error(local->a)) != NULL)
 		goto fail_free;

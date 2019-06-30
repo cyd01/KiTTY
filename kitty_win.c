@@ -1,7 +1,5 @@
 #include "kitty_win.h"
 
-void logevent(void *frontend, const char *);
-
 // Modifie la transparence
 void SetTransparency( HWND hwnd, int value ) {
 #ifndef NO_TRANSPARENCY
@@ -402,7 +400,7 @@ void RunPuttyEd( HWND hwnd, char * filename ) {
 		if( GetShortPathName( buffer, shortname, 1023 ) ) {
 			strcat( shortname, " -ed" );
 			if( filename!=NULL ) if( strlen(filename)>0 ) { strcat( shortname, "b " ) ; strcat( shortname, filename ) ; }
-			logevent(NULL, shortname ) ;
+			debug_logevent( shortname ) ;
 			RunCommand( hwnd, shortname ) ; 
 			}
 	}
@@ -418,4 +416,15 @@ void CheckVersionFromWebSite( HWND hwnd ) {
 		}
 	sprintf( buffer, "http://www.9bis.net/kitty/check_update.php?version=%s", vers ) ;
 	ShellExecute(hwnd, "open", buffer, 0, 0, SW_SHOWDEFAULT);
-	}
+}
+
+// Affichage d'un message dans l'event log
+void debug_logevent( const char *fmt, ... ) {
+	va_list ap;
+	char *buf;
+	va_start(ap, fmt);
+	buf = dupvprintf(fmt, ap) ;
+	va_end(ap);
+	lp_eventlog(default_logpolicy,buf) ;
+	free(buf);
+}
