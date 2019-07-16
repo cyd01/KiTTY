@@ -43,45 +43,6 @@
 // La structure de configuration est instanciee dans window.c
 extern Conf *conf ;
 
-/*************************************************
-** DEFINITION DES DEFINES
-*************************************************/
-#define IDM_QUIT 0x0100
-#define IDM_VISIBLE   0x0120
-#define IDM_PROTECT   0x0210
-#define IDM_PRINT   0x0220
-#define IDM_TRANSPARUP	0x0230
-#define IDM_TRANSPARDOWN	0x0240
-#define IDM_WINROL   0x0250
-#define IDM_PSCP	0x0260
-#define IDM_WINSCP	0x0270
-#define IDM_TOTRAY   0x0280
-#define IDM_FROMTRAY   0x0290
-#define IDM_SHOWPORTFWD	0x0300
-#define IDM_HIDE	0x0310
-#define IDM_UNHIDE	0x0320
-#define IDM_SWITCH_HIDE 0x0330
-#define IDM_GONEXT	0x0340
-#define IDM_GOPREVIOUS	0x0350
-#define IDM_SCRIPTFILE 0x0360
-#define IDM_RESIZE 0x0370
-#define IDM_REPOS 0x0380
-#define IDM_EXPORTSETTINGS 0x0390
-#define IDM_PORTKNOCK	0x0440
-#define IDM_CLEARLOGFILE 0x0610
-
-// Doit etre le dernier
-#define IDM_LAUNCHER	0x1000
-
-// USERCMD doit etre la plus grande valeur pour permettre d'avoir autant de raccourcis qu'on le souhaite
-#define IDM_USERCMD   0x8000
-
-// Idem USERCMD
-#define IDM_GOHIDE    0x9000
-
-#define IDB_OK	1098
-
-
 #ifndef SAVEMODE_REG
 #define SAVEMODE_REG 0
 #endif
@@ -99,17 +60,6 @@ extern int IniFileFlag ;
 extern int DirectoryBrowseFlag ;
 int GetDirectoryBrowseFlag(void) { return DirectoryBrowseFlag ; }
 void SetDirectoryBrowseFlag( const int flag ) { DirectoryBrowseFlag = flag ; }
-
-#ifdef ZMODEMPORT
-#define IDM_XYZSTART  0x0810
-#define IDM_XYZUPLOAD 0x0820
-#define IDM_XYZABORT  0x0830
-int xyz_Process(Backend *back, void *backhandle, Terminal *term);
-void xyz_ReceiveInit(Terminal *term);
-void xyz_StartSending(Terminal *term);
-void xyz_Cancel(Terminal *term);
-void xyz_updateMenuItems(Terminal *term);
-#endif
 
 
 #define SI_INIT 0
@@ -1204,6 +1154,7 @@ void RepliqueToPuTTY( LPCTSTR Key ) {
 #ifdef FDJ
 return ;
 #endif
+	if( IniFileFlag == SAVEMODE_REG )
 	if( readINI( KittyIniFile, "PuTTY", "keys", buffer ) ) {
 		while( (buffer[strlen(buffer)-1]=='\n')||(buffer[strlen(buffer)-1]=='\r')||(buffer[strlen(buffer)-1]==' ')||(buffer[strlen(buffer)-1]=='\t') ) buffer[strlen(buffer)-1]='\0';
 		if( !stricmp( buffer, "load" ) ) {

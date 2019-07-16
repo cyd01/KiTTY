@@ -251,7 +251,7 @@ int is_backend_connected = 0 ;
 
 #ifdef RECONNECTPORT
 int is_backend_first_connected = 0 ; 
-void SetSSHConnected( int flag ) { 
+void SetSSHConnected( int flag ) {
 	is_backend_connected = flag ; 
 	if( flag ) is_backend_first_connected = 1 ; 
 	}

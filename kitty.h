@@ -265,23 +265,6 @@ void SethInstIcons( const HINSTANCE h ) ;
 
 extern int debug_flag ;
 
-#ifdef ZMODEMPORT
-#ifndef IDM_XYZSTART
-#define IDM_XYZSTART  0x0810
-#endif
-#ifndef IDM_XYZUPLOAD
-#define IDM_XYZUPLOAD 0x0820
-#endif
-#ifndef IDM_XYZABORT
-#define IDM_XYZABORT  0x0830
-#endif
-int xyz_Process(Backend *back, void *backhandle, Terminal *term) ;
-void xyz_ReceiveInit(Terminal *term) ;
-void xyz_StartSending(Terminal *term) ;
-void xyz_Cancel(Terminal *term) ;
-void xyz_updateMenuItems(Terminal *term) ;
-#endif
-
 extern int PORT ;
 
 // Declaration de prototypes de fonction
@@ -495,100 +478,119 @@ int getpid(void) ;
 #define VISIBLE_TRAY -1
 #endif
 
+/*************************************************
+** DEFINITION DES DEFINES
+*************************************************/
+#ifdef ZMODEMPORT
+#ifndef IDM_XYZSTART
+#define IDM_XYZSTART  0xA810
+#endif
+#ifndef IDM_XYZUPLOAD
+#define IDM_XYZUPLOAD 0xA820
+#endif
+#ifndef IDM_XYZABORT
+#define IDM_XYZABORT  0xA830
+#endif
+int xyz_Process(Backend *back, void *backhandle, Terminal *term) ;
+void xyz_ReceiveInit(Terminal *term) ;
+void xyz_StartSending(Terminal *term) ;
+void xyz_Cancel(Terminal *term) ;
+void xyz_updateMenuItems(Terminal *term) ;
+#endif
 
 #ifndef IDM_QUIT
-#define IDM_QUIT 0x0100
+#define IDM_QUIT 0xA840
 #endif
 #ifndef IDM_VISIBLE
-#define IDM_VISIBLE   0x0120
+#define IDM_VISIBLE   0xA850
 #endif
 #ifndef IDM_PROTECT
-#define IDM_PROTECT   0x0210
+#define IDM_PROTECT   0xA860
 #endif
 #ifndef IDM_PRINT
-#define IDM_PRINT   0x0220
+#define IDM_PRINT   0xA870
 #endif
 #ifndef IDM_TRANSPARUP
-#define IDM_TRANSPARUP	0x0230
+#define IDM_TRANSPARUP	0xA880
 #endif
 #ifndef IDM_TRANSPARDOWN
-#define IDM_TRANSPARDOWN	0x0240
+#define IDM_TRANSPARDOWN	0xA890
 #endif
 #ifndef IDM_WINROL
-#define IDM_WINROL   0x0250
+#define IDM_WINROL   0xA900
 #endif
 #ifndef IDM_PSCP
-#define IDM_PSCP	0x0260
+#define IDM_PSCP	0xA910
 #endif
 #ifndef IDM_WINSCP
-#define IDM_WINSCP	0x0270
+#define IDM_WINSCP	0xA920
 #endif
 #ifndef IDM_TOTRAY
-#define IDM_TOTRAY   0x0280
+#define IDM_TOTRAY   0xA930
 #endif
 #ifndef IDM_FROMTRAY
-#define IDM_FROMTRAY   0x0290
+#define IDM_FROMTRAY   0xA940
 #endif
 #ifndef IDM_SHOWPORTFWD
-#define IDM_SHOWPORTFWD	0x0300
+#define IDM_SHOWPORTFWD	0xA950
 #endif
 #ifndef IDM_HIDE
-#define IDM_HIDE	0x0310
+#define IDM_HIDE	0xA960
 #endif
 #ifndef IDM_UNHIDE
-#define IDM_UNHIDE	0x0320
+#define IDM_UNHIDE	0xA970
 #endif
 #ifndef IDM_SWITCH_HIDE
-#define IDM_SWITCH_HIDE 0x0330
+#define IDM_SWITCH_HIDE 0xA980
 #endif
 #ifndef IDM_GONEXT
-#define IDM_GONEXT	0x0340
+#define IDM_GONEXT	0xA990
 #endif
 #ifndef IDM_GOPREVIOUS
-#define IDM_GOPREVIOUS	0x0350
+#define IDM_GOPREVIOUS	0xB000
 #endif
 #ifndef IDM_SCRIPTFILE
-#define IDM_SCRIPTFILE 0x0360
+#define IDM_SCRIPTFILE 0xB010
 #endif
 #ifndef IDM_RESIZE
-#define IDM_RESIZE 0x0370
+#define IDM_RESIZE 0xB020
 #endif
 #ifndef IDM_REPOS
-#define IDM_REPOS 0x0380
+#define IDM_REPOS 0xB030
 #endif
 #ifndef IDM_EXPORTSETTINGS
-#define IDM_EXPORTSETTINGS 0x0390
+#define IDM_EXPORTSETTINGS 0xB040
 #endif
 
 #ifndef IDM_FONTUP
-#define IDM_FONTUP 0x0400
+#define IDM_FONTUP 0xB050
 #endif
 #ifndef IDM_FONTDOWN
-#define IDM_FONTDOWN 0x0410
+#define IDM_FONTDOWN 0xB060
 #endif
 #ifndef IDM_FONTBLACKANDWHITE
-#define IDM_FONTBLACKANDWHITE 0x0420
+#define IDM_FONTBLACKANDWHITE 0xB070
 #endif
 #ifndef IDM_FONTNEGATIVE
-#define IDM_FONTNEGATIVE 0x0430
+#define IDM_FONTNEGATIVE 0xB080
 #endif
 
 #ifndef IDM_PORTKNOCK
-#define IDM_PORTKNOCK	0x0440
+#define IDM_PORTKNOCK	0xB090
 #endif
 #ifndef IDM_CLEARLOGFILE
-#define IDM_CLEARLOGFILE 0x0610
+#define IDM_CLEARLOGFILE 0xB100
 #endif
 
 #ifdef RECONNECTPORT
 #ifndef IDM_RESTARTSESSION
-#define IDM_RESTARTSESSION 0x0450
+#define IDM_RESTARTSESSION 0xB110
 #endif
 #endif
 
 // Doit etre le dernier
 #ifndef IDM_LAUNCHER
-#define IDM_LAUNCHER	0x1000
+#define IDM_LAUNCHER	0xB120
 #endif
 
 // USERCMD doit etre la plus grande valeur pour permettre d'avoir autant de raccourcis qu'on le souhaite
@@ -600,6 +602,12 @@ int getpid(void) ;
 #ifndef IDM_GOHIDE
 #define IDM_GOHIDE    0x9000
 #endif
+
+/*************************************************
+** FIN DE DEFINITION DES DEFINES
+*************************************************/
+
+
 
 #ifndef IDB_OK
 #define IDB_OK	1098

@@ -863,6 +863,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                                              s->publickey_comment),
                                    false);
 #ifdef PERSOPORT
+		    	SetSSHConnected(1);
 			if( strlen(ManagePassPhrase(NULL))>0 ) {
 				char *p = ManagePassPhrase(NULL) ;
 				bufchain bc;

@@ -1148,6 +1148,9 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	    get_sesslist(&ssd->sesslist, true);
 	    dlg_refresh(ssd->editbox, dlg);
 	    dlg_refresh(ssd->listbox, dlg);
+#ifdef PERSOPORT
+	    RepliqueToPuTTY( PUTTY_REG_POS ) ;
+#endif
 	} else if (!ssd->midsession &&
 		   ssd->delbutton && ctrl == ssd->delbutton) {
 	    int i = dlg_listbox_index(ssd->listbox, dlg);
