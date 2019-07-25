@@ -547,6 +547,7 @@ static void start_backend(void)
 	    SetConnBreakIcon() ;
 	    SetSSHConnected(0) ;
 	    queue_toplevel_callback(close_session, NULL);
+	    session_closed = true;
 	    lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
 	    SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 	    return ;
@@ -2042,6 +2043,7 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 		SetConnBreakIcon() ;
 		SetSSHConnected(0);
 		queue_toplevel_callback(close_session, NULL);
+		session_closed = true;
 		ReadInitScript(NULL);
 	
     char *title = dupprintf("%s Fatal Error: %s", appname,msg);
@@ -2050,6 +2052,7 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 	
 		if( conf_get_int(conf,CONF_failure_reconnect) ) {
 			queue_toplevel_callback(close_session, NULL);
+			session_closed = true;
 			lp_eventlog(default_logpolicy, "Lost connection, trying to reconnect...") ;
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ;
 		}
@@ -2062,6 +2065,7 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 	PostQuitMessage(1);
     else {
 	queue_toplevel_callback(close_session, NULL);
+	session_closed = true;
     }
 	}
 #else
@@ -3130,6 +3134,7 @@ static void win_seat_notify_remote_exit(Seat *seat)
 		SetConnBreakIcon() ;
 		SetSSHConnected(0);
 		queue_toplevel_callback(close_session, NULL);
+		session_closed = true;
 		ReadInitScript(NULL);
 		lp_eventlog(default_logpolicy, "Connection closed by remote host");
 	} else
@@ -5417,6 +5422,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 				if(!session_closed && backend) {
 					lp_eventlog(default_logpolicy, "Suspend detected, disconnecting cleanly...");
 					queue_toplevel_callback(close_session, NULL); // close_session();
+					session_closed = true;
 				}
 				break;
 		}
