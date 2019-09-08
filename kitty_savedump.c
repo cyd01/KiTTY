@@ -394,8 +394,8 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "window_border=%d\n",		conf_get_int(conf,CONF_window_border) ) ;
 	fprintf( fp, "answerback=%s\n",			conf_get_str(conf,CONF_answerback) ) ;
 	fprintf( fp, "printer=%s\n",			conf_get_str(conf,CONF_printer) ) ;
-	fprintf( fp, "arabicshaping=%d\n",		conf_get_bool(conf,CONF_arabicshaping) ) ;
-	fprintf( fp, "bidi=%d\n",			conf_get_bool(conf,CONF_bidi) ) ;
+	fprintf( fp, "no_arabicshaping=%d\n",		conf_get_bool(conf,CONF_no_arabicshaping) ) ;
+	fprintf( fp, "no_bidi=%d\n",			conf_get_bool(conf,CONF_no_bidi) ) ;
 		
 	/* Colour options */
 	fprintf( fp, "ansi_colour=%d\n",		conf_get_bool(conf,CONF_ansi_colour) ) ;

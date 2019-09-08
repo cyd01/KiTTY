@@ -118,21 +118,25 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "Compression", conf_get_bool(conf, CONF_compression));
     write_setting_b_forced(sesskey, "TryAgent", conf_get_bool(conf, CONF_tryagent));
     write_setting_b_forced(sesskey, "AgentFwd", conf_get_bool(conf, CONF_agentfwd));
+#ifndef NO_GSSAPI
     write_setting_b_forced(sesskey, "GssapiFwd", conf_get_bool(conf, CONF_gssapifwd));
+#endif
     write_setting_b_forced(sesskey, "ChangeUsername", conf_get_bool(conf, CONF_change_username));
     wprefs_forced(sesskey, "Cipher", ciphernames, CIPHER_MAX, conf, CONF_ssh_cipherlist);
     wprefs_forced(sesskey, "KEX", kexnames, KEX_MAX, conf, CONF_ssh_kexlist);
     wprefs_forced(sesskey, "HostKey", hknames, HK_MAX, conf, CONF_ssh_hklist);
     write_setting_i_forced(sesskey, "RekeyTime", conf_get_int(conf, CONF_ssh_rekey_time));
+#ifndef NO_GSSAPI
     write_setting_i_forced(sesskey, "GssapiRekey", conf_get_int(conf, CONF_gssapirekey));
+#endif
     write_setting_s_forced(sesskey, "RekeyBytes", conf_get_str(conf, CONF_ssh_rekey_data));
     write_setting_b_forced(sesskey, "SshNoAuth", conf_get_bool(conf, CONF_ssh_no_userauth));
     write_setting_b_forced(sesskey, "SshBanner", conf_get_bool(conf, CONF_ssh_show_banner));
     write_setting_b_forced(sesskey, "AuthTIS", conf_get_bool(conf, CONF_try_tis_auth));
     write_setting_b_forced(sesskey, "AuthKI", conf_get_bool(conf, CONF_try_ki_auth));
+#ifndef NO_GSSAPI
     write_setting_b_forced(sesskey, "AuthGSSAPI", conf_get_bool(conf, CONF_try_gssapi_auth));
     write_setting_b_forced(sesskey, "AuthGSSAPIKEX", conf_get_bool(conf, CONF_try_gssapi_kex));
-#ifndef NO_GSSAPI
     wprefs_forced(sesskey, "GSSLibs", gsslibkeywords, ngsslibs, conf, CONF_ssh_gsslist);
     write_setting_filename_forced(sesskey, "GSSCustom", conf_get_filename(conf, CONF_ssh_gss_custom));
 #endif
@@ -201,8 +205,8 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "AutoWrapMode", conf_get_bool(conf, CONF_wrap_mode));
     write_setting_b_forced(sesskey, "LFImpliesCR", conf_get_bool(conf, CONF_lfhascr));
     write_setting_b_forced(sesskey, "CRImpliesLF", conf_get_bool(conf, CONF_crhaslf));
-    write_setting_b_forced(sesskey, "DisableArabicShaping", conf_get_bool(conf, CONF_arabicshaping));
-    write_setting_b_forced(sesskey, "DisableBidi", conf_get_bool(conf, CONF_bidi));
+    write_setting_b_forced(sesskey, "DisableArabicShaping", conf_get_bool(conf, CONF_no_arabicshaping));
+    write_setting_b_forced(sesskey, "DisableBidi", conf_get_bool(conf, CONF_no_bidi));
     write_setting_b_forced(sesskey, "WinNameAlways", conf_get_bool(conf, CONF_win_name_always));
     write_setting_s_forced(sesskey, "WinTitle", conf_get_str(conf, CONF_wintitle));
     write_setting_i_forced(sesskey, "TermWidth", conf_get_int(conf, CONF_width));
@@ -602,7 +606,9 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "TryAgent", true, conf, CONF_tryagent);
     gppb_forced(sesskey, "AgentFwd", false, conf, CONF_agentfwd);
     gppb_forced(sesskey, "ChangeUsername", false, conf, CONF_change_username);
+#ifndef NO_GSSAPI
     gppb_forced(sesskey, "GssapiFwd", false, conf, CONF_gssapifwd);
+#endif
     gprefs_forced(sesskey, "Cipher", "\0",
 	   ciphernames, CIPHER_MAX, conf, CONF_ssh_cipherlist);
     {
@@ -655,7 +661,9 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gprefs_forced(sesskey, "HostKey", "ed25519,ecdsa,rsa,dsa,WARN",
            hknames, HK_MAX, conf, CONF_ssh_hklist);
     gppi_forced(sesskey, "RekeyTime", 60, conf, CONF_ssh_rekey_time);
+#ifndef NO_GSSAPI
     gppi_forced(sesskey, "GssapiRekey", GSS_DEF_REKEY_MINS, conf, CONF_gssapirekey);
+#endif
     gpps_forced(sesskey, "RekeyBytes", "1G", conf, CONF_ssh_rekey_data);
     {
 	/* SSH-2 only by default */
@@ -672,9 +680,9 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "SshBanner", true, conf, CONF_ssh_show_banner);
     gppb_forced(sesskey, "AuthTIS", false, conf, CONF_try_tis_auth);
     gppb_forced(sesskey, "AuthKI", true, conf, CONF_try_ki_auth);
+#ifndef NO_GSSAPI
     gppb_forced(sesskey, "AuthGSSAPI", true, conf, CONF_try_gssapi_auth);
     gppb_forced(sesskey, "AuthGSSAPIKEX", true, conf, CONF_try_gssapi_kex);
-#ifndef NO_GSSAPI
     gprefs_forced(sesskey, "GSSLibs", "\0",
 	   gsslibkeywords, ngsslibs, conf, CONF_ssh_gsslist);
     gppfile_forced(sesskey, "GSSCustom", conf, CONF_ssh_gss_custom);
@@ -771,8 +779,8 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "AutoWrapMode", true, conf, CONF_wrap_mode);
     gppb_forced(sesskey, "LFImpliesCR", false, conf, CONF_lfhascr);
     gppb_forced(sesskey, "CRImpliesLF", false, conf, CONF_crhaslf);
-    gppb_forced(sesskey, "DisableArabicShaping", false, conf, CONF_arabicshaping);
-    gppb_forced(sesskey, "DisableBidi", false, conf, CONF_bidi);
+    gppb_forced(sesskey, "DisableArabicShaping", false, conf, CONF_no_arabicshaping);
+    gppb_forced(sesskey, "DisableBidi", false, conf, CONF_no_bidi);
     gppb_forced(sesskey, "WinNameAlways", true, conf, CONF_win_name_always);
     gpps_forced(sesskey, "WinTitle", "", conf, CONF_wintitle);
     gppi_forced(sesskey, "TermWidth", 80, conf, CONF_width);
