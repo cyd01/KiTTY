@@ -4957,6 +4957,28 @@ void SetShrinkBitmapEnable(int) ;
 void LoadParameters( void ) {
 	char buffer[4096] ;
 	
+#ifdef ADBPORT
+	if( ReadParameter( INIT_SECTION, "adb", buffer ) ) {
+		if( !stricmp( buffer, "YES" ) ) SetADBFlag( 1 ) ; 
+		if( !stricmp( buffer, "NO" ) ) SetADBFlag( 0 ) ; 
+	}
+#endif
+	if( ReadParameter( INIT_SECTION, "antiidle", buffer ) ) { buffer[127]='\0'; strcpy( AntiIdleStr, buffer ) ; }
+	if( ReadParameter( INIT_SECTION, "antiidledelay", buffer ) ) 
+		{ AntiIdleCountMax = (int)floor(atoi(buffer)/10.0) ; if( AntiIdleCountMax<=0 ) AntiIdleCountMax =1 ; }
+	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
+#if (defined IMAGEPORT) && (!defined FDJ)
+	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) { 
+		if( !stricmp( buffer, "NO" ) ) BackgroundImageFlag = 0 ; 
+		//if( !stricmp( buffer, "YES" ) ) BackgroundImageFlag = 1 ;  // Broken en 0.71 ==> on desactive
+	}
+#endif
+	if( ReadParameter( INIT_SECTION, "bcdelay", buffer ) ) { between_char_delay = atoi( buffer ) ; }
+	
+	
+	
+	
+	
 	if( ReadParameter( INIT_SECTION, "configdir", buffer ) ) { 
 		if( strlen( buffer ) > 0 ) { if( existdirectory(buffer) ) SetConfigDirectory( buffer ) ; }
 	}
@@ -4968,14 +4990,6 @@ void LoadParameters( void ) {
 		autocommand_delay = (int)(1000*atof( buffer )) ;
 		if(autocommand_delay<5) autocommand_delay = 5 ; 
 	}
-#if (defined IMAGEPORT) && (!defined FDJ)
-	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) BackgroundImageFlag = 0 ; 
-		//if( !stricmp( buffer, "YES" ) ) BackgroundImageFlag = 1 ;  // Broken en 0.71 ==> on desactive
-	}
-#endif
-	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
-	if( ReadParameter( INIT_SECTION, "bcdelay", buffer ) ) { between_char_delay = atoi( buffer ) ; }
 	if( ReadParameter( INIT_SECTION, "browsedirectory", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) { DirectoryBrowseFlag = 0 ; }
 		else if( (!stricmp( buffer, "YES" )) && (IniFileFlag==SAVEMODE_DIR) ) DirectoryBrowseFlag = 1 ;
@@ -5019,9 +5033,6 @@ void LoadParameters( void ) {
 			strcpy( KittySavFile, buffer) ;
 		}
 	}
-	if( ReadParameter( INIT_SECTION, "antiidle", buffer ) ) { buffer[127]='\0'; strcpy( AntiIdleStr, buffer ) ; }
-	if( ReadParameter( INIT_SECTION, "antiidledelay", buffer ) ) 
-		{ AntiIdleCountMax = (int)floor(atoi(buffer)/10.0) ; if( AntiIdleCountMax<=0 ) AntiIdleCountMax =1 ; }
 	if( ReadParameter( INIT_SECTION, "shortcuts", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) ShortcutsFlag = 0 ; 
 		if( !stricmp( buffer, "YES" ) ) ShortcutsFlag = 1 ; 
@@ -5118,12 +5129,6 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "cygterm", buffer ) ) {
 		if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
 		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
-	}
-#endif
-#ifdef ADBPORT
-	if( ReadParameter( INIT_SECTION, "adb", buffer ) ) {
-		if( !stricmp( buffer, "YES" ) ) SetADBFlag( 1 ) ; 
-		if( !stricmp( buffer, "NO" ) ) SetADBFlag( 0 ) ; 
 	}
 #endif
 #ifdef ZMODEMPORT

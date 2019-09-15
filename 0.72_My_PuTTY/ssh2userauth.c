@@ -22,6 +22,7 @@
 #include "kitty.h"
 void SetSSHConnected( int flag );
 char bufpass[1024]="";
+extern int is_backend_connected ;
 #endif
 
 struct ssh2_userauth_state {
@@ -246,6 +247,10 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
         container_of(ppl, struct ssh2_userauth_state, ppl);
     PktIn *pktin;
 
+#ifdef RECONNECTPORT
+is_backend_connected = 1 ; 
+#endif
+
     ssh2_userauth_filter_queue(s);     /* no matter why we were called */
 
     crBegin(s->crState);
@@ -448,7 +453,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
             s->username = s->locally_allocated_username =
                 dupstr(s->cur_prompt->prompts[0]->result);
 #ifdef PERSOPORT
-	SetUsernameInConfig( s->username ) ;
+	SetUsernameInConfig( (char*)s->username ) ;
 #endif
             free_prompts(s->cur_prompt);
         } else {
@@ -881,7 +886,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                                              s->publickey_comment),
                                    false);
 #ifdef PERSOPORT
-		    	SetSSHConnected(1);
+		    	//SetSSHConnected(1);
 			if( strlen(ManagePassPhrase(NULL))>0 ) {
 				char *p = ManagePassPhrase(NULL) ;
 				bufchain bc;
@@ -1255,11 +1260,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     pq_push_front(s->ppl.in_pq, pktin);
                     s->type = AUTH_TYPE_KEYBOARD_INTERACTIVE_QUIET;
                     s->kbd_inter_refused = true; /* don't try it again */
-#ifdef PERSOPORT
-			if( !IsPasswordInConf() ) continue ;
-#else
 		    continue;
-#endif
                 }
 
                 s->ki_printed_header = false;
@@ -1372,34 +1373,38 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                      * user's response(s).
                      */
 #ifdef PERSOPORT
-	SetSSHConnected(1);
-		if( IsPasswordInConf() ) {
-		    GetPasswordInConfig(bufpass) ;
-		    while( (bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\') ) { 
-				bufpass[strlen(bufpass)-2]='\0'; 
-				bufpass[strlen(bufpass)-1]='\0'; 
-		    }
-		    bufchain bc;
-		    bufchain_init(&bc);
-		    bufchain_add(&bc, bufpass, strlen(bufpass));
-    		    s->userpass_ret = seat_get_userpass_input( s->ppl.seat, s->cur_prompt, &bc );
-		    SetPasswordInConfig("");
-		    CleanPassword(bufpass);
-	{ // Log de l'envoi du password
-	char *userlog = dupprintf("\nSend automatic password (Using keyboard-interactive authentication)" );
-	logevent(NULL,userlog);
-	
-	if (flags & FLAG_INTERACTIVE &&
-		(flags & FLAG_VERBOSE)) {
-		ppl_printf("%s\r\n",userlog);
+	if( IsPasswordInConf() ) {
+		GetPasswordInConfig(bufpass) ;
+		while( ((bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\')) || ((bufpass[strlen(bufpass)-1]=='r')&&(bufpass[strlen(bufpass)-2]=='\\')) ) { 
+			bufpass[strlen(bufpass)-2]='\0'; 
+			bufpass[strlen(bufpass)-1]='\0'; 
 		}
+		bufchain bc;
+		bufchain_init(&bc);
+		bufchain_add(&bc, bufpass, strlen(bufpass));
+		    bufchain_add(&bc,"\n",1);
+		s->userpass_ret = seat_get_userpass_input( s->ppl.seat, s->cur_prompt, &bc ) ;
 		
-	sfree(userlog);
-	}
+		SetPasswordInConfig("");
+		CleanPassword(bufpass);
+		{ // Log de l'envoi du password
+			char *userlog = dupprintf("Send automatic password (Using keyboard-interactive authentication)" );
+			ppl_logevent(userlog); // Affichage dans l'event log
+			// Affichage à l'écran
+			if (flags & FLAG_INTERACTIVE &&
+			(flags & FLAG_VERBOSE)) {
+				ppl_printf("%s\r\n",userlog);
+			}
+	
+			sfree(userlog);
+		}
 	} else
 #endif
                     s->userpass_ret = seat_get_userpass_input(
                         s->ppl.seat, s->cur_prompt, NULL);
+#ifdef PERSOPORT
+			if( !IsPasswordInConf() )
+#endif
                     while (1) {
                         while (s->userpass_ret < 0 &&
                                bufchain_size(s->ppl.user_input) > 0)
@@ -1434,10 +1439,12 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     put_uint32(s->pktout, s->num_prompts);
                     for (uint32_t i = 0; i < s->num_prompts; i++) {
 #ifdef PERSOPORT
-	if(!GetUserPassSSHNoSave()) 
-	if(s!=NULL) 
-	if(s->cur_prompt->prompts!=NULL) 
-	if(s->cur_prompt->prompts[i]->result!=NULL) SetPasswordInConfig( s->cur_prompt->prompts[i]->result ) ;
+	ppl_logevent("Sent password");
+	if(!GetUserPassSSHNoSave()) {
+		if(s!=NULL) 
+		if(s->cur_prompt->prompts!=NULL)  
+		if(s->cur_prompt->prompts[i]->result!=NULL) { SetPasswordInConfig( s->cur_prompt->prompts[i]->result ) ; }
+	}
 #endif
                         put_stringz(s->pktout,
                                     s->cur_prompt->prompts[i]->result);
@@ -1546,24 +1553,25 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                 put_stringz(s->pktout, "password");
                 put_bool(s->pktout, false);
 #ifdef PERSOPORT
-		if( IsPasswordInConf() ) {
-		    GetPasswordInConfig(bufpass);
-		    while( ((bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\')) || ((bufpass[strlen(bufpass)-1]=='r')&&(bufpass[strlen(bufpass)-2]=='\\')) ) { 
-				bufpass[strlen(bufpass)-2]='\0'; 
-				bufpass[strlen(bufpass)-1]='\0'; 
-		    }
-		    put_stringz(s->pktout, bufpass);
-		    SetPasswordInConfig("");
-
-	{ // Log de l'envoi du password
-	char *userlog = dupprintf("Send automatic password" );
-	logevent(NULL,userlog);
-	if (flags & FLAG_INTERACTIVE &&
-		(flags & FLAG_VERBOSE)) {
-		ppl_printf("\r\n%s\r\n",userlog);
+	if( IsPasswordInConf() ) {
+		GetPasswordInConfig(bufpass);
+		while( ((bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\')) || ((bufpass[strlen(bufpass)-1]=='r')&&(bufpass[strlen(bufpass)-2]=='\\')) ) { 
+			bufpass[strlen(bufpass)-2]='\0'; 
+			bufpass[strlen(bufpass)-1]='\0'; 
 		}
-	sfree(userlog);
-	}
+		put_stringz(s->pktout, bufpass);
+		SetPasswordInConfig("");
+		CleanPassword(bufpass);
+		{ // Log de l'envoi du password
+			char *userlog = dupprintf("Send automatic password" );
+			ppl_logevent(userlog); // Affichage dans l'event log
+			// Affichage à l'écran
+			if (flags & FLAG_INTERACTIVE &&
+			(flags & FLAG_VERBOSE)) {
+				ppl_printf("\r\n%s\r\n",userlog);
+			}
+			sfree(userlog);
+		}
 	} else {
 			put_stringz(s->pktout, s->password);
 	}
@@ -1588,7 +1596,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 			} else if( s != NULL ) {
 				if( s->password != NULL ) {
 					SetPasswordInConfig( s->password ) ;
-			}
+				}
 			}
 		}
 #endif

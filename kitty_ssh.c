@@ -36,11 +36,11 @@ int knock( char *hostname, unsigned short port, unsigned short proto) {
 	addr.sin_port = htons(port);
 	
 	if( proto == PROTO_UDP) {
-		vprint("Hitting udp %s:%u\n", inet_ntoa(addr.sin_addr), port);
+		vprint("Hitting udp %s:%u\n\n", inet_ntoa(addr.sin_addr), port);
 		connect(sd, (struct sockaddr*)&addr, sizeof(struct sockaddr));
 		send(sd, NULL, 0, 0);
 	} else {
-		vprint("Hitting tcp %s:%u\n", inet_ntoa(addr.sin_addr), port);
+		vprint("Hitting tcp %s:%u\n\n", inet_ntoa(addr.sin_addr), port);
 		connect(sd, (struct sockaddr*)&addr, sizeof(struct sockaddr));
 	}
 

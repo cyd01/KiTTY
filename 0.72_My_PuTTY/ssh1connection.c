@@ -395,11 +395,13 @@ static void ssh1_connection_process_queue(PacketProtocolLayer *ppl)
         s->antispoof_prompt->to_server = true;
         s->antispoof_prompt->from_server = false;
         s->antispoof_prompt->name = dupstr("Authentication successful");
+#ifndef PERSOPORT
         add_prompt(
             s->antispoof_prompt,
             dupstr("Access granted. Press Return to begin session. "), false);
         s->antispoof_ret = seat_get_userpass_input(
             s->ppl.seat, s->antispoof_prompt, NULL);
+#endif
         while (1) {
             while (s->antispoof_ret < 0 &&
                    bufchain_size(s->ppl.user_input) > 0)
