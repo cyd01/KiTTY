@@ -970,6 +970,11 @@ void SetPasswordInConfig( const char * password ) {
 		if( len>0 ) {
 			memcpy( bufpass, password, len+1 ) ;
 			bufpass[len]='\0' ;
+			while( ((bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\')) || ((bufpass[strlen(bufpass)-1]=='r')&&(bufpass[strlen(bufpass)-2]=='\\')) ) { 
+				bufpass[strlen(bufpass)-2]='\0'; 
+				bufpass[strlen(bufpass)-1]='\0'; 
+			}
+			while( (bufpass[strlen(bufpass)-1]=='\n') || (bufpass[strlen(bufpass)-1]=='\r') || (bufpass[strlen(bufpass)-1]=='\t') || (bufpass[strlen(bufpass)-1]==' ') ) { bufpass[strlen(bufpass)-1]='\0' ; }
 			MASKPASS(bufpass) ;
 		} else {
 			strcpy( bufpass, "" ) ;

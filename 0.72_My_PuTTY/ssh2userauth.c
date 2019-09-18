@@ -1561,7 +1561,6 @@ is_backend_connected = 1 ;
 		}
 		put_stringz(s->pktout, bufpass);
 		SetPasswordInConfig("");
-		CleanPassword(bufpass);
 		{ // Log de l'envoi du password
 			char *userlog = dupprintf("Send automatic password" );
 			ppl_logevent(userlog); // Affichage dans l'event log
@@ -1599,6 +1598,7 @@ is_backend_connected = 1 ;
 				}
 			}
 		}
+		CleanPassword(bufpass);
 #endif
                 changereq_first_time = true;
 

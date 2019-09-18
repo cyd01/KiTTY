@@ -3428,7 +3428,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	      {
 		// Initialiation
 		MainHwnd = hwnd ;
-		lp_eventlog(default_logpolicy,"Init");
+		if( debug_flag ) lp_eventlog(default_logpolicy,"Init");
       		if( GetIconeFlag() != -1 )
 			SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_INIT ) ;
 
