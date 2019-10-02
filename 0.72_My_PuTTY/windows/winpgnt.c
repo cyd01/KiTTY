@@ -22,7 +22,7 @@
 #include <shellapi.h>
 
 #ifdef PERSOPORT
-
+void scrumble_int();
 // Flag pour le fonctionnement en mode "portable" (gestion par fichiers)
 extern int IniFileFlag ;
 

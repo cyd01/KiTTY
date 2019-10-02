@@ -81,22 +81,22 @@ size_t m_strftime( char *s, size_t max, const char *format, const struct tm *tm)
 	}
 	
 /* Procedure perso de conversion date (struct _SYSTEMTIME) -> char* */
-size_t t_strftime( char *s, size_t max, const char *format, const SYSTEMTIME st ) {
+size_t t_strftime( char *s, size_t max, const char *format, const struct tm tm, const SYSTEMTIME st ) {
 	char * nfor, b[128] ;
 	int p, i = 1 ;
-	struct tm tm ;
+	//struct tm tm ;
 	size_t res = 0 ;
-	
+/*
 	tm.tm_sec = st.wSecond ;
 	tm.tm_min = st.wMinute ;
 	tm.tm_hour = st.wHour ;
 	tm.tm_mday = st.wDay ;
 	tm.tm_mon = st.wMonth - 1 ;
 	tm.tm_year = st.wYear - 1900 ;
-	tm.tm_mday = st.wDayOfWeek - 1 ;
+	tm.tm_wday = st.wDayOfWeek - 1 ;
 	tm.tm_yday = 0 ;
 	tm.tm_isdst = 0 ;
-
+*/
 	if( (nfor = (char*) malloc( strlen( format ) + 1024 )) == NULL ) return 0 ;
 	strcpy( nfor, format ) ;
 
@@ -105,7 +105,7 @@ size_t t_strftime( char *s, size_t max, const char *format, const SYSTEMTIME st 
 		if( p==1 ) { del(nfor,p,2) ; insert(nfor,b,p); }
 		else if( nfor[p-2] != '%' ) { del(nfor,p,2) ; insert(nfor,b,p); }
 		i = p + 1 ;
-		}
+	}
 
 	res = m_strftime( s, max, nfor, &tm ) ;
 	
@@ -122,7 +122,9 @@ int log_writetimestamp( struct LogContext *ctx ) {
 	if( poss( "%f", conf_get_str(ctx->conf,CONF_logtimestamp) ) ) {
 		SYSTEMTIME sysTime ;
 		GetLocalTime( &sysTime ) ;
-		t_strftime( buf, 127, conf_get_str(ctx->conf,CONF_logtimestamp), sysTime ) ;
+		time_t temps = time( 0 ) ;
+		struct tm tm = * localtime( &temps ) ;
+		t_strftime( buf, 127, conf_get_str(ctx->conf,CONF_logtimestamp), tm, sysTime ) ;
 		}
 	else {
 		time_t temps = time( 0 ) ;

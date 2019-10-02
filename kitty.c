@@ -281,7 +281,6 @@ static int CtrlTabFlag = 1 ;
 int GetCtrlTabFlag(void) { return CtrlTabFlag  ; }
 void SetCtrlTabFlag( const int flag ) { CtrlTabFlag  = flag ; }
 
-
 // Flag pour repasser en mode Putty basic
 int PuttyFlag = 0 ;
 int GetPuttyFlag(void) { return PuttyFlag ; }
@@ -4961,7 +4960,9 @@ void SetShrinkBitmapEnable(int) ;
 
 void LoadParameters( void ) {
 	char buffer[4096] ;
-	
+
+	if( ReadParameter( "Agent", "scrumble", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetScrumbleKeyFlag(1) ; }
+
 #ifdef ADBPORT
 	if( ReadParameter( INIT_SECTION, "adb", buffer ) ) {
 		if( !stricmp( buffer, "YES" ) ) SetADBFlag( 1 ) ; 
@@ -4979,29 +4980,35 @@ void LoadParameters( void ) {
 	}
 #endif
 	if( ReadParameter( INIT_SECTION, "bcdelay", buffer ) ) { between_char_delay = atoi( buffer ) ; }
-	
-	
-	
-	
-	
-	if( ReadParameter( INIT_SECTION, "configdir", buffer ) ) { 
-		if( strlen( buffer ) > 0 ) { if( existdirectory(buffer) ) SetConfigDirectory( buffer ) ; }
-	}
-	if( ReadParameter( INIT_SECTION, "initdelay", buffer ) ) { 
-		init_delay = (int)(1000*atof( buffer )) ;
-		if( init_delay < 0 ) init_delay = 2000 ; 
-	}
-	if( ReadParameter( INIT_SECTION, "commanddelay", buffer ) ) {
-		autocommand_delay = (int)(1000*atof( buffer )) ;
-		if(autocommand_delay<5) autocommand_delay = 5 ; 
-	}
 	if( ReadParameter( INIT_SECTION, "browsedirectory", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) { DirectoryBrowseFlag = 0 ; }
 		else if( (!stricmp( buffer, "YES" )) && (IniFileFlag==SAVEMODE_DIR) ) DirectoryBrowseFlag = 1 ;
 	}
 	if( ReadParameter( INIT_SECTION, "capslock", buffer ) ) { if( !stricmp( buffer, "YES" ) ) CapsLockFlag = 1 ; }
+	if( ReadParameter( INIT_SECTION, "commanddelay", buffer ) ) {
+		autocommand_delay = (int)(1000*atof( buffer )) ;
+		if(autocommand_delay<5) autocommand_delay = 5 ; 
+	}
 	if( ReadParameter( INIT_SECTION, "conf", buffer ) ) { if( !stricmp( buffer, "NO" ) ) NoKittyFileFlag = 1 ; }
+	if( ReadParameter( INIT_SECTION, "configdir", buffer ) ) { 
+		if( strlen( buffer ) > 0 ) { if( existdirectory(buffer) ) SetConfigDirectory( buffer ) ; }
+	}
+	if( ReadParameter( INIT_SECTION, "ctrltab", buffer ) ) { if( !stricmp( buffer, "NO" ) ) SetCtrlTabFlag( 0 ) ; }
+#ifdef CYGTERMPORT
+	if( ReadParameter( INIT_SECTION, "cygterm", buffer ) ) {
+		if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
+		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
+	}
+#endif
 	if( ReadParameter( INIT_SECTION, "debug", buffer ) ) { if( !stricmp( buffer, "YES" ) ) debug_flag = 1 ; }
+#ifdef HYPERLINKPORT
+#ifndef NO_HYPERLINK
+	if( ReadParameter( INIT_SECTION, "hyperlink", buffer ) ) {  
+		if( !stricmp( buffer, "NO" ) ) HyperlinkFlag = 0 ; 
+		if( !stricmp( buffer, "YES" ) ) HyperlinkFlag = 1 ;
+	}
+#endif
+#endif
 	if( ReadParameter( INIT_SECTION, "icon", buffer ) ) { if( !stricmp( buffer, "YES" ) ) IconeFlag = 1 ; }
 	if( ReadParameter( INIT_SECTION, "iconfile", buffer ) ) {
 		if( existfile( buffer ) ) {
@@ -5011,59 +5018,23 @@ void LoadParameters( void ) {
 			if( ReadParameter( INIT_SECTION, "numberoficons", buffer ) ) { NumberOfIcons = atof( buffer ) ; }
 		}
 	}
+	if( ReadParameter( INIT_SECTION, "initdelay", buffer ) ) { 
+		init_delay = (int)(1000*atof( buffer )) ;
+		if( init_delay < 0 ) init_delay = 2000 ; 
+	}
 	if( ReadParameter( INIT_SECTION, "internaldelay", buffer ) ) { 
 		internal_delay = atoi( buffer ) ; 
 		if( internal_delay < 1 ) internal_delay = 1 ;
 	}
-#ifdef RECONNECTPORT
-	if( ReadParameter( INIT_SECTION, "autoreconnect", buffer ) ) { if( !stricmp( buffer, "NO" ) ) AutoreconnectFlag = 0 ; }
-	if( ReadParameter( INIT_SECTION, "ReconnectDelay", buffer ) ) { 
-		ReconnectDelay = atoi( buffer ) ;
-		if( ReconnectDelay < 1 ) ReconnectDelay = 1 ;
-	}
-#endif
-#ifdef RUTTYPORT
-	if( ReadParameter( INIT_SECTION, "scriptmode", buffer ) ) { 
-		if( !stricmp( buffer, "YES" ) ) RuttyFlag = 1 ;
-		if( !stricmp( buffer, "NO" ) ) RuttyFlag = 0 ;
-	}
-#endif
 	if( ReadParameter( INIT_SECTION, "KiPP", buffer ) != 0 ) {
 		if( decryptstring( buffer, MASTER_PASSWORD ) ) ManagePassPhrase( buffer ) ;
 	}
-	if( ReadParameter( INIT_SECTION, "sav", buffer ) ) { 
-		if( strlen( buffer ) > 0 ) {
-			if( KittySavFile!=NULL ) free( KittySavFile ) ;
-			KittySavFile=(char*)malloc( strlen(buffer)+1 ) ;
-			strcpy( KittySavFile, buffer) ;
-		}
-	}
-	if( ReadParameter( INIT_SECTION, "shortcuts", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) ShortcutsFlag = 0 ; 
-		if( !stricmp( buffer, "YES" ) ) ShortcutsFlag = 1 ; 
-	}
+	if( ReadParameter( INIT_SECTION, "maxblinkingtime", buffer ) ) { MaxBlinkingTime=2*atoi(buffer);if(MaxBlinkingTime<0) MaxBlinkingTime=0; }
 	if( ReadParameter( INIT_SECTION, "mouseshortcuts", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) MouseShortcutsFlag = 0 ; 
 		if( !stricmp( buffer, "YES" ) ) MouseShortcutsFlag = 1 ; 
 	}
-	if( ReadParameter( INIT_SECTION, "size", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SizeFlag = 1 ; }
-	if( ReadParameter( INIT_SECTION, "slidedelay", buffer ) ) { ImageSlideDelay = atoi( buffer ) ; }
-	if( ReadParameter( INIT_SECTION, "sshversion", buffer ) ) { set_sshver( buffer ) ; }
-	if( ReadParameter( INIT_SECTION, "readonly", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetReadOnlyFlag(1) ; }
-	if( ReadParameter( INIT_SECTION, "maxblinkingtime", buffer ) ) { MaxBlinkingTime=2*atoi(buffer);if(MaxBlinkingTime<0) MaxBlinkingTime=0; }
-	if( ReadParameter( INIT_SECTION, "userpasssshnosave", buffer ) ) { 
-		if( !stricmp( buffer, "no" ) ) SetUserPassSSHNoSave(0) ;
-		if( !stricmp( buffer, "yes" ) ) SetUserPassSSHNoSave(1) ;
-	}
-	if( ReadParameter( INIT_SECTION, "ctrltab", buffer ) ) { if( !stricmp( buffer, "NO" ) ) SetCtrlTabFlag( 0 ) ; }
-	if( ReadParameter( INIT_SECTION, "wintitle", buffer ) ) {  if( !stricmp( buffer, "NO" ) ) TitleBarFlag = 0 ; }
 	if( ReadParameter( INIT_SECTION, "paste", buffer ) ) {  if( !stricmp( buffer, "YES" ) ) PasteCommandFlag = 1 ; }
-	if( ReadParameter( INIT_SECTION, "WinSCPPath", buffer ) ) {
-		if( existfile( buffer ) ) { 
-			if( WinSCPPath!=NULL) { free(WinSCPPath) ; WinSCPPath = NULL ; }
-			WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ;
-		}
-	}
 	if( ReadParameter( INIT_SECTION, "PSCPPath", buffer ) ) {
 		if( existfile( buffer ) ) { 
 			if( PSCPPath!=NULL) { free(PSCPPath) ; PSCPPath = NULL ; }
@@ -5077,17 +5048,54 @@ void LoadParameters( void ) {
 			PSCPOptions[1023] = '\0' ;
 		}
 	}
+	if( ReadParameter( INIT_SECTION, "readonly", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetReadOnlyFlag(1) ; }
+	if( ReadParameter( INIT_SECTION, "sav", buffer ) ) { 
+		if( strlen( buffer ) > 0 ) {
+			if( KittySavFile!=NULL ) free( KittySavFile ) ;
+			KittySavFile=(char*)malloc( strlen(buffer)+1 ) ;
+			strcpy( KittySavFile, buffer) ;
+		}
+	}
+	if( ReadParameter( INIT_SECTION, "shortcuts", buffer ) ) { 
+		if( !stricmp( buffer, "NO" ) ) ShortcutsFlag = 0 ; 
+		if( !stricmp( buffer, "YES" ) ) ShortcutsFlag = 1 ; 
+	}
+	if( ReadParameter( INIT_SECTION, "size", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SizeFlag = 1 ; }
+	if( ReadParameter( INIT_SECTION, "slidedelay", buffer ) ) { ImageSlideDelay = atoi( buffer ) ; }
+	if( ReadParameter( INIT_SECTION, "sshversion", buffer ) ) { set_sshver( buffer ) ; }
+	if( ReadParameter( INIT_SECTION, "userpasssshnosave", buffer ) ) { 
+		if( !stricmp( buffer, "no" ) ) SetUserPassSSHNoSave(0) ;
+		if( !stricmp( buffer, "yes" ) ) SetUserPassSSHNoSave(1) ;
+	}
 	if( ReadParameter( INIT_SECTION, "winroll", buffer ) ) { 
 		if( !stricmp( buffer, "no" ) ) WinrolFlag = 0 ;
 		if( !stricmp( buffer, "yes" ) ) WinrolFlag = 1 ;
 	}
-#ifdef HYPERLINKPORT
-#ifndef NO_HYPERLINK
-	if( ReadParameter( INIT_SECTION, "hyperlink", buffer ) ) {  
-		if( !stricmp( buffer, "NO" ) ) HyperlinkFlag = 0 ; 
-		if( !stricmp( buffer, "YES" ) ) HyperlinkFlag = 1 ;
+	if( ReadParameter( INIT_SECTION, "WinSCPPath", buffer ) ) {
+		if( existfile( buffer ) ) { 
+			if( WinSCPPath!=NULL) { free(WinSCPPath) ; WinSCPPath = NULL ; }
+			WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ;
+		}
+	}
+	if( ReadParameter( INIT_SECTION, "wintitle", buffer ) ) {  if( !stricmp( buffer, "NO" ) ) TitleBarFlag = 0 ; }
+#ifdef ZMODEMPORT
+	if( ReadParameter( INIT_SECTION, "zmodem", buffer ) ) { 
+		if( !stricmp( buffer, "NO" ) ) ZModemFlag = 0 ; 
+		if( !stricmp( buffer, "YES" ) ) ZModemFlag = 1 ; 
+		}
+#endif
+#ifdef RECONNECTPORT
+	if( ReadParameter( INIT_SECTION, "autoreconnect", buffer ) ) { if( !stricmp( buffer, "NO" ) ) AutoreconnectFlag = 0 ; }
+	if( ReadParameter( INIT_SECTION, "ReconnectDelay", buffer ) ) { 
+		ReconnectDelay = atoi( buffer ) ;
+		if( ReconnectDelay < 1 ) ReconnectDelay = 1 ;
 	}
 #endif
+#ifdef RUTTYPORT
+	if( ReadParameter( INIT_SECTION, "scriptmode", buffer ) ) { 
+		if( !stricmp( buffer, "YES" ) ) RuttyFlag = 1 ;
+		if( !stricmp( buffer, "NO" ) ) RuttyFlag = 0 ;
+	}
 #endif
 #ifndef NO_TRANSPARENCY
 	if( ReadParameter( INIT_SECTION, "transparency", buffer ) ) {
@@ -5099,6 +5107,8 @@ void LoadParameters( void ) {
 #if (defined IMAGEPORT) && (!defined FDJ)
 	if( ReadParameter( INIT_SECTION, "shrinkbitmap", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetShrinkBitmapEnable(1) ; else SetShrinkBitmapEnable(0) ; }
 #endif
+
+
 	if( readINI( KittyIniFile, "ConfigBox", "height", buffer ) ) {
 		ConfigBoxHeight = atoi( buffer ) ;
 	}
@@ -5117,6 +5127,8 @@ void LoadParameters( void ) {
 	if( readINI( KittyIniFile, "ConfigBox", "defaultsettings", buffer ) ) {
 		if( !stricmp( buffer, "NO" ) ) DefaultSettingsFlag = 0 ;
 	}
+
+
 	if( readINI( KittyIniFile, "Print", "height", buffer ) ) {
 		PrintCharSize = atoi( buffer ) ;
 	}
@@ -5130,19 +5142,7 @@ void LoadParameters( void ) {
 		StringList_Del( FolderList, buffer ) ;
 		delINI( KittyIniFile, "Folder", "del" ) ;
 	}
-#ifdef CYGTERMPORT
-	if( ReadParameter( INIT_SECTION, "cygterm", buffer ) ) {
-		if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
-		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
-	}
-#endif
-#ifdef ZMODEMPORT
-	if( ReadParameter( INIT_SECTION, "zmodem", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) ZModemFlag = 0 ; 
-		if( !stricmp( buffer, "YES" ) ) ZModemFlag = 1 ; 
-		}
-#endif
-	}
+}
 
 // Initialisation de noms de fichiers de configuration kitty.ini et kitty.sav
 // APPDATA = 	C:\Documents and Settings\U502190\Application Data sur XP
@@ -5235,9 +5235,13 @@ void WriteCountUpAndPath( void ) {
 
 // Initialisation specifique a KiTTY
 void appendPath(const char *append) ;
+extern char *sesspath;
+int loadPath() ;
 void InitWinMain( void ) {
 	char buffer[4096];
 	int i ;
+	
+	srand(time(NULL));
 	
 	if( existfile("kitty.log") ) { unlink( "kitty.log" ) ; }
 	
@@ -5341,7 +5345,8 @@ void InitWinMain( void ) {
 #endif
 		}
 	else if( IniFileFlag == SAVEMODE_DIR ){ // Mode de sauvegarde directory
-		}
+		if (*sesspath == '\0') { loadPath() ; }
+	}
 
 	// Creer les cles necessaires au programme
 	sprintf( buffer, "%s\\%s", TEXT(PUTTY_REG_POS), "Commands" ) ;
@@ -5360,7 +5365,7 @@ void InitWinMain( void ) {
 	// Incremente et ecrit les compteurs
 	if( IniFileFlag == SAVEMODE_REG ) {
 		WriteCountUpAndPath() ;
-		}
+	}
 
 	// Initialise la gestion des icones depuis la librairie kitty.dll si elle existe
 	if( !PuttyFlag ) {

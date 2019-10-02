@@ -183,16 +183,16 @@ settings_r *open_settings_r(const char *sessionname)
 		p = snewn(3 * strlen(sessionname) + 1 + 16, char);
 		mungestr(sessionname, p);
 		strcat(p, sessionsuffix);
-    
     		settings_r *toret = snew(settings_r) ;
 		toret->list = SettingsInit() ;
 		GetCurrentDirectory( (MAX_PATH*2), oldpath);
+
 		if (SetCurrentDirectory(sesspath)) {
 			hFile = CreateFile(p, GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 		} else {
 			hFile = INVALID_HANDLE_VALUE;
 		}
-		
+
 		if( strcmp(sessionname,"Default Settings") && (hFile == INVALID_HANDLE_VALUE) ) {
 			//errorShow("Unable to load file for reading", p);
 			SetCurrentDirectory(oldpath);
@@ -201,6 +201,7 @@ settings_r *open_settings_r(const char *sessionname)
 			sfree(p);
 			return NULL;
 		}
+
 		if( hFile != INVALID_HANDLE_VALUE ) {
 			CloseHandle(hFile);
 			SettingsLoad( toret->list, p ) ;
@@ -212,11 +213,12 @@ settings_r *open_settings_r(const char *sessionname)
 			sfree(p);
 			return NULL ;
 		}
-		
+
 		sfree(p) ;
 		SetCurrentDirectory(oldpath) ;
 		return toret ;
 	}
+
 #endif
     sb = strbuf_new();
     escape_registry_key(sessionname, sb);
@@ -281,6 +283,7 @@ int read_setting_i(settings_r *handle, const char *key, int defvalue)
     size = sizeof(val);
 #ifdef PERSOPORT
 	if( get_param("INIFILE")==SAVEMODE_DIR ) {
+		if( handle==NULL ) return defvalue ;
 		return SettingsKey_int( handle->list, key, defvalue ) ;
 	}
 #endif

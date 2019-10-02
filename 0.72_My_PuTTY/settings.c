@@ -964,7 +964,6 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     versioninfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&versioninfo);
 #endif
-
     conf_set_bool(conf, CONF_ssh_subsys, false); /* FIXME: load this properly */
     conf_set_str(conf, CONF_remote_cmd, "");
     conf_set_str(conf, CONF_remote_cmd2, "");
@@ -1101,6 +1100,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppb(sesskey, "TryAgent", true, conf, CONF_tryagent);
     gppb(sesskey, "AgentFwd", false, conf, CONF_agentfwd);
     gppb(sesskey, "ChangeUsername", false, conf, CONF_change_username);
+
 #ifndef NO_GSSAPI
     gppb(sesskey, "GssapiFwd", false, conf, CONF_gssapifwd);
 #endif
@@ -1679,5 +1679,12 @@ void get_sesslist(struct sesslist *list, bool allocate)
     }
 }
 #ifdef PERSOPORT
+/* Fonction de creation d'une session */
+void create_settings( const char * name ) {
+	Conf *cfg = conf_new() ;
+	do_defaults(name,cfg);
+	save_settings(name, cfg);
+	conf_free(cfg);
+}
 #include "../kitty_settings.c"
 #endif

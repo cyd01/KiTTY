@@ -287,7 +287,6 @@ int loadPath() {
 		}
 
 	hFile = CreateFile("putty.conf",GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
-
 	/* Test Sessions directory */
 	if(get_param("INIFILE")==SAVEMODE_DIR)
 	if( !existdirectory(sesspath) ) {

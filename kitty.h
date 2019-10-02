@@ -27,6 +27,7 @@ int GetConfigBoxNoExitFlag(void) ;
 int GetCtrlTabFlag(void) ;
 void SetCtrlTabFlag( const int flag ) ;
 
+
 #ifdef RECONNECTPORT
 // Flag pour inhiber le mécanisme de reconnexion automatique
 int GetAutoreconnectFlag( void ) ;

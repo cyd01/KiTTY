@@ -124,6 +124,79 @@ void pageant_make_keylist1(BinarySink *bs)
     }
 }
 
+#ifdef PERSOPORT
+int GetScrumbleKeyFlag(void) ;
+static int * tab_int = NULL ;
+void scrumble_int(void) {
+	int count = pageant_count_ssh2_keys(), s, i, j ;
+	bool test ; 
+	if( count>0 ) {
+		if( GetScrumbleKeyFlag() ) {
+			if( tab_int != NULL ) { free(tab_int) ; tab_int = NULL ; }
+			tab_int = (int*)malloc( count*sizeof(int) ) ;
+			if( count==1 ) { tab_int[0] = 0 ; }
+			else {
+				tab_int[0] = rand() % count ;
+				for( i=1 ; i<count ; i++ ) {
+					do {
+						test = false ;
+						s = rand() % count ;
+						for( j=0 ; j<i ; j++ ) {
+							if( tab_int[j] == s ) { test = true ; }
+						}
+					} while( test ) ;
+					tab_int[i] = s ;
+				}
+			}
+		} else {
+			if( tab_int != NULL ) { free(tab_int) ; tab_int = NULL ; }
+			tab_int = (int*)malloc( count*sizeof(int) ) ;
+			for( i=0 ; i<count ; i++ ) { tab_int[i] = i ; }
+		}
+		
+		/*
+		char b[1024]="",c[256];
+		for( i=0 ;i<count ; i++ ) {
+			sprintf(c,"%d\n",tab_int[i]);
+			strcat( b, c);
+		}
+		MessageBox(NULL,b,"info",MB_OK);
+		*/
+	
+	}
+}
+int get_scrumble_int( int i ) {
+	if( (tab_int == NULL) || !GetScrumbleKeyFlag() ) { return i ; }
+	else { return tab_int[i] ; }
+}
+static int confirm_key_usage(char* fingerprint, char* comment) {
+	const char* title = "Confirm SSH Key usage";
+	char* message = NULL;
+	int result = IDYES; // successful result is the default
+
+	message = dupprintf("Allow authentication with key with fingerprint\n%s\ncomment: %s", fingerprint, comment);
+	
+	if( (GetAskConfirmationFlag()==1) 
+		||
+		( (GetAskConfirmationFlag()==2) && (
+		(NULL != strstr(comment, "needs confirm"))||(NULL != strstr(comment, "need confirm"))||(NULL != strstr(comment, "confirmation"))
+		)
+		) )
+	{
+		result = MessageBox(NULL, message, title, MB_ICONQUESTION | MB_YESNO);
+	}
+
+	if (result != IDYES) {
+		sfree(message);
+		return 0;
+	} else {
+		if( GetShowBalloonOnKeyUsage()==1 ) ShowBalloonTip( trayIcone, "SSH private key usage", message ) ;
+		sfree(message);
+		return 1;
+	}
+}
+#endif
+
 void pageant_make_keylist2(BinarySink *bs)
 {
     int i;
@@ -161,35 +234,6 @@ static void plog(void *logctx, pageant_logfn_t logfn, const char *fmt, ...)
         va_end(ap);
     }
 }
-
-#ifdef PERSOPORT
-static int confirm_key_usage(char* fingerprint, char* comment) {
-	const char* title = "Confirm SSH Key usage";
-	char* message = NULL;
-	int result = IDYES; // successful result is the default
-
-	message = dupprintf("Allow authentication with key with fingerprint\n%s\ncomment: %s", fingerprint, comment);
-	
-	if( (GetAskConfirmationFlag()==1) 
-		||
-		( (GetAskConfirmationFlag()==2) && (
-		(NULL != strstr(comment, "needs confirm"))||(NULL != strstr(comment, "need confirm"))||(NULL != strstr(comment, "confirmation"))
-		)
-		) )
-	{
-		result = MessageBox(NULL, message, title, MB_ICONQUESTION | MB_YESNO);
-	}
-
-	if (result != IDYES) {
-		sfree(message);
-		return 0;
-	} else {
-		if( GetShowBalloonOnKeyUsage()==1 ) ShowBalloonTip( trayIcone, "SSH private key usage", message ) ;
-		sfree(message);
-		return 1;
-	}
-}
-#endif
 
 void pageant_handle_msg(BinarySink *bs,
                         const void *msgdata, int msglen,
@@ -716,8 +760,13 @@ RSAKey *pageant_nth_ssh1_key(int i)
 
 ssh2_userkey *pageant_nth_ssh2_key(int i)
 {
+#ifdef PERSOPORT
+    return index234(ssh2keys, get_scrumble_int(i));
+#else
     return index234(ssh2keys, i);
+#endif
 }
+
 
 int pageant_count_ssh1_keys(void)
 {

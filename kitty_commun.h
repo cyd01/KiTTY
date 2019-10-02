@@ -31,6 +31,11 @@ void SetAskConfirmationFlag( const int flag ) ;
 int GetReadOnlyFlag(void) ;
 void SetReadOnlyFlag( const int flag ) ;
 
+// Flag pour gérer le "mélange" des clés dans pageant
+int GetScrumbleKeyFlag(void) ;
+void SetScrumbleKeyFlag( const int flag ) ;
+
+
 #ifdef ADBPORT
 // Flag pour inhiber le support d'ADB
 int GetADBFlag(void) ;

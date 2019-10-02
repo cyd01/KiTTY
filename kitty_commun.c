@@ -55,6 +55,11 @@ static int ReadOnlyFlag = 0 ;
 int GetReadOnlyFlag(void) { return ReadOnlyFlag ; }
 void SetReadOnlyFlag( const int flag ) { ReadOnlyFlag = flag ; }
 
+// Flag pour gérer le "mélange" des clés dans pageant
+static int ScrumbleKeyFlag = 0 ;
+int GetScrumbleKeyFlag(void) { return ScrumbleKeyFlag ; }
+void SetScrumbleKeyFlag( const int flag ) { ScrumbleKeyFlag = flag ; }
+
 #ifdef ADBPORT
 // Flag pour inhiber le support d'ADB
 static int ADBFlag = 1 ;
@@ -242,7 +247,8 @@ int LoadParametersLight( void ) {
 		if( !stricmp( buffer, "NO" ) ) SetAskConfirmationFlag(0) ;
 		if( !stricmp( buffer, "AUTO" ) ) SetAskConfirmationFlag(2) ;
 	}
-	
+	if( ReadParameterLight( "Agent", "scrumble", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetScrumbleKeyFlag(1) ; }
+
 	return ret ;
 	}
 
