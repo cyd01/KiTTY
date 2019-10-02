@@ -5235,7 +5235,7 @@ void WriteCountUpAndPath( void ) {
 
 // Initialisation specifique a KiTTY
 void appendPath(const char *append) ;
-extern char *sesspath;
+extern char sesspath[];
 int loadPath() ;
 void InitWinMain( void ) {
 	char buffer[4096];
@@ -5345,7 +5345,14 @@ void InitWinMain( void ) {
 #endif
 		}
 	else if( IniFileFlag == SAVEMODE_DIR ){ // Mode de sauvegarde directory
-		if (*sesspath == '\0') { loadPath() ; }
+		if( strlen(sesspath) == 0 ) { loadPath() ; }
+		/* Test Default Settings */
+		char * defaultfile = (char*)malloc( strlen(sesspath)+20 ) ;
+		sprintf( defaultfile, "%s\\Default Settings", sesspath ) ;
+		if( !existfile(defaultfile) ) {
+			create_settings("Default Settings") ;
+		}
+		free( defaultfile ) ;
 	}
 
 	// Creer les cles necessaires au programme

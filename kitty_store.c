@@ -236,7 +236,7 @@ int loadPath() {
 	HANDLE hFile ;
 
 	char* puttypath = snewn( (MAX_PATH*2), char);
-
+	
 	/* JK:  save path/curdir */
 	GetCurrentDirectory( (MAX_PATH*2), oldpath);
 
