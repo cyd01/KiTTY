@@ -1612,10 +1612,10 @@ TrayIcone.hWnd = hwnd ;
 		if( GetBackgroundImageFlag() && ReadParameter( INIT_SECTION, "redraw", reg_buffer ) ) {
 			if( stricmp( reg_buffer, "NO" ) ) SetTimer(hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
 		} else SetTimer(hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
-		
+#endif
 		// Lancement du timer d'anti-idle
 		SetTimer(hwnd, TIMER_ANTIIDLE, (int)(30*1000), NULL) ;
-#endif
+
 		} // fin de if( !PuttyFlag )
 #ifdef HYPERLINKPORT
 else {

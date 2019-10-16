@@ -383,6 +383,8 @@ void NegativeColours(HWND hwnd) ;
 void BlackOnWhiteColours(HWND hwnd) ;
 void ChangeFontSize(HWND hwnd, int dec) ;
 
+void create_settings( const char * name ) ;
+
 #ifdef LAUNCHERPORT
 void InitLauncherRegistry( void ) ;
 #endif
