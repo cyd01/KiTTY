@@ -297,18 +297,6 @@ int GetReconnectDelay(void) { return ReconnectDelay ; }
 void SetReconnectDelay( const int flag ) { ReconnectDelay = flag ; }
 #endif
 
-// Flag pour afficher l'image de fond
-#if (defined IMAGEPORT) && (!defined FDJ)
-// Suite à PuTTY 0.61, le patch covidimus ne fonctionne plus tres bien
-// Il impose de demarrer les sessions avec -load meme depuis la config box (voir CONFIG.C)
-// Le patch est desactive par defaut
-int BackgroundImageFlag = 0 ;
-#else
-int BackgroundImageFlag = 0 ;
-#endif
-int GetBackgroundImageFlag(void) { return BackgroundImageFlag ; }
-void SetBackgroundImageFlag( const int flag ) { BackgroundImageFlag = flag ; }
-
 // Flag pour inhiber les fonctions ZMODEM
 static int ZModemFlag = 0 ;
 int GetZModemFlag(void) { return ZModemFlag ; }
@@ -622,7 +610,7 @@ int get_param( const char * val ) {
 	else if( !stricmp( val, "ZMODEM" ) ) return ZModemFlag ;
 #endif
 #ifdef IMAGEPORT
-	else if( !stricmp( val, "BACKGROUNDIMAGE" ) ) return BackgroundImageFlag ;
+	else if( !stricmp( val, "BACKGROUNDIMAGE" ) ) return GetBackgroundImageFlag() ;
 #endif
 #ifdef CYGTERMPORT
 	else if( !stricmp( val, "CYGTERM" ) ) return cygterm_get_flag() ;
@@ -642,7 +630,7 @@ int get_param( const char * val ) {
 		- il est ok lorsqu'on demarrer par -load ou par duplicate session
 	   On le desactive dans la config box (fin du fichier WINCFG.C)
 	*/
-void DisableBackgroundImage( void ) { BackgroundImageFlag = 0 ; }
+void DisableBackgroundImage( void ) { SetBackgroundImageFlag(0) ; }
 #endif
 
 // Procedure de recuperation de la valeur d'une chaine
@@ -2665,7 +2653,7 @@ void RedrawBackground( HWND hwnd ) ;
 
 void RefreshBackground( HWND hwnd ) {
 #if (defined IMAGEPORT) && (!defined FDJ)
-	if( BackgroundImageFlag ) RedrawBackground( hwnd ) ;
+	if( GetBackgroundImageFlag() ) RedrawBackground( hwnd ) ;
 	else
 #endif
 	InvalidateRect( hwnd, NULL, true ) ;
@@ -3490,7 +3478,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 		}
 	else if( !strcmp( st, "/copytokitty" ) ) 
 		{ RegCopyTree( HKEY_CURRENT_USER, "Software\\SimonTatham\\PuTTY", PUTTY_REG_POS ) ; return 1 ; }
-	else if( !strcmp( st, "/backgroundimage" ) ) { BackgroundImageFlag = abs( BackgroundImageFlag - 1 ) ; return 1 ; }
+	else if( !strcmp( st, "/backgroundimage" ) ) { SetBackgroundImageFlag( abs( GetBackgroundImageFlag() - 1 ) ) ; return 1 ; }
 	else if( !strcmp( st, "/debug" ) ) { debug_flag = abs( debug_flag - 1 ) ; return 1 ; }
 #ifdef HYPERLINKPORT
 	else if( !strcmp( st, "/hyperlink" ) ) { HyperlinkFlag = abs( HyperlinkFlag - 1 ) ; return 1 ; }
@@ -4728,12 +4716,12 @@ void InitShortcuts( void ) {
 		shortcuts_tab.switchlogmode = SHIFTKEY+VK_F5 ;
 	if( !readINI(KittyIniFile,"Shortcuts","showportforward",buffer) || ( (shortcuts_tab.showportforward=DefineShortcuts(buffer))<=0 ) )
 		shortcuts_tab.showportforward = SHIFTKEY+VK_F6 ;
-	if( !IsWow64() ) {
+//	if( !IsWow64() ) {
 		if( !readINI(KittyIniFile,"Shortcuts","print",buffer) || ( (shortcuts_tab.print=DefineShortcuts(buffer))<=0 ) )
 			shortcuts_tab.print = SHIFTKEY+VK_F7 ;
 		if( !readINI(KittyIniFile,"Shortcuts","printall",buffer) || ( (shortcuts_tab.printall=DefineShortcuts(buffer))<=0 ) )
 			shortcuts_tab.printall = VK_F7 ;
-	}
+//	}
 	if( !readINI(KittyIniFile,"Shortcuts","inputm",buffer) || ( (shortcuts_tab.inputm=DefineShortcuts(buffer))<=0 ) )
 		shortcuts_tab.inputm = SHIFTKEY+VK_F8 ;
 	if( !readINI(KittyIniFile,"Shortcuts","viewer",buffer) || ( (shortcuts_tab.viewer=DefineShortcuts(buffer))<=0 ) )
@@ -4816,7 +4804,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		return 1 ;
 	}
 	if( key == shortcuts_tab.showportforward ) 				// Fonction show port forward
-			{ SendMessage( hwnd, WM_COMMAND, IDM_SHOWPORTFWD, 0 ) ; return 1 ; }
+		{ SendMessage( hwnd, WM_COMMAND, IDM_SHOWPORTFWD, 0 ) ; return 1 ; }
 
 	if( (ProtectFlag == 1) || (WinHeight != -1) ) return 1 ;
 		
@@ -4829,7 +4817,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 	}
 	
 #if (defined IMAGEPORT) && (!defined FDJ)
-	if( BackgroundImageFlag && ImageViewerFlag ) { // Gestion du mode image
+	if( GetBackgroundImageFlag() && ImageViewerFlag ) { // Gestion du mode image
 		if( ManageViewer( hwnd, key_num ) ) return 1 ;
 		}
 #endif
@@ -4902,7 +4890,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 #endif
 
 #if (defined IMAGEPORT) && (!defined FDJ)
-	else if( BackgroundImageFlag && (key == shortcuts_tab.imagechange) ) 		// Changement d'image de fond
+	else if( GetBackgroundImageFlag() && (key == shortcuts_tab.imagechange) ) 		// Changement d'image de fond
 		{ if( NextBgImage( hwnd ) ) InvalidateRect(hwnd, NULL, TRUE) ; return 1 ; }
 #endif
 /*
@@ -4961,6 +4949,9 @@ void SetShrinkBitmapEnable(int) ;
 void LoadParameters( void ) {
 	char buffer[4096] ;
 
+	/* A lire en premier */
+	if( ReadParameter( INIT_SECTION, "debug", buffer ) ) { if( !stricmp( buffer, "YES" ) ) debug_flag = 1 ; }
+	
 	if( ReadParameter( "Agent", "scrumble", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetScrumbleKeyFlag(1) ; }
 
 #ifdef ADBPORT
@@ -4974,9 +4965,10 @@ void LoadParameters( void ) {
 		{ AntiIdleCountMax = (int)floor(atoi(buffer)/10.0) ; if( AntiIdleCountMax<=0 ) AntiIdleCountMax =1 ; }
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
 #if (defined IMAGEPORT) && (!defined FDJ)
-	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) BackgroundImageFlag = 0 ; 
-		//if( !stricmp( buffer, "YES" ) ) BackgroundImageFlag = 1 ;  // Broken en 0.71 ==> on desactive
+	if( debug_flag )
+	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) {	
+		if( !stricmp( buffer, "NO" ) ) SetBackgroundImageFlag( 0 ) ; 
+		if( !stricmp( buffer, "YES" ) ) SetBackgroundImageFlag( 1 ) ;  // Broken en 0.71 ==> on desactive
 	}
 #endif
 	if( ReadParameter( INIT_SECTION, "bcdelay", buffer ) ) { between_char_delay = atoi( buffer ) ; }
@@ -5000,7 +4992,6 @@ void LoadParameters( void ) {
 		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
 	}
 #endif
-	if( ReadParameter( INIT_SECTION, "debug", buffer ) ) { if( !stricmp( buffer, "YES" ) ) debug_flag = 1 ; }
 #ifdef HYPERLINKPORT
 #ifndef NO_HYPERLINK
 	if( ReadParameter( INIT_SECTION, "hyperlink", buffer ) ) {  
@@ -5434,7 +5425,10 @@ void InitWinMain( void ) ;
 
 // Gestion de commandes a distance
 int ManageLocalCmd( HWND hwnd, const char * cmd ) ;
-	
+
+// Gestion des raccourcis
+int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
+
 // Nettoie la clé de PuTTY pour enlever les clés et valeurs spécifique à KiTTY
 // Se trouve dans le fichier kitty_registry.c
 BOOL RegCleanPuTTY( void ) ;

@@ -5,19 +5,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "sel.h"
 #include "telnet.h"
 #include "malloc.h"
 #include "pty.h"
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE 1
-#endif
 
 #define	IAC	255		       /* interpret as command: */
 #define	DONT	254		       /* you are not to use option */
@@ -172,7 +166,7 @@ static const struct Opt *const opts[] = {
     &o_echo, &o_we_sga, &o_they_sga, &o_naws, &o_ttype, &o_oenv, &o_nenv, NULL
 };
 
-struct telnet_tag {
+struct Telnet {
     int opt_states[NUM_OPTS];
 
     int sb_opt, sb_len;
@@ -203,17 +197,17 @@ struct telnet_tag {
 
 #define SB_DELTA 1024
 
-static void send_opt(Telnet telnet, int cmd, int option)
+static void send_opt(Telnet *telnet, int cmd, int option)
 {
     unsigned char b[3];
 
     b[0] = IAC;
     b[1] = cmd;
     b[2] = option;
-    sel_write(telnet->net, (char *)b, 3);
+    sel_write(telnet->net, b, 3);
 }
 
-static void deactivate_option(Telnet telnet, const struct Opt *o)
+static void deactivate_option(Telnet *telnet, const struct Opt *o)
 {
     if (telnet->opt_states[o->index] == REQUESTED ||
 	telnet->opt_states[o->index] == ACTIVE)
@@ -224,11 +218,11 @@ static void deactivate_option(Telnet telnet, const struct Opt *o)
 /*
  * Generate side effects of enabling or disabling an option.
  */
-static void option_side_effects(Telnet telnet, const struct Opt *o, int enabled)
+static void option_side_effects(Telnet *telnet, const struct Opt *o, int enabled)
 {
 }
 
-static void activate_option(Telnet telnet, const struct Opt *o)
+static void activate_option(Telnet *telnet, const struct Opt *o)
 {
     if (o->option == TELOPT_NEW_ENVIRON ||
 	o->option == TELOPT_OLD_ENVIRON ||
@@ -245,7 +239,7 @@ static void activate_option(Telnet telnet, const struct Opt *o)
     option_side_effects(telnet, o, 1);
 }
 
-static void done_option(Telnet telnet, int option)
+static void done_option(Telnet *telnet, int option)
 {
     if (option == TELOPT_OLD_ENVIRON)
 	telnet->old_environ_done = 1;
@@ -260,7 +254,7 @@ static void done_option(Telnet telnet, int option)
     }
 }
 
-static void refused_option(Telnet telnet, const struct Opt *o)
+static void refused_option(Telnet *telnet, const struct Opt *o)
 {
     done_option(telnet, o->option);
     if (o->send == WILL && o->option == TELOPT_NEW_ENVIRON &&
@@ -272,7 +266,7 @@ static void refused_option(Telnet telnet, const struct Opt *o)
     option_side_effects(telnet, o, 0);
 }
 
-static void proc_rec_opt(Telnet telnet, int cmd, int option)
+static void proc_rec_opt(Telnet *telnet, int cmd, int option)
 {
     const struct Opt *const *o;
 
@@ -323,7 +317,7 @@ static void proc_rec_opt(Telnet telnet, int cmd, int option)
         send_opt(telnet, (cmd == WILL ? DONT : WONT), option);
 }
 
-static void process_subneg(Telnet telnet)
+static void process_subneg(Telnet *telnet)
 {
     int var, value, n;
 
@@ -400,7 +394,7 @@ static void process_subneg(Telnet telnet)
     }
 }
 
-void telnet_from_net(Telnet telnet, char *buf, int len)
+void telnet_from_net(Telnet *telnet, char *buf, int len)
 {
     while (len--) {
 	int c = (unsigned char) *buf++;
@@ -497,11 +491,11 @@ void telnet_from_net(Telnet telnet, char *buf, int len)
     }
 }
 
-Telnet telnet_new(sel_wfd *net, sel_wfd *pty)
+Telnet *telnet_new(sel_wfd *net, sel_wfd *pty)
 {
-    Telnet telnet;
+    Telnet *telnet;
 
-    telnet = snew(struct telnet_tag);
+    telnet = snew(Telnet);
     telnet->sb_buf = NULL;
     telnet->sb_size = 0;
     telnet->state = TOP_LEVEL;
@@ -532,13 +526,13 @@ Telnet telnet_new(sel_wfd *net, sel_wfd *pty)
     return telnet;
 }
 
-void telnet_free(Telnet telnet)
+void telnet_free(Telnet *telnet)
 {
     sfree(telnet->sb_buf);
     sfree(telnet);
 }
 
-void telnet_from_pty(Telnet telnet, char *buf, int len)
+void telnet_from_pty(Telnet *telnet, char *buf, int len)
 {
     unsigned char *p, *end;
     static const unsigned char iac[2] = { IAC, IAC };
@@ -554,16 +548,16 @@ void telnet_from_pty(Telnet telnet, char *buf, int len)
 
 	while (p < end && iswritable(*p))
 	    p++;
-	sel_write(telnet->net, (char *)q, p - q);
+	sel_write(telnet->net, q, p - q);
 
 	while (p < end && !iswritable(*p)) {
-	    sel_write(telnet->net, (char *)(*p == IAC ? iac : cr), 2);
+	    sel_write(telnet->net, *p == IAC ? iac : cr, 2);
 	    p++;
 	}
     }
 }
 
-int telnet_shell_ok(Telnet telnet, struct shell_data *shdata)
+int telnet_shell_ok(Telnet *telnet, struct shell_data *shdata)
 {
     if (telnet->shell_ok)
 	*shdata = telnet->shdata;      /* structure copy */

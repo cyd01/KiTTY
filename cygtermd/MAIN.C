@@ -24,7 +24,7 @@ sel *asel;
 sel_rfd *netr, *ptyr, *sigr;
 int ptyfd;
 sel_wfd *netw, *ptyw;
-Telnet telnet;
+Telnet *telnet;
 
 #define BUF 65536
 
@@ -36,7 +36,7 @@ void sigchld(int signum)
 void fatal(const char *fmt, ...)
 {
     va_list ap;
-    fprintf(stderr, "FIXME: ");
+    fprintf(stderr, "cygtermd: ");
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);

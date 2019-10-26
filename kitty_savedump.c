@@ -634,7 +634,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	//static HINSTANCE hInstIcons =  NULL ;
 	fprintf( fp, "WinHeight=%d\nWinrolFlag=%d\nAutoSendToTray=%d\nNoKittyFileFlag=%d\nConfigBoxHeight=%d\nConfigBoxWindowHeight=%d\nConfigBoxNoExitFlag=%d\nUserPassSSHNoSave=%d\nPuttyFlag=%d\n",WinHeight,WinrolFlag,AutoSendToTray,NoKittyFileFlag,ConfigBoxHeight,ConfigBoxWindowHeight,ConfigBoxNoExitFlag,GetUserPassSSHNoSave(),PuttyFlag);
 
-	fprintf( fp,"BackgroundImageFlag=%d\n",BackgroundImageFlag );
+	fprintf( fp,"BackgroundImageFlag=%d\n",GetBackgroundImageFlag() );
 #ifdef RECONNECTPORT
 	fprintf( fp,"AutoreconnectFlag=%d\nReconnectDelay=%d\n",AutoreconnectFlag,ReconnectDelay );
 #endif

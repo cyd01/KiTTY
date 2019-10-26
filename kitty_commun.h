@@ -35,6 +35,10 @@ void SetReadOnlyFlag( const int flag ) ;
 int GetScrumbleKeyFlag(void) ;
 void SetScrumbleKeyFlag( const int flag ) ;
 
+// Flag pour afficher l'image de fond
+//extern int BackgroundImageFlag ;
+int GetBackgroundImageFlag(void) ;
+void SetBackgroundImageFlag( const int flag ) ;
 
 #ifdef ADBPORT
 // Flag pour inhiber le support d'ADB

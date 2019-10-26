@@ -1,4 +1,7 @@
 #ifdef IMAGEPORT
+
+#include <stdbool.h>
+
 extern HDC textdc;
 extern HBITMAP textbm;
 extern HBITMAP backgroundbm;

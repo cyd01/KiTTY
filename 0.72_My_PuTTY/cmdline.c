@@ -29,7 +29,7 @@
  */
 
 #ifdef PERSOPORT
-#include "kitty_crypt.h" 
+#include "kitty_crypt.h"
 int decode64(char *buffer) ;
 void SetAutoStoreSSHKey( void ) ;
 void load_open_settings_forced(char *filename, Conf *conf) ;

@@ -1,9 +1,9 @@
 /*
- * pty.h - FIXME
+ * pty.h - declare functions for pty setup
  */
 
-#ifndef FIXME_PTY_H
-#define FIXME_PTY_H
+#ifndef CYGTERMD_PTY_H
+#define CYGTERMD_PTY_H
 
 #include "telnet.h"		       /* for struct shdata */
 
@@ -25,4 +25,4 @@ void pty_resize(int w, int h);
 int run_program_in_pty(const struct shell_data *shdata,
                        char *directory, char **program_args);
 
-#endif /* FIXME_PTY_H */
+#endif /* CYGTERMD_PTY_H */

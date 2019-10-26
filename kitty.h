@@ -27,6 +27,10 @@ int GetConfigBoxNoExitFlag(void) ;
 int GetCtrlTabFlag(void) ;
 void SetCtrlTabFlag( const int flag ) ;
 
+// Flag pour afficher l'image de fond
+//extern int BackgroundImageFlag ;
+int GetBackgroundImageFlag(void) ;
+void SetBackgroundImageFlag( const int flag ) ;
 
 #ifdef RECONNECTPORT
 // Flag pour inhiber le mécanisme de reconnexion automatique
@@ -50,11 +54,6 @@ extern int internal_delay ;
 
 // Nom de la classe de l'application
 extern char KiTTYClassName[128] ;
-
-// Flag pour afficher l'image de fond
-//extern int BackgroundImageFlag ;
-int GetBackgroundImageFlag(void) ;
-void SetBackgroundImageFlag( const int flag ) ;
 
 // Flag pour imposer le passage en majuscule
 // extern int CapsLockFlag ;

@@ -67,6 +67,18 @@ int GetADBFlag(void) { return ADBFlag ; }
 void SetADBFlag( const int flag ) { ADBFlag = flag ; }
 #endif
 
+// Flag pour afficher l'image de fond
+#if (defined IMAGEPORT) && (!defined FDJ)
+// Suite à PuTTY 0.61, le patch covidimus ne fonctionne plus tres bien
+// Il impose de demarrer les sessions avec -load meme depuis la config box (voir CONFIG.C)
+// Le patch est desactive par defaut
+int BackgroundImageFlag = 0 ;
+#else
+int BackgroundImageFlag = 0 ;
+#endif
+int GetBackgroundImageFlag(void) { return BackgroundImageFlag ; }
+void SetBackgroundImageFlag( const int flag ) { BackgroundImageFlag = flag ; }
+
 // Répertoire de sauvegarde de la configuration (savemode=dir)
 char * ConfigDirectory = NULL ;
 

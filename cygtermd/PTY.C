@@ -2,7 +2,7 @@
  * pty.c - pseudo-terminal handling
  */
 
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
 #include <features.h>
 
 #include <stdio.h>

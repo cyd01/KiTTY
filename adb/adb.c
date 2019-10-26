@@ -265,7 +265,6 @@ static const char *adb_init(Seat *seat, Backend **backend_handle,
 
 #   define write_hello(str, len) \
         sk_write(adb->s, str, len); \
-        sk_flush(adb->s); \
         adb->state = STATE_SENT_HELLO;
 
     do {

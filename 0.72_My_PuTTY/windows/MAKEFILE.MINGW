@@ -164,9 +164,9 @@ CFLAGS += 	-DPERSOPORT \
 		-I../../base64 -I../../bcrypt -I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
 		
 #		-DCYGTERMPORT \
-#		-DIMAGEPORT \
 #		-DUSE_CAPI -DWINCRYPTPORT \
 #		-DZMODEMPORT \
+#		-DIMAGEPORT \
 
 
 # Autre flag a gérer
