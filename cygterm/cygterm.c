@@ -1,4 +1,4 @@
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 
 #include <stdio.h> /* sprintf */
 #include <string.h>

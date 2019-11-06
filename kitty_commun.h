@@ -40,7 +40,7 @@ void SetScrumbleKeyFlag( const int flag ) ;
 int GetBackgroundImageFlag(void) ;
 void SetBackgroundImageFlag( const int flag ) ;
 
-#ifdef ADBPORT
+#ifdef MOD_ADB
 // Flag pour inhiber le support d'ADB
 int GetADBFlag(void) ;
 void SetADBFlag( const int flag ) ;
@@ -70,7 +70,7 @@ int LoadParametersLight( void ) ;
 
 // Positionne un flag permettant de determiner si on est connecte
 extern int is_backend_connected ;
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 extern int is_backend_first_connected ;
 #endif
 

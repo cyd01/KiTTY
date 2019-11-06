@@ -2,7 +2,7 @@
 
 // Modifie la transparence
 void SetTransparency( HWND hwnd, int value ) {
-#ifndef NO_TRANSPARENCY
+#ifndef MOD_NOTRANSPARENCY
 	SetLayeredWindowAttributes( hwnd, 0, value, LWA_ALPHA ) ;
 #endif
 	}

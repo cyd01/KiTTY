@@ -221,7 +221,7 @@ void set_regerror_func( void (*func)( char*))
 #endif
 void urlhack_set_regular_expression(int mode, const char* expression)
 {
-#ifndef NO_HYPERLINK
+#ifndef MOD_NOHYPERLINK
     char *to_use=NULL;
     switch (mode) {
     case URLHACK_REGEX_CUSTOM:
@@ -266,7 +266,7 @@ void urlhack_set_regular_expression(int mode, const char* expression)
 
 void urlhack_go_find_me_some_hyperlinks(int screen_width)
 {
-#ifndef NO_HYPERLINK
+#ifndef MOD_NOHYPERLINK
     char* text_pos;
 	
     if( urlhack_disabled!=0 ) {

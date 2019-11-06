@@ -4,7 +4,7 @@
 @ -0,0 +1,33 @@
 */
 
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 
 #include "putty.h"
 #include "dialog.h"

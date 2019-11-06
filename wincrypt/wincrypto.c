@@ -1,4 +1,4 @@
-#ifdef WINCRYPTPORT
+#ifdef MOD_WINCRYPT
 #ifdef USE_CAPI
 /*
  * PuTTY wincrypt patch main file.

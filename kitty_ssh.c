@@ -1,7 +1,7 @@
 #include "kitty_ssh.h"
 #include "kitty_tools.h"
 
-#ifdef PORTKNOCKINGPORT
+#ifdef MOD_PORTKNOCKING
 void vprint(char *fmt, ...)
 {	char buf[1024];
 	va_list args;

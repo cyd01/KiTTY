@@ -1,4 +1,4 @@
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
 
 #include "putty.h"
 #include "terminal.h"

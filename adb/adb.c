@@ -1,7 +1,7 @@
 /*
  * "Adb" backend.
  */
-#ifdef ADBPORT
+#ifdef MOD_ADB
 
 #include <stdio.h>
 #include <stdlib.h>

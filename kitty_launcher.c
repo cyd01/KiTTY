@@ -1,4 +1,4 @@
-#ifdef LAUNCHERPORT
+#ifdef MOD_LAUNCHER
 
 // define recupere de WIN_RES.H
 #ifndef IDI_PUTTY_LAUNCH

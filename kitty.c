@@ -97,7 +97,7 @@ int GetPasteCommandFlag(void) { return PasteCommandFlag ; }
 #ifdef FDJ
 int HyperlinkFlag = 1 ;
 #else
-#ifdef HYPERLINKPORT
+#ifdef MOD_HYPERLINK
 int HyperlinkFlag = 1 ;
 #else
 int HyperlinkFlag = 0 ;
@@ -140,7 +140,7 @@ void SetProtectFlag( const int flag ) { ProtectFlag = flag ; }
 #endif
 
 // Definition de la section du fichier de configuration
-#if (defined PERSOPORT) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FDJ)
 #ifndef INIT_SECTION
 #define INIT_SECTION "KiTTY"
 #endif
@@ -203,7 +203,7 @@ int GetIconeFlag(void) { return IconeFlag ; }
 void SetIconeFlag( const int flag ) { IconeFlag = flag ; }
 
 // Nombre d'icones differentes (identifiant commence a 1 dans le fichier .rc)
-#ifndef PERSOPORT
+#ifndef MOD_PERSO
 #define NB_ICONES 1
 #define IDI_MAINICON_0 1
 #define IDC_RESULT 1008
@@ -286,7 +286,7 @@ int PuttyFlag = 0 ;
 int GetPuttyFlag(void) { return PuttyFlag ; }
 void SetPuttyFlag( const int flag ) { PuttyFlag = flag ; }
 
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 // Flag pour inhiber le mécanisme de reconnexion automatique
 static int AutoreconnectFlag = 1 ;
 int GetAutoreconnectFlag( void ) { return AutoreconnectFlag ; }
@@ -377,7 +377,7 @@ NOTIFYICONDATA TrayIcone ;
 
 #define TIMER_INIT 8701
 #define TIMER_AUTOCOMMAND 8702
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 #define TIMER_SLIDEBG 8703
 #endif
 #define TIMER_REDRAW 8704
@@ -389,7 +389,7 @@ NOTIFYICONDATA TrayIcone ;
 /*
 #define TIMER_INIT 12341
 #define TIMER_AUTOCOMMAND 12342
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 #define TIMER_SLIDEBG 12343
 #endif
 #define TIMER_REDRAW 12344
@@ -606,13 +606,13 @@ int get_param( const char * val ) {
 	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) return DirectoryBrowseFlag ;
 	else if( !stricmp( val, "HYPERLINK" ) ) return HyperlinkFlag ;
 	else if( !stricmp( val, "TRANSPARENCY" ) )return TransparencyFlag ;
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
 	else if( !stricmp( val, "ZMODEM" ) ) return ZModemFlag ;
 #endif
-#ifdef IMAGEPORT
+#ifdef MOD_BACKGROUNDIMAGE
 	else if( !stricmp( val, "BACKGROUNDIMAGE" ) ) return GetBackgroundImageFlag() ;
 #endif
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 	else if( !stricmp( val, "CYGTERM" ) ) return cygterm_get_flag() ;
 #endif
 	// else if( !stricmp( val, "CONFIGBOXHEIGHT" ) ) return ConfigBoxHeight ;
@@ -624,7 +624,7 @@ int get_param( const char * val ) {
 	return 0 ;
 	}
 
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	/* Le patch Background image ne marche plus bien sur la version PuTTY 0.61
 		- il est en erreur lorsqu'on passe par la config box
 		- il est ok lorsqu'on demarrer par -load ou par duplicate session
@@ -642,7 +642,7 @@ char * get_param_str( const char * val ) {
 	return NULL ;
 	}
 
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
 void xyz_updateMenuItems(Terminal *term) {
 	if( !ZModemFlag ) return ;
 	HMENU m = GetSystemMenu(hwnd, FALSE);
@@ -1241,7 +1241,7 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, "ConfigBox", "#noexit", "no" ) ;
 			writeINI( KittyIniFile, "ConfigBox", "#windowheight", "600" ) ;
 
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 			writeINI( KittyIniFile, INIT_SECTION, "backgroundimage", "no" ) ;
 #endif
 			writeINI( KittyIniFile, INIT_SECTION, "capslock", "no" ) ;
@@ -1267,14 +1267,14 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "shortcuts", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "mouseshortcuts", "yes" ) ;
 #endif
-#ifdef HYPERLINKPORT
+#ifdef MOD_HYPERLINK
 #ifdef FDJ
 			writeINI( KittyIniFile, INIT_SECTION, "hyperlink", "yes" ) ;
 #else
 			writeINI( KittyIniFile, INIT_SECTION, "hyperlink", "no" ) ;
 #endif
 #endif
-#ifndef NO_TRANSPARENCY
+#ifndef MOD_NOTRANSPARENCY
 #ifdef FDJ
 			writeINI( KittyIniFile, INIT_SECTION, "transparency", "yes" ) ;
 #else
@@ -1299,17 +1299,17 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "#ctrltab", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#KiClassName", "PuTTY" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "maxblinkingtime", "5" ) ;
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 			writeINI( KittyIniFile, INIT_SECTION, "#autoreconnect", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#ReconnectDelay", "5" ) ;
 #endif
-#ifdef RUTTYPORT
+#ifdef MOD_RUTTY
 			writeINI( KittyIniFile, INIT_SECTION, "#scriptmode", "yes" ) ;
 #endif
-#ifdef RUTTYPORT
+#ifdef MOD_RUTTY
 			writeINI( KittyIniFile, INIT_SECTION, "#adb", "yes" ) ;
 #endif
-#ifdef PORTABLE
+#ifdef MOD_PORTABLE
 			writeINI( KittyIniFile, INIT_SECTION, "savemode", "dir" ) ;
 #else
 			sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE );
@@ -1325,7 +1325,7 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "slidedelay", "0" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "winroll", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "wintitle", "yes" ) ;
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
 			writeINI( KittyIniFile, INIT_SECTION, "zmodem", "yes" ) ;
 #endif
 			writeINI( KittyIniFile, "Print", "height", "100" ) ;
@@ -1389,7 +1389,7 @@ int DelParameter( const char * key, const char * name ) {
 	
 // Test la configuration (mode file ou registry) et charge le fichier kitty.sav si besoin
 void GetSaveMode( void ) {
-#ifndef PORTABLE
+#ifndef MOD_PORTABLE
 	char buffer[256] ;
 	if( readINI( KittyIniFile, INIT_SECTION, "savemode", buffer ) ) {
 		while( (buffer[strlen(buffer)-1]=='\n')||(buffer[strlen(buffer)-1]=='\r')||(buffer[strlen(buffer)-1]==' ')||(buffer[strlen(buffer)-1]=='\t') ) buffer[strlen(buffer)-1]='\0';
@@ -1899,7 +1899,7 @@ void SetNewIcon( HWND hwnd, char * iconefile, int icone, const int mode ) {
 
 // Modification de l'icone pour mettre l'icone de perte de connexion
 void SetConnBreakIcon( void ) {
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
 	HICON hIcon = NULL ;
 	hIcon = LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_NOCON) ) ;
 	SendMessage( hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon );	
@@ -2645,21 +2645,21 @@ void ManageWinrol( HWND hwnd, int resize_action ) {
 	InvalidateRect(hwnd, NULL, TRUE);
 }
 	
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 BOOL load_bg_bmp() ;
 void clean_bg( void ) ;
 void RedrawBackground( HWND hwnd ) ;
 #endif
 
 void RefreshBackground( HWND hwnd ) {
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	if( GetBackgroundImageFlag() ) RedrawBackground( hwnd ) ;
 	else
 #endif
 	InvalidateRect( hwnd, NULL, true ) ;
 }
 
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 /* Changement du fond d'ecran */
 int GetExt( const char * filename, char * ext) {
 	int i;
@@ -3458,7 +3458,7 @@ void SaveCurrentSetting( HWND hwnd ) {
 	}
 
 // Procedures de generation du dump "memoire" (/savedump)
-#ifdef SAVEDUMPPORT
+#ifdef MOD_SAVEDUMP
 #include "kitty_savedump.c"
 #endif
 void InitShortcuts( void ) ;
@@ -3480,7 +3480,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 		{ RegCopyTree( HKEY_CURRENT_USER, "Software\\SimonTatham\\PuTTY", PUTTY_REG_POS ) ; return 1 ; }
 	else if( !strcmp( st, "/backgroundimage" ) ) { SetBackgroundImageFlag( abs( GetBackgroundImageFlag() - 1 ) ) ; return 1 ; }
 	else if( !strcmp( st, "/debug" ) ) { debug_flag = abs( debug_flag - 1 ) ; return 1 ; }
-#ifdef HYPERLINKPORT
+#ifdef MOD_HYPERLINK
 	else if( !strcmp( st, "/hyperlink" ) ) { HyperlinkFlag = abs( HyperlinkFlag - 1 ) ; return 1 ; }
 	else if( !strcmp( st, "/urlregex" ) ) { 
 		char b[1024] ;
@@ -3492,7 +3492,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 		SaveCurrentSetting(hwnd);
 		return 1 ; 
 		}
-#ifdef SAVEDUMPPORT
+#ifdef MOD_SAVEDUMP
 	else if( !strcmp( st, "/savedump" ) ) { SaveDump() ; return 1 ; }
 #endif
 	else if( !strcmp( st, "/screenshot" ) ) { 
@@ -3555,7 +3555,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 		}
 	else if( !strcmp( st, "/size" ) ) { SizeFlag = abs( SizeFlag - 1 ) ; set_title( NULL, conf_get_str(conf,CONF_wintitle) ) ; return 1 ; }
 	else if( !strcmp( st, "/transparency" ) ) {
-#ifndef NO_TRANSPARENCY
+#ifndef MOD_NOTRANSPARENCY
 		if( (conf_get_int(conf,CONF_transparencynumber) == -1) || (TransparencyFlag == 0 ) ) {
 			TransparencyFlag = 1 ;
 			SetWindowLongPtr(MainHwnd, GWL_EXSTYLE, GetWindowLong(MainHwnd, GWL_EXSTYLE) | WS_EX_LAYERED ) ;
@@ -3639,7 +3639,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 	else if( strstr( st, "/PrintCharSize " ) == st ) { PrintCharSize=atoi( st+15 ) ; return 1 ; }
 	else if( strstr( st, "/PrintMaxLinePerPage " ) == st ) { PrintMaxLinePerPage=atoi( st+21) ; return 1 ; }
 	else if( strstr( st, "/PrintMaxCharPerLine " ) == st ) { PrintMaxCharPerLine=atoi( st+21 ) ; return 1 ; }
-#ifdef LAUNCHERPORT
+#ifdef MOD_LAUNCHER
 	else if( !strcmp( st, "/initlauncher" ) ) { InitLauncherRegistry() ; return 1 ; }
 #endif
 	else if( !strcmp( st, "/winroll" ) ) { WinrolFlag = abs(WinrolFlag-1) ; return 1 ; }
@@ -4475,7 +4475,7 @@ void ResetWindow(int reinit) ;
 
 void NegativeColours(HWND hwnd) {
 	int i ;
-#ifdef TUTTYPORT
+#ifdef MOD_TUTTY
     for (i = 0; i < NCFGCOLOURS; i++) {
 #else
     for (i = 0; i < 22; i++) {
@@ -4548,7 +4548,7 @@ void ChangeSettings(HWND hwnd) {
 	//ChangeFontSize(hwnd,-1);
 }
 	
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 // Gestion de l'image viewer
 int ManageViewer( HWND hwnd, WORD wParam ) { // Gestion du mode image
 	if( wParam==VK_BACK ) 
@@ -4816,7 +4816,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		}
 	}
 	
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	if( GetBackgroundImageFlag() && ImageViewerFlag ) { // Gestion du mode image
 		if( ManageViewer( hwnd, key_num ) ) return 1 ;
 		}
@@ -4889,7 +4889,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 			}
 #endif
 
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	else if( GetBackgroundImageFlag() && (key == shortcuts_tab.imagechange) ) 		// Changement d'image de fond
 		{ if( NextBgImage( hwnd ) ) InvalidateRect(hwnd, NULL, TRUE) ; return 1 ; }
 #endif
@@ -4908,7 +4908,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		if (key_num == VK_ADD) { SendMessage( hwnd, WM_COMMAND, IDM_FONTUP, 0 ) ; return 1 ; }
 		if (key_num == VK_SUBTRACT) { SendMessage( hwnd, WM_COMMAND, IDM_FONTDOWN, 0 ) ; return 1 ; }
 		if (key_num == VK_NUMPAD0) { ChangeFontSize(hwnd,0) ; return 1 ; }
-#ifdef LAUNCHERPORT
+#ifdef MOD_LAUNCHER
 		/*    ====> Ne fonctionne pas !!!
 		if (key_num == VK_LEFT ) //Fenetre KiTTY precedente
 			{ SendMessage( hwnd, WM_COMMAND, IDM_GOPREVIOUS, 0 ) ; return 1 ; }
@@ -4942,7 +4942,7 @@ void SetPasteCommand( void ) {
 	}
 	
 // Initialisation des parametres a partir du fichier kitty.ini
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 void SetShrinkBitmapEnable(int) ;
 #endif
 
@@ -4954,7 +4954,7 @@ void LoadParameters( void ) {
 	
 	if( ReadParameter( "Agent", "scrumble", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetScrumbleKeyFlag(1) ; }
 
-#ifdef ADBPORT
+#ifdef MOD_ADB
 	if( ReadParameter( INIT_SECTION, "adb", buffer ) ) {
 		if( !stricmp( buffer, "YES" ) ) SetADBFlag( 1 ) ; 
 		if( !stricmp( buffer, "NO" ) ) SetADBFlag( 0 ) ; 
@@ -4964,7 +4964,7 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "antiidledelay", buffer ) ) 
 		{ AntiIdleCountMax = (int)floor(atoi(buffer)/10.0) ; if( AntiIdleCountMax<=0 ) AntiIdleCountMax =1 ; }
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	if( debug_flag )
 	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) {	
 		if( !stricmp( buffer, "NO" ) ) SetBackgroundImageFlag( 0 ) ; 
@@ -4986,14 +4986,14 @@ void LoadParameters( void ) {
 		if( strlen( buffer ) > 0 ) { if( existdirectory(buffer) ) SetConfigDirectory( buffer ) ; }
 	}
 	if( ReadParameter( INIT_SECTION, "ctrltab", buffer ) ) { if( !stricmp( buffer, "NO" ) ) SetCtrlTabFlag( 0 ) ; }
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 	if( ReadParameter( INIT_SECTION, "cygterm", buffer ) ) {
 		if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
 		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
 	}
 #endif
-#ifdef HYPERLINKPORT
-#ifndef NO_HYPERLINK
+#ifdef MOD_HYPERLINK
+#ifndef MOD_NOHYPERLINK
 	if( ReadParameter( INIT_SECTION, "hyperlink", buffer ) ) {  
 		if( !stricmp( buffer, "NO" ) ) HyperlinkFlag = 0 ; 
 		if( !stricmp( buffer, "YES" ) ) HyperlinkFlag = 1 ;
@@ -5069,33 +5069,33 @@ void LoadParameters( void ) {
 		}
 	}
 	if( ReadParameter( INIT_SECTION, "wintitle", buffer ) ) {  if( !stricmp( buffer, "NO" ) ) TitleBarFlag = 0 ; }
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
 	if( ReadParameter( INIT_SECTION, "zmodem", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) ZModemFlag = 0 ; 
 		if( !stricmp( buffer, "YES" ) ) ZModemFlag = 1 ; 
 		}
 #endif
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 	if( ReadParameter( INIT_SECTION, "autoreconnect", buffer ) ) { if( !stricmp( buffer, "NO" ) ) AutoreconnectFlag = 0 ; }
 	if( ReadParameter( INIT_SECTION, "ReconnectDelay", buffer ) ) { 
 		ReconnectDelay = atoi( buffer ) ;
 		if( ReconnectDelay < 1 ) ReconnectDelay = 1 ;
 	}
 #endif
-#ifdef RUTTYPORT
+#ifdef MOD_RUTTY
 	if( ReadParameter( INIT_SECTION, "scriptmode", buffer ) ) { 
 		if( !stricmp( buffer, "YES" ) ) RuttyFlag = 1 ;
 		if( !stricmp( buffer, "NO" ) ) RuttyFlag = 0 ;
 	}
 #endif
-#ifndef NO_TRANSPARENCY
+#ifndef MOD_NOTRANSPARENCY
 	if( ReadParameter( INIT_SECTION, "transparency", buffer ) ) {
 		if( !stricmp( buffer, "YES" ) ) { TransparencyFlag = 1 ; }
 		else { TransparencyFlag = 0 ; } 
 	}
 #endif
 
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	if( ReadParameter( INIT_SECTION, "shrinkbitmap", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetShrinkBitmapEnable(1) ; else SetShrinkBitmapEnable(0) ; }
 #endif
 
@@ -5157,7 +5157,7 @@ void InitNameConfigFile( void ) {
 	if( getenv("KITTY_INI_FILE") != NULL ) { strcpy( buffer, getenv("KITTY_INI_FILE") ) ; }
 	if( !existfile( buffer ) ) {
 		sprintf( buffer, "%s\\%s", InitialDirectory, DEFAULT_INIT_FILE ) ;
-#ifdef PORTABLE
+#ifdef MOD_PORTABLE
 		if( !existfile( buffer ) ) {
 			sprintf( buffer, "%s\\putty.ini", InitialDirectory ) ;
 			if( !existfile( buffer ) ) {
@@ -5182,7 +5182,7 @@ void InitNameConfigFile( void ) {
 	if( KittySavFile != NULL ) { free( KittySavFile ) ; } 
 	KittySavFile=NULL ;
 	sprintf( buffer, "%s\\%s", InitialDirectory, DEFAULT_SAV_FILE ) ;
-#ifndef PORTABLE
+#ifndef MOD_PORTABLE
 	if( !existfile( buffer ) ) {
 		sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE ) ;
 		if( !existfile( buffer ) ) {
@@ -5246,13 +5246,13 @@ void InitWinMain( void ) {
 
 	// Initialisation de la version binaire
 	sprintf( BuildVersionTime, "%s.%d @ %s", BUILD_VERSION, BUILD_SUBVERSION, BUILD_TIME ) ;
-#ifdef PORTABLE
+#ifdef MOD_PORTABLE
 	sprintf( BuildVersionTime, "%s.%dp @ %s", BUILD_VERSION, BUILD_SUBVERSION, BUILD_TIME ) ;
 #endif
-#ifdef NO_TRANSPARENCY
+#ifdef MOD_NOTRANSPARENCY
 	sprintf( BuildVersionTime, "%s.%dn @ %s", BUILD_VERSION, BUILD_SUBVERSION, BUILD_TIME ) ;
 #endif	
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 	// Par defaut Cygterm est desactive, il faut l'activer dans le fichier kitty.ini
 	cygterm_set_flag(0);
 #endif
@@ -5271,7 +5271,7 @@ void InitWinMain( void ) {
 	// Initialisation du nom de la classe
 	strcpy( KiTTYClassName, appname ) ;
 
-#if (defined PERSOPORT) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FDJ)
 	if( ReadParameter( INIT_SECTION, "KiClassName", buffer ) ) 
 		{ if( (strlen(buffer)>0) && (strlen(buffer)<128) ) { buffer[127]='\0'; strcpy( KiTTYClassName, buffer ) ; } }
 	appname = KiTTYClassName ;
@@ -5287,7 +5287,7 @@ void InitWinMain( void ) {
 	LoadParameters() ;
 
 	// Ajoute les répertoires InitialDirectory et ConfigDirectory au PATH
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 	appendPath(InitialDirectory);    // Initialise dans la fonction GetInitialDirectory
 	if( strcmp(InitialDirectory,ConfigDirectory) ) {
 	appendPath(ConfigDirectory);	 // Initialise dans LoadParameters
@@ -5322,7 +5322,7 @@ void InitWinMain( void ) {
 			LoadRegistryKey( hdlg ) ; 
 			InfoBoxClose( hdlg ) ;
 			}
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
 		else { // la cle de registre existe deja
 			if( WindowsCount( MainHwnd ) == 1 ) { // Si c'est le 1er kitty on sauvegarde la cle de registre avant de charger le fichier kitty.sav
 				HWND hdlg = InfoBox( hinst, NULL ) ;
@@ -5351,7 +5351,7 @@ void InitWinMain( void ) {
 	if( (IniFileFlag == SAVEMODE_REG)||( IniFileFlag == SAVEMODE_FILE) ) 
 		RegTestOrCreate( HKEY_CURRENT_USER, buffer, NULL, NULL ) ;
 	
-#ifdef LAUNCHERPORT
+#ifdef MOD_LAUNCHER
 	// Initialisation du launcher
 	sprintf( buffer, "%s\\%s", TEXT(PUTTY_REG_POS), "Launcher" ) ;
 	if( (IniFileFlag == SAVEMODE_REG)||( IniFileFlag == SAVEMODE_FILE) )  

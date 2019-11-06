@@ -149,6 +149,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "RFCEnviron", conf_get_bool(conf, CONF_rfc_environ));
     write_setting_b_forced(sesskey, "PassiveTelnet", conf_get_bool(conf, CONF_passive_telnet));
     write_setting_b_forced(sesskey, "BackspaceIsDelete", conf_get_bool(conf, CONF_bksp_is_delete));
+    write_setting_i_forced(sesskey, "EnterSendsCrLf", conf_get_int(conf, CONF_enter_sends_crlf));
     write_setting_i_forced(sesskey, "RXVTHomeEnd", conf_get_int(conf, CONF_rxvt_homeend));
     write_setting_i_forced(sesskey, "LinuxFunctionKeys", conf_get_int(conf, CONF_funky_type));
     write_setting_b_forced(sesskey, "NoApplicationKeys", conf_get_bool(conf, CONF_no_applic_k));
@@ -221,7 +222,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "TrueColour", conf_get_bool(conf, CONF_true_colour));
     write_setting_i_forced(sesskey, "BoldAsColour", conf_get_int(conf, CONF_bold_style)-1);
 
-#ifdef TUTTYPORT
+#ifdef MOD_TUTTY
     write_setting_i_forced(sesskey, "WindowClosable", conf_get_int(conf, CONF_window_closable) );
     write_setting_i_forced(sesskey, "WindowMinimizable", conf_get_int(conf, CONF_window_minimizable) );
     write_setting_i_forced(sesskey, "WindowMaximizable", conf_get_int(conf, CONF_window_maximizable) );
@@ -324,7 +325,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "ConnectionSharingDownstream", conf_get_bool(conf, CONF_ssh_connection_sharing_downstream));
     wmap_forced(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys, false);
 /* rutty: */
-#ifdef RUTTYPORT
+#ifdef MOD_RUTTY
     write_setting_filename_forced(sesskey, "ScriptFileName", conf_get_filename(conf, CONF_script_filename));
     write_setting_i_forced(sesskey, "ScriptMode", (conf_get_int(conf, CONF_script_mode)!=SCRIPT_PLAY)?SCRIPT_STOP:conf_get_int(conf, CONF_script_mode));  /* dont save with record on */
     write_setting_i_forced(sesskey, "ScriptLineDelay", conf_get_int(conf, CONF_script_line_delay));
@@ -338,11 +339,11 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_s_forced(sesskey, "ScriptWait", conf_get_str(conf, CONF_script_waitfor));
     write_setting_s_forced(sesskey, "ScriptHalt", conf_get_str(conf, CONF_script_halton));
 #endif  /* rutty */
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
     write_setting_i_forced(sesskey, "WakeupReconnect", conf_get_int(conf,CONF_wakeup_reconnect) );
     write_setting_i_forced(sesskey, "FailureReconnect", conf_get_int(conf,CONF_failure_reconnect) );
 #endif
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	if( GetBackgroundImageFlag() ) {
     write_setting_i_forced(sesskey, "BgOpacity", conf_get_int(conf, CONF_bg_opacity) );
     write_setting_i_forced(sesskey, "BgSlideshow", conf_get_int(conf, CONF_bg_slideshow) );
@@ -354,7 +355,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_i_forced(sesskey, "BgImagePlacement", conf_get_int(conf, CONF_bg_image_abs_fixed) );
 	}
 #endif
-#ifdef HYPERLINKPORT
+#ifdef MOD_HYPERLINK
 	/*
 	 * HACK: PuttyTray / Nutty
 	 * Hyperlink stuff: Save hyperlink settings
@@ -364,7 +365,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 	write_setting_i_forced(sesskey, "HyperlinkBrowserUseDefault", conf_get_int(conf, CONF_url_defbrowser));
 	write_setting_filename_forced(sesskey, "HyperlinkBrowser", conf_get_filename(conf, CONF_url_browser));
 	write_setting_i_forced(sesskey, "HyperlinkRegularExpressionUseDefault", conf_get_int(conf, CONF_url_defregex));
-#ifndef NO_HYPERLINK
+#ifndef MOD_NOHYPERLINK
 	if( !strcmp(conf_get_str(conf, CONF_url_regex),"@°@°@NO REGEX--") ) 
 		write_setting_s_forced(sesskey, "HyperlinkRegularExpression", urlhack_default_regex ) ;
 	else
@@ -373,21 +374,21 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 	write_setting_s_forced(sesskey, "HyperlinkRegularExpression", conf_get_str(conf, CONF_url_regex));
 #endif
 #endif
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
     //if (do_host)
 	write_setting_i_forced(sesskey, "CygtermAltMetabit", conf_get_int(conf, CONF_alt_metabit));
 	write_setting_i_forced(sesskey, "CygtermAutoPath", conf_get_int(conf, CONF_cygautopath) );
 	write_setting_i_forced(sesskey, "Cygterm64", conf_get_int(conf, CONF_cygterm64));
 	write_setting_s_forced(sesskey, "CygtermCommand", conf_get_str(conf, CONF_cygcmd) );
 #endif
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
     write_setting_filename_forced(sesskey, "rzCommand", conf_get_filename(conf, CONF_rzcommand) );
     write_setting_s_forced(sesskey, "rzOptions", conf_get_str(conf, CONF_rzoptions) );
     write_setting_filename_forced(sesskey, "szCommand", conf_get_filename(conf, CONF_szcommand) );
     write_setting_s_forced(sesskey, "szOptions", conf_get_str(conf, CONF_szoptions) );
     write_setting_s_forced(sesskey, "zDownloadDir", conf_get_str(conf, CONF_zdownloaddir) );
 #endif
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
     if( conf_get_int(conf, CONF_transparencynumber)<-1 ) conf_set_int(conf, CONF_transparencynumber,-1) ;
     if( conf_get_int(conf, CONF_transparencynumber)>255 ) conf_set_int(conf, CONF_transparencynumber,255) ;
     write_setting_i_forced(sesskey, "TransparencyValue", conf_get_int(conf, CONF_transparencynumber) ) ;
@@ -421,7 +422,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 	strcpy( PassKey, "" ) ;
     }
     char pst[4096] ;
-#ifndef NO_PASSWORD
+#ifndef MOD_NOPASSWORD
     strcpy( pst, conf_get_str(conf, CONF_password ) );
     MASKPASS(pst);
     cryptstring( pst, PassKey ) ;
@@ -432,13 +433,10 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_s_forced(sesskey, "Comment", conf_get_str(conf, CONF_comment) );
     write_setting_i_forced(sesskey, "SCPAutoPwd", conf_get_int(conf, CONF_scp_auto_pwd));
 #endif
-#ifdef ACSPORT
-    write_setting_b_forced(sesskey, "ACSinUTF", conf_get_bool(conf, CONF_acs_in_utf));
-#endif
-#ifdef PORTKNOCKINGPORT
+#ifdef MOD_PORTKNOCKING
 	write_setting_s_forced(sesskey, "PortKnocking", conf_get_str(conf, CONF_portknockingoptions) );
 #endif
-#ifdef DISABLEALTGRPORT
+#ifdef MOD_DISABLEALTGR
 	write_setting_i_forced(sesskey, "DisableAltGr", conf_get_int(conf, CONF_disablealtgr));
 #endif
 // END COPY/PASTE
@@ -461,7 +459,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 // BEGIN COPY/PASTE
     int i;
     char *prot;
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
     /*
      * HACK: PuTTY-url
      * Set font quality to cleartype on Windows Vista and above
@@ -693,6 +691,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "RFCEnviron", false, conf, CONF_rfc_environ);
     gppb_forced(sesskey, "PassiveTelnet", false, conf, CONF_passive_telnet);
     gppb_forced(sesskey, "BackspaceIsDelete", true, conf, CONF_bksp_is_delete);
+    gppi_forced(sesskey, "EnterSendsCrLf", 0, conf, CONF_enter_sends_crlf);
     gppi_forced(sesskey, "RXVTHomeEnd", 0, conf, CONF_rxvt_homeend);
     gppi_forced(sesskey, "LinuxFunctionKeys", 0, conf, CONF_funky_type);
     gppb_forced(sesskey, "NoApplicationKeys", false, conf, CONF_no_applic_k);
@@ -731,7 +730,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "TelnetRet", true, conf, CONF_telnet_newline);
     gppi_forced(sesskey, "LocalEcho", AUTO, conf, CONF_localecho);
     gppi_forced(sesskey, "LocalEdit", AUTO, conf, CONF_localedit);
-#if (defined PERSOPORT) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FDJ)
     gpps_forced(sesskey, "Answerback", "KiTTY", conf, CONF_answerback);
 #else
     gpps_forced(sesskey, "Answerback", "PuTTY", conf, CONF_answerback);
@@ -770,7 +769,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 		 / 1000
 #endif
 		 );
-#ifdef HYPERLINKPORT
+#ifdef MOD_HYPERLINK
     gppi_forced(sesskey, "ScrollbackLines", 10000, conf, CONF_savelines);
 #else
     gppi_forced(sesskey, "ScrollbackLines", 2000, conf, CONF_savelines);
@@ -786,7 +785,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "TermWidth", 80, conf, CONF_width);
     gppi_forced(sesskey, "TermHeight", 24, conf, CONF_height);
     gppfont_forced(sesskey, "Font", conf, CONF_font);
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
     /*
      * HACK: PuTTY-url
      * Set font quality to cleartype on Windows Vista and higher
@@ -807,7 +806,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "TrueColour", true, conf, CONF_true_colour);
     i = gppi_raw_forced(sesskey, "BoldAsColour", 1); conf_set_int(conf, CONF_bold_style, i+1);
 
-#ifdef TUTTYPORT
+#ifdef MOD_TUTTY
     gppi_forced(sesskey, "WindowClosable", 1, conf, CONF_window_closable);
     gppi_forced(sesskey, "WindowMinimizable", 1, conf, CONF_window_minimizable);
     gppi_forced(sesskey, "WindowMaximizable", 1, conf, CONF_window_maximizable);
@@ -896,7 +895,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "CJKAmbigWide", false, conf, CONF_cjk_ambig_wide);
     gppb_forced(sesskey, "UTF8Override", true, conf, CONF_utf8_override);
     gpps_forced(sesskey, "Printer", "", conf, CONF_printer);
-#ifdef PRINTCLIPPORT
+#ifdef MOD_PRINTCLIP
     if( !strcmp( conf_get_str(conf,CONF_printer),PRINT_TO_CLIPBOARD_STRING) ) { conf_set_int(conf,CONF_printclip,1) ; }
     else { conf_set_int(conf,CONF_printclip,0) ; }
 #endif
@@ -963,7 +962,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
          conf, CONF_ssh_connection_sharing_downstream);
     gppmap_forced(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys);
 /* rutty: */
-#ifdef RUTTYPORT
+#ifdef MOD_RUTTY
 	gppfile_forced(sesskey, "ScriptFileName", conf, CONF_script_filename);
 	gppi_forced(sesskey, "ScriptMode", 0, conf, CONF_script_mode);
 	gppi_forced(sesskey, "ScriptLineDelay", 0, conf, CONF_script_line_delay);
@@ -977,11 +976,11 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 	gpps_forced(sesskey, "ScriptWait", "", conf, CONF_script_waitfor);
 	gpps_forced(sesskey, "ScriptHalt", "", conf, CONF_script_halton);
 #endif  /* rutty */
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
     gppi_forced(sesskey, "WakeupReconnect", 0, conf, CONF_wakeup_reconnect );
     gppi_forced(sesskey, "FailureReconnect", 0, conf, CONF_failure_reconnect );
 #endif
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
     gppi_forced(sesskey, "BgOpacity", 50, conf, CONF_bg_opacity );
     gppi_forced(sesskey, "BgSlideshow", 0, conf, CONF_bg_slideshow );
     gppi_forced(sesskey, "BgType", 0, conf, CONF_bg_type );
@@ -991,7 +990,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "BgImageAbsoluteY", 0, conf, CONF_bg_image_abs_y );
     gppi_forced(sesskey, "BgImagePlacement", 0, conf, CONF_bg_image_abs_fixed );
 #endif
-#ifdef HYPERLINKPORT
+#ifdef MOD_HYPERLINK
 	/*
 	 * HACK: PuttyTray / Nutty
 	 * Hyperlink stuff: Load hyperlink settings
@@ -1002,24 +1001,24 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 	gppfile_forced(sesskey, "HyperlinkBrowser", conf, CONF_url_browser);
 	gppi_forced(sesskey, "HyperlinkRegularExpressionUseDefault", 1, conf, CONF_url_defregex);
 
-#ifndef NO_HYPERLINK
+#ifndef MOD_NOHYPERLINK
 	gpps_forced(sesskey, "HyperlinkRegularExpression", urlhack_default_regex, conf, CONF_url_regex);
 #endif
 #endif
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
     gppi_forced(sesskey, "CygtermAltMetabit", 0, conf, CONF_alt_metabit);
     gppi_forced(sesskey, "CygtermAutoPath", 1, conf, CONF_cygautopath );
     gppi_forced(sesskey, "Cygterm64", 0, conf, CONF_cygterm64);
     gpps_forced(sesskey, "CygtermCommand", "", conf, CONF_cygcmd );
 #endif
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
     gppfile_forced(sesskey, "rzCommand", conf, CONF_rzcommand );
     gpps_forced(sesskey, "rzOptions", "-e -v", conf, CONF_rzoptions );
     gppfile_forced(sesskey, "szCommand", conf, CONF_szcommand );
     gpps_forced(sesskey, "szOptions", "-e -v", conf, CONF_szoptions );
     gpps_forced(sesskey, "zDownloadDir", "C:\\", conf, CONF_zdownloaddir );
 #endif
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
     gppi_forced(sesskey, "TransparencyValue", 0, conf, CONF_transparencynumber ) ;
     if( conf_get_int( conf, CONF_transparencynumber) < -1 ) conf_set_int( conf,CONF_transparencynumber,-1) ;
     if( conf_get_int( conf, CONF_transparencynumber) > 255 ) conf_set_int( conf,CONF_transparencynumber,255) ;
@@ -1047,7 +1046,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "WindowState", 0, conf, CONF_windowstate );
     gppb_forced(sesskey, "SaveWindowPos", false, conf, CONF_save_windowpos ); /* BKG */
     gppb_forced(sesskey, "ForegroundOnBell", false, conf, CONF_foreground_on_bell );
-#ifndef NO_PASSWORD
+#ifndef MOD_NOPASSWORD
     if( strlen(conf_get_str(conf, CONF_host))>0 ) {
 	if( (strlen(conf_get_str(conf, CONF_host))+strlen(conf_get_str(conf, CONF_termtype))) < 1000 ) { 
 		sprintf( PassKey, "%s%sKiTTY", conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
@@ -1090,13 +1089,10 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gpps_forced(sesskey, "Comment", "", conf, CONF_comment );
     gppi_forced(sesskey, "SCPAutoPwd", 0, conf, CONF_scp_auto_pwd);
 #endif
-#ifdef ACSPORT
-    gppb_forced(sesskey, "ACSinUTF", false, conf, CONF_acs_in_utf);
-#endif
-#ifdef PORTKNOCKINGPORT
+#ifdef MOD_PORTKNOCKING
 	gpps_forced(sesskey, "PortKnocking", "", conf, CONF_portknockingoptions );
 #endif
-#ifdef DISABLEALTGRPORT
+#ifdef MOD_DISABLEALTGR
 	gppi_forced(sesskey, "DisableAltGr", 0, conf, CONF_disablealtgr);
 #endif
 // END COPY/PASTE

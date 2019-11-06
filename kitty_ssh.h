@@ -1,7 +1,7 @@
 #ifndef KITTY_SSH
 #define KITTY_SSH
 
-#ifdef PORTKNOCKINGPORT
+#ifdef MOD_PORTKNOCKING
 #define PROTO_TCP 1
 #define PROTO_UDP 2
 int knock( char *hostname, unsigned short port, unsigned short proto) ;

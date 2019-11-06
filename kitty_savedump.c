@@ -325,6 +325,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 
 	/* Keyboard options */
 	fprintf( fp, "bksp_is_delete=%d\n", 		conf_get_bool(conf,CONF_bksp_is_delete) ) ;
+	fprintf( fp, "enter_sends_crlf=%d\n", 		conf_get_int(conf,CONF_enter_sends_crlf) ) ;
 	fprintf( fp, "rxvt_homeend=%d\n", 		conf_get_int(conf,CONF_rxvt_homeend) ) ;
 	fprintf( fp, "funky_type=%d\n", 		conf_get_int(conf,CONF_funky_type) ) ;
 	fprintf( fp, "no_applic_c=%d\n", 		conf_get_bool(conf,CONF_no_applic_c) ) ;
@@ -478,8 +479,8 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "crhaslf=%d\n",			conf_get_bool(conf,CONF_crhaslf) ) ;
 	fprintf( fp, "winclass=%s\n",			conf_get_str(conf,CONF_winclass) ) ;
 
-#ifdef PERSOPORT
-	/* PERSOPORT Options */
+#ifdef MOD_PERSO
+	/* MOD_PERSO Options */
 	//fprintf( fp, "bcdelay=%d\n", 			conf_get_int(conf,CONF_bcdelay) ) ;		// Non present systematiquement
 	//fprintf( fp, "initdelay=%d\n",			conf_get_int(conf,CONF_initdelay) ) ;		// Non present systematiquement
 	fprintf( fp, "transparencynumber=%d\n", 	conf_get_int(conf,CONF_transparencynumber) ) ;
@@ -524,13 +525,10 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "comment=%s\n",			conf_get_str(conf,CONF_comment) ) ;
 	fprintf( fp, "scp_auto_pwd=%d\n", 		conf_get_int(conf, CONF_scp_auto_pwd));
 #endif
-#ifdef ACSPORT
-	fprintf( fp, "acs_in_utf=%d\n", 		conf_get_bool(conf, CONF_acs_in_utf));
-#endif
-#ifdef PRINTCLIPPORT
+#ifdef MOD_PRINTCLIP
 	fprintf( fp, "printclip=%d\n",			conf_get_int(conf,CONF_printclip) ) ;
 #endif
-#ifdef RUTTYPORT
+#ifdef MOD_RUTTY
 	/* rutty: scripting options */
 	fprintf( fp, "ScriptFileName=%s\n",		conf_get_filename(conf,CONF_script_filename)->path ) ;
 	fprintf( fp, "ScriptMode=%d\n",			conf_get_int(conf,CONF_script_mode) ) ;
@@ -545,14 +543,14 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "ScriptWait=%s\n",			conf_get_str(conf,CONF_script_waitfor) ) ;
 	fprintf( fp, "ScriptHalt=%s\n",			conf_get_str(conf,CONF_script_halton) ) ;
 #endif
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 	/* Cygterm options */
 	fprintf( fp, "cygautopath=%d\n", 		conf_get_int(conf,CONF_cygautopath) ) ;
 	fprintf( fp, "cygterm64=%d\n", 			conf_get_int(conf,CONF_cygterm64) ) ;
 	fprintf( fp, "cygcmd=%s\n", 			conf_get_str(conf,CONF_cygcmd) ) ;
 	fprintf( fp, "alt_metabit=%d\n", 		conf_get_int(conf,CONF_alt_metabit) ) ;
 #endif
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	/* Image Options */
 	fprintf( fp, "bg_opacity=%d\n",			conf_get_int(conf,CONF_bg_opacity) ) ;
 	fprintf( fp, "bg_slideshow=%d\n",		conf_get_int(conf,CONF_bg_slideshow) ) ;
@@ -563,12 +561,12 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "bg_image_abs_y=%d\n",		conf_get_int(conf,CONF_bg_image_abs_y) ) ;
 	fprintf( fp, "bg_image_abs_fixed=%d\n",		conf_get_int(conf,CONF_bg_image_abs_fixed) ) ;
 #endif
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 	/* Reconnect Options */
 	fprintf( fp, "wakeup_reconnect=%d\n",		conf_get_int(conf,CONF_wakeup_reconnect) ) ;
 	fprintf( fp, "failure_reconnect=%d\n",		conf_get_int(conf,CONF_failure_reconnect) ) ;
 #endif
-#ifdef HYPERLINKPORT
+#ifdef MOD_HYPERLINK
 	/* Hyperlink Options */
 	fprintf( fp, "url_ctrl_click=%d\n",		conf_get_int(conf,CONF_url_ctrl_click) ) ; 
 	fprintf( fp, "url_underline=%d\n",		conf_get_int(conf,CONF_url_underline) ) ; 
@@ -579,7 +577,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "urlhack_default_regex=%s\n",	urlhack_default_regex ) ;
 	fprintf( fp, "urlhack_liberal_regex=%s\n",	urlhack_liberal_regex ) ;
 #endif
-#ifdef TUTTYPORT
+#ifdef MOD_TUTTY
 	/* TuTTY port Options */
 	fprintf( fp, "window_closable=%d\n",		conf_get_int(conf,CONF_window_closable) ) ; 
 	fprintf( fp, "window_minimizable=%d\n",		conf_get_int(conf,CONF_window_minimizable) ) ; 
@@ -590,7 +588,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "under_colour=%d\n",		conf_get_int(conf,CONF_under_colour) ) ; 
 	fprintf( fp, "sel_colour=%d\n",			conf_get_int(conf,CONF_sel_colour) ) ;
 #endif
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
 	/* ZModem Options */
 	fprintf( fp, "rzcommand=%s\n",			conf_get_filename(conf,CONF_rzcommand)->path ) ;
 	fprintf( fp, "rzoptions=%s\n",			conf_get_str(conf,CONF_rzoptions) ) ;
@@ -598,11 +596,11 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "szoptions=%s\n",			conf_get_str(conf,CONF_szoptions) ) ;
 	fprintf( fp, "zdownloaddir=%s\n",		conf_get_str(conf,CONF_zdownloaddir) ) ;
 #endif
-#ifdef PORTKNOCKINGPORT
+#ifdef MOD_PORTKNOCKING
 	/* Port knocking Options */
 	fprintf( fp, "portknocking=%s\n",		conf_get_str(conf,CONF_portknockingoptions) ) ;
 #endif
-#ifdef DISABLEALTGRPORT
+#ifdef MOD_DISABLEALTGR
 	/* Disable AltGr Options */
 	fprintf( fp, "disablealtgr=%d\n",		conf_get_int(conf,CONF_disablealtgr) ) ;
 #endif
@@ -635,13 +633,13 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "WinHeight=%d\nWinrolFlag=%d\nAutoSendToTray=%d\nNoKittyFileFlag=%d\nConfigBoxHeight=%d\nConfigBoxWindowHeight=%d\nConfigBoxNoExitFlag=%d\nUserPassSSHNoSave=%d\nPuttyFlag=%d\n",WinHeight,WinrolFlag,AutoSendToTray,NoKittyFileFlag,ConfigBoxHeight,ConfigBoxWindowHeight,ConfigBoxNoExitFlag,GetUserPassSSHNoSave(),PuttyFlag);
 
 	fprintf( fp,"BackgroundImageFlag=%d\n",GetBackgroundImageFlag() );
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 	fprintf( fp,"AutoreconnectFlag=%d\nReconnectDelay=%d\n",AutoreconnectFlag,ReconnectDelay );
 #endif
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 	fprintf( fp,"CygTermFlag=%d\n",cygterm_get_flag() );
 #endif
-#ifdef ADBPORT
+#ifdef MOD_ADB
 	fprintf( fp,"ADBFlag=%d\n",GetADBFlag() );
 #endif
 	if( PasswordConf!= NULL ) fprintf( fp, "PasswordConf=%s\n", PasswordConf ) ;
@@ -854,7 +852,7 @@ void SaveDumpFile( char * filename ) {
 			fputs( "\n@ Private key file @\n\n", fpout ) ;
 			SaveDebugFile( conf_get_filename(conf,CONF_keyfile)->path, fpout ) ;
 		}
-#ifdef RUTTYPORT
+#ifdef MOD_RUTTY
 		if( existfile( conf_get_filename(conf,CONF_script_filename)->path ) ) { 
 			fputs( "\n@ RuTTY script file @\n\n", fpout ) ;
 			SaveDebugFile( conf_get_filename(conf,CONF_script_filename)->path, fpout ) ;

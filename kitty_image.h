@@ -1,4 +1,4 @@
-#ifdef IMAGEPORT
+#ifdef MOD_BACKGROUNDIMAGE
 
 #include <stdbool.h>
 

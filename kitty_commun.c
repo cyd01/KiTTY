@@ -8,7 +8,7 @@
 // Flag permettant d'activer l'acces a du code particulier permettant d'avoir plus d'info dans le kitty.dmp
 int debug_flag = 0 ;
 
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
 
 #ifndef SAVEMODE_REG
 #define SAVEMODE_REG 0
@@ -21,14 +21,14 @@ int debug_flag = 0 ;
 #endif
 
 // Flag pour le fonctionnement en mode "portable" (gestion par fichiers)
-#ifdef PORTABLE
+#ifdef MOD_PORTABLE
 int IniFileFlag = SAVEMODE_DIR ;
 #else
 int IniFileFlag = SAVEMODE_REG ;
 #endif
 
 // Flag permettant la gestion de l'arborscence (dossier=folder) dans le cas d'un savemode=dir
-#ifdef PORTABLE
+#ifdef MOD_PORTABLE
 int DirectoryBrowseFlag = 1 ;
 #else
 int DirectoryBrowseFlag = 0 ;
@@ -60,7 +60,7 @@ static int ScrumbleKeyFlag = 0 ;
 int GetScrumbleKeyFlag(void) { return ScrumbleKeyFlag ; }
 void SetScrumbleKeyFlag( const int flag ) { ScrumbleKeyFlag = flag ; }
 
-#ifdef ADBPORT
+#ifdef MOD_ADB
 // Flag pour inhiber le support d'ADB
 static int ADBFlag = 1 ;
 int GetADBFlag(void) { return ADBFlag ; }
@@ -68,7 +68,7 @@ void SetADBFlag( const int flag ) { ADBFlag = flag ; }
 #endif
 
 // Flag pour afficher l'image de fond
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 // Suite à PuTTY 0.61, le patch covidimus ne fonctionne plus tres bien
 // Il impose de demarrer les sessions avec -load meme depuis la config box (voir CONFIG.C)
 // Le patch est desactive par defaut
@@ -267,7 +267,7 @@ int LoadParametersLight( void ) {
 // Positionne un flag permettant de determiner si on est connecte
 int is_backend_connected = 0 ;
 
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 int is_backend_first_connected = 0 ; 
 void SetSSHConnected( int flag ) {
 	is_backend_connected = flag ; 

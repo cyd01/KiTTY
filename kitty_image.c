@@ -6,7 +6,7 @@
 
 // Essai de compilation séparée
 #ifdef FDJ
-#undef IMAGEPORT
+#undef MOD_BACKGROUNDIMAGE
 #endif
 
 #include <windows.h>
@@ -15,8 +15,7 @@
 #include "jpeg/jpeglib.h"
 #include <stdio.h>
 
-#ifdef IMAGEPORT
-#ifdef NO
+#ifdef MOD_BACKGROUNDIMAGE
 
 #include <math.h>
 #include "putty.h"
@@ -49,7 +48,6 @@ int return_font_height(void) ;
 int return_font_width(void) ;
 COLORREF return_colours258(void) ;
 
-#endif
 
 static BOOL (WINAPI * pAlphaBlend)( HDC, int, int, int, int, HDC, int, int, int, int, BLENDFUNCTION ) = 0 ;
 
@@ -1332,7 +1330,7 @@ void RedrawBackground( HWND hwnd ) {
 	}
 
 
-#ifdef STARTBUTTON
+#ifdef MOD_STARTBUTTON
 /*
  * Patch permettant de gerer le probleme de chargement de l'image de fond arrive avec putty 0.61
  */

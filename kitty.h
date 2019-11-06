@@ -32,7 +32,7 @@ void SetCtrlTabFlag( const int flag ) ;
 int GetBackgroundImageFlag(void) ;
 void SetBackgroundImageFlag( const int flag ) ;
 
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 // Flag pour inhiber le mécanisme de reconnexion automatique
 int GetAutoreconnectFlag( void ) ;
 void SetAutoreconnectFlag( const int flag ) ;
@@ -199,7 +199,7 @@ void SetSessionsInDefaultFlag( const int flag ) ;
 int GetDefaultSettingsFlag(void) ;
 void SetDefaultSettingsFlag( const int flag ) ;
 
-#ifdef ADBPORT
+#ifdef MOD_ADB
 // Flag pour inhiber le support d'ADB
 int GetADBFlag(void) ;
 void SetADBFlag( const int flag ) ;
@@ -226,7 +226,7 @@ extern char * ConfigDirectory ;
 // Positionne un flag permettant de determiner si on est connecte
 extern int is_backend_connected ;
 
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 /* Variable permettant de savoir qu'on a deja ete connecte */
 extern int is_backend_first_connected ; 
 #endif
@@ -384,10 +384,10 @@ void ChangeFontSize(HWND hwnd, int dec) ;
 
 void create_settings( const char * name ) ;
 
-#ifdef LAUNCHERPORT
+#ifdef MOD_LAUNCHER
 void InitLauncherRegistry( void ) ;
 #endif
-#ifdef CYGTERMPORT
+#ifdef MOD_CYGTERM
 void cygterm_set_flag( int flag ) ;
 int cygterm_get_flag( void ) ;
 #endif
@@ -395,7 +395,7 @@ int cygterm_get_flag( void ) ;
 int getpid(void) ;
 
 // Definition de la section du fichier de configuration
-#if (defined PERSOPORT) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FDJ)
 
 #ifndef INIT_SECTION
 #define INIT_SECTION "KiTTY"
@@ -447,7 +447,7 @@ int getpid(void) ;
 #endif
 
 #ifndef TIMER_SLIDEBG
-#if (defined IMAGEPORT) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 #define TIMER_SLIDEBG 8703
 #endif
 #endif
@@ -483,7 +483,7 @@ int getpid(void) ;
 /*************************************************
 ** DEFINITION DES DEFINES
 *************************************************/
-#ifdef ZMODEMPORT
+#ifdef MOD_ZMODEM
 #ifndef IDM_XYZSTART
 #define IDM_XYZSTART  0xA810
 #endif
@@ -584,7 +584,7 @@ void xyz_updateMenuItems(Terminal *term) ;
 #define IDM_CLEARLOGFILE 0xB100
 #endif
 
-#ifdef RECONNECTPORT
+#ifdef MOD_RECONNECT
 #ifndef IDM_RESTARTSESSION
 #define IDM_RESTARTSESSION 0xB110
 #endif

@@ -5,6 +5,6 @@
 
 #include <stdlib.h>
 #include "putty.h"
-#ifdef PERSOPORT
+#ifdef MOD_PERSO
 
 #endif 

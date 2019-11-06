@@ -210,7 +210,7 @@ regcomp( char* exp)
 	register char *longest;
 	register int len;
 	int flags;
-	int i;														// Ajout HYPERLINKPORT
+	int i;														// Ajout MOD_HYPERLINK
 
 	if (exp == NULL)
 		FAIL("NULL argument");
@@ -233,8 +233,8 @@ regcomp( char* exp)
 	if (r == NULL)
 		FAIL("out of space");
 
-	for( i=0 ; i<NSUBEXP ; i++ ) { if( r->startp[i] != NULL) free( r->startp[i] ) ; r->startp[i] = NULL ; }		// Ajout HYPERLINKPORT
-	for( i=0 ; i<NSUBEXP ; i++ ) { if( r->endp[i] != NULL) free( r->endp[i] ) ; r->endp[i] = NULL ; }		// Ajout HYPERLINKPORT
+	for( i=0 ; i<NSUBEXP ; i++ ) { if( r->startp[i] != NULL) free( r->startp[i] ) ; r->startp[i] = NULL ; }		// Ajout MOD_HYPERLINK
+	for( i=0 ; i<NSUBEXP ; i++ ) { if( r->endp[i] != NULL) free( r->endp[i] ) ; r->endp[i] = NULL ; }		// Ajout MOD_HYPERLINK
 	
 	/* Second pass: emit code. */
 	regparse = exp;
