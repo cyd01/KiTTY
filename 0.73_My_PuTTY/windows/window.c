@@ -1187,8 +1187,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	else
 		icon_m = LoadIcon(inst, MAKEINTRESOURCE(IDI_MAINICON));
 int xpos_init=0, ypos_init=0 ;
-	if( (conf_get_bool(conf,CONF_saveonexit)||conf_get_bool(conf,CONF_save_windowpos))
-		&& (conf_get_int(conf,CONF_xpos)>=0) && (conf_get_int(conf,CONF_ypos)>=0) ) {
+	if( (conf_get_bool(conf,CONF_saveonexit)||conf_get_bool(conf,CONF_save_windowpos) )
+		/*&& (conf_get_int(conf,CONF_xpos)>=0) && (conf_get_int(conf,CONF_ypos)>=0)*/ ) {
 		xpos_init=conf_get_int(conf,CONF_xpos) ;
 		ypos_init=conf_get_int(conf,CONF_ypos) ;
 		}
@@ -1392,7 +1392,7 @@ TrayIcone.hWnd = hwnd ;
 #ifdef MOD_PERSO
     if( !PuttyFlag )
     if( (conf_get_bool(conf,CONF_saveonexit)||conf_get_bool(conf,CONF_save_windowpos)) 
-	&& (xpos_init>=0) && (ypos_init>=0) ) {
+	/*&& (xpos_init>=0) && (ypos_init>=0)*/ ) {
 	MoveWindow(hwnd, xpos_init, ypos_init, guess_width, guess_height, TRUE );
 	}
 #endif

@@ -2605,7 +2605,7 @@ void SaveWindowCoord( Conf * conf ) {
 			conf_set_int(conf,CONF_height,height) ;
 			conf_set_int(conf,CONF_windowstate,windowstate) ; 
 			conf_set_int(conf,CONF_transparencynumber,transparency) ; 
-			save_settings( conf_get_str(conf,CONF_sessionname), conf ) ; 
+			save_settings( conf_get_str(conf,CONF_sessionname), conf ) ;
 			}
 		}
 	}

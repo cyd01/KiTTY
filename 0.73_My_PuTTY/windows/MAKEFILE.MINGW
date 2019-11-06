@@ -1994,6 +1994,8 @@ cleanall: clean FORCE
 version:
 	expr `cat version_minor.txt|tr -d '\r\n 	'` + 1 > version_minor.txt
 	cat version_major.txt version_minor.txt|tr -d '\r\n 	'|sed 's/^.//'|sed 's/"/./' > version.txt
+	v=`cat version_major.txt|tr -d '"\r\n 	'|sed 's/\.[0-9]*$$//'` ; printf '#define RELEASE '$${v}'\n#define TEXTVER "Release '$${v}'"\n#define SSHVER "-Release-'$${v}'"\n#define BINARY_VERSION '`cat version.txt|sed 's/\./,/g'`'\n#define SOURCE_COMMIT "unavailable"\n' > ../version.h
+	cat version.txt
 
 xml:
 	cat ../../kitty.xml | sed 's/<Program_Version>.*<\/Program_Version>/<Program_Version>'`cat version.txt`'<\/Program_Version>/' | sed 	's/<Program_Release_Month>.*<\/Program_Release_Month>/<Program_Release_Month>'`date +"%m"`'<\/Program_Release_Month>/' | sed 	's/<Program_Release_Day>.*<\/Program_Release_Day>/<Program_Release_Day>'`date +"%d"`'<\/Program_Release_Day>/' | sed 's/<Program_Release_Year>.*<\/Program_Release_Year>/<Program_Release_Year>'`date +"%Y"`'<\/Program_Release_Year>/' | sed 's/<File_Size_Bytes>.*<\/File_Size_Bytes>/<File_Size_Bytes>'`ls -l putty.exe|awk '{print $5}'`'<\/File_Size_Bytes>/' > kitty.xml
