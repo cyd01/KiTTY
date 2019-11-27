@@ -2133,9 +2133,11 @@ clean:
 
 cross:
 	sed -i 's#^typedef enum _WTS_VIRTUAL_CLASS #// typedef enum _WTS_VIRTUAL_CLASS #' window.c
-	make -e TOOLPATH=/usr/bin/i686-w64-mingw32- -f MAKEFILE.MINGW putty.exe
-	upx --best --compress-icons=2 --compress-exports=0 putty.exe
-	wine /usr/bin/MD5sign.exe putty.exe
+	make -e TOOLPATH=/usr/bin/i686-w64-mingw32- -f MAKEFILE.MINGW putty.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
+	make -e TOOLPATH=/usr/bin/i686-w64-mingw32- -f MAKEFILE.MINGW portable
+	cp putty.exe putty_nocompress.exe
+	upx --best --compress-icons=2 --compress-exports=0 putty.exe putty_portable.exe putty_nocompress.exe
+	wine /usr/bin/MD5sign.exe putty.exe putty_portable.exe plink.exe
 	mv putty.exe /build/kitty.exe
 	rm *.o
 
