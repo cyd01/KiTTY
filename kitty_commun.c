@@ -279,7 +279,7 @@ void SetSSHConnected( int flag ) {
 	}
 #endif
 
-PVOID SecureZeroMemory( PVOID ptr, SIZE_T cnt) { return memset( ptr, 0, cnt ) ; }
+//PVOID SecureZeroMemory( PVOID ptr, SIZE_T cnt) { return memset( ptr, 0, cnt ) ; }
 
 // Fonction permettant de changer le statut du stockage automatique des ssh host keys
 void SetAutoStoreSSHKey( void ) {

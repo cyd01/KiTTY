@@ -8,6 +8,11 @@
 #ifndef AUTO_WINSOCK
 #include <winsock2.h>
 #endif
+
+#ifdef MOD_PERSO
+#include <winerror.h>
+#endif
+
 #include <windows.h>
 #include <stdio.h>		       /* for FILENAME_MAX */
 

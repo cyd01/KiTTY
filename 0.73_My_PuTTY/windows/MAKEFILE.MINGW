@@ -140,7 +140,7 @@ FDJFLAG = FDJ1
 
 RCFLAGS += -I ../../ -DMOD_PERSO -D$(FDJFLAG)
 
-CFLAGS += -DAUTO_WINSOCK -DCOVERITY -DNO_MULTIMON -DNO_HTMLHELP
+CFLAGS += -DNO_SECUREZEROMEMORY -DCOVERITY -DNO_MULTIMON -DNO_HTMLHELP
 CFLAGS += -D$(FDJFLAG)
 CFLAGS += 	-I.././ -I../../ \
 		-DMOD_PERSO \
@@ -2130,6 +2130,14 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 
 clean:
 	rm -f *.o *.exe *.res.o *.so *.map
+
+cross:
+	sed -i 's#^typedef enum _WTS_VIRTUAL_CLASS #// typedef enum _WTS_VIRTUAL_CLASS #' window.c
+	make -e TOOLPATH=/usr/bin/i686-w64-mingw32- -f MAKEFILE.MINGW putty.exe
+	upx --best --compress-icons=2 --compress-exports=0 putty.exe
+	wine /usr/bin/MD5sign.exe putty.exe
+	mv putty.exe /build/kitty.exe
+	rm *.o
 
 9bis: putty.exe putty_portable.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
 

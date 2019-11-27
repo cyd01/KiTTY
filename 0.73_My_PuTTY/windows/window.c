@@ -259,7 +259,7 @@ void SendStrToTerminal( const char * str, const int len ) {
 	for( i=0 ; i<len ; i++ ) {
 		c=(unsigned char)str[i] ;
 		if (ldisc)
-			term_keyinputw(term, &c, 1); //lpage_send(ldisc, CP_ACP, &c, 1, 1);
+			term_keyinputw(term, (const wchar_t *) &c, 1); //lpage_send(ldisc, CP_ACP, &c, 1, 1);
 		}
 	}
 // resize en convertissant en nombre de lignes et colonnes
@@ -321,10 +321,7 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 
 #endif
 #ifdef MOD_WTS
-typedef enum _WTS_VIRTUAL_CLASS { 
-  WTSVirtualClientData,
-  WTSVirtualFileHandle
-} WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS n'est pas défini dans le fichier wtsapi32.h !!!
+typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS n'est pas défini dans le fichier wtsapi32.h !!!
 #include <wtsapi32.h>
 #endif
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)

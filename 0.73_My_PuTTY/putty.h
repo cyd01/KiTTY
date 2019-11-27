@@ -38,8 +38,8 @@ int switch_private_key_flag( void ) ;
 
 /* Ajout de declaration de DLL manquante dans MinGW*/
 //DLL_DIRECTORY_COOKIE WINAPI AddDllDirectory( PCWSTR NewDirectory );
-BOOL WINAPI SetDefaultDllDirectories( DWORD DirectoryFlags ) ;
-BOOL WINAPI CryptProtectMemory( LPVOID pData, DWORD  cbData, DWORD  dwFlags );
+BOOL WINAPI __declspec(dllimport) SetDefaultDllDirectories( DWORD DirectoryFlags ) ;
+BOOL WINAPI __declspec(dllimport) CryptProtectMemory( LPVOID pData, DWORD  cbData, DWORD  dwFlags );
 #endif
 #ifdef MOD_PRINTCLIP
 #define PRINT_TO_CLIPBOARD_STRING "Windows clipboard"
