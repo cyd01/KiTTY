@@ -2139,6 +2139,13 @@ cross:
 	upx --best --compress-icons=2 --compress-exports=0 putty.exe putty_portable.exe putty_nocompress.exe
 	wine /usr/bin/MD5sign.exe putty.exe putty_portable.exe plink.exe
 	mv putty.exe /build/kitty.exe
+	mv putty_portable.exe /build/kitty_portable.exe
+	mv putty_nocompress.exe /build/kitty_nocompress.exe
+	mv plink.exe /build/klink.exe
+	mv pscp.exe /build/kscp.exe
+	mv psftp.exe /build/ksftp.exe
+	mv pageant.exe /build/kageant.exe
+	mv puttygen.exe /build/kittygen.exe
 	rm *.o
 
 9bis: putty.exe putty_portable.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
