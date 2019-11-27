@@ -11,16 +11,16 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-// Include specifiques Windows (windows.h doit imperativement etre declare en premier)
-#include <windows.h>
-#include <iphlpapi.h>
-#include <psapi.h>
-
 // Includes de PuTTY
 #include "putty.h"
 #include "terminal.h"
 #include "ldisc.h"
 #include "win_res.h"
+
+// Include specifiques Windows (windows.h doit imperativement etre declare en premier)
+#include <windows.h>
+#include <psapi.h>
+#include <iphlpapi.h>
 
 // Includes de KiTTY
 #include "kitty.h"
@@ -1234,39 +1234,34 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, "Agent", "#messageonkeyusage", "no" ) ;
 			writeINI( KittyIniFile, "Agent", "#askconfirmation", "auto" ) ;
 			
-			writeINI( KittyIniFile, "ConfigBox", "height", "21" ) ;
-			writeINI( KittyIniFile, "ConfigBox", "filter", "yes" ) ;
 			writeINI( KittyIniFile, "ConfigBox", "#default", "yes" ) ;
 			writeINI( KittyIniFile, "ConfigBox", "#defaultsettings", "yes" ) ;
+			writeINI( KittyIniFile, "ConfigBox", "filter", "yes" ) ;
+			writeINI( KittyIniFile, "ConfigBox", "height", "21" ) ;
 			writeINI( KittyIniFile, "ConfigBox", "#noexit", "no" ) ;
 			writeINI( KittyIniFile, "ConfigBox", "#windowheight", "600" ) ;
 
+#ifdef MOD_ADB
+			writeINI( KittyIniFile, INIT_SECTION, "#adb", "yes" ) ;
+#endif
+			writeINI( KittyIniFile, INIT_SECTION, "#antiidle=", " \\k08\\" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#antiidledelay", "60" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#autostoresshkey", "no" ) ;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 			writeINI( KittyIniFile, INIT_SECTION, "backgroundimage", "no" ) ;
 #endif
+			writeINI( KittyIniFile, INIT_SECTION, "#bcdelay", "0" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "capslock", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "conf", "yes" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#configdir", "" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#CtHelperPath", "" ) ;
 #ifndef FDJ
 			writeINI( KittyIniFile, INIT_SECTION, "cygterm", "no" ) ;
 #else
 			writeINI( KittyIniFile, INIT_SECTION, "cygterm", "no" ) ;
 #endif
-			writeINI( KittyIniFile, INIT_SECTION, "icon", "no" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#iconfile", DEFAULT_EXE_FILE ) ;
-			sprintf( buffer, "%d", NB_ICONES ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#numberoficons", buffer ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "paste", "no" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "print", "yes" ) ;
-			
-			writeINI( KittyIniFile, INIT_SECTION, "scriptfilefilter", "All files (*.*)|*.*" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "size", "no" ) ;
-#ifdef FDJ
-			writeINI( KittyIniFile, INIT_SECTION, "shortcuts", "no" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "mouseshortcuts", "no" ) ;
-#else
-			writeINI( KittyIniFile, INIT_SECTION, "shortcuts", "yes" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "mouseshortcuts", "yes" ) ;
-#endif
+//			writeINI( KittyIniFile, INIT_SECTION, "debug", "#no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#downloaddir", "" ) ;
 #ifdef MOD_HYPERLINK
 #ifdef FDJ
 			writeINI( KittyIniFile, INIT_SECTION, "hyperlink", "yes" ) ;
@@ -1274,6 +1269,31 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "hyperlink", "no" ) ;
 #endif
 #endif
+			writeINI( KittyIniFile, INIT_SECTION, "icon", "no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#iconfile", DEFAULT_EXE_FILE ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "mouseshortcuts", "yes" ) ;
+			sprintf( buffer, "%d", NB_ICONES ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#numberoficons", buffer ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "paste", "no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#PlinkPath", "" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#PSCPPath", "" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#PSCPOptions", "-scp -r" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#remotedir", "" ) ;
+#ifdef MOD_PORTABLE
+			writeINI( KittyIniFile, INIT_SECTION, "savemode", "dir" ) ;
+#else
+			sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE );
+			writeINI( KittyIniFile, INIT_SECTION, "sav", buffer ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "savemode", "registry" ) ;
+#endif
+			writeINI( KittyIniFile, INIT_SECTION, "#scriptfilefilter", "All files (*.*)|*.*" ) ;
+#ifdef FDJ
+			writeINI( KittyIniFile, INIT_SECTION, "shortcuts", "no" ) ;
+#else
+			writeINI( KittyIniFile, INIT_SECTION, "shortcuts", "yes" ) ;
+#endif
+			writeINI( KittyIniFile, INIT_SECTION, "size", "no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#sshversion", "OpenSSH_5.5" ) ;
 #ifndef MOD_NOTRANSPARENCY
 #ifdef FDJ
 			writeINI( KittyIniFile, INIT_SECTION, "transparency", "yes" ) ;
@@ -1281,21 +1301,19 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "transparency", "no" ) ;
 #endif
 #endif
-			writeINI( KittyIniFile, INIT_SECTION, "#configdir", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#downloaddir", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#uploaddir", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#remotedir", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#PSCPPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#PSCPOptions", "-scp -r" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#PlinkPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#CtHelperPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#antiidle=", " \\k08\\" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#antiidledelay", "60" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#sshversion", "OpenSSH_5.5" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPProtocol", "sftp" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#autostoresshkey", "no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#uploaddir", "." ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#UserPassSSHNoSave", "no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPPath", "" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPProtocol", "sftp" ) ;
+#ifdef MOD_ZMODEM
+			writeINI( KittyIniFile, INIT_SECTION, "zmodem", "yes" ) ;
+#endif
+			
+			
+			
+			
+			
+			
 			writeINI( KittyIniFile, INIT_SECTION, "#ctrltab", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#KiClassName", "PuTTY" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "maxblinkingtime", "5" ) ;
@@ -1306,18 +1324,7 @@ void CreateDefaultIniFile( void ) {
 #ifdef MOD_RUTTY
 			writeINI( KittyIniFile, INIT_SECTION, "#scriptmode", "yes" ) ;
 #endif
-#ifdef MOD_RUTTY
-			writeINI( KittyIniFile, INIT_SECTION, "#adb", "yes" ) ;
-#endif
-#ifdef MOD_PORTABLE
-			writeINI( KittyIniFile, INIT_SECTION, "savemode", "dir" ) ;
-#else
-			sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE );
-			writeINI( KittyIniFile, INIT_SECTION, "sav", buffer ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "savemode", "registry" ) ;
-#endif
 
-			writeINI( KittyIniFile, INIT_SECTION, "#bcdelay", "0" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#commanddelay", "0.05" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#initdelay", "2.0" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#internaldelay", "10" ) ;
@@ -1325,9 +1332,6 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "slidedelay", "0" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "winroll", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "wintitle", "yes" ) ;
-#ifdef MOD_ZMODEM
-			writeINI( KittyIniFile, INIT_SECTION, "zmodem", "yes" ) ;
-#endif
 			writeINI( KittyIniFile, "Print", "height", "100" ) ;
 			writeINI( KittyIniFile, "Print", "maxline", "60" ) ;
 			writeINI( KittyIniFile, "Print", "maxchar", "85" ) ;
@@ -1336,9 +1340,6 @@ void CreateDefaultIniFile( void ) {
 	
 			writeINI( KittyIniFile, "Launcher", "reload", "yes" ) ;
 			
-			writeINI( KittyIniFile, "Print", "height", "100" ) ;
-			writeINI( KittyIniFile, "Print", "maxline", "60" ) ;
-			writeINI( KittyIniFile, "Print", "maxchar", "85" ) ;
 			
 			writeINI( KittyIniFile, "Shortcuts", "#switchlogmode", "{SHIFT}{F5}" ) ;
 			writeINI( KittyIniFile, "Shortcuts", "#showportforward", "{SHIFT}{F6}" ) ;

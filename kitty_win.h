@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <windows.h>
 #include "putty.h"
+#include <windows.h>
 
 void SetTransparency( HWND hwnd, int value ) ;
 void GetOSInfo( char * version ) ;

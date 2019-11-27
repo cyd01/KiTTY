@@ -277,7 +277,7 @@ void routine_SaveRegistryKey( void * st ) ;
 void SetNewIcon( HWND hwnd, char * iconefile, int icone, const int mode ) ;
 int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine, int nCmdShow) ;
 void InitWinMain( void ) ;
-char * getcwd (char * buf, size_t size);
+char * getcwd (char * buf, int size);
 int chdir(const char *path); 
 char * InputBox( HINSTANCE hInstance, HWND hwnd ) ;
 char *itoa(int value, char *string, int radix);

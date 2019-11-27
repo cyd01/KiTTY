@@ -1,7 +1,7 @@
 #ifndef KITTYCRYPT_H
 #define KITTYCRYPT_H
 
-#include "bcrypt.h"
+#include "nbcrypt.h"
 
 extern char PassKey[1024] ;
 

@@ -3255,17 +3255,17 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 				char bufpass[1024]; strcpy(bufpass,conf_get_str(conf,CONF_password)) ;
 				MASKPASS(bufpass); strcat(buffer,bufpass); memset(bufpass,0,strlen(bufpass));
 				strcat( buffer, "\\n" ) ;
-				}
 			}
+		}
 		if( strlen( conf_get_str(conf,CONF_autocommand) ) > 0 ) {
 			strcat( buffer, "\\n\\p" ) ; 
 			strcat( buffer, conf_get_str(conf,CONF_autocommand) ) ;
 			strcat( buffer, "\\n" ) ;
-			}
+		}
 		if( strlen(buffer) > 0 ) { 
 			conf_set_str( conf, CONF_autocommand, buffer ); 
-			}
 		}
+	}
 
 	// Envoi automatiquement dans le systeme tray si besoin
 	if( GetAutoSendToTray() ) ManageToTray( hwnd ) ;
@@ -3284,11 +3284,11 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 
 	if( strlen( conf_get_str(conf,CONF_autocommand) ) > 0 ) {
 		SetTimer(hwnd, TIMER_AUTOCOMMAND, autocommand_delay, NULL) ;
-		}
+	}
 	if( conf_get_int(conf,CONF_logtimerotation) > 0 ) {
 		SetTimer(hwnd, TIMER_LOGROTATION, (int)( conf_get_int(conf,CONF_logtimerotation)*1000), NULL) ;
 		lp_eventlog(default_logpolicy, "Start log rotation" );
-		}
+	}
 
 	RefreshBackground( hwnd ) ;
 	}
@@ -3334,7 +3334,7 @@ else if((UINT_PTR)wParam == TIMER_AUTOCOMMAND) {  // Autocommand au demarrage
 		
 	del( AutoCommand, 1, i ) ; //AutoCommand += i ;
 	if( strlen( buffer ) > 0 ) { SendAutoCommand( hwnd, buffer ) ; }
-	if( AutoCommand[0] == '\0' ) { 
+	if( AutoCommand[0] == '\0' ) {
 		free( AutoCommand ) ; AutoCommand = NULL ; 
 		InvalidateRect( hwnd, NULL, true ) ;
 		}
@@ -3658,17 +3658,19 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, 0, SI_INIT ) ;
 		is_backend_connected = 0 ;
 		start_backend();
-		if( (!backend || !is_backend_connected) && GetAutoreconnectFlag() ) { 
+		//if( (!backend || !is_backend_connected) && GetAutoreconnectFlag() ) {
+		if( (!backend) && GetAutoreconnectFlag() ) {
 		    if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 			lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
-			}
-			break;
+		    }
+		    break;
 		}
 #else
 		is_backend_connected = 0 ;
 		start_backend();
 #endif
+		is_backend_connected = 1 ;
 		SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
 #else
 		start_backend();

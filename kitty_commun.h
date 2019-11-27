@@ -3,10 +3,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <windows.h>
+#include "putty.h"
 
 #include "winstuff.h"
-#include "putty.h"
+#include <windows.h>
 
 // Flag permettant d'activer l'acces a du code particulier permettant d'avoir plus d'info dans le kitty.dmp
 extern int debug_flag ;
@@ -76,7 +76,7 @@ extern int is_backend_first_connected ;
 
 void SetSSHConnected( int flag ) ;
 
-PVOID SecureZeroMemory( PVOID ptr, SIZE_T cnt) ;
+//PVOID WINAPI SecureZeroMemory( PVOID ptr, SIZE_T cnt) ;
 
 // Fonction permettant de changer le statut du stockage automatique des ssh host keys
 void SetAutoStoreSSHKey( void ) ;
