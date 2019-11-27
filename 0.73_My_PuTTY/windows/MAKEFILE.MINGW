@@ -142,7 +142,7 @@ RCFLAGS += -I ../../ -DMOD_PERSO -D$(FDJFLAG)
 
 CFLAGS += -DNO_SECUREZEROMEMORY -DCOVERITY -DNO_MULTIMON -DNO_HTMLHELP
 CFLAGS += -D$(FDJFLAG)
-CFLAGS += 	-I.././ -I../../ \
+CFLAGS += 	-D__WINE__ \
 		-DMOD_PERSO \
 		-DMOD_STARTBUTTON \
 		-DMOD_SAVEDUMP \
@@ -159,6 +159,7 @@ CFLAGS += 	-I.././ -I../../ \
 		-DMOD_RUTTY \
 		-DMOD_ADB \
 		-DMOD_BACKGROUNDIMAGE \
+		-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
 		-I../../base64 \

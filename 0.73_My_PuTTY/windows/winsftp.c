@@ -25,8 +25,8 @@ extern int DirectoryBrowseFlag ;
 #include "../../kitty_commun.h"
 
 int get_param( const char * val ) {
-	if( !stricmp( val, "INIFILE" ) ) return IniFileFlag ;
-	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) return DirectoryBrowseFlag ;
+	if( !stricmp( val, "INIFILE" ) ) {return IniFileFlag ; }
+	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) { return DirectoryBrowseFlag ; }
 	return 0 ;
 	}
 

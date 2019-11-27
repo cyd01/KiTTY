@@ -28,8 +28,8 @@ int GetPuttyFlag() { return 1 ; }
 size_t win_seat_output_local(Seat *seat, bool is_stderr, const void *data, size_t len) { return 0 ; }
 
 int get_param( const char * val ) {
-	if( !stricmp( val, "INIFILE" ) ) return IniFileFlag ;
-	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) return DirectoryBrowseFlag ;
+	if( !stricmp( val, "INIFILE" ) ) { return IniFileFlag ; }
+	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) { return DirectoryBrowseFlag ; }
 	return 0 ;
 	}
 
