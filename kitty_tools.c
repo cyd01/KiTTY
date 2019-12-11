@@ -211,7 +211,8 @@ int MakeDir( const char * directory ) {
 	char buffer[MAX_VALUE_NAME], fullpath[MAX_VALUE_NAME], *p, *pst ;
 	int i,j ;
 	
-	if( directory==NULL ) return 1 ; if( strlen(directory)==0 ) return 1 ;
+	if( directory==NULL ) { return 1 ; } 
+	if( strlen(directory)==0 ) { return 1 ; }
 
 	for( i=0, j=0 ; i<=strlen(directory) ; i++,j++ ) { // On supprime les espaces après un '\' 
 		if( (directory[i]=='\\')||(directory[i]=='/') ) {

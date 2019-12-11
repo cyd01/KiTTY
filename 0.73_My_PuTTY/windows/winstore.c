@@ -1332,9 +1332,12 @@ if( get_param("INIFILE")==SAVEMODE_DIR ) {
 
     /* Clean up and return. */
 #ifdef MOD_PERSO
-if( get_param("INIFILE")!=SAVEMODE_DIR )
-#endif	
+if( get_param("INIFILE")!=SAVEMODE_DIR ) {
     RegCloseKey(pjumplist_key);
+}
+#else
+    RegCloseKey(pjumplist_key);
+#endif
 
     if (ret != ERROR_SUCCESS) {
         return JUMPLISTREG_ERROR_VALUEWRITE_FAILURE;

@@ -3878,7 +3878,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 			if( directory[strlen(directory)-1]!='/' ) strcat( cmd, "/" ) ;
 		}
 	}
-	if( conf_get_int(conf,CONF_proxy_type)!=I(PROXY_NONE) ) {
+	if( conf_get_int(conf,CONF_proxy_type) != PROXY_NONE ) {
 		if( raw == 0 ) {
 			strcat( cmd, " -rawsettings" ) ;
 			raw++;

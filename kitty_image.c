@@ -9,17 +9,19 @@
 #undef MOD_BACKGROUNDIMAGE
 #endif
 
-#include <windows.h>
-#include "kitty_image.h"
 #include <setjmp.h>
 #include "jpeg/jpeglib.h"
 #include <stdio.h>
+
 
 #ifdef MOD_BACKGROUNDIMAGE
 
 #include <math.h>
 #include "putty.h"
+#include <windows.h>
 #include "terminal.h"
+
+#include "kitty_image.h"
 
 extern Conf *conf ;// extern Config cfg;
 //extern int offset_width, offset_height ;
@@ -469,6 +471,7 @@ HBITMAP loadJPEGimage(FILE *input_file, HGLOBAL *LimageBitmap, int *LsizeX, int 
 	bh = (LPBITMAPINFOHEADER) imageBitmap;
 	pix = ((LPBYTE) imageBitmap) + sizeof(BITMAPINFOHEADER) +
 			(usePalette ? (256 * sizeof(RGBQUAD)) : 0);
+	pix = pix + 0 ; // Pour eviter un warning de compilation
 	bh->biSize = sizeof(BITMAPINFOHEADER);
 	bh->biWidth = cinfo.output_width;
 	bh->biHeight = cinfo.output_height;
@@ -520,7 +523,7 @@ HBITMAP loadJPEGimage(FILE *input_file, HGLOBAL *LimageBitmap, int *LsizeX, int 
 	int nStorageWidth = ((bh->biWidth * 24 + 31) & ~31) >> 3; //dword alignment
 	JSAMPARRAY ppDst = &pDst;
 /*
-	px = pix + (linewid * (bh->biHeight - 1));
+	LPBYTE px = pix + (linewid * (bh->biHeight - 1));
 	for (i = 0; i < (int) cinfo.output_height; i++) {
 		unsigned char *slp[1] = { sl };
 		jpeg_read_scanlines(&cinfo, slp, 1);
@@ -633,8 +636,8 @@ void init_dc_blend(void) {
     	HDC hdc = GetDC(hwnd);
     	
     	// Create one pixel size bitmap for use in color_blend.
-        if( colorinpixeldc !=NULL ) DeleteDC(colorinpixeldc ); colorinpixeldc = CreateCompatibleDC(hdc);
-        if( colorinpixelbm!=NULL ) DeleteObject(colorinpixelbm); colorinpixelbm = CreateCompatibleBitmap(hdc, 1, 1);
+        if( colorinpixeldc !=NULL ) { DeleteDC(colorinpixeldc ) ; } colorinpixeldc = CreateCompatibleDC(hdc);
+        if( colorinpixelbm!=NULL ) { DeleteObject(colorinpixelbm) ; } colorinpixelbm = CreateCompatibleBitmap(hdc, 1, 1);
         SelectObject(colorinpixeldc, colorinpixelbm);
         colorinpixel = 0;
         SetPixelV(colorinpixeldc, 0, 0, colorinpixel);
@@ -880,7 +883,6 @@ void CreateBlankBitmap( HBITMAP * rawImage, const int width, const int height ) 
 	
 BOOL load_bg_bmp()
 {
-    BOOL bRes;
     HBITMAP rawImage = NULL;
     BITMAP rawImageInfo;
     HDC hdcPrimary;
@@ -982,13 +984,12 @@ BOOL load_bg_bmp()
 
         // Create a memory DC that has a new bitmap of the appropriate final
         // image size.
-        if( textdc!=NULL ) DeleteDC(textdc) ; textdc = CreateCompatibleDC(hdcPrimary);
-        if( textbm!= NULL ) DeleteObject(textbm) ; textbm = CreateCompatibleBitmap(hdcPrimary, deskWidth, deskHeight);
+        if( textdc!=NULL ) { DeleteDC(textdc) ; } textdc = CreateCompatibleDC(hdcPrimary);
+        if( textbm!= NULL ) { DeleteObject(textbm) ; } textbm = CreateCompatibleBitmap(hdcPrimary, deskWidth, deskHeight);
         SelectObject(textdc, textbm);
 
-        if( backgrounddc!=NULL ) DeleteDC(backgrounddc); backgrounddc = CreateCompatibleDC(hdcPrimary);
-        if( backgroundbm!=NULL ) DeleteObject(backgroundbm); backgroundbm
-            = CreateCompatibleBitmap(hdcPrimary, deskWidth, deskHeight);
+        if( backgrounddc!=NULL ) { DeleteDC(backgrounddc) ; } backgrounddc = CreateCompatibleDC(hdcPrimary);
+        if( backgroundbm!=NULL ) { DeleteObject(backgroundbm) ; } backgroundbm = CreateCompatibleBitmap(hdcPrimary, deskWidth, deskHeight) ;
         SelectObject(backgrounddc, backgroundbm);
 
 	switch(style)
@@ -998,7 +999,7 @@ BOOL load_bg_bmp()
             {
                 for(x = 0; x < deskWidth; x += rawImageInfo.bmWidth)
                 {
-                    bRes = BitBlt(
+                    BitBlt(
                         backgrounddc,
                         x, y, rawImageInfo.bmWidth, rawImageInfo.bmHeight,
                         bmpdc, 0, 0, SRCCOPY
@@ -1020,7 +1021,7 @@ BOOL load_bg_bmp()
             // Start out with a background color fill.
             fill_dc(backgrounddc, deskWidth, deskHeight, backgroundcolor);
 
-            bRes = BitBlt(
+            BitBlt(
                 backgrounddc,
                 x, y, rawImageInfo.bmWidth, rawImageInfo.bmHeight,
                 bmpdc, 0, 0, SRCCOPY
@@ -1029,7 +1030,7 @@ BOOL load_bg_bmp()
             }
 
         case 2: // Stretch
-            bRes = StretchBlt(
+            StretchBlt(
                 backgrounddc, 0, 0, deskWidth, deskHeight,
                 bmpdc, 0, 0, rawImageInfo.bmWidth, rawImageInfo.bmHeight,
                 SRCCOPY
@@ -1055,10 +1056,10 @@ BOOL load_bg_bmp()
 				DeleteObject(newhbmpBMP);
 				}
 			else
-			bRes = StretchBlt( backgrounddc,0,0,clientWidth,clientHeight,bmpdc,0,0,rawImageInfo.bmWidth,rawImageInfo.bmHeight,SRCCOPY);
+			StretchBlt( backgrounddc,0,0,clientWidth,clientHeight,bmpdc,0,0,rawImageInfo.bmWidth,rawImageInfo.bmHeight,SRCCOPY);
 			}
 		else
-			bRes = StretchBlt( backgrounddc,0,0,clientWidth,clientHeight,bmpdc,0,0,rawImageInfo.bmWidth,rawImageInfo.bmHeight,SRCCOPY);
+			StretchBlt( backgrounddc,0,0,clientWidth,clientHeight,bmpdc,0,0,rawImageInfo.bmWidth,rawImageInfo.bmHeight,SRCCOPY);
 		}
 		break ;
         }
@@ -1066,8 +1067,8 @@ BOOL load_bg_bmp()
         // Create a version of the background DC with opacity already applied
         // for fast screen fill in areas with no text.
 
-        if( backgroundblenddc!=NULL ) DeleteDC(backgroundblenddc) ; backgroundblenddc = CreateCompatibleDC(hdcPrimary);
-        if( backgroundblendbm!=NULL ) DeleteObject(backgroundblendbm) ; backgroundblendbm = CreateCompatibleBitmap( hdcPrimary, deskWidth, deskHeight );
+        if( backgroundblenddc!=NULL ) { DeleteDC(backgroundblenddc) ; } backgroundblenddc = CreateCompatibleDC(hdcPrimary);
+        if( backgroundblendbm!=NULL ) { DeleteObject(backgroundblendbm) ; } backgroundblendbm = CreateCompatibleBitmap( hdcPrimary, deskWidth, deskHeight );
         
         DeleteObject(rawImage);
         DeleteDC(bmpdc);
@@ -1094,7 +1095,6 @@ BOOL load_bg_bmp()
     ReleaseDC(hwnd, hdcPrimary);
 
 //DeleteDC(hdcPrimary);
-
     return TRUE;
 }
 

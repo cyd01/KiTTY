@@ -97,4 +97,6 @@ void MASKPASS( char * password ) ;
 void GetPasswordInConfig( char * p ) ;
 int IsPasswordInConf(void) ;
 void CleanPassword( char * p ) ;
+
+int _rmdir(const char *) ;
 #endif

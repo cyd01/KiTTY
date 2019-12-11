@@ -1,9 +1,10 @@
 #include <limits.h>
 
-#include "kitty_tools.h"
-#include "kitty_commun.h"
 
 #include "kitty_store.h"
+#include "kitty_commun.h"
+#include "kitty_tools.h"
+
 
 #ifndef snewn
 #define snewn(n, type) ((type *)safemalloc((n), sizeof(type)))

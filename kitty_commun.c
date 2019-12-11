@@ -109,6 +109,7 @@ void CleanFolderName( char * folder ) {
 #include <dirent.h>
 #define MAX_VALUE_NAME 16383
 // Supprime une arborescence
+int _rmdir( const char *dirname ) ;
 void DelDir( const char * directory ) {
 	DIR * dir ;
 	struct dirent * de ;

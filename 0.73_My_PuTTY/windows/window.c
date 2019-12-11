@@ -11,7 +11,9 @@
 #include <assert.h>
 
 #ifdef __WINE__
+#ifndef NO_MULTIMON
 #define NO_MULTIMON                    /* winelib doesn't have this */
+#endif
 #endif
 
 #ifndef NO_MULTIMON
@@ -4659,6 +4661,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		 * problems when the PuTTY window is taller than
 		 * the primary monitor. It seems harmless enough...
 		 */
+
 		IntersectClipRect(hdc,
 			p.rcPaint.left, p.rcPaint.top,
 			p.rcPaint.right, p.rcPaint.bottom);
