@@ -1,0 +1,133 @@
+Droits d'utilisation de Libremail
+
+
+
+Ce site web décrit et fournit les fichiers source d'une série
+   d'applications de courrier électronique développées par Bernard
+   Chardonneau (France).
+
+
+Dans ce qui suit, on entendra par "fichiers source" les fichiers
+sources principaux (suffixe .c) ainsi que les fichiers d'inclusion
+associés (suffixe .h)
+On entendra par "fichiers de données" les fichiers diffusés en
+plusieurs langues contenant les messages générés par les différentes
+applications.
+
+
+Vous êtes autorisé à :
+
+
+- utiliser les applications obtenues par compilation des fichiers
+source sur autant d'ordinateurs que vous le désirez,
+- dupliquer ces fichiers source, les fichiers de données associés, et
+les fichiers de documentation, et les diffuser à d'autres personnes,
+- analyser les fichiers source pour comprendre leur fonctionnement,
+
+
+... mais également :
+
+
+- modifier les fichiers sources et les fichiers de données pour les
+adapter à vos besoins ou en corriger d'éventuels défauts,
+- traduire les fichiers source et les fichiers de données dans d'autres
+langues (qu'il s'agisse de langues nationales ou d'espéranto).
+
+Afin de faciliter l'analyse des sources et leur exécution sans
+barrière linguistique, on pourra traduire :
+
+
+- tous les commentaires figurant dans les fichiers source,
+- les messages contenus dans les fichiers de données et utilisés
+par les différentes applications,
+- mais aussi, et sous réserve de vérifier le bon fonctionnement
+des applications traduites :
+
+- tous les noms de fonctions, variables, constantes, présents
+dans les différents fichiers source,
+- les noms de répertoire et de fichiers utilisés par les
+différentes applications.
+
+Seuls les mots clé prédéfinis dans les protocoles relatifs au
+courrier électronique (Subject, From, To, Content-Type ....)
+devront être conservés sans modification.
+
+On pourra également traduire les fichiers de données fournis dans
+de nouvelles langues, ou corriger les traductions de ces fichiers.
+La langue de référence de Libremail est le français.
+
+
+- diffuser les fichiers ainsi traduits ou modifiés (pensez à envoyer
+une copie à l'auteur du fichier initial).
+
+
+Toutefois, en cas de modification ou de traduction des fichiers,
+les présents droits d'utilisation devront être reproduits sans
+changement.
+La mention de la, ou des personne(s) ayant effectué la modification
+ou la traduction pourra être rajoutée après la mention de l'auteur
+du fichier initial.
+
+
+Les droits définis ci dessus et notamment dans le paragraphe
+précédent (en vert) entraînent :
+
+
+- l'interdiction d'utiliser tout ou partie des fichiers de cette
+série d'applications pour proposer des logiciels dans lesquels :
+
+
+- les sources ne seraient pas fournis,
+- ou / et le paiement d'un droit d'utilisation serait demandé,
+- ou / et la duplication et la diffusion de copies serait limitée
+ou interdite.
+
+
+- l'interdiction de s'approprier (ou de tenter de s'approprier) des
+idées, algorithmes ou autres, issus de l'étude des fichiers de
+ces application, notamment par le dépôt de brevets,
+- l'interdiction d'utiliser le nom "Libremail" pour des produits
+commerciaux, tout particulièrement s'ils concernent le traitement
+des courriers électroniques,
+- l'interdiction de déposer dans quelque pays que ce soit, la marque
+"Libremail" sans accord préalable de l'auteur des présents logiciels,
+et celle de conserver à son profit le dépôt non autorisé de cette
+marque.
+
+
+Vous pouvez également traduire dans de nouvelles langues ou proposer
+des améliorations aux traductions effectuées par l'auteur de libremail
+pour :
+
+
+- les sites web : http://libremail.free.fr et
+http://libremail.tuxfamily.org
+- les pages de man de Libremail
+- les fichiers d'exemple et autres fichiers de documentation.
+
+
+Toutefois, il est recommandé de contacter l'auteur au préalable afin
+d'éviter de travailler sur des mauvais fichiers.
+
+Par ailleurs, c'est la version française des droits d'utilisation qui
+sera considérée comme valable en cas de différences constatée dans
+certaines versions traduites.
+
+
+Afin d'encourager l'étude et le développement de logiciels libres
+plutôt que la simple utilisation de produits prêts à l'emploi,
+il est recommandé de diffuser les fichiers source de cette série
+d'applications (fichier makefile inclus), et non les seuls fichiers
+exécutables découlant de leur compilation.
+
+
+Toutefois, si cette série d'applications devait être intégrée dans
+des distributions GNU/Linux directement utilisables après installation,
+la copie d'exécutables précompilés de ces applications est acceptable
+si les fichiers sources sont également recopiés lors de l'installation
+sous une forme directement lisible (donc non compressée) dans un
+répertoire facile à trouver par l'utilisateur final.
+Cette copie des sources ne pourra être évitée que si l'utilisateur a
+fait ce choix pendant l'installation.
+
+
