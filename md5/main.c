@@ -1,7 +1,7 @@
 #include "config.h"
 #include <windows.h>
 #include <wincrypt.h>
-#include "assert.h"
+#include "md5assert.h"
 #include "console.h"
 #include "main.h"
 

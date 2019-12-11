@@ -71,7 +71,9 @@ extern int DirectoryBrowseFlag ;
 #endif /* USE_CAPI */
 #endif
 
+#ifdef MOD_PERSO
 #define APPNAME "Pageant"
+#endif
 
 static HWND keylist;
 static HWND aboutbox;
@@ -751,12 +753,15 @@ static BOOL AddTrayIcon(HWND hwnd)
     tnid.uID = 1;	       /* unique within this systray use */
     tnid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     tnid.uCallbackMessage = WM_SYSTRAY;
-#ifndef MOD_INTEGRATED_AGENT
-    tnid.hIcon = hicon = LoadIcon(hinst, MAKEINTRESOURCE(201));
-    strcpy(tnid.szTip, "Pageant (PuTTY authentication agent)");
-#else
+#ifdef MOD_INTEGRATED_AGENT
     tnid.hIcon = hicon = LoadIcon(hinst, MAKEINTRESOURCE(901));
+#else
+    tnid.hIcon = hicon = LoadIcon(hinst, MAKEINTRESOURCE(201));
+#endif
+#ifdef MOD_PERSO
     strcpy(tnid.szTip, "Kageant (KiTTY authentication agent)");
+#else
+    strcpy(tnid.szTip, "Pageant (PuTTY authentication agent)");
 #endif
 
     res = Shell_NotifyIcon(NIM_ADD, &tnid);

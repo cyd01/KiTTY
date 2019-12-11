@@ -1,6 +1,6 @@
 #include "config.h"
 #include <windows.h>
-#include "assert.h"
+#include "md5assert.h"
 #include "console.h"
 
 typedef union {
