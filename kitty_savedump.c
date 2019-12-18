@@ -757,13 +757,13 @@ void SaveDumpFile( char * filename ) {
 
 	if( ( fpout = fopen( buffer, "w" ) ) != NULL ) {
 		
-		fputs( "\n@ InitialDirectoryListing @\n\n", fpout ) ;
+		fputs( "\n@@@ InitialDirectoryListing @@@\n\n", fpout ) ;
 		SaveDumpListFile( fpout, InitialDirectory ) ; fflush( fpout ) ;
 
-		fputs( "\n@ Environment variables @\n\n", fpout ) ;
+		fputs( "\n@@@ Environment variables @@@\n\n", fpout ) ;
 		SaveDumpEnvironment( fpout ) ; fflush( fpout ) ;
 		
-		fputs( "\n@ KiTTYIniFile @\n\n", fpout ) ;
+		fputs( "\n@@@ KiTTYIniFile @@@\n\n", fpout ) ;
 		if( ( fp = fopen( KittyIniFile, "r" ) ) != NULL ) {
 			while( fgets( buffer, 4095, fp ) != NULL ) fputs( buffer, fpout ) ;
 			fclose( fp ) ;
@@ -772,7 +772,7 @@ void SaveDumpFile( char * filename ) {
 		fflush( fpout ) ;
 
 		if( RegTestKey( HKEY_CURRENT_USER, TEXT("Software\\SimonTatham\\PuTTY") ) ) {
-			fputs( "\n@ PuTTY RegistryBackup @\n\n", fpout ) ;
+			fputs( "\n@@@ PuTTY RegistryBackup @@@\n\n", fpout ) ;
 			SaveRegistryKeyEx( HKEY_CURRENT_USER, TEXT("Software\\SimonTatham\\PuTTY"), KittySavFile ) ;
 			if( ( fp = fopen( KittySavFile, "r" ) ) != NULL ) {
 				while( fgets( buffer, 4095, fp ) != NULL ) fputs( buffer, fpout ) ;
@@ -782,7 +782,7 @@ void SaveDumpFile( char * filename ) {
 			}
 		fflush( fpout ) ;
 
-		fputs( "\n@ KiTTY RegistryBackup @\n\n", fpout ) ;
+		fputs( "\n@@@ KiTTY RegistryBackup @@@\n\n", fpout ) ;
 		if( (IniFileFlag == SAVEMODE_REG)||(IniFileFlag == SAVEMODE_FILE) ) {
 			SaveRegistryKey() ;
 			if( ( fp = fopen( KittySavFile, "r" ) ) != NULL ) {
@@ -800,65 +800,65 @@ void SaveDumpFile( char * filename ) {
 			}
 		fflush( fpout ) ;
 			
-		fputs( "\n@ WindowSettings @\n\n", fpout ) ;
+		fputs( "\n@@@ WindowSettings @@@\n\n", fpout ) ;
 		PrintWindowSettings( fpout ) ;
 
-		fputs( "\n@ RunningProcess @\n\n", fpout ) ;
+		fputs( "\n@@@ RunningProcess @@@\n\n", fpout ) ;
 		PrintAllProcess( fpout ) ; fflush( fpout ) ;
 
-		fputs( "\n@ CurrentEventLog @\n\n", fpout ) ;
+		fputs( "\n@@@ CurrentEventLog @@@\n\n", fpout ) ;
 		i = 0 ; while( print_event_log( fpout, i ) ) { i++ ; }
 		fflush( fpout ) ;
 
-		fputs( "\n@ ClipBoardContent @\n\n", fpout ) ;
+		fputs( "\n@@@ ClipBoardContent @@@\n\n", fpout ) ;
 		SaveDumpClipBoard( fpout ) ; fflush( fpout ) ;
 
 		if( debug_flag ) {
-			fputs( "\n@ KeyPressed @\n\n", fpout ) ;
+			fputs( "\n@@@ KeyPressed @@@\n\n", fpout ) ;
 			fprintf( fpout, "%d: WM_KEYDOWN\n%d: WM_SYSKEYDOWN\n%d: WM_KEYUP\n%d: WM_SYSKEYUP\n%d: WM_CHAR\n\n", WM_KEYDOWN,WM_SYSKEYDOWN,WM_KEYUP,WM_SYSKEYUP,WM_CHAR);
 			fprintf( fpout, "SHIFT CONTROL ALT ALTGR WIN\n" ) ;
 			fprintf( fpout, "%s\n", SaveKeyPressed ) ;
 			}
 		fflush( fpout ) ;
 
-		fputs( "\n@ RunningConfig @\n\n", fpout ) ; fflush( fpout ) ;
+		fputs( "\n@@@ RunningConfig @@@\n\n", fpout ) ; fflush( fpout ) ;
 		SaveDumpConfig( fpout, conf ) ; fflush( fpout ) ;
 
-		fputs( "\n@ RunningConfig in KTX file format @\n\n", fpout ) ; fflush( fpout ) ;
+		fputs( "\n@@@ RunningConfig in KTX file format @@@\n\n", fpout ) ; fflush( fpout ) ;
 		SaveCurrentConfig( fpout, conf ) ; fputs( "\n", fpout ) ; fflush( fpout ) ;
 				
 		if( IniFileFlag==SAVEMODE_DIR ) {
-			fputs( "\n@ RunningPortableConfig @\n\n", fpout ) ;
+			fputs( "\n@@@ RunningPortableConfig @@@\n\n", fpout ) ;
 			SaveDumpPortableConfig( fpout ) ;
 			}
 		fflush( fpout ) ;
 			
 		if( DebugText!= NULL ) {
-			fputs( "\n@ Debug @\n\n", fpout ) ;
+			fputs( "\n@@@ Debug @@@\n\n", fpout ) ;
 			fprintf( fpout, "%s\n",  DebugText ) ;
 			}
 		
-		fputs( "\n@ Shortcuts @\n\n", fpout ) ;
+		fputs( "\n@@@ Shortcuts @@@\n\n", fpout ) ;
 		SaveShortCuts( fpout ) ; fflush( fpout ) ;
 		
-		fputs( "\n@ SpecialMenu @\n\n", fpout ) ;
+		fputs( "\n@@@ SpecialMenu @@@\n\n", fpout ) ;
 		SaveSpecialMenu( fpout ) ; fflush( fpout ) ;
 
 		if( existfile("kitty.log") ) { 
-			fputs( "\n@ Debug log file @\n\n", fpout ) ;
+			fputs( "\n@@@ Debug log file @@@\n\n", fpout ) ;
 			SaveDebugFile( "kitty.log", fpout ) ; 
 		}
 		if( existfile( conf_get_filename(conf,CONF_keyfile)->path ) ) { 
-			fputs( "\n@ Private key file @\n\n", fpout ) ;
+			fputs( "\n@@@ Private key file @@@\n\n", fpout ) ;
 			SaveDebugFile( conf_get_filename(conf,CONF_keyfile)->path, fpout ) ;
 		}
 #ifdef MOD_RUTTY
 		if( existfile( conf_get_filename(conf,CONF_script_filename)->path ) ) { 
-			fputs( "\n@ RuTTY script file @\n\n", fpout ) ;
+			fputs( "\n@@@ RuTTY script file @@@\n\n", fpout ) ;
 			SaveDebugFile( conf_get_filename(conf,CONF_script_filename)->path, fpout ) ;
 		}
 #endif
-		fputs( "\n@ ScreenShot @\n\n", fpout ) ;
+		fputs( "\n@@@ ScreenShot @@@\n\n", fpout ) ;
 		SaveScreenShot( fpout ) ; fflush( fpout ) ;
 			
 		fclose( fpout ) ;

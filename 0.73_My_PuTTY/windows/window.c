@@ -745,7 +745,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	}
 	conf_set_int(conf, CONF_logtype, LGTYP_NONE);
 	do_defaults(NULL, conf);
-	
+
 	p = cmdline;
 	/*
 	 * Process a couple of command-line options which are more
@@ -1160,7 +1160,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		}
 	    }
 	}
-
 #ifdef MOD_PERSO
 	// Creation du fichier kitty.ini par defaut si besoin
 	CreateDefaultIniFile() ;
@@ -1172,8 +1171,10 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
          * (explicitly) specified a launchable configuration.
          */
         if (!(special_launchable_argument || cmdline_host_ok(conf))) {
+
             if (!do_config()) 
                 cleanup_exit(0);
+
 	}
 
         prepare_session(conf);

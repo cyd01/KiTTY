@@ -1003,7 +1003,6 @@ void defuse_showwindow(void)
 bool do_config(void)
 {
     bool ret;
-
 #ifdef MOD_PERSO
 	// On cree la session "Default Settings" si elle n'existe pas
 	if( GetDefaultSettingsFlag() ) { 

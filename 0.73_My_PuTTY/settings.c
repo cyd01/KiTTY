@@ -953,6 +953,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
 {
     int i;
     char *prot;
+	
 #ifdef MOD_PERSO
     /*
      * HACK: PuTTY-url
@@ -1167,6 +1168,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
 	else if (sshprot == 2) sshprot = 3; /* => "SSH-2 only" */
 	conf_set_int(conf, CONF_sshprot, sshprot);
     }
+
     gpps(sesskey, "LogHost", "", conf, CONF_loghost);
     gppb(sesskey, "SSH2DES", false, conf, CONF_ssh2_des_cbc);
     gppb(sesskey, "SshNoAuth", false, conf, CONF_ssh_no_userauth);

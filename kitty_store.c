@@ -583,16 +583,28 @@ void SettingsLoad( HSettingsList list, const char * filename ) {
 	char buffer[4096] ;
 	int p ;
 	
+//debug_log("filename=%s|\n",filename); int i=0;
+	
 	if( (fp=fopen(filename,"rb")) != NULL ) {
 		list->filename = (char*) malloc( strlen(filename)+1 ) ; strcpy( list->filename, filename ) ;
-		while( fgets(buffer,4096,fp) != NULL ) {
+		while( fgets(buffer,409,fp) != NULL ) {
+//debug_log("\nline %05d[%d]: %s|\n",++i,strlen(buffer),buffer);
 			char *name, *value, *value2 ;
-			while( buffer[strlen(buffer)-2]!='\\' ) {
+			while( (buffer[strlen(buffer)-1]=='\n') || (buffer[strlen(buffer)-1]=='\r') ) buffer[strlen(buffer)-1] = '\0' ;
+//debug_log("line %05d[%d]: %s|\n",i,strlen(buffer),buffer);
+//debug_log("\t-2=%c -3=%c\n",buffer[strlen(buffer)-2],buffer[strlen(buffer)-3]);
+			while( buffer[strlen(buffer)-1]!='\\' ) {
+//debug_log("ici\n");
 				while( buffer[strlen(buffer)-1]=='\r' ) { buffer[strlen(buffer)+1]='\0' ; buffer[strlen(buffer)-1]='\\' ; buffer[strlen(buffer)] = 'r' ; }
 				while( buffer[strlen(buffer)-1]=='\n' ) { buffer[strlen(buffer)+1]='\0' ; buffer[strlen(buffer)-1]='\\' ; buffer[strlen(buffer)] = 'n' ; }
 				if( fgets( buffer+strlen(buffer), 4096, fp ) == NULL ) break ;
+				while( (buffer[strlen(buffer)-1]=='\n') || (buffer[strlen(buffer)-1]=='\r') ) buffer[strlen(buffer)-1] = '\0' ;
 			}
+//debug_log("line %05d[%d]: %s|\n",i,strlen(buffer),buffer);
 			while( (buffer[strlen(buffer)-1]=='\n') || (buffer[strlen(buffer)-1]=='\r') ) buffer[strlen(buffer)-1] = '\0' ;
+//debug_log("line %05d[%d]: %s|\n",i,strlen(buffer),buffer);
+			if( buffer[strlen(buffer)-1] != '\\' ) { strcat( buffer, "\\" ) ; }
+//debug_log("line %05d[%d]: %s|\n",i,strlen(buffer),buffer);
 			p = poss( "\\", buffer ) ;
 			if( p>1 ) {
 				name = (char*) malloc( p+1 ) ;
@@ -600,13 +612,16 @@ void SettingsLoad( HSettingsList list, const char * filename ) {
 				value = (char*) malloc( strlen(buffer)-p+1 ) ;
 				strcpy( value, buffer+p ) ;
 				value[strlen(value)-1]='\0' ;
+//debug_log("line %05d: %s|%s|\n",i,name,value);
 				value2 = (char*) malloc( strlen(value)+1 ) ;
 				unmungestr( value, value2, strlen(value)+1 ) ;
+//debug_log("line %05d: %s|%s|%s|\n",i,name,value,value2);
 				SettingsAddItem( list, name, value2 ) ;
 				free( value2 ) ;
 				free( value ) ;
 				free( name ) ;
 			}
+
 		}
 		fclose(fp );
 	} else {
