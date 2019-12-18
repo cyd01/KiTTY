@@ -587,7 +587,7 @@ void SettingsLoad( HSettingsList list, const char * filename ) {
 	
 	if( (fp=fopen(filename,"rb")) != NULL ) {
 		list->filename = (char*) malloc( strlen(filename)+1 ) ; strcpy( list->filename, filename ) ;
-		while( fgets(buffer,409,fp) != NULL ) {
+		while( fgets(buffer,4096,fp) != NULL ) {
 //debug_log("\nline %05d[%d]: %s|\n",++i,strlen(buffer),buffer);
 			char *name, *value, *value2 ;
 			while( (buffer[strlen(buffer)-1]=='\n') || (buffer[strlen(buffer)-1]=='\r') ) buffer[strlen(buffer)-1] = '\0' ;
