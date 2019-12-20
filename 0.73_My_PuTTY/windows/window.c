@@ -899,7 +899,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-nofiles") ) {
 			SetNoKittyFileFlag( 1 ) ;
 		} else if( !strcmp(p, "-edit") ) {
-			i++;
+			i++ ;
 			if( existfile(argv[i]) ) {
 				LoadFile = (char*) malloc( strlen(argv[i])+1 ) ;
 				strcpy( LoadFile, argv[i] ) ;
@@ -914,7 +914,17 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if( GetDirectoryBrowseFlag() ) SetSessPath( pfolder ) ;
 			SetInitCurrentFolder( pfolder ) ;
 			i++ ;
-
+		} else if( !strcmp(p, "-localproxy") ) {
+			i++ ;
+			conf_set_str( conf, CONF_host, "localhost" ) ;
+			conf_set_int( conf, CONF_port, 23 ) ;
+			conf_set_int( conf, CONF_protocol, I(PROT_TELNET) ) ;
+			conf_set_int( conf, CONF_proxy_type, 5 ) ;
+			conf_set_str( conf, CONF_proxy_host, "proxy" ) ;
+			conf_set_int( conf, CONF_proxy_port, 80 ) ;
+			conf_set_bool( conf, CONF_even_proxy_localhost, true ) ;
+			conf_set_str( conf, CONF_proxy_telnet_command, argv[i] ) ;
+			SetBackgroundImageFlag(0) ;
 		} else if( !strcmp(p, "-loginscript") ) {
 			i++ ;
 			if( existfile( argv[i] ) ) {
@@ -5488,6 +5498,20 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 				   TO_CHR_Y(p.y), shift_pressed,
 				   control_pressed, is_alt_pressed());
 		    } /* else: not sure when this can fail */
+
+		    // region tray-zoom
+
+		    } else if (control_pressed) {
+			conf_get_fontspec(conf, CONF_font)->height +=
+			MBT_WHEEL_UP == b ? 1 : -1;
+			// short version of IDM_RECONF's reconfig:
+			term_size(term,
+				conf_get_int(conf, CONF_height),
+				conf_get_int(conf, CONF_width),
+				conf_get_int(conf, CONF_savelines));
+			reset_window(2);
+
+		    // endregion
 		} else {
 		    /* trigger a scroll */
 		    term_scroll(term, 0,
