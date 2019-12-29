@@ -4538,7 +4538,11 @@ void ChangeFontSize(HWND hwnd, int dec) {
 	conf_set_fontspec(conf, CONF_font, fontspec);
         fontspec_free(fontspec);
 	force_reconf = 0 ;
-	PostMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ;
+	term_size(term,
+				conf_get_int(conf, CONF_height),
+				conf_get_int(conf, CONF_width),
+				conf_get_int(conf, CONF_savelines));
+	//PostMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ;
 
 	ResetWindow(2);
 }
