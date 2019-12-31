@@ -159,7 +159,6 @@ CFLAGS += 	-D__WINE__ \
 		-DMOD_RUTTY \
 		-DMOD_ADB \
 		-DMOD_BACKGROUNDIMAGE \
-		-DHAS_WINX509 -DMOD_WINCRYPT \
 		-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
@@ -420,7 +419,9 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		../../md5/MD5check.a ../../mini/mini.a ../../regex/libregex.a \
 		-ladvapi32 -lcomdlg32 -lgdi32 -limm32 -lpsapi -lole32 -lshell32 \
 		-luser32 -lwsock32  -lwtsapi32 \
-		# -lcomctl32 -lwinmm -lwinspool -lole32 -lcrypt32
+		#-lcrypt32 \
+		#/c/Windows/system32/crypt32.dll /c/windows/system32/ncrypt.dll \
+		# -lcomctl32 -lwinmm -lwinspool -lole32 
 		
 puttygen.exe: conf.o ecc.o import.o marshal.o memory.o misc.o mpint.o \
 		notiming.o puttygen.res.o sshaes.o sshauxcrypt.o sshbcrypt.o \

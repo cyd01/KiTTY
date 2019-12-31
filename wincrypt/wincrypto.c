@@ -9,8 +9,8 @@
 
 #include <windows.h>
 #include <wincrypt.h>
-//#include <bcrypt.h>
-//#include <ncrypt.h>
+#include "bcrypt.h"
+#include "ncrypt.h"
 #include "wincrypt/wincrypto.h"
 
  /*
