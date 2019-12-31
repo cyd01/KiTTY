@@ -1167,30 +1167,15 @@ int pageant_add_keyfile(Filename *filename, const char *passphrase,
              * afterwards */
             put_uint32(blob, 0);
 #ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-		if(0 == strncmp("cert://", filename->path, 7)) {
-			ssh2_userkey_loadpub(filename, NULL, BinarySink_UPCAST(blob),
-				&comment, &error);
-			if(blob) {
-				sfree(filename->path);
-				filename->path = comment;
-				comment = NULL;
-			}
-		}
-		else {
-#endif /* USE_CAPI */
-#endif
+	    if (!ssh2_userkey_loadpub((const Filename **)&filename, NULL, BinarySink_UPCAST(blob),
+#else
 	    if (!ssh2_userkey_loadpub(filename, NULL, BinarySink_UPCAST(blob),
+#endif
                                       NULL, &error)) {
                 *retstr = dupprintf("Couldn't load private key (%s)", error);
                 strbuf_free(blob);
 		return PAGEANT_ACTION_FAILURE;
 	    }
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-		}
-#endif /* USE_CAPI */
-#endif
 	    PUT_32BIT_MSB_FIRST(blob->s, blob->len - 4);
 	    keylist = pageant_get_keylist2(&keylistlen);
 	}

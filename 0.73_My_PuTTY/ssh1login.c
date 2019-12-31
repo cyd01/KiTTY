@@ -461,14 +461,6 @@ static void ssh1_login_process_queue(PacketProtocolLayer *ppl)
                 if (!s->privatekey_available)
                     ppl_logevent("Key file contains public key only");
                 s->privatekey_encrypted = rsa_ssh1_encrypted(s->keyfile, NULL);
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-		if(s->publickey_comment && 0 == strncmp("cert://", s->publickey_comment, 7)) {
-			sfree(s->keyfile->path);
-			s->keyfile->path = strdup(s->publickey_comment);
-		}
-#endif /* USE_CAPI */
-#endif
             } else {
                 ppl_logevent("Unable to load key (%s)", error);
                 ppl_printf("Unable to load key file \"%s\" (%s)\r\n",

@@ -159,6 +159,7 @@ CFLAGS += 	-D__WINE__ \
 		-DMOD_RUTTY \
 		-DMOD_ADB \
 		-DMOD_BACKGROUNDIMAGE \
+		-DHAS_WINX509 -DMOD_WINCRYPT \
 		-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
@@ -167,7 +168,7 @@ CFLAGS += 	-D__WINE__ \
 		-I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
 		
 #		-DMOD_CYGTERM \
-#		-DUSE_CAPI -DMOD_WINCRYPT \
+#		-DHAS_WINX509 -DMOD_WINCRYPT \
 #		-DMOD_ZMODEM \
 
 
@@ -384,7 +385,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		adb.o cygcfg.o cygterm.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
-		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
+		urlhack.o pageant_integrated.o wincrypto.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
 		void.o
 	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
@@ -412,7 +413,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		adb.o cygcfg.o cygterm.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
-		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
+		urlhack.o pageant_integrated.o wincrypto.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
 		void.o \
 		../../base64/base64.a ../../bcrypt/bcrypt.a ../../blocnote/notepad.a ../../jpeg/libjpeg.a \
@@ -2147,6 +2148,10 @@ cross:
 	mv pageant.exe /build/kageant.exe
 	mv puttygen.exe /build/kittygen.exe
 	rm *.o
+
+cross64:
+	sed -i 's#^typedef enum _WTS_VIRTUAL_CLASS #// typedef enum _WTS_VIRTUAL_CLASS #' window.c
+	make -e TOOLPATH=/usr/bin/x86_64-w64-mingw32- -f MAKEFILE.MINGW putty.exe
 
 9bis: putty.exe putty_portable.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
 

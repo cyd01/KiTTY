@@ -280,7 +280,11 @@ is_backend_connected = 1 ;
             keytype == SSH_KEYTYPE_SSH2_PUBLIC_OPENSSH) {
             const char *error;
             s->publickey_blob = strbuf_new();
+#ifdef MOD_WINCRYPT
+	    if (ssh2_userkey_loadpub(&(s->keyfile),
+#else
             if (ssh2_userkey_loadpub(s->keyfile,
+#endif
                                      &s->publickey_algorithm,
                                      BinarySink_UPCAST(s->publickey_blob),
                                      &s->publickey_comment, &error)) {
@@ -289,14 +293,6 @@ is_backend_connected = 1 ;
                     ppl_logevent("Key file contains public key only");
                 s->privatekey_encrypted =
                     ssh2_userkey_encrypted(s->keyfile, NULL);
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-			if(s->publickey_comment && 0 == strncmp("cert://", s->publickey_comment, 7)) {
-				sfree(s->keyfile->path);
-				s->keyfile->path = strdup(s->publickey_comment);
-			}
-#endif /* USE_CAPI */
-#endif
             } else {
                 ppl_logevent("Unable to load key (%s)", error);
                 ppl_printf("Unable to load key file \"%s\" (%s)\r\n",
@@ -731,6 +727,15 @@ is_backend_connected = 1 ;
                 {
                     BinarySource src[1];
                     BinarySource_BARE_INIT_PL(src, s->pk);
+#ifdef MOD_WINCRYPT
+#ifdef HAS_WINX509
+						if ((s->comment.len > 7)
+							&& (0 == strncmp("x509://", s->comment.ptr, 7))) {
+							s->alg = make_ptrlen(dupstr(ssh_x509_wincrypt.ssh_id), strlen(ssh_x509_wincrypt.ssh_id));
+						} else
+
+#endif /* HAS_WINX509 */
+#endif
                     s->alg = get_string(src);
                 }
 

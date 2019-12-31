@@ -66,9 +66,12 @@ extern int DirectoryBrowseFlag ;
 #define IDM_ABOUT    0x0050
 
 #ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
+#ifdef HAS_WINX509
+#include "wincrypt/wincrypto.h"
 #define IDM_ADDCERT  0x0070
-#endif /* USE_CAPI */
+#define IDM_ADDX509  0x0080
+static void key_to_clipboard(HWND hwnd) ;
+#endif /* HAS_WINX509 */
 #endif
 
 #ifdef MOD_PERSO
@@ -170,6 +173,15 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 	    aboutbox = NULL;
 	    DestroyWindow(hwnd);
 	    return 0;
+#ifdef MOD_WINCRYPT
+#ifdef HAS_WINX509
+		case 100:		       /* key list */
+			if (HIWORD(wParam) == LBN_DBLCLK) {
+				key_to_clipboard(hwnd);
+			}
+			return 0;
+#endif /* HAS_WINX509 */
+#endif
 	  case 101:
 	    EnableWindow(hwnd, 0);
 	    DialogBox(hinst, MAKEINTRESOURCE(214), hwnd, LicenceProc);
@@ -445,24 +457,23 @@ static void win_add_keyfile(Filename *filename)
     return;
 }
 
-
 #ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
+#ifdef HAS_WINX509
 /*
  * Add a key from a Windows certificate
  */
-static void prompt_add_capikey(void)
+static void prompt_add_capikey(PSTR search)
 {
-	int ret;
 	char *err;
-	Filename *fn = filename_from_str("cert://*");
+	Filename *fn = filename_from_str(search);
 	pageant_add_keyfile(fn, NULL, &err);
-	if (ret == PAGEANT_ACTION_OK) {
+	if (err == PAGEANT_ACTION_OK) {
 		keylist_update();
 	} else {
 		message_box(err, APPNAME, MB_OK | MB_ICONERROR, HELPCTXID(errors_cantloadkey));
 	}
 	filename_free(fn);
+	if (err != NULL)
 	sfree(err);
 }
 
@@ -471,28 +482,53 @@ static void prompt_add_capikey(void)
  */
 static void key_to_clipboard2(struct ssh2_userkey *key)
 {
-	unsigned char *pub_blob;
+	//BinarySink* bs;
 	char *buffer, *p, *psz;
-	int pub_len, i;
+	int  i, mbReturn;
 	HGLOBAL hClipBuffer;
+	Filename* filename;
+	strbuf *bblob;
+	bool isX509 = false;
+
+	bblob = strbuf_new();
+	filename = filename_from_str(key->comment);
+	int len = strlen(filename->path);
+	if ((len < 7)
+		|| !(0 == strncmp("cert://", filename->path, 7)
+			|| (isX509 = (0 == strncmp("x509://", filename->path, 7))))) {
+		filename_free(filename);
+		return;
+	}
+
+	if (isX509) {
+		MessageBox(0, "Cannot copy the public key in x509v3-sign-rsa mode.", "Invalid operation", MB_ICONEXCLAMATION | MB_OK | MB_TASKMODAL);
+		filename_free(filename);
+		return;
+	}
 	
-	pub_blob = key->alg->public_blob(key->data, &pub_len);
-	buffer = snewn(strlen(key->alg->name) + 4 * ((pub_len + 2) / 3) + strlen(key->comment) + 3, char);
-	strcpy(buffer, key->alg->name);
+	mbReturn = MessageBox(0, "Copy certificate public key to clipboard?\n\nHint: Copied in ssh authorized_keys format.",
+		"Copy public key", MB_ICONASTERISK | MB_YESNO | MB_TASKMODAL);
+
+	if (mbReturn == IDNO)
+		return;
+
+	capi_load_key((const Filename **)&filename, BinarySink_UPCAST(bblob));
+	buffer = snewn(strlen(key->key->vt->ssh_id) + 4 * ((bblob->len + 2) / 3) + strlen(key->comment) + 3, char);
+	strcpy(buffer, key->key->vt->ssh_id);
 	p = buffer + strlen(buffer);
 	*p++ = ' ';
 	i = 0;
-	while(i < pub_len) {
-		int n = (pub_len - i < 3 ? pub_len - i : 3);
-		base64_encode_atom(pub_blob + i, n, p);
+	while (i < bblob->len) {
+		int n = (bblob->len - i < 3 ? bblob->len - i : 3);
+		base64_encode_atom((const unsigned char *)bblob->s + i, n, p);
 		i += n;
 		p += 4;
 	}
 	*p++ = ' ';
 	strcpy(p, key->comment);
-	if(OpenClipboard(NULL)) {
+	if (OpenClipboard(NULL)) {
 		hClipBuffer = GlobalAlloc(GMEM_MOVEABLE, strlen(buffer) + 1);
-		if(hClipBuffer) {
+		if (hClipBuffer) {
 			psz = (char *)GlobalLock(hClipBuffer);
 			strcpy(psz, buffer);
 			GlobalUnlock(hClipBuffer);
@@ -500,9 +536,11 @@ static void key_to_clipboard2(struct ssh2_userkey *key)
 			SetClipboardData(CF_TEXT, hClipBuffer);
 		}
 		CloseClipboard();
+		MessageBox(0, "Certificate public copied.", "Copy", MB_ICONINFORMATION | MB_OK | MB_TASKMODAL);
 	}
-	sfree(pub_blob);
 	sfree(buffer);
+	strbuf_free(bblob);
+	filename_free(filename);
 }
 
 /*
@@ -511,16 +549,15 @@ static void key_to_clipboard2(struct ssh2_userkey *key)
 static void key_to_clipboard(HWND hwnd)
 {
 	int numSelected, *selectedArray;
-	if((numSelected = SendDlgItemMessage(hwnd, 100, LB_GETSELCOUNT, 0, 0)) > 0) {
+	if ((numSelected = SendDlgItemMessage(hwnd, 100, LB_GETSELCOUNT, 0, 0)) > 0) {
 		selectedArray = snewn(numSelected, int);
 		SendDlgItemMessage(hwnd, 100, LB_GETSELITEMS, numSelected, (WPARAM)selectedArray);
 		key_to_clipboard2(pageant_nth_ssh2_key(selectedArray[0]));
 		sfree(selectedArray);
 	}
 }
-#endif /* USE_CAPI */
-#endif 
-
+#endif /* HAS_WINX509 */
+#endif
 /*
  * Prompt for a key file to add, and add it.
  */
@@ -623,15 +660,6 @@ static INT_PTR CALLBACK KeyListProc(HWND hwnd, UINT msg,
 	    keylist = NULL;
 	    DestroyWindow(hwnd);
 	    return 0;
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-	  case 100:		       /* key list */
-		if(HIWORD(wParam) == LBN_DBLCLK) {
-			key_to_clipboard(hwnd);
-		}
-		return 0;
-#endif /* USE_CAPI */
-#endif
 	  case 101:		       /* add key */
 	    if (HIWORD(wParam) == BN_CLICKED ||
 		HIWORD(wParam) == BN_DOUBLECLICKED) {
@@ -1157,11 +1185,14 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	    prompt_add_keyfile();
 	    break;
 #ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-	  case IDM_ADDCERT:
-		prompt_add_capikey();
-		break;
-#endif /* USE_CAPI */
+#ifdef HAS_WINX509
+		case IDM_ADDCERT:
+			prompt_add_capikey("cert://*");
+			break;
+		case IDM_ADDX509:
+			prompt_add_capikey("x509://*");
+			break;
+#endif /* HAS_WINX509 */
 #endif
 	  case IDM_ABOUT:
 	    if (!aboutbox) {
@@ -1474,9 +1505,10 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 	   "&View Keys");
     AppendMenu(systray_menu, MF_ENABLED, IDM_ADDKEY, "Add &Key");
 #ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
+#ifdef HAS_WINX509
 	AppendMenu(systray_menu, MF_ENABLED, IDM_ADDCERT, "Add &Certificate");
-#endif /* USE_CAPI */
+	AppendMenu(systray_menu, MF_ENABLED, IDM_ADDX509, "Add &X509 Certificate");
+#endif /* HAS_WINX509 */
 #endif
     AppendMenu(systray_menu, MF_SEPARATOR, 0, 0);
     if (has_help())

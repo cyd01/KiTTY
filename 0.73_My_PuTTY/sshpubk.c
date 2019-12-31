@@ -13,6 +13,9 @@
 #include "mpint.h"
 #include "ssh.h"
 #include "misc.h"
+#ifdef MOD_WINCRYPT
+#include "wincrypt/wincrypto.h"
+#endif
 
 #define rsa_signature "SSH PRIVATE KEY FILE FORMAT 1.1\n"
 
@@ -622,28 +625,28 @@ ssh2_userkey *ssh2_load_userkey(
     int passlen = passphrase ? strlen(passphrase) : 0;
     const char *error = NULL;
 
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-	if(0 == strncmp("cert://", filename->path, 7)) {
-		alg = find_pubkey_alg("ssh-rsa");
-		ret = snew(struct ssh2_userkey);
-	
-		public_blob = (unsigned char*)filename->path;
-		ret->data = alg->openssh_createkey(alg, (const unsigned char **)&public_blob, &public_blob_len);
-		if(!ret->data) {
-			sfree(ret);
-			error = "load key from certificate failed";
-			return NULL;
-		}
-		ret->comment = dupstr((((struct RSAKey*)ret->data)->comment) ?
-			(((struct RSAKey*)ret->data)->comment) : "");
-		return ret;
-	}
-#endif /* USE_CAPI */
-#endif
     ret = NULL;			       /* return NULL for most errors */
     encryption = comment = mac = NULL;
     public_blob = private_blob = NULL;
+
+#ifdef MOD_WINCRYPT
+	Filename *commentPath;
+#ifdef HAS_WINX509
+	if (0 == strncmp("cert://", filename->path, 7)
+		|| 0 == strncmp("x509://", filename->path, 7)) {
+		commentPath = filename_copy(filename);
+		ret = snew(ssh2_userkey);
+		ret->comment = commentPath->path;
+
+		ret->key = ssh_key_new_priv(
+			&ssh_rsa_wincrypt, make_ptrlen(commentPath->path, strlen(commentPath->path)), make_ptrlen(NULL, 0));
+
+		if (errorstr)
+			*errorstr = NULL;
+		return ret;
+	}
+#endif /*HAS_WINX509*/
+#endif
 
     fp = f_open(filename, "rb", false);
     if (!fp) {
@@ -1077,7 +1080,11 @@ bool openssh_loadpub(FILE *fp, char **algorithm,
     return false;
 }
 
+#ifdef MOD_WINCRYPT
+bool ssh2_userkey_loadpub(const Filename **filename, char **algorithm,
+#else
 bool ssh2_userkey_loadpub(const Filename *filename, char **algorithm,
+#endif
                           BinarySink *bs,
                           char **commentptr, const char **errorstr)
 {
@@ -1087,28 +1094,35 @@ bool ssh2_userkey_loadpub(const Filename *filename, char **algorithm,
     int type, i;
     const char *error = NULL;
     char *comment = NULL;
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-	struct RSAKey *key;
-	if(0 == strncmp("cert://", filename->path, 7)) {
-		alg = find_pubkey_alg("ssh-rsa");
-		if(algorithm) { *algorithm = dupstr(alg->name); }
-		public_blob_len = strlen(filename->path);
-		public_blob = (unsigned char*)filename->path;
-		key = (struct RSAKey*)alg->openssh_createkey(alg, (const unsigned char **)&public_blob, &public_blob_len);
-		if(!key) {
-			*errorstr = "load key from certificate failed";
-			return NULL;
-		}
-		if(commentptr) { *commentptr = dupstr(key->comment); }
-		public_blob = alg->public_blob(key, pub_blob_len);
-		alg->freekey(key);
-		return public_blob;
-	}
-#endif /* USE_CAPI */
-#endif
 
+#ifdef MOD_WINCRYPT
+#ifdef HAS_WINX509
+	alg = NULL;
+	if (0 == strncmp("cert://", (*filename)->path, 7)) {
+		alg = &ssh_rsa_wincrypt;
+	}
+	if (0 == strncmp("x509://", (*filename)->path, 7)) {
+		alg = &ssh_x509_wincrypt;
+	}
+	if (alg != NULL) {
+		if (algorithm)
+			*algorithm = dupstr(alg->ssh_id);
+		if (capi_load_key(filename, bs)) {
+		if (commentptr)
+			(*commentptr) = dupstr((*filename)->path);
+		return true;
+		} else {
+			if (errorstr)
+				*errorstr = dupstr("User aborted");
+			return false;
+		}
+	}
+#endif /* HAS_WINX509 */
+
+	fp = f_open((*filename), "rb", false);
+#else
     fp = f_open(filename, "rb", false);
+#endif
     if (!fp) {
 	error = "can't open file";
 	goto error;
@@ -1559,7 +1573,15 @@ char *ssh2_fingerprint_blob(ptrlen blob)
          * No algorithm available (which means a seriously confused
          * key blob, but there we go). Return only the hash.
          */
+#ifdef MOD_WINCRYPT
+#ifdef HAS_WINX509
+		return dupcat("x509v3-sign-rsa\t", fingerprint_str, NULL);
+#else
+		return dupcat(fingerprint_str, NULL);
+#endif
+#else
         return dupstr(fingerprint_str);
+#endif
     }
 }
 
@@ -1588,16 +1610,6 @@ static int key_type_fp(FILE *fp)
 
     i = fread(buf, 1, sizeof(buf)-1, fp);
     rewind(fp);
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-	/*
-	if(0 == strncmp("cert://", filename->path, 7)) {
-		return SSH_KEYTYPE_SSH2;
-	}
-	*/
-	// Ne fonctionne plus après 0.67_20160922 car Filename* a été remplacé par FILE*
-#endif /* USE_CAPI */
-#endif
 
     if (i < 0)
 	return SSH_KEYTYPE_UNOPENABLE;
@@ -1636,11 +1648,12 @@ int key_type(const Filename *filename)
     int ret;
 
 #ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-	if(0 == strncmp("cert://", filename->path, 7)) {
+#ifdef HAS_WINX509
+	if (0 == strncmp("cert://", filename->path, 7)
+		|| 0 == strncmp("x509://", filename->path, 7)) {
 		return SSH_KEYTYPE_SSH2;
 	}
-#endif /* USE_CAPI */
+#endif /* HAS_WINX509 */
 #endif
 
     fp = f_open(filename, "r", false);

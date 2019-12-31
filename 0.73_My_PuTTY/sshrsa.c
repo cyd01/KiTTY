@@ -11,14 +11,6 @@
 #include "mpint.h"
 #include "misc.h"
 
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-#ifdef _WINDOWS
-#include "wincrypto.h"
-#endif /* _WINDOWS */
-#endif /* USE_CAPI */
-#endif
-
 void BinarySource_get_rsa_ssh1_pub(
     BinarySource *src, RSAKey *rsa, RsaSsh1Order order)
 {
@@ -303,16 +295,6 @@ bool rsa_verify(RSAKey *key)
 {
     mp_int *n, *ed, *pm1, *qm1;
     unsigned ok = 1;
-
-#ifdef MOD_WINCRYPT
-#ifdef USE_CAPI
-#ifdef _WINDOWS
-	if(capi_is_capikey(key)) {
-		return 1;
-	}
-#endif /* _WINDOWS */
-#endif /* USE_CAPI */
-#endif
 
     /* Preliminary checks: p,q can't be 0 or 1. (Of course no other
      * very small value is any good either, but these are the values
