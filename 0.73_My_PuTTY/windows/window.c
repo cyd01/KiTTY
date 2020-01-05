@@ -877,6 +877,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-cmd") ) {
 			i++ ;
 			conf_set_str( conf, CONF_autocommand, argv[i] ) ;
+		} else if( !strcmp(p, "-codepage") ) {
+			i++ ;
+			conf_set_str( conf, CONF_line_codepage, argv[i] ) ;
 		} else if( !strcmp(p, "-rcmd") ) {
 			i++ ;
 			conf_set_str( conf, CONF_remote_cmd, argv[i] ) ;
