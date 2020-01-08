@@ -54,7 +54,7 @@ BEGIN
 	    VALUE "FileVersion",	TEXTVER
 #endif
 #if (defined MOD_PERSO) && (!defined FDJ)
-		VALUE "ProductVersion",	TEXTVER " - KiTTY fork - Additional features on KiTTY That's all folks! by 9bis.com, 2019"
+		VALUE "ProductVersion",	TEXTVER " - KiTTY fork - Additional features on KiTTY That's all folks! by 9bis.com, 2005-2020"
 #else
 	    VALUE "ProductVersion",	TEXTVER
 #endif

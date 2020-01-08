@@ -2153,10 +2153,7 @@ cross:
 cross64:
 	sed -i 's#^typedef enum _WTS_VIRTUAL_CLASS #// typedef enum _WTS_VIRTUAL_CLASS #' window.c
 	make -e TOOLPATH=/usr/bin/x86_64-w64-mingw32- -f MAKEFILE.MINGW putty.exe
-	/usr/bin/x86_64-w64-mingw32-gcc -o kitty64.exe *.o ../../base64/base64_64.a ../../bcrypt/bcrypt_64.a ../../blocnote/notepad_64.a ../../jpeg/libjpeg_64.a \
-		../../md5/MD5check_64.a ../../mini/mini_64.a ../../regex/libregex_64.a \
-		-ladvapi32 -lcomdlg32 -lgdi32 -limm32 -lpsapi -lole32 -lshell32 \
-		-luser32 -lwsock32  -lwtsapi32
+	/usr/bin/x86_64-w64-mingw32-gcc -o kitty64.exe *.o ../../base64/base64_64.a ../../bcrypt/bcrypt_64.a ../../blocnote/notepad_64.a ../../jpeg/libjpeg_64.a ../../md5/MD5check_64.a ../../mini/mini_64.a ../../regex/libregex_64.a -ladvapi32 -lcomdlg32 -lgdi32 -limm32 -lpsapi -lole32 -lshell32 -luser32 -lwsock32  -lwtsapi32 -mwindows
 
 9bis: putty.exe putty_portable.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
 

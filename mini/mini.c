@@ -493,7 +493,7 @@ int delINISec( const char * filename, const char * section, const char * key ) {
 	}
 		
 void destroyINI( void ) { 
-	if(mini_filename!=NULL) ; free(mini_filename) ; mini_filename=NULL ;
+	if(mini_filename!=NULL) { free(mini_filename) ; } mini_filename=NULL ;
 	freeINI( &mini_Ini ) ;
 	}
 
