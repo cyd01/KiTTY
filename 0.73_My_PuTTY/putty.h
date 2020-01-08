@@ -412,9 +412,6 @@ enum {
 enum {
     /* Protocol back ends. (CONF_protocol) */
     PROT_RAW, PROT_TELNET, PROT_RLOGIN, PROT_SSH,
-#ifdef MOD_CYGTERM
-    PROT_CYGTERM,
-#endif
 #ifdef MOD_ADB
     PROT_ADB,
 #endif
@@ -1586,13 +1583,6 @@ NORETURN void cleanup_exit(int);
    X(STR, NONE, script_waitfor) \
    X(STR, NONE, script_halton) \
 /* #endif */ \
-/* #ifdef MOD_CYGTERM */ \
-    /* Cygterm options */ \
-    X(INT, NONE, cygautopath) \
-    X(INT, NONE, cygterm64) \
-    X(STR, NONE, cygcmd) \
-    X(INT, NONE, alt_metabit)  		       /* set meta instead of escape */ \
-/* #endif */ \
 /* #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ) */\
     X(INT, NONE, bg_opacity) \
     X(INT, NONE, bg_slideshow) \
@@ -1932,14 +1922,6 @@ extern const struct BackendVtable raw_backend;
 
 //extern Backend adb_backend;
 extern const struct BackendVtable adb_backend ;
-#endif
-#ifdef MOD_CYGTERM
-/*
- * Exports from cygterm.c.
- */
-extern const struct BackendVtable cygterm_backend;
-void cygterm_setup_config_box(struct controlbox *b, int midsession);
-
 #endif
 
 /*

@@ -51,7 +51,7 @@ void license_init( void ) {
 	char buf[64], c ;
 	int i ;
 	time_t t = time(0) ;
-	sprintf( buf, "%ld", t ) ;
+	sprintf( buf, "%ld", (const long int)t ) ;
 	for( i=0;i<(strlen(buf)/2);i++ ) { c=buf[i];buf[i]=buf[strlen(buf)-1-i];buf[strlen(buf)-1-i]=c;}
 	srand( atol(buf) ) ; 
 	} 

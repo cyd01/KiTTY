@@ -48,9 +48,6 @@ void SetUsernameInConfig( char * username ) {
 		}
 	}
 #endif
-#ifdef MOD_CYGTERM
-void cygterm_set_flag( int flag ) { }
-#endif
 
 int filexfer_get_userpass_input(Seat *seat, prompts_t *p, bufchain *input)
 {

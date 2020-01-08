@@ -145,10 +145,6 @@ Socket *sk_new(SockAddr *addr, int port, bool privport, bool oobinline,
 Socket *sk_newlistener(const char *srcaddr, int port, Plug *plug,
                        bool local_host_only, int address_family);
 
-#ifdef MOD_CYGTERM
-int sk_getport(Socket *s);
-#endif
-
 static inline Plug *sk_plug(Socket *s, Plug *p)
 { return s->vt->plug(s, p); }
 static inline void sk_close(Socket *s)

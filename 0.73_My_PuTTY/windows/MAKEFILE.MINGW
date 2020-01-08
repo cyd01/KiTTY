@@ -127,7 +127,7 @@ CFLAGS += -D_WIN32_IE=0x0500
 ################################################################################
 CFLAGS += -DWINVER=0x0501 -D_WIN32_WINDOWS=0x0410 -D_WIN32_WINNT=0x0501
 
-# 		-DMOD_PERSO -DMOD_CYGTERM -DMOD_BACKGROUNDIMAGE -DMOD_RECONNECT -DMOD_HYPERLINK -DMOD_ZMODEM -DMOD_STARTBUTTON -DMOD_LAUNCHER -DMOD_SAVEDUMP -DMOD_KEYMAPPING -DMOD_WINCRYPT -DMOD_TUTTY -DMOD_PORTKNOCKING -DMOD_PUTTYX -DMOD_WTS -DMOD_PRINTCLIP -DMOD_RUTTY -DMOD_ADB \
+# 		-DMOD_PERSO -DMOD_BACKGROUNDIMAGE -DMOD_RECONNECT -DMOD_HYPERLINK -DMOD_ZMODEM -DMOD_STARTBUTTON -DMOD_LAUNCHER -DMOD_SAVEDUMP -DMOD_KEYMAPPING -DMOD_WINCRYPT -DMOD_TUTTY -DMOD_PORTKNOCKING -DMOD_PUTTYX -DMOD_WTS -DMOD_PRINTCLIP -DMOD_RUTTY -DMOD_ADB \
 
 
 # Flag special FDJ
@@ -166,7 +166,6 @@ CFLAGS += 	-D__WINE__ \
 		-I../../bcrypt \
 		-I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
 		
-#		-DMOD_CYGTERM \
 #		-DHAS_WINX509 -DMOD_WINCRYPT \
 #		-DMOD_ZMODEM \
 
@@ -181,7 +180,7 @@ CFLAGS += 	-D__WINE__ \
 # MOD_INTEGRATED_KEYGEN: intègre le key generator directement
 
 CFLAGS_PLINK = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT \
-		-DMOD_PERSO -DPUTTYCYG -DMOD_RECONNECT -DNO_MOD_RUTTY \
+		-DMOD_PERSO -DMOD_RECONNECT -DNO_MOD_RUTTY \
 		-D_NO_OLDNAMES -DNO_MULTIMON -DNO_HTMLHELP -I../. \
 		-I../charset -I../windows -I../unix -I../mac -I.\
 		-I../macosx \
@@ -381,7 +380,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winmiscs.o winnet.o winnoise.o winnpc.o winnps.o winpgntc.o \
 		winprint.o winproxy.o winsecur.o winser.o winshare.o \
 		winstore.o wintime.o winucs.o winutils.o winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o wincrypto.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -409,7 +408,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
 		winser.o winshare.o winstore.o wintime.o winucs.o winutils.o \
 		winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o wincrypto.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -1806,12 +1805,6 @@ FORCE:
 ################################################################################
 # BEGIN MOD_PERSO
 ################################################################################
-cygcfg.o: ../../cygterm/cygcfg.c
-	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../cygterm/cygcfg.c -I../../cygterm/ -I../../
-
-cygterm.o: ../../cygterm/cygterm.c
-	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../cygterm/cygterm.c -I../../cygterm -I../../
-
 be_all_s_plink.o: ../be_all_s.c ../putty.h ../puttyps.h ../network.h ../misc.h \
 		../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
@@ -2087,7 +2080,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		winmiscs.o winnet.o winnoise.o winnpc.o winnps.o winpgntc.o \
 		winprint.o winproxy.o winsecur.o winser.o winshare.o \
 		winstore.o wintime.o winucs.o winutils.o winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -2117,7 +2110,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
 		winser.o winshare.o winstore.o wintime.o winucs.o winutils.o \
 		winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
