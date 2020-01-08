@@ -612,9 +612,6 @@ int get_param( const char * val ) {
 #ifdef MOD_BACKGROUNDIMAGE
 	else if( !stricmp( val, "BACKGROUNDIMAGE" ) ) return GetBackgroundImageFlag() ;
 #endif
-#ifdef MOD_CYGTERM
-	else if( !stricmp( val, "CYGTERM" ) ) return cygterm_get_flag() ;
-#endif
 	// else if( !stricmp( val, "CONFIGBOXHEIGHT" ) ) return ConfigBoxHeight ;
 	// else if( !stricmp( val, "AUTOSTORESSHKEY" ) ) return AutoStoreSSHKeyFlag ;
 	// else if( !stricmp( val, "CONFIGBOXWINDOWHEIGHT" ) ) return ConfigBoxWindowHeight ;
@@ -1255,11 +1252,6 @@ void CreateDefaultIniFile( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "conf", "yes" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#configdir", "" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#CtHelperPath", "" ) ;
-#ifndef FDJ
-			writeINI( KittyIniFile, INIT_SECTION, "cygterm", "no" ) ;
-#else
-			writeINI( KittyIniFile, INIT_SECTION, "cygterm", "no" ) ;
-#endif
 //			writeINI( KittyIniFile, INIT_SECTION, "debug", "#no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#downloaddir", "" ) ;
 #ifdef MOD_HYPERLINK
@@ -4991,12 +4983,6 @@ void LoadParameters( void ) {
 		if( strlen( buffer ) > 0 ) { if( existdirectory(buffer) ) SetConfigDirectory( buffer ) ; }
 	}
 	if( ReadParameter( INIT_SECTION, "ctrltab", buffer ) ) { if( !stricmp( buffer, "NO" ) ) SetCtrlTabFlag( 0 ) ; }
-#ifdef MOD_CYGTERM
-	if( ReadParameter( INIT_SECTION, "cygterm", buffer ) ) {
-		if( !stricmp( buffer, "YES" ) ) cygterm_set_flag( 1 ) ; // Broken en 0.71 On desactive
-		if( !stricmp( buffer, "NO" ) ) cygterm_set_flag( 0 ) ; 
-	}
-#endif
 #ifdef MOD_HYPERLINK
 #ifndef MOD_NOHYPERLINK
 	if( ReadParameter( INIT_SECTION, "hyperlink", buffer ) ) {  
@@ -5257,12 +5243,6 @@ void InitWinMain( void ) {
 #ifdef MOD_NOTRANSPARENCY
 	sprintf( BuildVersionTime, "%s.%dn @ %s", BUILD_VERSION, BUILD_SUBVERSION, BUILD_TIME ) ;
 #endif	
-#ifdef MOD_CYGTERM
-	// Par defaut Cygterm est desactive, il faut l'activer dans le fichier kitty.ini
-	cygterm_set_flag(0);
-#endif
-
-	//sprintf( BuildVersionTime, "%s.%d @ %s", "0.60", 60, "07/02/2008-22:07:31(GMT)" ) ; // Pour compilation CygWin
 
 	// Initialisation de la librairie de cryptage
 	bcrypt_init( 0 ) ;
@@ -5292,13 +5272,7 @@ void InitWinMain( void ) {
 	LoadParameters() ;
 
 	// Ajoute les répertoires InitialDirectory et ConfigDirectory au PATH
-#ifdef MOD_CYGTERM
-	appendPath(InitialDirectory);    // Initialise dans la fonction GetInitialDirectory
-	if( strcmp(InitialDirectory,ConfigDirectory) ) {
-	appendPath(ConfigDirectory);	 // Initialise dans LoadParameters
-	}
-	if( getenv("KITTY_PATH")!=NULL ) { appendPath(getenv("KITTY_PATH")); }
-#endif
+
 	// Initialisation des shortcuts
 	InitShortcuts() ;
 

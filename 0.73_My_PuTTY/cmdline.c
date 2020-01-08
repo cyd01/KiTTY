@@ -168,12 +168,6 @@ static bool cmdline_check_unavailable(int flag, const char *p)
 static bool seen_hostname_argument = false;
 static bool seen_port_argument = false;
 
-#ifdef MOD_CYGTERM
-void cygterm_set_flag( int flag ) ;
-bool get_got_host(void){ return seen_hostname_argument ; }
-void set_got_host(bool val ){ seen_hostname_argument = val ; }
-#endif
-
 int cmdline_process_param(const char *p, char *value,
                           int need_save, Conf *conf)
 {
@@ -531,17 +525,6 @@ int cmdline_process_param(const char *p, char *value,
     if ( !strcmp(p, "-auto_store_sshkey") || !strcmp(p, "-auto-store-sshkey") ) {
 	RETURN(1);
 	SetAutoStoreSSHKey();
-    }
-#endif
-#ifdef MOD_CYGTERM
-    if (!strcmp(p, "-cygterm")) {
-	RETURN(1);
-	UNAVAILABLE_IN(TOOLTYPE_FILETRANSFER | TOOLTYPE_NONNETWORK);
-	cygterm_set_flag( 1 ) ;
-	//default_protocol = cfg->protocol = PROT_CYGTERM;
-	default_protocol = PROT_CYGTERM;
-	conf_set_int(conf, CONF_protocol, default_protocol) ;
-	return 1;
     }
 #endif
 #ifdef MOD_ADB

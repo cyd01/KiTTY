@@ -13,9 +13,6 @@
 #ifdef MOD_RUTTY
 #include "script.h"
 #endif  /* rutty */
-#ifdef MOD_CYGTERM
-int cygterm_get_flag( void ) ;
-#endif
 #ifdef MOD_PERSO
 #include "kitty.h"
 union control * ctrlHostnameEdit = NULL ;
@@ -256,11 +253,6 @@ static void config_host_handler(union control *ctrl, dlgparam *dlg,
 	     */
 	    dlg_label_change(ctrl, dlg, "Serial line");
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_serline));
-#ifdef MOD_CYGTERM
-	} else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) {
-	    dlg_label_change(ctrl, dlg, "Command (use - for login shell, ? for exe)");
-	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_cygcmd) );
-#endif
 #ifdef MOD_ADB
         } else if (conf_get_int(conf, CONF_protocol) == PROT_ADB) {
             char *saved_host = conf_get_str(conf, CONF_host);
@@ -277,12 +269,6 @@ static void config_host_handler(union control *ctrl, dlgparam *dlg,
 	char *s = dlg_editbox_get(ctrl, dlg);
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_str(conf, CONF_serline, s);
-#ifdef MOD_CYGTERM
-	else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) {
-	    char *s = dlg_editbox_get(ctrl, dlg);
-	    conf_set_str(conf, CONF_cygcmd, s);
-	}
-#endif
 	else
 	    conf_set_str(conf, CONF_host, s);
 	sfree(s);
@@ -308,11 +294,6 @@ static void config_port_handler(union control *ctrl, dlgparam *dlg,
 	     */
 	    dlg_label_change(ctrl, dlg, "Speed");
 	    sprintf(buf, "%d", conf_get_int(conf, CONF_serspeed));
-#ifdef MOD_CYGTERM
-	} else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) {
-	    dlg_label_change(ctrl, dlg, "Port (ignored)");
-	    strcpy(buf, "-");
-#endif
 	} else {
 	    dlg_label_change(ctrl, dlg, PORT_BOX_TITLE);
 	    if (conf_get_int(conf, CONF_port) != 0)
@@ -329,9 +310,6 @@ static void config_port_handler(union control *ctrl, dlgparam *dlg,
 
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_int(conf, CONF_serspeed, i);
-#ifdef MOD_CYGTERM
-	else if( cygterm_get_flag() && (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) ) ;
-#endif
 	else
 	    conf_set_int(conf, CONF_port, i);
     }
@@ -2298,9 +2276,6 @@ void setup_config_box(struct controlbox *b, bool midsession,
 	ssd->listbox->listbox.height = GetConfigBoxHeight() ;
 #else
     ssd->listbox->listbox.height = 7;
-#endif
-#ifdef MOD_CYGTERM
-	if( cygterm_get_flag() ) ssd->listbox->listbox.height-- ;
 #endif
     if (!midsession) {
 	ssd->loadbutton = ctrl_pushbutton(s, "Load", 'l',

@@ -17,9 +17,6 @@ const struct BackendVtable *const backends[] = {
 #ifdef MOD_ADB
     &adb_backend,
 #endif
-#ifdef MOD_CYGTERM
-    &cygterm_backend,
-#endif
     NULL
 };
 

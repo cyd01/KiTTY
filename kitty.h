@@ -387,10 +387,6 @@ void create_settings( const char * name ) ;
 #ifdef MOD_LAUNCHER
 void InitLauncherRegistry( void ) ;
 #endif
-#ifdef MOD_CYGTERM
-void cygterm_set_flag( int flag ) ;
-int cygterm_get_flag( void ) ;
-#endif
 
 int getpid(void) ;
 

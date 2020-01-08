@@ -543,13 +543,6 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "ScriptWait=%s\n",			conf_get_str(conf,CONF_script_waitfor) ) ;
 	fprintf( fp, "ScriptHalt=%s\n",			conf_get_str(conf,CONF_script_halton) ) ;
 #endif
-#ifdef MOD_CYGTERM
-	/* Cygterm options */
-	fprintf( fp, "cygautopath=%d\n", 		conf_get_int(conf,CONF_cygautopath) ) ;
-	fprintf( fp, "cygterm64=%d\n", 			conf_get_int(conf,CONF_cygterm64) ) ;
-	fprintf( fp, "cygcmd=%s\n", 			conf_get_str(conf,CONF_cygcmd) ) ;
-	fprintf( fp, "alt_metabit=%d\n", 		conf_get_int(conf,CONF_alt_metabit) ) ;
-#endif
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 	/* Image Options */
 	fprintf( fp, "bg_opacity=%d\n",			conf_get_int(conf,CONF_bg_opacity) ) ;
@@ -635,9 +628,6 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp,"BackgroundImageFlag=%d\n",GetBackgroundImageFlag() );
 #ifdef MOD_RECONNECT
 	fprintf( fp,"AutoreconnectFlag=%d\nReconnectDelay=%d\n",AutoreconnectFlag,ReconnectDelay );
-#endif
-#ifdef MOD_CYGTERM
-	fprintf( fp,"CygTermFlag=%d\n",cygterm_get_flag() );
 #endif
 #ifdef MOD_ADB
 	fprintf( fp,"ADBFlag=%d\n",GetADBFlag() );

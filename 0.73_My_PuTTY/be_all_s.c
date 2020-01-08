@@ -32,9 +32,6 @@ const struct BackendVtable *const backends[] = {
     &rlogin_backend,
     &raw_backend,
     &serial_backend,
-#ifdef MOD_CYGTERM
-    &cygterm_backend,
-#endif
 #ifdef MOD_ADB
     &adb_backend,
 #endif
