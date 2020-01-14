@@ -4454,16 +4454,19 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	}
 #endif
 
-	if (wParam & (MK_LBUTTON | MK_MBUTTON | MK_RBUTTON) &&
-	    GetCapture() == hwnd) {
-	    Mouse_Button b;
-	    if (wParam & MK_LBUTTON)
-		b = MBT_LEFT;
-	    else if (wParam & MK_MBUTTON)
-		b = MBT_MIDDLE;
-	    else
-		b = MBT_RIGHT;
-	    term_mouse(term, b, translate_button(b), MA_DRAG,
+	{
+            // debug("X %d Y %d => %d:%d\n", X_POS(lParam), Y_POS(lParam), TO_CHR_X(X_POS(lParam)), TO_CHR_Y(Y_POS(lParam)));
+            Mouse_Button b;
+            if (wParam & MK_LBUTTON)
+                b = MBT_LEFT;
+            else if (wParam & MK_MBUTTON)
+                b = MBT_MIDDLE;
+            else if (wParam & MK_RBUTTON)
+                b = MBT_RIGHT;
+            else
+                b = MBT_NOTHING;
+            term_mouse(term, b, translate_button(b),
+                       b == MBT_NOTHING ? MA_MOVE : MA_DRAG,
 		       TO_CHR_X(X_POS(lParam)),
 		       TO_CHR_Y(Y_POS(lParam)), wParam & MK_SHIFT,
 		       wParam & MK_CONTROL, is_alt_pressed());
