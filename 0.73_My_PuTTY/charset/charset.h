@@ -13,9 +13,9 @@
  * character sets known to this library.
  */
 typedef enum {
-    CS_NONE,			       /* used for reporting errors, etc */
+    CS_NONE,                           /* used for reporting errors, etc */
     CS_ISO8859_1,
-    CS_ISO8859_1_X11,		       /* X font encoding with VT100 glyphs */
+    CS_ISO8859_1_X11,                  /* X font encoding with VT100 glyphs */
     CS_ISO8859_2,
     CS_ISO8859_3,
     CS_ISO8859_4,
@@ -77,7 +77,7 @@ typedef struct {
 
 /*
  * Routine to convert a MB/SB character set to Unicode.
- * 
+ *
  * This routine accepts some number of bytes, updates a state
  * variable, and outputs some number of Unicode characters. There
  * are no guarantees. You can't even guarantee that at most one
@@ -86,12 +86,12 @@ typedef struct {
  * then you suddenly see FE. Now you need to output _two_ error
  * characters - one for the incomplete sequence E1 80, and one for
  * the completely invalid UTF-8 byte FE.
- * 
+ *
  * Returns the number of wide characters output; will never output
  * more than the size of the buffer (as specified on input).
  * Advances the `input' pointer and decrements `inlen', to indicate
  * how far along the input string it got.
- * 
+ *
  * The sequence of `errlen' wide characters pointed to by `errstr'
  * will be used to indicate a conversion error. If `errstr' is
  * NULL, `errlen' will be ignored, and the library will choose
@@ -101,21 +101,21 @@ typedef struct {
 
 int charset_to_unicode(const char **input, int *inlen,
                        wchar_t *output, int outlen,
-		       int charset, charset_state *state,
-		       const wchar_t *errstr, int errlen);
+                       int charset, charset_state *state,
+                       const wchar_t *errstr, int errlen);
 
 /*
  * Routine to convert Unicode to an MB/SB character set.
- * 
+ *
  * This routine accepts some number of Unicode characters, updates
  * a state variable, and outputs some number of bytes.
- * 
+ *
  * Returns the number of bytes characters output; will never output
  * more than the size of the buffer (as specified on input), and
  * will never output a partial MB character. Advances the `input'
  * pointer and decrements `inlen', to indicate how far along the
  * input string it got.
- * 
+ *
  * The sequence of `errlen' characters pointed to by `errstr' will
  * be used to indicate a conversion error. If `errstr' is NULL,
  * `errlen' will be ignored, and the library will choose something
@@ -125,8 +125,8 @@ int charset_to_unicode(const char **input, int *inlen,
 
 int charset_from_unicode(const wchar_t **input, int *inlen,
                          char *output, int outlen,
-			 int charset, charset_state *state,
-			 const char *errstr, int errlen);
+                         int charset, charset_state *state,
+                         const char *errstr, int errlen);
 
 /*
  * Convert X11 encoding names to and from our charset identifiers.
@@ -152,6 +152,6 @@ int charset_localenc_nth(int n);
  * Convert Mac OS script/region/font to our charset identifiers.
  */
 int charset_from_macenc(int script, int region, int sysvers,
-			const char *fontname);
+                        const char *fontname);
 
 #endif /* charset_charset_h */
