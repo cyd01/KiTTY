@@ -6841,10 +6841,6 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	  case VK_PRIOR: sk_key = SKK_PGUP; goto small_keypad_key;
 	  case VK_NEXT: sk_key = SKK_PGDN; goto small_keypad_key;
           small_keypad_key:
-            /* These keys don't generate terminal input with Ctrl */
-            if (shift_state & 2)
-                break;
-
             p += format_small_keypad_key((char *)p, term, sk_key, shift_state, left_alt);
             return p - output;
 
