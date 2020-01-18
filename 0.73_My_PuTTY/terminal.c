@@ -2729,6 +2729,7 @@ static void toggle_mode(Terminal *term, int mode, int query, bool state)
             break;
           case 1006:                   /* use SGR 1006 mouse protocol */
             term->xterm_mouse_protocol = state ? MP_SGR : MP_NORMAL;
+            break;
           case 1015:                   /* use URXVT 1015 mouse protocol */
             term->xterm_mouse_protocol = state ? MP_URXVT : MP_NORMAL;
 	    break;
