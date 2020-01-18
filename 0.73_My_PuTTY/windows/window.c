@@ -6683,12 +6683,12 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	    return 0;
 	}
 
-	if (wParam == VK_BACK && shift_state == 0) {	/* Backspace */
+	if (wParam == VK_BACK && shift_state <= 1) {	/* Backspace of Shift Backspace */
 	    *p++ = (conf_get_bool(conf, CONF_bksp_is_delete) ? 0x7F : 0x08);
 	    *p++ = 0;
 	    return -2;
 	}
-	if (wParam == VK_BACK && shift_state == 1) {	/* Shift Backspace */
+	if (wParam == VK_BACK) {	/* Ctrl Backspace or Ctrl+Shift Backspace */
 	    /* We do the opposite of what is configured */
 	    *p++ = (conf_get_bool(conf, CONF_bksp_is_delete) ? 0x08 : 0x7F);
 	    *p++ = 0;
