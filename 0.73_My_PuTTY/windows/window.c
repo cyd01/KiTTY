@@ -6545,9 +6545,38 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	/* Okay, prepare for most alts then ... */
 #ifdef MOD_KEYMAPPING
 	if( !GetPuttyFlag() ) {
-		if (left_alt && shift_state != 1 && !(wParam == VK_UP || wParam == VK_DOWN || wParam == VK_RIGHT || wParam == VK_LEFT))
-			*p++ = '\033';
+		if (left_alt && shift_state != 1 && !(wParam == VK_UP || wParam == VK_DOWN || wParam == VK_RIGHT || wParam == VK_LEFT)) {
+			int fkey = 0;
+			switch (wParam) {
+				case VK_F1:
+				case VK_F2:
+				case VK_F3:
+				case VK_F4:
+				case VK_F5:
+				case VK_F6:
+				case VK_F7:
+				case VK_F8:
+				case VK_F9:
+				case VK_F10:
+				case VK_F11:
+				case VK_F12:
+				case VK_INSERT:
+				case VK_DELETE:
+				case VK_HOME:
+				case VK_END:
+				case VK_PRIOR:
+				case VK_NEXT:
+					fkey = 1;
+					break;
+				default:
+					break;
+			}
+
+			if (!(term->funky_type == FUNKY_XTERM && !term->vt52_mode) || fkey == 0) {
+				*p++ = '\033';
+			}
 		}
+	}
 	else
 #endif
 	if (left_alt)
