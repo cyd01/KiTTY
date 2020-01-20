@@ -374,13 +374,6 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 	write_setting_s_forced(sesskey, "HyperlinkRegularExpression", conf_get_str(conf, CONF_url_regex));
 #endif
 #endif
-#ifdef MOD_CYGTERM
-    //if (do_host)
-	write_setting_i_forced(sesskey, "CygtermAltMetabit", conf_get_int(conf, CONF_alt_metabit));
-	write_setting_i_forced(sesskey, "CygtermAutoPath", conf_get_int(conf, CONF_cygautopath) );
-	write_setting_i_forced(sesskey, "Cygterm64", conf_get_int(conf, CONF_cygterm64));
-	write_setting_s_forced(sesskey, "CygtermCommand", conf_get_str(conf, CONF_cygcmd) );
-#endif
 #ifdef MOD_ZMODEM
     write_setting_filename_forced(sesskey, "rzCommand", conf_get_filename(conf, CONF_rzcommand) );
     write_setting_s_forced(sesskey, "rzOptions", conf_get_str(conf, CONF_rzoptions) );
@@ -1004,12 +997,6 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 #ifndef MOD_NOHYPERLINK
 	gpps_forced(sesskey, "HyperlinkRegularExpression", urlhack_default_regex, conf, CONF_url_regex);
 #endif
-#endif
-#ifdef MOD_CYGTERM
-    gppi_forced(sesskey, "CygtermAltMetabit", 0, conf, CONF_alt_metabit);
-    gppi_forced(sesskey, "CygtermAutoPath", 1, conf, CONF_cygautopath );
-    gppi_forced(sesskey, "Cygterm64", 0, conf, CONF_cygterm64);
-    gpps_forced(sesskey, "CygtermCommand", "", conf, CONF_cygcmd );
 #endif
 #ifdef MOD_ZMODEM
     gppfile_forced(sesskey, "rzCommand", conf, CONF_rzcommand );

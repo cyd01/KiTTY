@@ -637,20 +637,6 @@ static void close_session(void *ignored_context)
     }
 }
 
-#ifdef MOD_CYGTERM
-/* Copy at most n characters from src to dst or until copying a '\0'
- * character.  A pointer to the terminal '\0' in dst is returned, or if no
- * '\0' was written, dst+n is returned.  */
-static char *
-stpcpy_max(char *dst, const char *src, size_t n)
-{
-    while (n-- && (*dst = *src++))
-	dst++;
-    return dst;
-}
-bool get_got_host(void) ;
-void set_got_host(bool val ) ;
-#endif
 #ifdef MOD_RECONNECT
 void RestartSession( void ) {
 	win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
@@ -855,13 +841,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			memset( bufpass, 0, strlen(bufpass) ) ;
 			memset( argv[i], 0, strlen(argv[i]) ) ;
 #endif
-#ifdef MOD_CYGTERM
-		} else if( !strcmp(p, "-cc") ) {
-			conf_set_str( conf, CONF_host, "cmd.exe /k" ) ;
-			conf_set_int( conf, CONF_port, 0 ) ;
-			conf_set_int( conf, CONF_protocol, PROT_CYGTERM ) ;
-			special_launchable_argument = true ;
-#endif
 		} else if( !strcmp(p, "-auto_store_sshkey") || !strcmp(p, "-auto-store-sshkey") ) {
 			SetAutoStoreSSHKeyFlag( 1 ) ;
 		} else if( !strcmp(p, "-bgcolor" ) ) {
@@ -877,6 +856,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-cmd") ) {
 			i++ ;
 			conf_set_str( conf, CONF_autocommand, argv[i] ) ;
+		} else if( !strcmp(p, "-codepage") ) {
+			i++ ;
+			conf_set_str( conf, CONF_line_codepage, argv[i] ) ;
 		} else if( !strcmp(p, "-rcmd") ) {
 			i++ ;
 			conf_set_str( conf, CONF_remote_cmd, argv[i] ) ;
@@ -947,12 +929,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-notrans") ) {
 			SetTransparencyFlag( 0 ) ;
 			conf_set_int(conf,CONF_transparencynumber, -1) ;
-#ifdef MOD_CYGTERM
-		} else if( !strcmp(p, "-cygterm") ) {
-			cygterm_set_flag( 1 ) ;
-		} else if( !strcmp(p, "-nocygterm") ) {
-			cygterm_set_flag( 0 ) ;
-#endif
 #ifdef MOD_SAVEDUMP	
 		} else if( !strcmp(p, "-savedump") ) {			
 			SaveDump() ;
@@ -1022,9 +998,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			SetRuttyFlag( 0 ) ;
 			SetDefaultSettingsFlag(1);
 			SetReadOnlyFlag(0);
-#ifdef MOD_CYGTERM
-			cygterm_set_flag( 0 ) ;
-#endif
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 			SetBackgroundImageFlag(0) ;
 #endif
@@ -1141,29 +1114,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		    pgp_fingerprints();
 		    exit(1);
 		} else if (*p != '-') {
-#ifdef MOD_CYGTERM
-                    } else if ( conf_get_int(conf,CONF_protocol) == PROT_CYGTERM) {
-                        /* Concatenate all the remaining arguments separating
-                         * them with spaces to get the command line to execute.
-                         */
-			    
-			char *p,*pst;
-			pst=(char*)malloc(1000);
-			p=pst;
-			strcpy( p, conf_get_str(conf,CONF_cygcmd) );
-			char *const end = p + 1000 ;
-			    
-                        for (; i < argc && p < end; i++) {
-                            p = stpcpy_max(p, argv[i], end - p - 1);
-                            *p++ = ' ';
-                        }
-                        assert(p > pst && p <= end);
-                        *--p = '\0';
-			set_got_host(true) ;			
-			
-			conf_set_str( conf, CONF_cygcmd, pst );
-			free(pst); 
-#endif			
 		    cmdline_error("unexpected argument \"%s\"", p);
 		} else {
 		    cmdline_error("unknown option \"%s\"", p);
@@ -6695,11 +6645,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	    *p++ = 0;
 	    return -2;
 	}
-#ifdef MOD_CYGTERM
-	if (wParam == VK_BACK && shift_state != 0) {	/* Shift-Backspace, Ctrl-Backspace */
-#else
 	if (wParam == VK_BACK && shift_state == 1) {	/* Shift Backspace */
-#endif
 	    /* We do the opposite of what is configured */
 	    *p++ = (conf_get_bool(conf, CONF_bksp_is_delete) ? 0x08 : 0x7F);
 	    *p++ = 0;
@@ -6718,9 +6664,6 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	}
 #endif
 	if (wParam == VK_TAB && shift_state == 1) {	/* Shift tab */
-#ifdef MOD_CYGTERM
-	p = output; /* don't also pass escape */
-#endif
 	    *p++ = 0x1B;
 	    *p++ = '[';
 	    *p++ = 'Z';
@@ -6731,16 +6674,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	    return p - output;
 	}
 	if (wParam == VK_SPACE && shift_state == 3) {	/* Ctrl-Shift-Space */
-#ifdef MOD_CYGTERM
-	    p = output; /* don't also pass escape */
-	    *p++ = 160; /* Latin1 NBSP */
-	    return p - output;
-	}
-	if (wParam == '/' && shift_state == 2) {	/* Ctrl-/ sends ^_ */
-	    *p++ = 037;
-#else
 	    *p++ = 160;
-#endif
 	    return p - output;
 	}
 	if (wParam == VK_CANCEL && shift_state == 2) {	/* Ctrl-Break */
@@ -6770,13 +6704,6 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	    *p++ = 0x1E;	       /* Ctrl-~ == Ctrl-^ in xterm at least */
 	    return p - output;
 	}
-#ifdef MOD_CYGTERM
-	if (wParam == VK_RETURN && shift_state != 0) {	/* Shift-Return, Ctrl-Return */
-	    /* send LINEFEED */
-	    *p++ = 012;
- 	    return p - output;
- 	}
-#endif
 
 	switch (wParam) {
           case VK_NUMPAD0: keypad_key = '0'; goto numeric_keypad;
@@ -7032,13 +6959,8 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 		    } else {
 			WCHAR cbuf[2];
 			cbuf[0] = '\033';
-#ifdef MOD_CYGTERM
-			cbuf[1] = wch | ((left_alt & conf_get_int(conf,CONF_alt_metabit)) << 7);
-    			term_keyinputw(term, cbuf + !(left_alt & !conf_get_int(conf,CONF_alt_metabit)),  1 + !!(left_alt & !conf_get_int(conf,CONF_alt_metabit))  );
-#else
 			cbuf[1] = wch;
 			term_keyinputw(term, cbuf+!left_alt, 1+!!left_alt);
-#endif
 		    }
 		}
 		show_mouseptr(false);
@@ -7111,9 +7033,6 @@ void make_title( char * res, char * fmt, const char * title ) {
 		case PROT_TELNET: strcpy(b,"telnet"); if(port==-1) port=23 ; break;
 		case PROT_RLOGIN: strcpy(b,"rlogin"); break;
 		case PROT_SSH: strcpy(b,"ssh"); if(port==-1) port=22 ; break;
-#ifdef MOD_CYGTERM
-		case PROT_CYGTERM: strcpy(b,"cyg"); break;
-#endif
 		case PROT_SERIAL: strcpy(b,"serial"); break;
 		}
 	while( (p=poss( "%%P", res)) > 0 ) { del(res,p,3); insert(res,b,p); }

@@ -127,7 +127,7 @@ CFLAGS += -D_WIN32_IE=0x0500
 ################################################################################
 CFLAGS += -DWINVER=0x0501 -D_WIN32_WINDOWS=0x0410 -D_WIN32_WINNT=0x0501
 
-# 		-DMOD_PERSO -DMOD_CYGTERM -DMOD_BACKGROUNDIMAGE -DMOD_RECONNECT -DMOD_HYPERLINK -DMOD_ZMODEM -DMOD_STARTBUTTON -DMOD_LAUNCHER -DMOD_SAVEDUMP -DMOD_KEYMAPPING -DMOD_WINCRYPT -DMOD_TUTTY -DMOD_PORTKNOCKING -DMOD_PUTTYX -DMOD_WTS -DMOD_PRINTCLIP -DMOD_RUTTY -DMOD_ADB \
+# 		-DMOD_PERSO -DMOD_BACKGROUNDIMAGE -DMOD_RECONNECT -DMOD_HYPERLINK -DMOD_ZMODEM -DMOD_STARTBUTTON -DMOD_LAUNCHER -DMOD_SAVEDUMP -DMOD_KEYMAPPING -DMOD_WINCRYPT -DMOD_TUTTY -DMOD_PORTKNOCKING -DMOD_PUTTYX -DMOD_WTS -DMOD_PRINTCLIP -DMOD_RUTTY -DMOD_ADB \
 
 
 # Flag special FDJ
@@ -165,7 +165,6 @@ CFLAGS += -DMOD_PERSO \
 		-I../../bcrypt \
 		-I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
 		
-#		-DMOD_CYGTERM \
 #		-DHAS_WINX509 -DMOD_WINCRYPT \
 #		-DMOD_ZMODEM \
 
@@ -380,7 +379,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winmiscs.o winnet.o winnoise.o winnpc.o winnps.o winpgntc.o \
 		winprint.o winproxy.o winsecur.o winser.o winshare.o \
 		winstore.o wintime.o winucs.o winutils.o winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o wincrypto.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -408,7 +407,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
 		winser.o winshare.o winstore.o wintime.o winucs.o winutils.o \
 		winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o wincrypto.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -1805,12 +1804,6 @@ FORCE:
 ################################################################################
 # BEGIN MOD_PERSO
 ################################################################################
-cygcfg.o: ../../cygterm/cygcfg.c
-	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../cygterm/cygcfg.c -I../../cygterm/ -I../../
-
-cygterm.o: ../../cygterm/cygterm.c
-	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../cygterm/cygterm.c -I../../cygterm -I../../
-
 be_all_s_plink.o: ../be_all_s.c ../putty.h ../puttyps.h ../network.h ../misc.h \
 		../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
@@ -2086,7 +2079,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		winmiscs.o winnet.o winnoise.o winnpc.o winnps.o winpgntc.o \
 		winprint.o winproxy.o winsecur.o winser.o winshare.o \
 		winstore.o wintime.o winucs.o winutils.o winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -2116,7 +2109,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
 		winser.o winshare.o winstore.o wintime.o winucs.o winutils.o \
 		winx11.o x11fwd.o \
-		adb.o cygcfg.o cygterm.o \
+		adb.o \
 		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -2151,7 +2144,9 @@ cross:
 
 cross64:
 	sed -i 's#^typedef enum _WTS_VIRTUAL_CLASS #// typedef enum _WTS_VIRTUAL_CLASS #' window.c
-	make -e TOOLPATH=/usr/bin/x86_64-w64-mingw32- -f MAKEFILE.MINGW putty.exe
+	make -e TOOLPATH=/usr/bin/x86_64-w64-mingw32- -f MAKEFILE.MINGW putty.exe || /usr/bin/x86_64-w64-mingw32-gcc -o kitty64.exe *.o ../../base64/base64_64.a ../../bcrypt/bcrypt_64.a ../../blocnote/notepad_64.a ../../jpeg/libjpeg_64.a ../../md5/MD5check_64.a ../../mini/mini_64.a ../../regex/libregex_64.a -ladvapi32 -lcomdlg32 -lgdi32 -limm32 -lpsapi -lole32 -lshell32 -luser32 -lwsock32  -lwtsapi32 -mwindows
+	upx --best --compress-icons=2 --compress-exports=0 kitty64.exe
+	mv kitty64.exe /build/kitty64.exe
 
 9bis: putty.exe putty_portable.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
 

@@ -49,9 +49,6 @@ void SetUsernameInConfig( char * username ) {
 		}
 	}
 #endif
-#ifdef MOD_CYGTERM
-void cygterm_set_flag( int flag ) { }
-#endif
 
 #define WM_AGENT_CALLBACK (WM_APP + 4)
 
