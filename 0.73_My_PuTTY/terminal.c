@@ -3191,7 +3191,8 @@ static inline void term_keyinput_internal(
         bufchain_add(&term->inbuf, buf, true_len);
         term_added_data(term);
     }
-    term_bracketed_paste_stop(term);
+	if (interactive)
+		term_bracketed_paste_stop(term);
     if (term->ldisc)
         ldisc_send(term->ldisc, buf, len, interactive);
     term_seen_key_event(term);
