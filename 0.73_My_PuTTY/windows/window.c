@@ -29,7 +29,7 @@
 #include "tree234.h"
 
 #ifndef NO_MULTIMON
-#include <multimon.h>
+#include <winuser.h>
 #endif
 
 #include <imm.h>
