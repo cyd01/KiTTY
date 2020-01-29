@@ -624,20 +624,19 @@ void CreateFileAssoc() {
 	RegTestOrCreate( HKEY_CLASSES_ROOT, ".ktx", "OpenWithProgids", "kitty.connect.1") ;
 }
 	
-// Vérifie l'existance de la clé de KiTTY sinon la copie depuis PuTTY
+// Check for KiTTY registry key. If not, copy from PuTTY one
 void TestRegKeyOrCopyFromPuTTY( HKEY hMainKey, char * KeyName ) { 
 	HKEY hKey ;
 	if( RegOpenKeyEx( hMainKey, TEXT(KeyName), 0, KEY_READ, &hKey) == ERROR_SUCCESS ) {
 		RegCloseKey( hKey ) ;
-		}
-	else {
+	} else {
 		RegCreateKey( hMainKey, TEXT(KeyName), &hKey ) ;
 		RegCloseKey( hKey ) ;
 #ifndef FDJ
 		RegCopyTree( hMainKey, "Software\\SimonTatham\\PuTTY", TEXT(KeyName) ) ;
 #endif
-		}
 	}
+}
 
 
 	

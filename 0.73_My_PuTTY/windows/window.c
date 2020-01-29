@@ -29,7 +29,11 @@
 #include "tree234.h"
 
 #ifndef NO_MULTIMON
+#ifdef MOD_PERSO
 #include <winuser.h>
+#else
+#include <multimon.h>
+#endif
 #endif
 
 #include <imm.h>
@@ -3207,8 +3211,23 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 	
 	if( (conf_get_int(conf,CONF_protocol) == PROT_SSH) && (!is_backend_connected) ) break ; // On sort si en SSH on n'est pas connecte
 	// Lancement d'une (ou plusieurs separees par \\n) commande(s) automatique(s) a l'initialisation
+
 	KillTimer( hwnd, TIMER_INIT ) ;
 
+	// Fullscreen automatic
+	if( conf_get_int(conf,CONF_fullscreen) ) { PostMessage( hwnd, WM_COMMAND, IDM_FULLSCREEN, (LPARAM)NULL ) ; }
+
+	// Maximize automatic
+	if( conf_get_int(conf,CONF_maximize) ) { PostMessage( hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, (LPARAM)NULL ) ; }
+
+	// Affichage d'une note de la session s'il y en a une
+	if( GetSessionField( conf_get_str( conf, CONF_sessionname), conf_get_str( conf, CONF_folder), "Notes", buffer )  )
+		{ if( strlen( buffer ) > 0 ) MessageBox( hwnd, buffer, "Notes", MB_OK ) ; }
+
+	// Envoi automatiquement dans le systeme tray si besoin
+	if( GetAutoSendToTray() ) ManageToTray( hwnd ) ;
+
+	// Si telnet on essaie d'envoyer le password
 	if( conf_get_int(conf,CONF_protocol) == PROT_TELNET ) {
 		if( strlen( conf_get_str(conf,CONF_username) ) > 0 ) {
 			if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
@@ -3227,21 +3246,9 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 		}
 	}
 
-	// Envoi automatiquement dans le systeme tray si besoin
-	if( GetAutoSendToTray() ) ManageToTray( hwnd ) ;
-	
-	// Maximize automatic
-	if( conf_get_int(conf,CONF_maximize) ) { PostMessage( hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, (LPARAM)NULL ) ; }
-
-	// Fullscreen automatic
-	if( conf_get_int(conf,CONF_fullscreen) ) { PostMessage( hwnd, WM_COMMAND, IDM_FULLSCREEN, (LPARAM)NULL ) ; }
-
-	// Affichage d'une note de la session s'il y en a une
-	if( GetSessionField( conf_get_str( conf, CONF_sessionname), conf_get_str( conf, CONF_folder), "Notes", buffer )  )
-		{ if( strlen( buffer ) > 0 ) MessageBox( hwnd, buffer, "Notes", MB_OK ) ; }
-
 	RenewPassword( conf ) ;
 
+	// On envoie l'autocommand
 	if( strlen( conf_get_str(conf,CONF_autocommand) ) > 0 ) {
 		SetTimer(hwnd, TIMER_AUTOCOMMAND, autocommand_delay, NULL) ;
 	}

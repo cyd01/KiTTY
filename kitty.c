@@ -5358,9 +5358,13 @@ void InitWinMain( void ) {
 	if( GetValueData( HKEY_CURRENT_USER, TEXT(PUTTY_REG_POS), "Notes", buffer ) ) 
 		{ if( strlen( buffer ) > 0 ) MessageBox( NULL, buffer, "Notes", MB_OK ) ; }
 		
-	// Genere un fichier d'initialisation de toute les Sessions
+	// Genere un fichier (4096ko max) d'initialisation de toute les Sessions
 	sprintf( buffer, "%s\\%s.ses.updt", InitialDirectory, appname ) ;
 	if( existfile( buffer ) ) { InitAllSessions( HKEY_CURRENT_USER, TEXT(PUTTY_REG_POS), "Sessions", buffer ) ; }
+	/* Format: registry like
+	"ProxyUsername"="mylogin"
+	"ProxyPassword"="mypassword"
+	*/
 	
 	// Initialise les logs
 	char hostname[4096], username[4096] ;
