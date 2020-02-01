@@ -119,8 +119,9 @@ void license_form( char * license, char sep, int size ) {
 int license_test( char * license, char sep, int modulo, int result ) {
 	if( (int)(license_modulo( license, modulo, sep )) == result ) return 1 ;
 	return 0 ;
-	}
+}
 
+#ifdef MAIN
 void license_usage( char * progname ) {
 	fprintf( stderr, "%s - License generator\n", basename(progname) ) ;
 	fprintf( stderr, "Usage: %s [-b begining] [-g groupsize] [-l] [-m modulo] [-s size] [-t]\n", basename(progname) ) ;
@@ -194,7 +195,6 @@ int license_main( int argc, char *argv[], char *arge[] ){
 	return return_code ;
 	}
 
-#ifdef MAIN
 int main( int argc, char *argv[], char *arge[] ) {
 	return license_main( argc, argv, arge ) ;
 	}

@@ -11,9 +11,7 @@
 #include <assert.h>
 
 #ifdef __WINE__
-#ifndef NO_MULTIMON
 #define NO_MULTIMON                    /* winelib doesn't have this */
-#endif
 #endif
 
 #ifndef NO_MULTIMON
@@ -263,9 +261,10 @@ void SendStrToTerminal( const char * str, const int len ) {
 	if( len <= 0 ) return ;
 //	if( term!=NULL ) term_seen_key_event(term) ;
 	for( i=0 ; i<len ; i++ ) {
-		c=(unsigned char)str[i] ;
+		c = (unsigned char)str[i] ;
 		if (ldisc)
-			term_keyinputw(term, (const wchar_t *) &c, 1); //lpage_send(ldisc, CP_ACP, &c, 1, 1);
+			//term_keyinputw(term, (const wchar_t *) &c, 1); //lpage_send(ldisc, CP_ACP, &c, 1, 1);
+			term_keyinput(term, -1, &c, 1) ;
 		}
 	}
 // resize en convertissant en nombre de lignes et colonnes

@@ -1701,16 +1701,19 @@ void SendAutoCommand( HWND hwnd, const char * cmd ) {
 		if( debug_flag ) { strcat( buf, ": ") ; strcat( buf, cmd ) ; }
 		if( conf_get_int(conf,CONF_protocol) != PROT_TELNET ) debug_logevent( buf ) ; // On logue que si on est pas en telnet (à cause du password envoyé en clair)
 		free(buf);
-		if( existfile( cmd ) ) RunScriptFile( hwnd, cmd ) ;
-		else if( (toupper(cmd[0])=='C')&&(toupper(cmd[1])==':')&&(toupper(cmd[2])=='\\') ) {
+		if( existfile( cmd ) ) { 
+			RunScriptFile( hwnd, cmd ) ; 
+		} else if( (toupper(cmd[0])=='C')&&(toupper(cmd[1])==':')&&(toupper(cmd[2])=='\\') ) { 
 			//MessageBox( NULL, cmd,"Info", MB_OK );
 			return ;
-			}
-		else { SendKeyboardPlus( hwnd, cmd ) ; }
+		} else { 
+			SendKeyboardPlus( hwnd, cmd ) ; 
 		}
-	else { if( debug_flag ) debug_logevent( "No automatic command !" ) ; }
+	} else { 
+		if( debug_flag ) debug_logevent( "No automatic command !" ) ; 
 	}
-	
+}
+
 // Command sender (envoi d'une meme commande a toutes les fenetres)
 BOOL CALLBACK SendCommandProc( HWND hwnd, LPARAM lParam ) {
 	char buffer[256] ;
