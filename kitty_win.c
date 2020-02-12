@@ -428,3 +428,27 @@ void debug_logevent( const char *fmt, ... ) {
 	lp_eventlog(default_logpolicy,buf) ;
 	free(buf);
 }
+
+void PopUpSystemMenu( HWND hwnd, int npos ) {
+	RECT rc ;
+	GetWindowRect( hwnd, &rc ) ;
+	HMENU m = GetSystemMenu( hwnd, FALSE) ;
+	TrackPopupMenu( m, 0, rc.left, rc.top, 0, hwnd, NULL) ;
+
+	if( npos>0 ) {
+	int nb = GetMenuItemCount(m), i;
+	MENUITEMINFO mi ;
+	mi.cbSize = sizeof(MENUITEMINFO) ;
+	for( i=0; i<nb; i++ ) {
+		mi.dwTypeData  = NULL ;
+		GetMenuItemInfoA( m, i, TRUE, &mi);
+		char *txt = (char*)malloc(mi.cch+1);
+		mi.dwTypeData  = txt ;
+		mi.cch=	mi.cch+1;
+		GetMenuItemInfoA( m, i, FALSE, &mi);
+		MessageBox(NULL,txt,"info",MB_OK);
+		free(txt);
+	}
+	}
+	
+}

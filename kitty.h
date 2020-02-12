@@ -341,7 +341,7 @@ int fileno(FILE *stream) ;
 void SaveRegistryKeyEx( HKEY hMainKey, LPCTSTR lpSubKey, const char * filename ) ;
 void ManageProtect( HWND hwnd, TermWin *tw, char * title ) ;
 // Gere l'option always visible
-void ManageVisible( HWND hwnd ) ;
+void ManageVisible( HWND hwnd, TermWin *tw, char * title ) ;
 // Sauvegarde de la cle de registre
 void SaveRegistryKeyEx( HKEY hMainKey, LPCTSTR lpSubKey, const char * filename ) ;
 void SaveRegistryKey( void ) ;
@@ -638,11 +638,29 @@ void xyz_updateMenuItems(Terminal *term) ;
 #ifndef IDM_COPYALL
 #define IDM_COPYALL   0x0170
 #endif
+#ifndef IDM_SHOWLOG
+#define IDM_SHOWLOG   0x0010
+#endif
 #ifndef IDM_RESTART
 #define IDM_RESTART   0x0040
 #endif
+#ifndef IDM_NEWSESS
+#define IDM_NEWSESS   0x0020
+#endif
 #ifndef IDM_DUPSESS
 #define IDM_DUPSESS   0x0030
+#endif
+#ifndef IDM_RECONF
+#define IDM_RECONF   0x0050
+#endif
+#ifndef IDM_CLRSB
+#define IDM_CLRSB     0x0060
+#endif
+#ifndef IDM_FULLSCREEN
+#define IDM_FULLSCREEN	0x0180
+#endif
+#ifndef IDM_COPYALL
+#define IDM_COPYALL	0x0170
 #endif
 
 #endif // KITTY_H

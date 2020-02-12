@@ -36,4 +36,7 @@ void CheckVersionFromWebSite( HWND hwnd ) ;
 
 // Affichage d'un message dans l'event log
 void debug_logevent( const char *fmt, ... ) ;
+
+// Affiche le menu system de l'application
+void PopUpSystemMenu( HWND hwnd, int npos  ) ;
 #endif

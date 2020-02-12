@@ -3500,7 +3500,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
       case WM_COMMAND:
       case WM_SYSCOMMAND:
 #ifdef MOD_PERSO
-	if( strlen( conf_get_str(conf,CONF_folder) )>0 ) SetInitCurrentFolder( conf_get_str(conf,CONF_folder) );
+      	if( strlen( conf_get_str(conf,CONF_folder) )>0 ) SetInitCurrentFolder( conf_get_str(conf,CONF_folder) );
 	if( (wParam>=IDM_USERCMD)&&(wParam<(IDM_USERCMD+NB_MENU_MAX)) ) {
 	  	ManageSpecialCommand( hwnd, wParam-IDM_USERCMD ) ;
 	        break ;
@@ -3974,7 +3974,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	  	ManageProtect( hwnd, wintw, conf_get_str(conf, CONF_wintitle) ) ;
 		break ;
 	  case IDM_VISIBLE: 
-	  	ManageVisible( hwnd ) ;
+	  	ManageVisible( hwnd, wintw, conf_get_str(conf, CONF_wintitle) ) ;
 		break ;
           case IDM_TOTRAY: 
 		if( GetVisibleFlag()==VISIBLE_YES ) {
@@ -5144,7 +5144,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #endif
 #ifdef MOD_PERSO
 
-	if( (wParam == VK_TAB) && (GetKeyState(VK_CONTROL) & 0x8000) ) {
+	if( (wParam == VK_TAB) && (GetKeyState(VK_CONTROL) & 0x8000) ) {					// CTRL + TAB to switch between windows
 		if( (message==WM_KEYUP) && conf_get_int(conf, CONF_ctrl_tab_switch) && GetCtrlTabFlag() ) {
 			struct ctrl_tab_info info = { (GetKeyState(VK_SHIFT) & 0x8000) ? 1 : -1, hwnd, } ;
 
@@ -5167,28 +5167,32 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #endif
 
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
-		if( (wParam==VK_SNAPSHOT)&&(GetKeyState(VK_CONTROL)&0x8000) ) {
+		if( (wParam==VK_SNAPSHOT)&&(GetKeyState(VK_CONTROL)&0x8000) ) {					// CTRL + PrintScreen => Screenshot
 			char screenShotFile[1024] ;
 			sprintf( screenShotFile, "%s\\screenshot-%d-%ld.jpg", InitialDirectory, getpid(), time(0) );
 			screenCaptureClientRect( hwnd, screenShotFile, 100 ) ;
 		}
 #endif
-		if((wParam==VK_TAB)&&(message==WM_KEYDOWN)&&(GetKeyState(VK_CONTROL)&0x8000)&&(GetKeyState(VK_SHIFT)&0x8000)) 
-			{ SetShortcutsFlag( abs(GetShortcutsFlag()-1) ) ; return 0 ; }
-      
-		if( GetShortcutsFlag() ) { if ( (message==WM_KEYDOWN)||(message==WM_SYSKEYDOWN) ) {
 
-		if( ManageShortcuts( hwnd, clips_system, wParam
-			, GetKeyState(VK_SHIFT)&0x8000
-			, GetKeyState(VK_CONTROL)&0x8000
-			, (GetKeyState(VK_MENU)&0x8000)||(GetKeyState(VK_LMENU)&0x8000)
-			, GetKeyState(VK_RMENU)&0x8000
-			//, is_alt_pressed()
-			, (GetKeyState(VK_RWIN)&0x8000)||(GetKeyState(VK_LWIN)&0x8000)
-			) )  
-			return 0 ;
-		} } // fin if( GetShortcutsFlag() )
-		else { if( GetProtectFlag() == 1 ) return 0 ; }
+
+		if((wParam==VK_TAB)&&(message==WM_KEYDOWN)&&(GetKeyState(VK_CONTROL)&0x8000)&&(GetKeyState(VK_SHIFT)&0x8000))  // CTRL+SHIFT+TAB => Manage shortcut flag
+			{ SetShortcutsFlag( abs(GetShortcutsFlag()-1) ) ; return 0 ; }
+		
+		if( GetShortcutsFlag() ) { 
+			if ( (message==WM_KEYDOWN)||(message==WM_SYSKEYDOWN) ) {
+
+				if( ManageShortcuts( hwnd, clips_system, wParam
+					, GetKeyState(VK_SHIFT)&0x8000
+					, GetKeyState(VK_CONTROL)&0x8000
+					, (GetKeyState(VK_MENU)&0x8000)||(GetKeyState(VK_LMENU)&0x8000)
+					, GetKeyState(VK_RMENU)&0x8000
+					//, is_alt_pressed()
+					, (GetKeyState(VK_RWIN)&0x8000)||(GetKeyState(VK_LWIN)&0x8000)
+					) )  return 0 ;
+			} 
+		} else { 
+			if( GetProtectFlag() == 1 ) return 0 ; 
+		}
 
 		// Majuscule uniquement
 		if( GetCapsLockFlag() ) {
@@ -5199,8 +5203,12 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 				keybd_event( VK_CAPITAL, 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0) ;
 				SendMessage(hwnd, WM_CHAR, wParam, 0) ;
 				return 0 ;
-				}
 			}
+		}
+if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) { 
+	PopUpSystemMenu( hwnd, 0 ) ;
+	return 0;
+}
 #endif
 
 	/*
@@ -7104,7 +7112,8 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 		if( strlen( title ) > 0 ) make_title( buffer, "%s", title ) ;
 		else sprintf( buffer, "%s - %s", conf_get_str(conf,CONF_host), appname ) ;
 		}
-	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) strcat( buffer, " (PROTECTED)" ) ;
+	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) { strcat( buffer, " (PROTECTED)" ) ; }
+	if( conf_get_bool(conf, CONF_alwaysontop) ) if( strstr(buffer, " (ONTOP)")==NULL ) { strcat( buffer, " (ONTOP)" ) ; }
 	set_title_internal( tw, buffer ) ;
 	free(title);
 	free(buffer);

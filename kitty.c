@@ -445,6 +445,18 @@ static struct TShortcuts {
 	int showportforward ;
 	int resetterminal ;
 	int duplicate ;
+	int opennew ;
+	int changesettings ;
+	int clearscrollback ;
+	int closerestart ;
+	int eventlog ;
+	int fullscreen ;
+	int fontup ;
+	int fontdown ;
+	int copyall ;
+	int fontnegative ;
+	int fontblackandwhite ;
+	int keyexchange ;
 	} shortcuts_tab ;
 
 static int NbShortCuts = 0 ;
@@ -1831,17 +1843,21 @@ int ManageToTray( HWND hwnd ) {
 	}
 
 // Gere l'option always visible
-void ManageVisible( HWND hwnd ) {
+void ManageVisible( HWND hwnd, TermWin *tw, char * title ) {
 	HMENU m ;
 	if( ( m = GetSystemMenu (hwnd, FALSE) ) != NULL ) {
 		DWORD fdwMenu = GetMenuState( m, (UINT) IDM_VISIBLE, MF_BYCOMMAND); 
 		if (!(fdwMenu & MF_CHECKED)) {
 			CheckMenuItem( m, (UINT)IDM_VISIBLE, MF_BYCOMMAND|MF_CHECKED ) ;
-			SetWindowPos(hwnd,(HWND)-1,0,0,0,0,  SWP_NOMOVE |SWP_NOSIZE );
+			SetWindowPos(hwnd,(HWND)-1,0,0,0,0,  SWP_NOMOVE |SWP_NOSIZE ) ;
+			conf_set_bool( conf, CONF_alwaysontop, true ) ;
+			set_title(tw, title) ;
 			}
 		else {
 			CheckMenuItem( m, (UINT)IDM_VISIBLE, MF_BYCOMMAND|MF_UNCHECKED ) ;
-			SetWindowPos(hwnd,(HWND)-2,0,0,0,0,  SWP_NOMOVE |SWP_NOSIZE );
+			SetWindowPos(hwnd,(HWND)-2,0,0,0,0,  SWP_NOMOVE |SWP_NOSIZE ) ;
+			conf_set_bool( conf, CONF_alwaysontop, false ) ;
+			set_title(tw, title) ;
 			}
 		}
 	}
@@ -2569,7 +2585,7 @@ void GetWindowCoord( HWND hwnd ) {
 	conf_set_int(conf,CONF_ypos,rc.top);
 
 	conf_set_int(conf,CONF_windowstate,IsZoomed( hwnd ));
-	}
+}
 
 // Sauve les coordonnees de la fenetre
 void SaveWindowCoord( Conf * conf ) {
@@ -4592,6 +4608,7 @@ int ManageViewer( HWND hwnd, WORD wParam ) { // Gestion du mode image
 // GESTION DES RACCOURCI
 int DefineShortcuts( char * buf ) {
 	char * pst = buf ;
+	if( strlen(buf)==0 ) return 0 ;
 	int key = 0 ;
 	while( (strstr(pst,"{SHIFT}")==pst) || (strstr(pst,"{CONTROL}")==pst) || (strstr(pst,"{ALT}")==pst) || (strstr(pst,"{ALTGR}")==pst) || (strstr(pst,"{WIN}")==pst) ) {
 		while( strstr(pst,"{ALT}")==pst ) { key += ALTKEY ; pst += 5 ; }
@@ -4667,6 +4684,7 @@ list={OEM_COMMA}
 	else if( pst[0] == '{' ) { key = 0 ; }
 	else { key = key + toupper(pst[0]) ; }
 	
+	if( key==0 ) { key = -1 ; }
 	return key ;
 	}
 	
@@ -4706,53 +4724,83 @@ void TranslateShortcuts( char * st ) {
 void InitShortcuts( void ) {
 	char buffer[4096], list[4096], *pl ;
 	int i, t=0 ;
-	if( !readINI(KittyIniFile,"Shortcuts","editor",buffer) || ( (shortcuts_tab.editor=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","editor",buffer) || ( (shortcuts_tab.editor=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.editor = SHIFTKEY+VK_F2 ;
-	if( !readINI(KittyIniFile,"Shortcuts","editorclipboard",buffer) || ( (shortcuts_tab.editorclipboard=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","editorclipboard",buffer) || ( (shortcuts_tab.editorclipboard=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.editorclipboard = CONTROLKEY+SHIFTKEY+VK_F2 ;
-	if( !readINI(KittyIniFile,"Shortcuts","winscp",buffer) || ( (shortcuts_tab.winscp=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","winscp",buffer) || ( (shortcuts_tab.winscp=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.winscp = SHIFTKEY+VK_F3 ;
-	if( !readINI(KittyIniFile,"Shortcuts","switchlogmode",buffer) || ( (shortcuts_tab.switchlogmode=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","switchlogmode",buffer) || ( (shortcuts_tab.switchlogmode=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.switchlogmode = SHIFTKEY+VK_F5 ;
-	if( !readINI(KittyIniFile,"Shortcuts","showportforward",buffer) || ( (shortcuts_tab.showportforward=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","showportforward",buffer) || ( (shortcuts_tab.showportforward=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.showportforward = SHIFTKEY+VK_F6 ;
 //	if( !IsWow64() ) {
-		if( !readINI(KittyIniFile,"Shortcuts","print",buffer) || ( (shortcuts_tab.print=DefineShortcuts(buffer))<=0 ) )
+		if( !readINI(KittyIniFile,"Shortcuts","print",buffer) || ( (shortcuts_tab.print=DefineShortcuts(buffer))<0 ) )
 			shortcuts_tab.print = SHIFTKEY+VK_F7 ;
-		if( !readINI(KittyIniFile,"Shortcuts","printall",buffer) || ( (shortcuts_tab.printall=DefineShortcuts(buffer))<=0 ) )
+		if( !readINI(KittyIniFile,"Shortcuts","printall",buffer) || ( (shortcuts_tab.printall=DefineShortcuts(buffer))<0 ) )
 			shortcuts_tab.printall = VK_F7 ;
 //	}
-	if( !readINI(KittyIniFile,"Shortcuts","inputm",buffer) || ( (shortcuts_tab.inputm=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","inputm",buffer) || ( (shortcuts_tab.inputm=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.inputm = SHIFTKEY+VK_F8 ;
-	if( !readINI(KittyIniFile,"Shortcuts","viewer",buffer) || ( (shortcuts_tab.viewer=DefineShortcuts(buffer))<=0 ) )
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+	if( !readINI(KittyIniFile,"Shortcuts","viewer",buffer) || ( (shortcuts_tab.viewer=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.viewer = SHIFTKEY+VK_F11 ;
-	if( !readINI(KittyIniFile,"Shortcuts","autocommand",buffer) || ( (shortcuts_tab.autocommand=DefineShortcuts(buffer))<=0 ) ) 
+#endif
+	if( !readINI(KittyIniFile,"Shortcuts","autocommand",buffer) || ( (shortcuts_tab.autocommand=DefineShortcuts(buffer))<0 ) ) 
 		shortcuts_tab.autocommand = SHIFTKEY+VK_F12 ;
 
-	if( !readINI(KittyIniFile,"Shortcuts","script",buffer) || ( (shortcuts_tab.script=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","script",buffer) || ( (shortcuts_tab.script=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.script = CONTROLKEY+VK_F2 ;
-	if( !readINI(KittyIniFile,"Shortcuts","sendfile",buffer) || ( (shortcuts_tab.sendfile=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","sendfile",buffer) || ( (shortcuts_tab.sendfile=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.sendfile = CONTROLKEY+VK_F3 ;
-	if( !readINI(KittyIniFile,"Shortcuts","getfile",buffer) || ( (shortcuts_tab.getfile=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","getfile",buffer) || ( (shortcuts_tab.getfile=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.getfile = CONTROLKEY+VK_F4 ;
-	if( !readINI(KittyIniFile,"Shortcuts","command",buffer) || ( (shortcuts_tab.command=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","command",buffer) || ( (shortcuts_tab.command=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.command = CONTROLKEY+VK_F5 ;
-	if( !readINI(KittyIniFile,"Shortcuts","tray",buffer) || ( (shortcuts_tab.tray=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","tray",buffer) || ( (shortcuts_tab.tray=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.tray = CONTROLKEY+VK_F6 ;
-	if( !readINI(KittyIniFile,"Shortcuts","visible",buffer) || ( (shortcuts_tab.visible=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","visible",buffer) || ( (shortcuts_tab.visible=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.visible = CONTROLKEY+VK_F7 ;
-	if( !readINI(KittyIniFile,"Shortcuts","input",buffer) || ( (shortcuts_tab.input=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","input",buffer) || ( (shortcuts_tab.input=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.input = CONTROLKEY+VK_F8 ;
-	if( !readINI(KittyIniFile,"Shortcuts","protect",buffer) || ( (shortcuts_tab.protect=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","protect",buffer) || ( (shortcuts_tab.protect=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.protect = CONTROLKEY+VK_F9 ;
-	if( !readINI(KittyIniFile,"Shortcuts","imagechange",buffer) || ( (shortcuts_tab.imagechange=DefineShortcuts(buffer))<=0 ) )
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+	if( !readINI(KittyIniFile,"Shortcuts","imagechange",buffer) || ( (shortcuts_tab.imagechange=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.imagechange = CONTROLKEY+VK_F11 ;
-	if( !readINI(KittyIniFile,"Shortcuts","rollup",buffer) || ( (shortcuts_tab.rollup=DefineShortcuts(buffer))<=0 ) )
+#endif
+	if( !readINI(KittyIniFile,"Shortcuts","rollup",buffer) || ( (shortcuts_tab.rollup=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.rollup = CONTROLKEY+VK_F12 ;
-	if( !readINI(KittyIniFile,"Shortcuts","resetterminal",buffer) || ( (shortcuts_tab.resetterminal=DefineShortcuts(buffer))<=0 ) ) { }
-	if( !readINI(KittyIniFile,"Shortcuts","duplicate",buffer) || ( (shortcuts_tab.duplicate=DefineShortcuts(buffer))<=0 ) )
+	if( !readINI(KittyIniFile,"Shortcuts","resetterminal",buffer) || ( (shortcuts_tab.resetterminal=DefineShortcuts(buffer))<0 ) ) 
+		shortcuts_tab.resetterminal = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","duplicate",buffer) || ( (shortcuts_tab.duplicate=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.duplicate = CONTROLKEY+ALTKEY+84 ;
+	if( !readINI(KittyIniFile,"Shortcuts","opennew",buffer) || ( (shortcuts_tab.opennew=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.opennew = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","changesettings",buffer) || ( (shortcuts_tab.changesettings=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.changesettings = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","clearscrollback",buffer) || ( (shortcuts_tab.clearscrollback=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.clearscrollback = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","closerestart",buffer) || ( (shortcuts_tab.closerestart=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.closerestart = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","eventlog",buffer) || ( (shortcuts_tab.eventlog=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.eventlog = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","fullscreen",buffer) || ( (shortcuts_tab.fullscreen=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.fullscreen = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","fontup",buffer) || ( (shortcuts_tab.fontup=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.fontup = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","fontdown",buffer) || ( (shortcuts_tab.fontdown=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.fontdown = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","copyall",buffer) || ( (shortcuts_tab.copyall=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.copyall = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","fontnegative",buffer) || ( (shortcuts_tab.fontnegative=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.fontnegative = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","fontblackandwhite",buffer) || ( (shortcuts_tab.fontblackandwhite=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.fontblackandwhite = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","keyexchange",buffer) || ( (shortcuts_tab.keyexchange=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.keyexchange = 0 ;
 
+	
 	if( NbShortCuts>0 ) for( i=0 ; i<NbShortCuts ; i++ ) { if( shortcuts_tab2[i].st!=NULL ) { free(shortcuts_tab2[i].st) ; } }
 	NbShortCuts=0 ;
 	if( ReadParameter( "Shortcuts", "list", list ) ) {
@@ -4852,7 +4900,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		{ RenewPassword( conf ) ; 
 			SetTimer(hwnd, TIMER_AUTOCOMMAND,autocommand_delay, NULL) ;
 			return 1 ; }
-	if( key == shortcuts_tab.print ) {	// Impression presse papier
+	if( key == shortcuts_tab.print ) {			// Impression presse papier
 		SendMessage( hwnd, WM_COMMAND, IDM_PRINT, 0 ) ; 
 		return 1 ; 
 	}
@@ -4863,9 +4911,10 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		return 1 ;
 		}
 #endif
-	if( key == shortcuts_tab.viewer ) 			// Switcher le mode visualiseur d'image
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+	if( GetBackgroundImageFlag() && (key == shortcuts_tab.viewer) ) 	// Switcher le mode visualiseur d'image
 		{ ImageViewerFlag = abs(ImageViewerFlag-1) ; set_title(NULL, conf_get_str(conf,CONF_wintitle) ) ; return 1 ; }
-
+#endif
 	if( key == shortcuts_tab.script ) 			// Chargement d'un fichier de script
 		{ OpenAndSendScriptFile( hwnd ) ; return 1 ; }
 	else if( key == shortcuts_tab.sendfile ) 		// Envoi d'un fichier par SCP
@@ -4882,6 +4931,31 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		{ SendMessage( hwnd, WM_COMMAND, IDM_RESET, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.duplicate ) 		// Duplicate session
 		{ SendMessage( hwnd, WM_COMMAND, IDM_DUPSESS, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.opennew ) 		// Open new session
+		{ SendMessage( hwnd, WM_COMMAND, IDM_NEWSESS, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.changesettings ) 		// Change settings
+		{ SendMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.clearscrollback )		// Clear scrollback
+		{ SendMessage( hwnd, WM_COMMAND, IDM_CLRSB, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.closerestart )		// Close + restart
+		{ SendMessage( hwnd, WM_COMMAND, IDM_RESTARTSESSION, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.eventlog )		// Event log
+		{ SendMessage( hwnd, WM_COMMAND, IDM_SHOWLOG, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.fullscreen )		// Full screen
+		{ SendMessage( hwnd, WM_COMMAND, IDM_FULLSCREEN, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.fontup )			// Font up
+		{ SendMessage( hwnd, WM_COMMAND, IDM_FONTUP, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.fontdown )		// Font down
+		{ SendMessage( hwnd, WM_COMMAND, IDM_FONTDOWN, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.copyall )			// Copy all to clipboard
+		{ SendMessage( hwnd, WM_COMMAND, IDM_COPYALL, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.fontnegative )		// Font negative
+		{ SendMessage( hwnd, WM_COMMAND, IDM_FONTNEGATIVE, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.fontblackandwhite )	// Font black and white
+		{ SendMessage( hwnd, WM_COMMAND, IDM_FONTBLACKANDWHITE, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.keyexchange )		// Repeat key exchange
+		{ SendMessage( hwnd, WM_COMMAND, 1328, 0 ) ; return 1 ; }
+		
 #ifndef FDJ
 	else if( key == shortcuts_tab.input ) 			// Fenetre de controle
 			{ MainHwnd = hwnd ; _beginthread( routine_inputbox, 0, (void*)&hwnd ) ;
