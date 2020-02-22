@@ -183,7 +183,7 @@ static int confirm_key_usage(char* fingerprint, char* comment) {
 		)
 		) )
 	{
-		result = MessageBox(NULL, message, title, MB_ICONQUESTION | MB_YESNO);
+		result = MessageBox(NULL, message, title, MB_ICONQUESTION | MB_YESNO | MB_SYSTEMMODAL);
 	}
 
 	if (result != IDYES) {
