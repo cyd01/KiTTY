@@ -22,7 +22,6 @@
 #include "kitty.h"
 void SetSSHConnected( int flag );
 char bufpass[1024]="";
-extern int is_backend_connected ;
 #endif
 
 struct ssh2_userauth_state {
@@ -248,7 +247,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
     PktIn *pktin;
 
 #ifdef MOD_RECONNECT
-is_backend_connected = 1 ; 
+	SetSSHConnected(0);
 #endif
 
     ssh2_userauth_filter_queue(s);     /* no matter why we were called */
@@ -891,7 +890,6 @@ is_backend_connected = 1 ;
                                              s->publickey_comment),
                                    false);
 #ifdef MOD_PERSO
-		    	//SetSSHConnected(1);
 			if( strlen(ManagePassPhrase(NULL))>0 ) {
 				char *p = ManagePassPhrase(NULL) ;
 				bufchain bc;

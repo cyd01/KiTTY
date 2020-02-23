@@ -1551,7 +1551,7 @@ TrayIcone.hWnd = hwnd ;
 			}
 #endif
 		// Lancement du timer auto-command pour les connexions non SSH
-		if(conf_get_int(conf,CONF_protocol) != PROT_SSH) is_backend_connected = 1 ;
+		if(conf_get_int(conf,CONF_protocol) != PROT_SSH) { is_backend_connected = 1 ; }
 		SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
 
 		if( IniFileFlag == SAVEMODE_REG ) {
@@ -3207,7 +3207,7 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 
 	// On charge automatiquement au démarrage (-edit) un fichier dans l'editeur connecté
 	if( !PuttyFlag ) if( LoadFile!=NULL ) { RunPuttyEd( hwnd, LoadFile ) ; free( LoadFile ) ; LoadFile = NULL ; }
-	
+
 	if( (conf_get_int(conf,CONF_protocol) == PROT_SSH) && (!is_backend_connected) ) break ; // On sort si en SSH on n'est pas connecte
 	// Lancement d'une (ou plusieurs separees par \\n) commande(s) automatique(s) a l'initialisation
 
