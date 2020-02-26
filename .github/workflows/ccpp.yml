@@ -35,5 +35,5 @@ jobs:
       if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@v1
       with:
-        name: kitty-${VERSION}.zip
+        name: kitty.zip
         path: builds/kitty.zip
