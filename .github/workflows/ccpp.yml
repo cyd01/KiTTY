@@ -1,0 +1,20 @@
+name: C/C++ CI
+
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      - master         # Push events on master branch
+    # Sequence of patterns matched against refs/tags
+    tags:        
+      - v*
+
+jobs:
+  build:
+    name: Windows 32bits
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: build
+      run: cd KiTTY/0.73_My_PuTTY/windows && make -f MAKEFILE.MINGW cross
