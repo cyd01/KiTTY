@@ -18,6 +18,5 @@ jobs:
     - uses: actions/checkout@v2
     - name: build
       run: |
-        ls
         cd 0.73_My_PuTTY/windows
-        make -f MAKEFILE.MINGW cross
+        make -f MAKEFILE.MINGW putty.exe
