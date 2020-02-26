@@ -19,4 +19,5 @@ jobs:
     - name: build
       run: |
         cd 0.73_My_PuTTY/windows
+        sed -i 's#^typedef enum _WTS_VIRTUAL_CLASS #// typedef enum _WTS_VIRTUAL_CLASS #' window.c
         make -f MAKEFILE.MINGW putty.exe
