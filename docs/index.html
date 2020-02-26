@@ -455,7 +455,7 @@ function doHelp() {
   swal({
   width: 600,
   title: 'Help page?',
-  html: '<ul style="text-align:left;"><li>To switch from page viewer to page editor, just double-click</li><li>To protect the page with password ALT+p</li><li>To save the page press ALT+o</li><li>To switch back to the viewer press escape key</li></ul>'
+  html: '<ul style="text-align:left;"><li>To switch from page viewer to page editor, just triple-click</li><li>To protect the page with password ALT+p</li><li>To save the page press ALT+o</li><li>To switch back to the viewer press escape key</li></ul>'
   });
 }
 function doPass() {
@@ -540,7 +540,8 @@ pre {
   <div v-html="compiledMarkdown"></div>
 </div>
 
-<div id="content" onDblClick="switchToEditor();"></div>
+<div id="content"></div>
+<!-- onDblClick="switchToEditor();" -->
 
 <script type="text/javascript">
 new Vue({
@@ -572,6 +573,11 @@ window.onhashchange = function() {
 	    doHash( window.location.hash ) ;
 	}
 }
+window.addEventListener('click', function (evt) {
+    if (evt.detail === 3) {
+        switchToEditor() ;
+    }
+});
 /*
 window.document.getElementById("ttxt").addEventListener("scroll", function (event) {
     var scroll = this.scrollY;
