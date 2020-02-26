@@ -13,7 +13,8 @@ env:
   VERSION: 0.73
 
 jobs:
-  build:
+  # Build for Win 32bits
+  build32:
     name: Windows 32bits
     runs-on: ubuntu-latest
     
@@ -36,4 +37,29 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: kitty.zip
+        path: builds/kitty.zip
+
+  # Build for Win 64bits
+  build64:
+    name: Windows 64bits
+    runs-on: ubuntu-latest
+    steps:
+    
+    # Checkout
+    - uses: actions/checkout@v2
+    
+    # Build
+    - name: build
+      run: |
+        mkdir ../builds
+        docker run --rm -i -v $(pwd)/../builds:/builds -v $(pwd):/sources cyd01/cross-gcc "cd ${VERSION}_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 ; cd /builds ; ls -l"
+        mv -f $(pwd)/../builds ./
+        cd builds ; zip kitty.zip *.exe
+
+    # Upload runner package tar.gz/zip as artifact
+    - name: Publish Artifact
+      if: github.event_name != 'pull_request'
+      uses: actions/upload-artifact@v1
+      with:
+        name: kitty64.zip
         path: builds/kitty.zip
