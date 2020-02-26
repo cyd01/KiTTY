@@ -9,6 +9,9 @@ on:
     tags:        
       - v*
 
+env:
+  VERSION: 0.73
+
 jobs:
   build:
     name: Windows 32bits
@@ -23,7 +26,7 @@ jobs:
     - name: build
       run: |
         mkdir ../builds
-        docker run --rm -it -v $(pwd)/../builds:/builds -v $(pwd):/sources "pwd;ls -lart;cd KiTTY/0.73_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
+        docker run --rm -i -v $(pwd)/../builds:/builds -v $(pwd):/sources "pwd;ls -lart;cd KiTTY/0.73_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
 
     # Upload runner package tar.gz/zip as artifact
     - name: Publish Artifact
