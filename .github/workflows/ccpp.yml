@@ -12,12 +12,22 @@ on:
 jobs:
   build:
     name: Windows 32bits
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
+    
+    # Checkout
     - uses: actions/checkout@v2
+    
+    # Build
     - name: build
       run: |
-        cd 0.73_My_PuTTY/windows
-        sed -i 's#^typedef enum _WTS_VIRTUAL_CLASS #// typedef enum _WTS_VIRTUAL_CLASS #' window.c
-        make -f MAKEFILE.MINGW putty.exe
+        mkdir ../builds
+	docker run --rm -it -v $(pwd)/../builds:/builds -v $(pwd):/sources "pwd;ls -lart;cd KiTTY/0.73_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
+	
+    # Upload runner package tar.gz/zip as artifact
+    - name: Publish Artifact
+      if: github.event_name != 'pull_request'
+      uses: actions/upload-artifact@v1
+      with:
+        name: $(pwd)/../builds/putty.exe
