@@ -17,4 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: build
-      run: cd KiTTY/0.73_My_PuTTY/windows && make -f MAKEFILE.MINGW cross
+      run: |
+        cd KiTTY/0.73_My_PuTTY/windows
+        make -f MAKEFILE.MINGW cross
