@@ -2027,7 +2027,7 @@ putty_notrans.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_registry.o kitty_ssh.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
-		void.o
+		void.o $(UTF8MOUSE_OBJS)
 	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
 		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o \
@@ -2054,7 +2054,7 @@ putty_notrans.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_registry.o kitty_ssh.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
-		void.o \
+		void.o $(UTF8MOUSE_OBJS) \
 		../../base64/base64.a ../../bcrypt/bcrypt.a ../../blocnote/notepad.a ../../md5/MD5check.a ../../mini/mini.a \
 		../../regex/libregex.a \
 		-ladvapi32 -lcomdlg32 -lgdi32 -limm32 -lole32 -lshell32 \

@@ -5,7 +5,7 @@
  * announcing what character set it will be using), and a set of
  * enumeration functions which return a list of supported
  * encodings one by one.
- *
+ * 
  * charset_from_localenc will attempt all other text translations
  * as well as this table, to maximise the number of different ways
  * you can select a supported charset.
@@ -83,10 +83,10 @@ const char *charset_to_localenc(int charset)
     int i;
 
     for (i = 0; i < (int)lenof(localencs); i++)
-        if (charset == localencs[i].charset)
-            return localencs[i].name;
+	if (charset == localencs[i].charset)
+	    return localencs[i].name;
 
-    return NULL;                       /* not found */
+    return NULL;		       /* not found */
 }
 
 int charset_from_localenc(const char *name)
@@ -94,24 +94,24 @@ int charset_from_localenc(const char *name)
     int i;
 
     if ( (i = charset_from_mimeenc(name)) != CS_NONE)
-        return i;
+	return i;
     if ( (i = charset_from_xenc(name)) != CS_NONE)
-        return i;
+	return i;
 
     for (i = 0; i < (int)lenof(localencs); i++) {
-        const char *p, *q;
-        p = name;
-        q = localencs[i].name;
-        while (*p || *q) {
-                if (tolower((unsigned char)*p) != tolower((unsigned char)*q))
-                break;
-            p++; q++;
-        }
-        if (!*p && !*q)
-            return localencs[i].charset;
+	const char *p, *q;
+	p = name;
+	q = localencs[i].name;
+	while (*p || *q) {
+		if (tolower((unsigned char)*p) != tolower((unsigned char)*q))
+		break;
+	    p++; q++;
+	}
+	if (!*p && !*q)
+	    return localencs[i].charset;
     }
 
-    return CS_NONE;                    /* not found */
+    return CS_NONE;		       /* not found */
 }
 
 int charset_localenc_nth(int n)
@@ -119,8 +119,8 @@ int charset_localenc_nth(int n)
     int i;
 
     for (i = 0; i < (int)lenof(localencs); i++)
-        if (localencs[i].return_in_enum && !n--)
-            return localencs[i].charset;
+	if (localencs[i].return_in_enum && !n--)
+	    return localencs[i].charset;
 
-    return CS_NONE;                    /* end of list */
+    return CS_NONE;		       /* end of list */
 }

@@ -10,10 +10,10 @@
  * sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following
  * conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -38,39 +38,39 @@
  * independent of that.
  */
 
-#define smRoman                 0
-#define smJapanese              1
-#define smTradChinese           2
-#define smKorean                3
-#define smArabic                4
-#define smHebrew                5
-#define smCyrillic              7
-#define smDevenagari            9
-#define smGurmukhi              10
-#define smGujurati              11
-#define smThai                  21
-#define smSimpChinese           25
-#define smTibetan               26
-#define smEthiopic              28
-#define smCentralEuroRoman      29
+#define smRoman			0
+#define smJapanese		1
+#define smTradChinese		2
+#define smKorean		3
+#define smArabic		4
+#define smHebrew		5
+#define smCyrillic		7
+#define smDevenagari		9
+#define smGurmukhi		10
+#define smGujurati		11
+#define smThai			21
+#define smSimpChinese		25
+#define smTibetan		26
+#define smEthiopic		28
+#define smCentralEuroRoman	29
 
-#define verGreece               20
-#define verIceland              21
-#define verTurkey               24
-#define verYugoCroatian         25
-#define verRomania              39
-#define verFaroeIsl             47
-#define verIran                 48
-#define verRussia               49
-#define verSlovenian            66
-#define verCroatia              68
-#define verBulgaria             72
-#define verScottishGaelic       75
-#define verManxGaelic           76
-#define verBreton               77
-#define verNunavut              78
-#define verWelsh                79
-#define verIrishGaelicScript    81
+#define verGreece		20
+#define verIceland		21
+#define verTurkey		24
+#define verYugoCroatian		25
+#define verRomania		39
+#define verFaroeIsl		47
+#define verIran			48
+#define verRussia		49
+#define verSlovenian		66
+#define verCroatia		68
+#define verBulgaria		72
+#define verScottishGaelic	75
+#define verManxGaelic		76
+#define verBreton		77
+#define verNunavut		78
+#define verWelsh		79
+#define verIrishGaelicScript	81
 
 static const struct {
     int script;
@@ -152,17 +152,17 @@ static const struct {
 };
 
 int charset_from_macenc(int script, int region, int sysvers,
-                        char const *fontname)
+			char const *fontname)
 {
     int i;
 
     for (i = 0; i < (int)lenof(macencs); i++)
-        if ((macencs[i].script == script) &&
-            (macencs[i].region < 0 || macencs[i].region == region) &&
-            (macencs[i].sysvermin <= sysvers) &&
-            (macencs[i].fontname == NULL ||
-             (fontname != NULL && strcmp(macencs[i].fontname, fontname) == 0)))
-            return macencs[i].charset;
+	if ((macencs[i].script == script) &&
+	    (macencs[i].region < 0 || macencs[i].region == region) &&
+	    (macencs[i].sysvermin <= sysvers) &&
+	    (macencs[i].fontname == NULL ||
+	     (fontname != NULL && strcmp(macencs[i].fontname, fontname) == 0)))
+	    return macencs[i].charset;
 
     return CS_NONE;
 }

@@ -1,7 +1,7 @@
 /*
  * xenc.c - translate our internal character set codes to and from
  * X11 character encoding names.
- *
+ * 
  */
 
 #include <ctype.h>
@@ -15,9 +15,9 @@ static const struct {
     /*
      * Officially registered encoding names. This list is derived
      * from the font encodings section of
-     *
+     * 
      *   http://ftp.x.org/pub/DOCS/registry
-     *
+     * 
      * Where multiple encoding names map to the same encoding id
      * (such as iso8859-15 and fcd8859-15), the first is considered
      * canonical and will be returned when translating the id to a
@@ -67,10 +67,10 @@ const char *charset_to_xenc(int charset)
     int i;
 
     for (i = 0; i < (int)lenof(xencs); i++)
-        if (charset == xencs[i].charset)
-            return xencs[i].name;
+	if (charset == xencs[i].charset)
+	    return xencs[i].name;
 
-    return NULL;                       /* not found */
+    return NULL;		       /* not found */
 }
 
 int charset_from_xenc(const char *name)
@@ -78,17 +78,17 @@ int charset_from_xenc(const char *name)
     int i;
 
     for (i = 0; i < (int)lenof(xencs); i++) {
-        const char *p, *q;
-        p = name;
-        q = xencs[i].name;
-        while (*p || *q) {
-                if (tolower((unsigned char)*p) != tolower((unsigned char)*q))
-                break;
-            p++; q++;
-        }
-        if (!*p && !*q)
-            return xencs[i].charset;
+	const char *p, *q;
+	p = name;
+	q = xencs[i].name;
+	while (*p || *q) {
+		if (tolower((unsigned char)*p) != tolower((unsigned char)*q))
+		break;
+	    p++; q++;
+	}
+	if (!*p && !*q)
+	    return xencs[i].charset;
     }
 
-    return CS_NONE;                    /* not found */
+    return CS_NONE;		       /* not found */
 }

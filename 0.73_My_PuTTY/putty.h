@@ -287,7 +287,11 @@ typedef enum {
 } Mouse_Button;
 
 typedef enum {
+#ifdef MOD_PERSO
     MA_NOTHING, MA_CLICK, MA_2CLK, MA_3CLK, MA_DRAG, MA_MOVE, MA_RELEASE
+#else
+    MA_NOTHING, MA_CLICK, MA_2CLK, MA_3CLK, MA_DRAG, MA_RELEASE
+#endif
 } Mouse_Action;
 
 /* Keyboard modifiers -- keys the user is actually holding down */
@@ -1806,12 +1810,15 @@ typedef enum SmallKeypadKey {
 
 #ifdef MOD_KEYMAPPING
 int format_arrow_key(char *buf, Terminal *term, int xkey, int modifier, bool alt);
-#else
-int format_arrow_key(char *buf, Terminal *term, int xkey, bool ctrl);
-#endif
-
 int format_function_key(char *buf, Terminal *term, int key_number, int modifier, bool alt);
 int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key, int modifier, bool alt);
+#else
+int format_arrow_key(char *buf, Terminal *term, int xkey, bool ctrl);
+int format_function_key(char *buf, Terminal *term, int key_number,
+                        bool shift, bool ctrl);
+int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key);
+#endif
+
 int format_numeric_keypad_key(char *buf, Terminal *term, char key,
                               bool shift, bool ctrl);
 

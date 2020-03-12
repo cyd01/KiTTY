@@ -12,9 +12,9 @@
 #include <assert.h>
 #include "putty.h"
 #include "terminal.h"
-#include "charset.h"
 
 #ifdef MOD_PERSO
+#include "charset.h"
 int get_param( const char * val ) ;
 int frontend_is_utf8(void *frontend) ;
 int GetPuttyFlag(void) ;
@@ -70,6 +70,7 @@ int GetZModemFlag(void) ;
 #define TM_VTXXX	(TM_VT220|CL_VT340TEXT|CL_VT510|CL_VT420|CL_VT320)
 #define TM_SCOANSI	(CL_ANSIMIN|CL_SCOANSI)
 
+#ifdef MOD_PERSO
 #define MM_NONE         0x00           /* No tracking */
 #define MM_NORMAL       0x01           /* Normal tracking mode */
 #define MM_BTN_EVENT    0x02           /* Button event mode */
@@ -80,8 +81,9 @@ int GetZModemFlag(void) ;
 #define MP_URXVT        0x01           /* CSI Db ; Dx ; Dy M */
 #define MP_SGR          0x02           /* CSI Db ; Dx ; Dy M/m */
 #define MP_XTERM        0x03           /* CSI M Cb WCx WCy */
+#endif
 
-#define TM_PUTTY        (0xFFFF)
+#define TM_PUTTY	(0xFFFF)
 
 #define UPDATE_DELAY    ((TICKSPERSEC+49)/50)/* ticks to defer window update */
 #define TBLINK_DELAY    ((TICKSPERSEC*9+19)/20)/* ticks between text blinks*/
@@ -1380,8 +1382,14 @@ static void power_on(Terminal *term, bool clear)
     term->erase_char = term->basic_erase_char;
     term->alt_which = 0;
     term_print_finish(term);
+#ifdef MOD_PERSO
     term->xterm_mouse_mode = MM_NONE;
     term->xterm_mouse_protocol = MP_NORMAL;
+#else
+    term->xterm_mouse = 0;
+    term->xterm_extended_mouse = false;
+    term->urxvt_extended_mouse = false;
+#endif
     win_set_raw_mouse_mode(term->win, false);
     term->bracketed_paste = false;
     term->srm_echo = false;
@@ -1634,10 +1642,14 @@ void term_reconfig(Terminal *term, Conf *conf)
 	    term->wordness[i] = conf_get_int_int(term->conf, CONF_wordness, i);
 
     if (conf_get_bool(term->conf, CONF_no_alt_screen))
-        swap_screen(term, 0, false, false);
+	swap_screen(term, 0, false, false);
     if (conf_get_bool(term->conf, CONF_no_mouse_rep)) {
-        term->xterm_mouse_mode = MM_NONE;
-        win_set_raw_mouse_mode(term->win, 0);
+#ifdef MOD_PERSO
+	term->xterm_mouse_mode = MM_NONE;
+#else
+	term->xterm_mouse = 0;
+#endif
+	win_set_raw_mouse_mode(term->win, 0);
     }
     if (conf_get_bool(term->conf, CONF_no_remote_charset)) {
 	term->cset_attr[0] = term->cset_attr[1] = CSET_ASCII;
@@ -2711,7 +2723,8 @@ static void toggle_mode(Terminal *term, int mode, int query, bool state)
 	    swap_screen(term, term->no_alt_screen ? 0 : state, false, false);
             if (term->scroll_on_disp)
                 term->disptop = 0;
-            break;
+	    break;
+#ifdef MOD_PERSO
           case 1000:                   /* xterm mouse 1 (normal) */
             term->xterm_mouse_mode = state ? MM_NORMAL : MM_NONE;
             win_set_raw_mouse_mode(term->win, state);
@@ -2729,10 +2742,26 @@ static void toggle_mode(Terminal *term, int mode, int query, bool state)
             break;
           case 1006:                   /* use SGR 1006 mouse protocol */
             term->xterm_mouse_protocol = state ? MP_SGR : MP_NORMAL;
-            break;
+	    break;
           case 1015:                   /* use URXVT 1015 mouse protocol */
             term->xterm_mouse_protocol = state ? MP_URXVT : MP_NORMAL;
 	    break;
+#else
+	  case 1000:		       /* xterm mouse 1 (normal) */
+	    term->xterm_mouse = state ? 1 : 0;
+	    win_set_raw_mouse_mode(term->win, state);
+	    break;
+	  case 1002:		       /* xterm mouse 2 (inc. button drags) */
+	    term->xterm_mouse = state ? 2 : 0;
+	    win_set_raw_mouse_mode(term->win, state);
+	    break;
+	  case 1006:		       /* xterm extended mouse */
+	    term->xterm_extended_mouse = state;
+	    break;
+	  case 1015:		       /* urxvt extended mouse */
+	    term->urxvt_extended_mouse = state;
+	    break;
+#endif
 	  case 1047:                   /* alternate screen */
 	    compatibility(OTHER);
 	    deselect(term);
@@ -3356,7 +3385,9 @@ unsigned long term_translate(
     return c;
 }
 
+#ifdef MOD_PERSO
 extern int cursor_type;
+#endif
 /*
  * Remove everything currently in `inbuf' and stick it up on the
  * in-memory display. There's a big state machine in here to
@@ -3906,18 +3937,20 @@ static void term_out(Terminal *term)
 		    if (term->esc_nargs < ARGS_MAX)
 			term->esc_args[term->esc_nargs++] = ARG_DEFAULT;
 		    term->termstate = SEEN_CSI;
+#ifdef MOD_PERSO
 		} else if (c == 'q') {
 		    // cursor shape type (DECSCUSR)
 		    int cursor_shape = def(term->esc_args[0], 1);
 		    // set cursor_type from shape (cursor_type: 0=block, 1=underline, 2=beam)
 		    cursor_type = (cursor_shape - 1) >> 1;
 		    // set term->blink_cur from shape (odd numbers indicate blinking in DECSCUSR)
-		    if (term->blink_cur != cursor_shape & 1)
+		    if (term->blink_cur != (cursor_shape & 1))
 		    {
 			term->blink_cur = cursor_shape & 1;
 			term_reset_cblink(term);
 		    }
 		    term->termstate = TOPLEVEL;
+#endif
 		} else if (c < '@') {
 		    if (term->esc_query)
 			term->esc_query = -1;
@@ -6769,7 +6802,11 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
 {
     pos selpoint;
     termline *ldata;
+#ifdef MOD_PERSO
     bool raw_mouse = (term->xterm_mouse_mode &&
+#else
+    bool raw_mouse = (term->xterm_mouse &&
+#endif
                       !term->no_mouse_rep &&
                       !(term->mouse_override && shift));
     int default_seltype;
@@ -6838,9 +6875,14 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
 	(term->selstate != ABOUT_TO) && (term->selstate != DRAGGING)) {
 	int encstate = 0, r, c;
         bool wheel;
+#ifdef MOD_PERSO
         char abuf[64];
         char m; /* SGR 1006's postfix character ('M' or 'm') */
         int l = 0;
+#else
+	char abuf[32];
+	int len = 0;
+#endif
 
 	if (term->ldisc) {
 
@@ -6865,10 +6907,12 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
 		encstate = 0x41;
                 wheel = true;
 		break;
-              case MBT_NOTHING:        /* for any event tracking */
+#ifdef MOD_PERSO
+	      case MBT_NOTHING:        /* for any event tracking */
                 encstate = 0x03;
                 wheel = false;
                 break;
+#endif
 	      default:
                 return;
 	    }
@@ -6883,7 +6927,7 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
 	      case MA_DRAG:
 #ifdef MOD_HYPERLINK
 	      	if( !GetPuttyFlag() && GetHyperlinkFlag() ) {
-		if (term->xterm_mouse_mode == MM_NORMAL) {// HACK: ADDED FOR hyperlink stuff
+				if (term->xterm_mouse_mode == MM_NORMAL) {// HACK: ADDED FOR hyperlink stuff
 			unlineptr(ldata); 
 			return;
 			}
@@ -6893,19 +6937,29 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
 		    return;
 		}
 #else
+#ifdef MOD_PERSO
 		if (term->xterm_mouse_mode == MM_NORMAL)
+#else
+		if (term->xterm_mouse == 1)
+#endif
 		    return;
 #endif
 		encstate += 0x20;
 		break;
+#ifdef MOD_PERSO
               case MA_MOVE:
                 if (term->xterm_mouse_mode != MM_ANY_EVENT)
                     return;
                 encstate += 0x20;      /* add motion indicator */
                 break;
+#endif
 	      case MA_RELEASE:
 		/* If multiple extensions are enabled, the xterm 1006 is used, so it's okay to check for only that */
+#ifdef MOD_PERSO
 		if (term->xterm_mouse_protocol != MP_SGR)
+#else
+		if (!term->xterm_extended_mouse)
+#endif
 		    encstate = 0x03;
 		term->mouse_is_down = 0;
 		break;
@@ -6943,22 +6997,25 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
                 return;
 	    }
 	    if (shift)
-                encstate += 0x04;
-            if (ctrl)
-                encstate += 0x10;
+		encstate += 0x04;
+	    if (ctrl)
+		encstate += 0x10;
 
-            switch (term->xterm_mouse_protocol) {
+#ifdef MOD_PERSO
+             switch (term->xterm_mouse_protocol) {
+
               case MP_NORMAL:
-                /* add safety to avoid sending garbage sequences */
+               /* add safety to avoid sending garbage sequences */
                 if (x < 223 && y < 223) {
                   encstate += 0x20;
+
                   r = y + 33;
                   c = x + 33;
                   sprintf(abuf, "\033[M%c%c%c", encstate, c, r);
                   ldisc_send(term->ldisc, abuf, 6, 0);
                 }
                 break;
-              case MP_URXVT:
+             case MP_URXVT:
                 encstate += 0x20;
                 r = y + 1;
                 c = x + 1;
@@ -6995,12 +7052,29 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
               default: break;          /* placate gcc warning about enum use */
             }
         }
+#else
+	    r = y + 1;
+	    c = x + 1;
+
+	    /* Check the extensions in decreasing order of preference. Encoding the release event above assumes that 1006 comes first. */
+	    if (term->xterm_extended_mouse) {
+		len = sprintf(abuf, "\033[<%d;%d;%d%c", encstate, c, r, a == MA_RELEASE ? 'm' : 'M');
+	    } else if (term->urxvt_extended_mouse) {
+		len = sprintf(abuf, "\033[%d;%d;%dM", encstate + 32, c, r);
+	    } else if (c <= 223 && r <= 223) {
+		len = sprintf(abuf, "\033[M%c%c%c", encstate + 32, c + 32, r + 32);
+	    }
+            if (len > 0)
+                ldisc_send(term->ldisc, abuf, len, false);
+	}
+#endif
+
 #ifdef MOD_HYPERLINK
 	if( !GetPuttyFlag() && GetHyperlinkFlag() ) {
 		unlineptr(ldata); // HACK: ADDED FOR hyperlink stuff
 		}
 #endif
-        return;
+	return;
     }
 
     /*
@@ -7213,6 +7287,7 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
     term_update(term);
 }
 
+#ifdef MOD_KEYMAPPING
 int get_xterm_modifier(bool shift, bool ctrl, bool alt)
 {
     int xterm_modifier = 1;  // no modifier key was pressed
@@ -7224,8 +7299,6 @@ int get_xterm_modifier(bool shift, bool ctrl, bool alt)
         xterm_modifier += 4;
     return xterm_modifier;
 }
-
-#ifdef MOD_KEYMAPPING
 int format_arrow_key(char *buf, Terminal *term, int xkey, int modifier, bool alt)
 #else
 int format_arrow_key(char *buf, Terminal *term, int xkey, bool ctrl)
@@ -7298,7 +7371,12 @@ int format_arrow_key(char *buf, Terminal *term, int xkey, bool ctrl)
     return p - buf;
 }
 
+#ifdef MOD_KEYMAPPING
 int format_function_key(char *buf, Terminal *term, int key_number, int modifier, bool alt)
+#else
+int format_function_key(char *buf, Terminal *term, int key_number,
+                        bool shift, bool ctrl)
+#endif
 {
     char *p = buf;
 
@@ -7310,7 +7388,7 @@ int format_function_key(char *buf, Terminal *term, int key_number, int modifier,
 
     assert(key_number > 0);
     assert(key_number < lenof(key_number_to_tilde_code));
-
+#ifdef MOD_KEYMAPPING
     bool shift = modifier & 1;
     bool ctrl = modifier & 2;
     if (term->funky_type == FUNKY_XTERM && !term->vt52_mode)
@@ -7341,6 +7419,7 @@ int format_function_key(char *buf, Terminal *term, int key_number, int modifier,
         }
         return p - buf;
     }
+#endif
 
     int index = (shift && key_number <= 10) ? key_number + 10 : key_number;
     int code = key_number_to_tilde_code[index];
@@ -7378,7 +7457,11 @@ int format_function_key(char *buf, Terminal *term, int key_number, int modifier,
     return p - buf;
 }
 
+#ifdef MOD_KEYMAPPING
 int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key, int modifier, bool alt)
+#else
+int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
+#endif
 {
     char *p = buf;
 
@@ -7392,7 +7475,7 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key, int m
       case SKK_PGDN: code = 6; break;
       default: unreachable("bad small keypad key enum value");
     }
-
+#ifdef MOD_KEYMAPPING
     bool shift = modifier & 1;
     bool ctrl = modifier & 2;
     if (term->funky_type == FUNKY_XTERM && !term->vt52_mode)
@@ -7423,6 +7506,7 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key, int m
 
         return p - buf;
     }
+#endif
 
     /* Reorder edit keys to physical order */
     if (term->funky_type == FUNKY_VT400 && code <= 6)

@@ -9,13 +9,13 @@
 #define lenof(x) ( sizeof((x)) / sizeof(*(x)) )
 
 /* This is an invalid Unicode value used to indicate an error. */
-#define ERROR 0xFFFFL                  /* Unicode value representing error */
+#define ERROR 0xFFFFL		       /* Unicode value representing error */
 
 typedef struct charset_spec charset_spec;
 typedef struct sbcs_data sbcs_data;
 
 struct charset_spec {
-    int charset;                       /* numeric identifier */
+    int charset;		       /* numeric identifier */
 
     /*
      * A function to read the character set and output Unicode
@@ -24,8 +24,8 @@ struct charset_spec {
      * on the input.
      */
     void (*read)(charset_spec const *charset, long int input_chr,
-                 charset_state *state,
-                 void (*emit)(void *ctx, long int output), void *emitctx);
+		 charset_state *state,
+		 void (*emit)(void *ctx, long int output), void *emitctx);
     /*
      * A function to read Unicode characters and output in this
      * character set. The `emit' function expects to get byte
@@ -33,8 +33,8 @@ struct charset_spec {
      * non-representable characters on the input.
      */
     void (*write)(charset_spec const *charset, long int input_chr,
-                  charset_state *state,
-                  void (*emit)(void *ctx, long int output), void *emitctx);
+		  charset_state *state,
+		  void (*emit)(void *ctx, long int output), void *emitctx);
     void const *data;
 };
 
@@ -60,7 +60,7 @@ struct sbcs_data {
      * position in this table, you branch according to whether
      * sbcs2ucs[ucs2sbcs[X]] is less than, greater than, or equal
      * to U.
-     *
+     * 
      * Note that since there may be fewer than 256 valid byte
      * values in a particular SBCS, we must supply the length of
      * this table as well as the contents.
@@ -74,11 +74,11 @@ struct sbcs_data {
  */
 charset_spec const *charset_find_spec(int charset);
 void read_sbcs(charset_spec const *charset, long int input_chr,
-               charset_state *state,
-               void (*emit)(void *ctx, long int output), void *emitctx);
+	       charset_state *state,
+	       void (*emit)(void *ctx, long int output), void *emitctx);
 void write_sbcs(charset_spec const *charset, long int input_chr,
-                charset_state *state,
-                void (*emit)(void *ctx, long int output), void *emitctx);
+		charset_state *state,
+		void (*emit)(void *ctx, long int output), void *emitctx);
 
 /*
  * Placate compiler warning about unused parameters, of which we

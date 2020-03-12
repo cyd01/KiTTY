@@ -4475,15 +4475,16 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	}
 #endif
 
+#ifdef MOD_PERSO
 	{
             // debug("X %d Y %d => %d:%d\n", X_POS(lParam), Y_POS(lParam), TO_CHR_X(X_POS(lParam)), TO_CHR_Y(Y_POS(lParam)));
             Mouse_Button b;
             if (wParam & MK_LBUTTON)
                 b = MBT_LEFT;
             else if (wParam & MK_MBUTTON)
-                b = MBT_MIDDLE;
+               b = MBT_MIDDLE;
             else if (wParam & MK_RBUTTON)
-                b = MBT_RIGHT;
+ 	       b = MBT_RIGHT;
             else
                 b = MBT_NOTHING;
             term_mouse(term, b, translate_button(b),
@@ -4491,6 +4492,21 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		       TO_CHR_X(X_POS(lParam)),
 		       TO_CHR_Y(Y_POS(lParam)), wParam & MK_SHIFT,
 		       wParam & MK_CONTROL, is_alt_pressed());
+#else
+	if (wParam & (MK_LBUTTON | MK_MBUTTON | MK_RBUTTON) &&
+	    GetCapture() == hwnd) {
+	    Mouse_Button b;
+	    if (wParam & MK_LBUTTON)
+		b = MBT_LEFT;
+	    else if (wParam & MK_MBUTTON)
+		b = MBT_MIDDLE;
+	    else
+		b = MBT_RIGHT;
+	    term_mouse(term, b, translate_button(b), MA_DRAG,
+		       TO_CHR_X(X_POS(lParam)),
+		       TO_CHR_Y(Y_POS(lParam)), wParam & MK_SHIFT,
+		       wParam & MK_CONTROL, is_alt_pressed());
+#endif
 	}
 	return 0;
       case WM_NCMOUSEMOVE:
@@ -6595,6 +6611,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 				default:
 					break;
 			}
+
 			if (!(term->funky_type == FUNKY_XTERM && !term->vt52_mode) || fkey == 0) {
 				*p++ = '\033';
 			}
@@ -6706,7 +6723,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	}
 
 #ifdef MOD_KEYMAPPING
-	if (wParam == VK_BACK && shift_state <= 1) {	/* Backspace or Shift Backspace */
+	if (wParam == VK_BACK && shift_state <= 1) {	/* Backspace of Shift Backspace */
 #else
 	if (wParam == VK_BACK && shift_state == 0) {	/* Backspace */
 #endif
@@ -6860,7 +6877,12 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	  case VK_F19: fkey_number = 19; goto numbered_function_key;
 	  case VK_F20: fkey_number = 20; goto numbered_function_key;
           numbered_function_key:
-            p += format_function_key((char *)p, term, fkey_number, shift_state, left_alt);
+#ifdef MOD_KEYMAPPING
+	    p += format_function_key((char *)p, term, fkey_number, shift_state, left_alt);
+#else
+            p += format_function_key((char *)p, term, fkey_number,
+                                     shift_state & 1, shift_state & 2);
+#endif
             return p - output;
 
             SmallKeypadKey sk_key;
@@ -6871,12 +6893,14 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	  case VK_PRIOR: sk_key = SKK_PGUP; goto small_keypad_key;
 	  case VK_NEXT: sk_key = SKK_PGDN; goto small_keypad_key;
           small_keypad_key:
-#ifndef MOD_KEYMAPPING
+#ifdef MOD_KEYMAPPING
+            p += format_small_keypad_key((char *)p, term, sk_key, shift_state, left_alt);
+#else
             /* These keys don't generate terminal input with Ctrl */
             if (shift_state & 2)
                 break;
-#endif
             p += format_small_keypad_key((char *)p, term, sk_key);
+#endif
             return p - output;
 
 	    char xkey;
