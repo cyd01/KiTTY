@@ -9,18 +9,20 @@ void SetTransparency( HWND hwnd, int value ) {
 
 
 // Numéro de version de l'OS
-void GetOSInfo( char * version ) {
+void GetOSInfo( char * version ) { // ==> Deprecated with version >= Windows 8.1
 	OSVERSIONINFO osvi;
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	GetVersionEx(&osvi);
 	sprintf( version, "%ld.%ld %ld %ld %s %dx%d", osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber, osvi.dwPlatformId, osvi.szCSDVersion, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) ) ;
-	}
+}
 /*
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms724832%28v=vs.85%29.aspx
 Operating system 			Version number
 Windows 10 Insider Preview		10.0*
 Windows Server Technical Preview	10.0*
+Windows Server 2019 			10.0*
+Windows Server 2016 			10.0*
 Windows 8.1				6.3*
 Windows Server 2012 R2			6.3*
 Windows 8				6.2

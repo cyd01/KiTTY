@@ -865,7 +865,9 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     continue; /* process this new message */
                 }
                 ppl_logevent("Offer of public key accepted");
-
+#ifdef MOD_RECONNECT
+	is_backend_first_connected = 0 ;
+#endif
                 /*
                  * Actually attempt a serious authentication using
                  * the key.
@@ -890,11 +892,13 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                                              s->publickey_comment),
                                    false);
 #ifdef MOD_PERSO
+			//if( GetAutoreconnectFlag() && (strlen(ManagePassPhrase(NULL))>0) ) {
 			if( strlen(ManagePassPhrase(NULL))>0 ) {
 				char *p = ManagePassPhrase(NULL) ;
 				bufchain bc;
 				bufchain_init(&bc);
 				bufchain_add(&bc, p, strlen(p));
+				bufchain_add(&bc, "\n", 1);
     				s->userpass_ret = seat_get_userpass_input( s->ppl.seat, s->cur_prompt, &bc );
 				logevent(NULL,"Test passphrase");
 				ManagePassPhrase("");
@@ -938,8 +942,12 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                      * Try decrypting the key.
                      */
                     key = ssh2_load_userkey(s->keyfile, passphrase, &error);
+
                     if (passphrase) {
                         /* burn the evidence */
+#ifdef MOD_PERSO
+	if(strlen(passphrase)>0) { ManagePassPhrase(passphrase); }
+#endif
                         smemclr(passphrase, strlen(passphrase));
                         sfree(passphrase);
                     }
@@ -956,6 +964,9 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                             s->suppress_wait_for_response_packet = true;
                             break; /* try something else */
                         }
+#ifdef MOD_PERSO
+	ManagePassPhrase("");	
+#endif
                     } else {
                         /* FIXME: if we ever support variable signature
                          * flags, this is somewhere they'll need to be

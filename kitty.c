@@ -1306,7 +1306,7 @@ void CreateDefaultIniFile( void ) {
 #endif
 #endif
 			writeINI( KittyIniFile, INIT_SECTION, "#uploaddir", "." ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#UserPassSSHNoSave", "no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#userpasssshnosave", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPPath", "" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPProtocol", "sftp" ) ;
 #ifdef MOD_ZMODEM

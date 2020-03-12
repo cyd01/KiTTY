@@ -57,7 +57,10 @@ static char PassPhrase[256] = "" ;
 	
 // Procedure de management de la passphrase
 char * ManagePassPhrase( const char * st ) {
-	if( st != NULL ) strcpy( PassPhrase, st ) ;
+	if( !GetUserPassSSHNoSave() && (st != NULL) ) {
+		strcpy( PassPhrase, st ) ;
+	}
+	if( GetUserPassSSHNoSave() ) { return "" ; }
 	return PassPhrase ;
 }
 
