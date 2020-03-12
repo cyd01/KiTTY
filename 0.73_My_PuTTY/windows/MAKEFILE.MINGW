@@ -848,7 +848,7 @@ putty.res.o: ../windows/putty.rc ../windows/rcstuff.h ../windows/winhelp.rc2 \
 		../windows/win_res.h ../windows/putty.ico \
 		../windows/puttycfg.ico ../windows/version.rc2 ../version.h \
 		../licence.h \
-		../../blocnote/notepad.rc
+		../../blocnote/notepad.rc ../windows/kitty.mft
 	$(RC) $(RCFL) $(RCFLAGS) ../windows/putty.rc -o putty.res.o -DMOD_INTEGRATED_AGENT -DMOD_INTEGRATED_KEYGEN
 
 puttygen.res.o: ../windows/puttygen.rc ../windows/rcstuff.h \
@@ -2132,7 +2132,7 @@ cross:
 	make -e TOOLPATH=/usr/bin/i686-w64-mingw32- -f MAKEFILE.MINGW putty.exe plink.exe pscp.exe psftp.exe pageant.exe puttygen.exe
 	make -e TOOLPATH=/usr/bin/i686-w64-mingw32- -f MAKEFILE.MINGW portable
 	cp putty.exe putty_nocompress.exe
-	upx --best --compress-icons=2 --compress-exports=0 putty.exe putty_portable.exe putty_nocompress.exe
+	upx --best --compress-icons=2 --compress-exports=0 putty.exe putty_portable.exe
 	mv putty.exe /builds/kitty.exe
 	mv putty_portable.exe /builds/kitty_portable.exe
 	mv putty_nocompress.exe /builds/kitty_nocompress.exe

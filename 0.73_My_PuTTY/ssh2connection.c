@@ -12,6 +12,10 @@
 #include "sshcr.h"
 #include "ssh2connection.h"
 
+#ifdef MOD_RECONNECT
+int GetAutoreconnectFlag( void ) ;
+#endif
+
 static void ssh2_connection_free(PacketProtocolLayer *); 
 static void ssh2_connection_process_queue(PacketProtocolLayer *);
 static bool ssh2_connection_get_specials(

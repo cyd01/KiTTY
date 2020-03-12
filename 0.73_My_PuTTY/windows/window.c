@@ -539,13 +539,17 @@ static void start_backend(void)
                          conf_get_bool(conf, CONF_tcp_nodelay),
                          conf_get_bool(conf, CONF_tcp_keepalives));
     if (error) {
+#ifdef MOD_RECONNECT
 	char *str = dupprintf("%s Error", appname);
         char *msg = dupprintf("Unable to open connection to\n%s\n%s",
                               conf_dest(conf), error);
-	MessageBox(NULL, msg, str, MB_ICONERROR | MB_OK);
+	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
+	    lp_eventlog(default_logpolicy, msg) ; 
+        } else {
+	    MessageBox(NULL, msg, str, MB_ICONERROR | MB_OK);
+        }
 	sfree(str);
 	sfree(msg);
-#ifdef MOD_RECONNECT
 	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 	    SetConnBreakIcon() ;
 	    SetSSHConnected(0) ;
@@ -556,6 +560,13 @@ static void start_backend(void)
 	    return ;
 	    }
 	else
+#else
+	char *str = dupprintf("%s Error", appname);
+        char *msg = dupprintf("Unable to open connection to\n%s\n%s",
+                              conf_dest(conf), error);
+	MessageBox(NULL, msg, str, MB_ICONERROR | MB_OK);
+	sfree(str);
+	sfree(msg);
 #endif
 	exit(0);
     }
@@ -644,6 +655,7 @@ static void close_session(void *ignored_context)
 void RestartSession( void ) {
 	win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
 	PostMessage(hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
+	is_backend_first_connected = 0 ;
 	PostMessage(hwnd,WM_KEYUP,VK_RETURN ,1) ;
 }
 #endif
@@ -872,6 +884,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			debug_flag = 1 ;
 		} else if( !strcmp(p, "-fullscreen") ) {
 			conf_set_int( conf, CONF_fullscreen, 1 ) ;
+		} else if( !strcmp(p, "-funky") ) {
+			i++;
+			conf_set_int( conf, CONF_funky_type, atoi(argv[1]) ) ;
 		} else if( !strcmp(p, "-initdelay") ) {
 			i++ ;
 			init_delay = (int)(1000*atof( argv[i] )) ;
@@ -932,7 +947,13 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-notrans") ) {
 			SetTransparencyFlag( 0 ) ;
 			conf_set_int(conf,CONF_transparencynumber, -1) ;
-#ifdef MOD_SAVEDUMP	
+#ifdef MOD_RECONNECT
+		} else if( !strcmp(p, "-autorecnt") ) {
+			SetAutoreconnectFlag(1) ;
+			conf_set_int(conf,CONF_wakeup_reconnect, 1) ;
+			conf_set_int(conf,CONF_failure_reconnect, 1) ;
+#endif
+#ifdef MOD_SAVEDUMP
 		} else if( !strcmp(p, "-savedump") ) {			
 			SaveDump() ;
 			return 0;
@@ -6571,7 +6592,6 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 				default:
 					break;
 			}
-
 			if (!(term->funky_type == FUNKY_XTERM && !term->vt52_mode) || fkey == 0) {
 				*p++ = '\033';
 			}
@@ -6595,7 +6615,6 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
             SendMessage(hwnd, WM_VSCROLL, SB_BOTTOM, 0);
             return 0;
         }
-
 	if (wParam == VK_PRIOR && shift_state == 2) {
 	    SendMessage(hwnd, WM_VSCROLL, SB_LINEUP, 0);
 	    return 0;
@@ -6683,12 +6702,20 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	    return 0;
 	}
 
-	if (wParam == VK_BACK && shift_state <= 1) {	/* Backspace of Shift Backspace */
+#ifdef MOD_KEYMAPPING
+	if (wParam == VK_BACK && shift_state <= 1) {	/* Backspace or Shift Backspace */
+#else
+	if (wParam == VK_BACK && shift_state == 0) {	/* Backspace */
+#endif
 	    *p++ = (conf_get_bool(conf, CONF_bksp_is_delete) ? 0x7F : 0x08);
 	    *p++ = 0;
 	    return -2;
 	}
+#ifdef MOD_KEYMAPPING
 	if (wParam == VK_BACK) {	/* Ctrl Backspace or Ctrl+Shift Backspace */
+#else
+	if (wParam == VK_BACK && shift_state == 1) {	/* Shift Backspace */
+#endif
 	    /* We do the opposite of what is configured */
 	    *p++ = (conf_get_bool(conf, CONF_bksp_is_delete) ? 0x08 : 0x7F);
 	    *p++ = 0;
@@ -6841,7 +6868,12 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	  case VK_PRIOR: sk_key = SKK_PGUP; goto small_keypad_key;
 	  case VK_NEXT: sk_key = SKK_PGDN; goto small_keypad_key;
           small_keypad_key:
-            p += format_small_keypad_key((char *)p, term, sk_key, shift_state, left_alt);
+#ifndef MOD_KEYMAPPING
+            /* These keys don't generate terminal input with Ctrl */
+            if (shift_state & 2)
+                break;
+#endif
+            p += format_small_keypad_key((char *)p, term, sk_key);
             return p - output;
 
 	    char xkey;
@@ -7108,7 +7140,7 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 
 	if( (title[0]=='_')&&(title[1]=='_') ) { // Mode commande a distance
 		if( ManageLocalCmd( MainHwnd, title+2 ) ) { free(title); return ; }
-		}
+	}
 	
 	if( !GetTitleBarFlag() ) { set_title_internal( tw, title ) ; free(title) ; return ; }
 		

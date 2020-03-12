@@ -12,6 +12,7 @@ int decryptstring( char * st, const char * key ) ;
 int GenerePrivateKey( const char * filename ) ;
 
 // Procedure de management de la passphrase
+int GetUserPassSSHNoSave(void) ;
 char * ManagePassPhrase( const char * st ) ;
 
 #endif

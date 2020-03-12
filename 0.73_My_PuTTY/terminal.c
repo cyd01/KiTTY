@@ -3338,6 +3338,7 @@ unsigned long term_translate(
     return c;
 }
 
+extern int cursor_type;
 /*
  * Remove everything currently in `inbuf' and stick it up on the
  * in-memory display. There's a big state machine in here to
@@ -3887,6 +3888,18 @@ static void term_out(Terminal *term)
 		    if (term->esc_nargs < ARGS_MAX)
 			term->esc_args[term->esc_nargs++] = ARG_DEFAULT;
 		    term->termstate = SEEN_CSI;
+		} else if (c == 'q') {
+		    // cursor shape type (DECSCUSR)
+		    int cursor_shape = def(term->esc_args[0], 1);
+		    // set cursor_type from shape (cursor_type: 0=block, 1=underline, 2=beam)
+		    cursor_type = (cursor_shape - 1) >> 1;
+		    // set term->blink_cur from shape (odd numbers indicate blinking in DECSCUSR)
+		    if (term->blink_cur != cursor_shape & 1)
+		    {
+			term->blink_cur = cursor_shape & 1;
+			term_reset_cblink(term);
+		    }
+		    term->termstate = TOPLEVEL;
 		} else if (c < '@') {
 		    if (term->esc_query)
 			term->esc_query = -1;
@@ -4244,7 +4257,7 @@ static void term_out(Terminal *term)
 				    compatibility2(OTHER, VT220);
 				    term->curr_attr &= ~(ATTR_BOLD | ATTR_DIM);
 				    break;
-#ifdef PERSPORT
+#ifdef MOD_PERSO
 				  case 23:	/* disable italics */
 				    compatibility(ANSI);
 				    term->curr_attr &= ~ATTR_ITALIC;
