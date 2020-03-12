@@ -150,10 +150,9 @@ struct terminal_tag {
     bool seen_disp_event;
     bool big_cursor;
 
-    int xterm_mouse;		       /* send mouse messages to host */
-    bool xterm_extended_mouse;
-    bool urxvt_extended_mouse;
-    int mouse_is_down;		       /* used while tracking mouse buttons */
+    int xterm_mouse_mode;              /* mouse event mode */
+    int xterm_mouse_protocol;          /* mouse protocol */
+    int mouse_is_down;                 /* used while tracking mouse buttons */
 
     bool bracketed_paste, bracketed_paste_active;
 
