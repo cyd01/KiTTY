@@ -4257,7 +4257,7 @@ static void term_out(Terminal *term)
 				    compatibility2(OTHER, VT220);
 				    term->curr_attr &= ~(ATTR_BOLD | ATTR_DIM);
 				    break;
-#ifdef PERSPORT
+#ifdef MOD_PERSO
 				  case 23:	/* disable italics */
 				    compatibility(ANSI);
 				    term->curr_attr &= ~ATTR_ITALIC;
