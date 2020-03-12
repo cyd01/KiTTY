@@ -7150,6 +7150,18 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
     term_update(term);
 }
 
+int get_xterm_modifier(bool shift, bool ctrl, bool alt)
+{
+    int xterm_modifier = 1;  // no modifier key was pressed
+    if (shift)
+        xterm_modifier += 1;
+    if (alt)
+        xterm_modifier += 2;
+    if (ctrl)
+        xterm_modifier += 4;
+    return xterm_modifier;
+}
+
 #ifdef MOD_KEYMAPPING
 int format_arrow_key(char *buf, Terminal *term, int xkey, int modifier, bool alt)
 #else
@@ -7223,8 +7235,7 @@ int format_arrow_key(char *buf, Terminal *term, int xkey, bool ctrl)
     return p - buf;
 }
 
-int format_function_key(char *buf, Terminal *term, int key_number,
-                        bool shift, bool ctrl)
+int format_function_key(char *buf, Terminal *term, int key_number, int modifier, bool alt)
 {
     char *p = buf;
 
@@ -7236,6 +7247,37 @@ int format_function_key(char *buf, Terminal *term, int key_number,
 
     assert(key_number > 0);
     assert(key_number < lenof(key_number_to_tilde_code));
+
+    bool shift = modifier & 1;
+    bool ctrl = modifier & 2;
+    if (term->funky_type == FUNKY_XTERM && !term->vt52_mode)
+    {
+        // XTerm mode
+        char prefix[20];
+        char suffix[20];
+        int xterm_modifier = get_xterm_modifier(shift, ctrl, alt);
+        if (xterm_modifier > 1)
+        {
+            sprintf(prefix, "[1;%d", xterm_modifier);
+            sprintf(suffix, ";%d", xterm_modifier);
+        }
+        else
+        {
+            sprintf(prefix, "O");
+            sprintf(suffix, "");
+        }
+
+        int code = key_number_to_tilde_code[key_number];
+        if (code >= 11 && code <= 14)
+        {
+            p += sprintf(p, "\x1B%s%c", prefix, code + 'P' - 11);
+        }
+        else
+        {
+            p += sprintf(p, "\x1B[%d%s~", code, suffix);
+        }
+        return p - buf;
+    }
 
     int index = (shift && key_number <= 10) ? key_number + 10 : key_number;
     int code = key_number_to_tilde_code[index];
@@ -7273,7 +7315,7 @@ int format_function_key(char *buf, Terminal *term, int key_number,
     return p - buf;
 }
 
-int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
+int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key, int modifier, bool alt)
 {
     char *p = buf;
 
@@ -7286,6 +7328,37 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
       case SKK_PGUP: code = 5; break;
       case SKK_PGDN: code = 6; break;
       default: unreachable("bad small keypad key enum value");
+    }
+
+    bool shift = modifier & 1;
+    bool ctrl = modifier & 2;
+    if (term->funky_type == FUNKY_XTERM && !term->vt52_mode)
+    {
+        // XTerm mode
+        char prefix[20];
+        char suffix[20];
+        int xterm_modifier = get_xterm_modifier(shift, ctrl, alt);
+        if (xterm_modifier > 1)
+        {
+            sprintf(prefix, "[1;%d", xterm_modifier);
+            sprintf(suffix, ";%d", xterm_modifier);
+        }
+        else
+        {
+            sprintf(prefix, "[");
+            sprintf(suffix, "");
+        }
+
+        if (code == 1 || code == 4)
+        {
+            p += sprintf(p, "\x1B%s%c", prefix, code == 1 ? 'H' : 'F');
+        }
+        else
+        {
+            p += sprintf(p, "\x1B[%d%s~", code, suffix);
+        }
+
+        return p - buf;
     }
 
     /* Reorder edit keys to physical order */

@@ -6591,7 +6591,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 					break;
 				default:
 					break;
-			}			
+			}
 			if (!(term->funky_type == FUNKY_XTERM && !term->vt52_mode) || fkey == 0) {
 				*p++ = '\033';
 			}
@@ -6857,8 +6857,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 	  case VK_F19: fkey_number = 19; goto numbered_function_key;
 	  case VK_F20: fkey_number = 20; goto numbered_function_key;
           numbered_function_key:
-            p += format_function_key((char *)p, term, fkey_number,
-                                     shift_state & 1, shift_state & 2);
+            p += format_function_key((char *)p, term, fkey_number, shift_state, left_alt);
             return p - output;
 
             SmallKeypadKey sk_key;
