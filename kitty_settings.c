@@ -155,6 +155,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "NoApplicationKeys", conf_get_bool(conf, CONF_no_applic_k));
     write_setting_b_forced(sesskey, "NoApplicationCursors", conf_get_bool(conf, CONF_no_applic_c));
     write_setting_b_forced(sesskey, "NoMouseReporting", conf_get_bool(conf, CONF_no_mouse_rep));
+    write_setting_b_forced(sesskey, "NoFocusReporting", conf_get_bool(conf, CONF_no_focus_rep));
     write_setting_b_forced(sesskey, "NoRemoteResize", conf_get_bool(conf, CONF_no_remote_resize));
     write_setting_b_forced(sesskey, "NoAltScreen", conf_get_bool(conf, CONF_no_alt_screen));
     write_setting_b_forced(sesskey, "NoRemoteWinTitle", conf_get_bool(conf, CONF_no_remote_wintitle));
@@ -690,6 +691,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "NoApplicationKeys", false, conf, CONF_no_applic_k);
     gppb_forced(sesskey, "NoApplicationCursors", false, conf, CONF_no_applic_c);
     gppb_forced(sesskey, "NoMouseReporting", false, conf, CONF_no_mouse_rep);
+    gppb_forced(sesskey, "NoFocusReporting", false, conf, CONF_no_focus_rep);
     gppb_forced(sesskey, "NoRemoteResize", false, conf, CONF_no_remote_resize);
     gppb_forced(sesskey, "NoAltScreen", false, conf, CONF_no_alt_screen);
     gppb_forced(sesskey, "NoRemoteWinTitle", false, conf, CONF_no_remote_wintitle);
