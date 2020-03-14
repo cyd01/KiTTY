@@ -7482,13 +7482,15 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
       default: unreachable("bad small keypad key enum value");
     }
 #ifdef MOD_KEYMAPPING
+    int home_end_type = conf_get_int(conf, CONF_rxvt_homeend);  // standard(0), rxvt, urxvt, xterm(3), bsd1, bsd2
     bool shift = modifier & 1;
     bool ctrl = modifier & 2;
-    if (term->funky_type == FUNKY_XTERM && !term->vt52_mode)
+    if (term->funky_type == FUNKY_XTERM && !term->vt52_mode && (home_end_type == 0 || home_end_type == 3))
     {
         // XTerm mode
         char prefix[20];
         char suffix[20];
+        bool app_flg = (term->app_cursor_keys && !term->no_applic_c);
         int xterm_modifier = get_xterm_modifier(shift, ctrl, alt);
         if (xterm_modifier > 1)
         {
@@ -7497,11 +7499,15 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
         }
         else
         {
-            sprintf(prefix, "[");
+            if (!app_flg)
+                sprintf(prefix, "[");
+            else
+                sprintf(prefix, "O");
+
             sprintf(suffix, "");
         }
 
-        if (code == 1 || code == 4)
+        if ((xterm_modifier > 1 || app_flg || home_end_type == 3) && (code == 1 || code == 4))
         {
             p += sprintf(p, "\x1B%s%c", prefix, code == 1 ? 'H' : 'F');
         }
