@@ -331,6 +331,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "no_applic_c=%d\n", 		conf_get_bool(conf,CONF_no_applic_c) ) ;
 	fprintf( fp, "no_applic_k=%d\n", 		conf_get_bool(conf,CONF_no_applic_k) ) ;
 	fprintf( fp, "no_mouse_rep=%d\n", 		conf_get_bool(conf,CONF_no_mouse_rep) ) ;
+	fprintf( fp, "no_focus_rep=%d\n", 		conf_get_bool(conf,CONF_no_focus_rep) ) ;
 	fprintf( fp, "no_remote_resize=%d\n", 		conf_get_bool(conf,CONF_no_remote_resize) ) ;
 	fprintf( fp, "no_alt_screen=%d\n", 		conf_get_bool(conf,CONF_no_alt_screen) ) ;
 	fprintf( fp, "no_remote_wintitle=%d\n", 	conf_get_bool(conf,CONF_no_remote_wintitle) ) ;

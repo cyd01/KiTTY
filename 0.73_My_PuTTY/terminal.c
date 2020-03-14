@@ -1530,6 +1530,7 @@ void term_copy_stuff_from_conf(Terminal *term)
     term->no_applic_k = conf_get_bool(term->conf, CONF_no_applic_k);
     term->no_dbackspace = conf_get_bool(term->conf, CONF_no_dbackspace);
     term->no_mouse_rep = conf_get_bool(term->conf, CONF_no_mouse_rep);
+    term->no_focus_rep = conf_get_bool(term->conf, CONF_no_focus_rep);
     term->no_remote_charset = conf_get_bool(term->conf, CONF_no_remote_charset);
     term->no_remote_resize = conf_get_bool(term->conf, CONF_no_remote_resize);
     term->no_remote_wintitle = conf_get_bool(term->conf, CONF_no_remote_wintitle);
@@ -2736,6 +2737,9 @@ static void toggle_mode(Terminal *term, int mode, int query, bool state)
           case 1003:                   /* xterm any event tracking */
             term->xterm_mouse_mode = state ? MM_ANY_EVENT : MM_NONE;
             win_set_raw_mouse_mode(term->win, state);
+            break;
+          case 1004:
+            win_set_focus_reporting_mode(term->win, state);
             break;
           case 1005:                   /* use XTERM 1005 mouse protocol */
             term->xterm_mouse_protocol = state ? MP_XTERM : MP_NORMAL;
@@ -7764,7 +7768,16 @@ void term_provide_logctx(Terminal *term, LogContext *logctx)
 
 void term_set_focus(Terminal *term, bool has_focus)
 {
-    term->has_focus = has_focus;
+    if( term->has_focus != has_focus) {
+        term->has_focus = has_focus;
+
+        if(term->report_focus && term->ldisc) {
+            if (has_focus)
+                ldisc_send(term->ldisc, "\033[I", 3,false);
+            else
+                ldisc_send(term->ldisc, "\033[O", 3,false);
+        }
+    }
     term_schedule_cblink(term);
 }
 

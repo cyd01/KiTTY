@@ -1178,6 +1178,7 @@ struct TermWinVtable {
     void (*set_cursor_pos)(TermWin *, int x, int y);
 
     void (*set_raw_mouse_mode)(TermWin *, bool enable);
+    void (*set_focus_reporting_mode)(TermWin *, bool enable);
 
     void (*set_scrollbar)(TermWin *, int total, int start, int page);
 
@@ -1234,6 +1235,8 @@ static inline void win_set_cursor_pos(TermWin *win, int x, int y)
 { win->vt->set_cursor_pos(win, x, y); }
 static inline void win_set_raw_mouse_mode(TermWin *win, bool enable)
 { win->vt->set_raw_mouse_mode(win, enable); }
+static inline void win_set_focus_reporting_mode(TermWin *win, bool enable)
+{ win->vt->set_focus_reporting_mode(win, enable); }
 static inline void win_set_scrollbar(TermWin *win, int t, int s, int p)
 { win->vt->set_scrollbar(win, t, s, p); }
 static inline void win_bell(TermWin *win, int mode)
@@ -1384,6 +1387,7 @@ NORETURN void cleanup_exit(int);
     X(BOOL, NONE, no_applic_c) /* totally disable app cursor keys */ \
     X(BOOL, NONE, no_applic_k) /* totally disable app keypad */ \
     X(BOOL, NONE, no_mouse_rep) /* totally disable mouse reporting */ \
+    X(BOOL, NONE, no_focus_rep) /* totally disable mouse reporting */ \
     X(BOOL, NONE, no_remote_resize) /* disable remote resizing */ \
     X(BOOL, NONE, no_alt_screen) /* disable alternate screen */ \
     X(BOOL, NONE, no_remote_wintitle) /* disable remote retitling */ \
