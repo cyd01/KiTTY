@@ -331,7 +331,6 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "no_applic_c=%d\n", 		conf_get_bool(conf,CONF_no_applic_c) ) ;
 	fprintf( fp, "no_applic_k=%d\n", 		conf_get_bool(conf,CONF_no_applic_k) ) ;
 	fprintf( fp, "no_mouse_rep=%d\n", 		conf_get_bool(conf,CONF_no_mouse_rep) ) ;
-	fprintf( fp, "no_focus_rep=%d\n", 		conf_get_bool(conf,CONF_no_focus_rep) ) ;
 	fprintf( fp, "no_remote_resize=%d\n", 		conf_get_bool(conf,CONF_no_remote_resize) ) ;
 	fprintf( fp, "no_alt_screen=%d\n", 		conf_get_bool(conf,CONF_no_alt_screen) ) ;
 	fprintf( fp, "no_remote_wintitle=%d\n", 	conf_get_bool(conf,CONF_no_remote_wintitle) ) ;
@@ -525,6 +524,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "ctrl_tab_switch=%d\n", 		conf_get_int(conf, CONF_ctrl_tab_switch));
 	fprintf( fp, "comment=%s\n",			conf_get_str(conf,CONF_comment) ) ;
 	fprintf( fp, "scp_auto_pwd=%d\n", 		conf_get_int(conf, CONF_scp_auto_pwd));
+	fprintf( fp, "no_focus_rep=%d\n",		conf_get_bool(conf,CONF_no_focus_rep) ) ;
 #endif
 #ifdef MOD_PRINTCLIP
 	fprintf( fp, "printclip=%d\n",			conf_get_int(conf,CONF_printclip) ) ;

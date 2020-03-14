@@ -1233,7 +1233,23 @@ void CountUp( void ) {
 	}
 	
 // Si le fichier kitty.ini n'existe pas => creation du fichier par defaut
+#include "kitty_ini.h"
 void CreateDefaultIniFile( void ) {
+	if( !NoKittyFileFlag ) if( !GetReadOnlyFlag() ) {
+		if( KittyIniFile==NULL ) return ;
+		if( strlen(KittyIniFile)==0 ) return ;
+		if( !existfile( KittyIniFile ) ) {
+			FILE *fp;
+			if( (fp=fopen(KittyIniFile,"w")) != NULL ) {
+				fputs(default_init_file_content,fp);
+				fclose(fp);
+			}
+		}
+		if( !existfile( KittyIniFile ) ) { MessageBox( NULL, "Unable to create configuration file !", "Error", MB_OK|MB_ICONERROR ) ; }
+	}
+}
+
+void CreateDefaultIniFile_old( void ) {
 	char buffer[4096] ;
 	if( !NoKittyFileFlag ) if( !GetReadOnlyFlag() ) {
 		if( KittyIniFile==NULL ) return ;

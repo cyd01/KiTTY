@@ -1,0 +1,262 @@
+[Agent]
+
+; askconfirmation: ask for confirmation on private key usage
+;    See http://people.mpi-klsb.mpg.de/~pcernko/pageant.html for information
+;    - yes : always
+;    - no  : never
+;    - auto: only is private key comment contains 'needs confirm'
+;askconfirmation=auto
+
+; messageonkeyusage: allow notification bullet on private key usage
+;messageonkeyusage=no
+
+
+
+[ConfigBox]
+
+; default: if yes all the sessions belong to their own folder and the default folder too
+;default=yes
+
+; defaultsettings: enable/disable the automatic creation of the 'Default Settings' session
+;defaultsettings=yes
+
+; filter: enable/disable filter in saved sessions selection box
+filter=yes
+
+; height: the number of visible lines into the saved sessions selection box (in main window)
+height=21
+
+; noexit: if set to yes, return to the configuration box at main program exit
+;noexit=no
+
+; windowheight: the size of the configuration box
+;windowheight=800
+
+
+
+[KiTTY]
+
+; adb: enable/disable adb support
+adb=yes
+
+; antiidle: character string regularly sent to maintain the connection alive
+;antiidle== \k08\
+
+; antiidledelay: time delay between two sending
+;antiidledelay=60
+
+; autostoresshkey: enable/disable the automatic ssh key store freature (no confirmation window)
+;autostoresshkey=no
+
+; backgroundimage: enable/disable the background image feature
+backgroundimage=yes
+
+; bcdelay: time delay between each character in automatic features (autocommand, login script, user function ...)
+;bcdelay=0
+
+; capslock: force upper case
+capslock=no
+
+; conf: enable/disable the automatic creation of default configuration file
+conf=yes
+
+; configdir: set the configuration directory
+;    In portable mode it the place where to find settings files directories: Sessions, SshHostKeys, ...
+;    Usually it the same directory where kitty.exe is
+;configdir=
+
+; CtHelperPath: The full path to the cthelper.exe binary (Wrapper for Cygwin feature)
+;CtHelperPath=
+
+; ctrltab: Switch between PuTTY windows with CTRL+Tab
+ctrltab=yes
+
+; cygterm: enable/disable then cygterm feature
+cygterm=no
+
+; debug: for debug purpose only
+;debug=no
+
+; downloaddir: this is the local directory where files are downloaded with the pscp integration
+;downloaddir=
+
+; hyperlink: enable/disable the hyperlink feature
+hyperlink=yes
+
+; icon: enable/disable the icon managment feature (a particular icon for specific session)
+icon=yes
+
+; iconfile: point a file where internal icons are located
+;iconfile=kitty.exe
+
+; mouseshortcuts: enable/disable mouse shortcuts
+mouseshortcuts=yes
+
+; numberoficons: total number of internal icons
+;numberoficons=45
+
+; paste: enable/disable one line at a time feature in paste action (useful on slow servers only)
+paste=no
+
+; PlinkPath: the full path to the plink.exe (or klink.exe) binary
+;PlinkPath=
+
+; PSCPPath: the full path to the pscp.exe (or kscp.exe) binary
+;PSCPPath=
+
+; PSCPOptions: the additionnal options to pass to the pscp command (for download or upload file)
+;    default settings are -scp -r (force scp mode, and recursive mode)
+;PSCPOptions=-scp -r
+
+; remotedir: the default remote directory where files will be uploaded with pscp integration (drag 'n drop in the KiTTY window)
+;remotedir=.
+
+; savemode: specify the save mode for sessions settings
+;    Allowed values are:
+;    - registry : to save sessions into windows regitry
+;    - file : to save sessions into one unique file (currently not maintained)
+;    - dir : to save sessions into files in the directory structure
+savemode=registry
+
+; scriptfilefilter: specify the the local script files extension
+;    Default value is (*.ksh,*.sh)|*.ksh;*.sh|SQL files (*.sql)|*.sql|All files (*.*)|*.*|
+;scriptfilefilter=All files (*.*)|*.*|
+
+; shortcuts: enable/disable keybord shortcuts
+shortcuts=yes
+
+; size: enable/disable window size in the window title
+size=no
+
+; sshversion: Force the SSH version title. 
+;    Default value: PuTTY-KiTTY
+;    KiTTY claims it is PuTTY-KiTTY. But sometimes there are servers that does not allow non standard values.
+;    So it is possible to redefine it
+;sshversion=OpenSSH_5.5
+
+; transparency: enable/disable the transparency feature
+transparency=yes
+
+; uploaddir: the default remote directory where files will be uploaded with pscp integration (drag 'n drop in the KiTTY window)
+;uploaddir=.
+
+; userpasssshnosave: if yes, SSH password will not be save internaly (and can't be reuse automatically) 
+userpasssshnosave=no
+
+; zmodem: enable/disable zmodem feature (to send/receive files with sz/rz commands)
+zmodem=yes
+
+; WinSCPPath: the full path to the winscp.exe binary
+;WinSCPPath=
+
+; WinSCPProtocol: force the protocol for WinSCP integration
+;    Allowed values are: scp, sftp, ftp
+;    Default value is: sftp
+;WinSCPProtocol=sftp
+
+
+
+[Shortcuts]
+
+; Shortcuts: definition for the menu shortcuts keys
+
+; (re)send automatic command (default is SHIFT+F12)
+autocommand=
+; Change settings ...
+changesettings=
+; Clear scrollback
+clearscrollback=
+; Close and restart current session
+closerestart=
+; run a local command (default is CONTROL+F5)
+command=
+; Copy all window buffer to clipboard
+copyall=
+; Open a duplicate window (with same session settings)
+duplicate=
+; open text editor connected to the main window (default is SHIFT+F2)
+editor=
+; open text editor with clipboard content, connected to the main window (default is CONTROL+SHIFT+F2)
+editorclipboard=
+; Show event log
+eventlog=
+; Switch font to black on white colors
+fontblackandwhite=
+; Decrease font size
+fontdown=
+; Switch font to negative colors
+fontnegative=
+; Increase fonr size
+fontup=
+; Switch to full screen
+fullscreen=
+; receive a remote file with pscp.exe: the full path must be selected in clipboard (default is CONTROL+F4)
+getfile=
+; change the background image (default is CONTROL+F11)
+imagechange=
+; special command box (default is CONTROL+F8)
+input=
+; special command with multi-line editor (default is SHIFT+F8)
+inputm=
+; Repeat key exchange
+keyexchange=
+; New session ...
+opennew=
+; Print current clipboard content (default if SHIFT+F7)
+print=
+; Print all window buffer content (default is F7)
+printall=
+; Protect the window, disable keyboard and mouse input (default is CONTROL+F9)
+protect=
+; Reset terminal
+resetterminal=
+; Roll-up the window into the title bar (default is CONTROL+F12)
+rollup=
+; Load a local script and run it remotely (default is CONTROL+F2)
+script=
+; Send a local file with pscp.exe (default is CONTROL+F3)
+sendfile=
+; Show current port forwarding definition (default is SHIFT+F6)
+showportforward=
+; Enable or disable logging (default is SHIFT+F5)
+switchlogmode=
+; Send the window to the system tray (default is CONTROL+F6)
+tray=
+; Switch to embedded image viewer (default SHIFT+F11)
+viewer=
+; Switch to always visible (default is CONTROL+F7)
+visible=
+; Start WinSCP (default is SHIFT+F3)
+winscp=
+
+
+
+
+;KiClassName=PuTTY
+maxblinkingtime=5
+;autoreconnect=yes
+;ReconnectDelay=5
+;scriptmode=yes
+sav=C:\Users\cyril\AppData\Roaming\KiTTY\kitty.sav
+;bcdelay=0
+;commanddelay=0.05
+;initdelay=2.0
+;internaldelay=10
+slidedelay=0
+wintitle=yes
+winrol=yes
+
+
+
+[Print]
+height=100
+maxline=60s
+maxchar=85
+
+
+
+[Launcher]
+
+; reload: enable session list reload on each menu respawn
+reload=yes
+

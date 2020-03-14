@@ -1851,7 +1851,7 @@ winpgnt_integrated.o: ../windows/winpgnt.c ../putty.h ../ssh.h ../misc.h ../tree
 adb.o: ../putty.h ../../adb/adb.c
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../../adb/adb.c -I../../adb -I../../
 
-kitty.o: ../../kitty.c ../../kitty.h ../../kitty_savedump.c ../../kitty_launcher.c ../../kitty_launcher.h ../windows/window.c
+kitty.o: ../../kitty.c ../../kitty.h ../../kitty_savedump.c ../../kitty_launcher.c ../../kitty_launcher.h ../windows/window.c  ../../kitty_ini.h
 	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty.c \
 	-DBUILD_TIME=`date +'"%d/%m/%Y-%H:%M:%S(%Z)"'` \
 	-DBUILD_VERSION=`cat version_major.txt` \
@@ -1978,6 +1978,9 @@ kitty.dll: ../../kitty_dll.c kitty_dll.res.o
 	-Wl,--whole-archive ../../base64/base64.a ../../regex/libregex.a ../../bcrypt/bcrypt.a ../../jpeg/libjpeg.a ../../md5/MD5check.a ../../blocnote/notepad.a ../../mini/mini.a -Wl,--no-whole-archive \
 	-DBUILD_DLL -static-libgcc -lcomdlg32 -lgdi32
 	upx --best --compress-icons=2 kitty.dll
+
+../../kitty_ini.h: ../../kitty_ini.txt
+	( printf 'static char *default_init_file_content = "' ; sed 's/\\/\\\\/g' ../../kitty_ini.txt | sed 's/$$/\\n\\/' ; printf '" ;\n' ) > ../../kitty_ini.h
 
 nohyperlink: putty_nohyperlink.exe
 

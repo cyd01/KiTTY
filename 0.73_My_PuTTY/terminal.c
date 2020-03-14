@@ -1530,7 +1530,9 @@ void term_copy_stuff_from_conf(Terminal *term)
     term->no_applic_k = conf_get_bool(term->conf, CONF_no_applic_k);
     term->no_dbackspace = conf_get_bool(term->conf, CONF_no_dbackspace);
     term->no_mouse_rep = conf_get_bool(term->conf, CONF_no_mouse_rep);
+#ifdef MOD_PERSO
     term->no_focus_rep = conf_get_bool(term->conf, CONF_no_focus_rep);
+#endif
     term->no_remote_charset = conf_get_bool(term->conf, CONF_no_remote_charset);
     term->no_remote_resize = conf_get_bool(term->conf, CONF_no_remote_resize);
     term->no_remote_wintitle = conf_get_bool(term->conf, CONF_no_remote_wintitle);
@@ -7768,6 +7770,7 @@ void term_provide_logctx(Terminal *term, LogContext *logctx)
 
 void term_set_focus(Terminal *term, bool has_focus)
 {
+#ifdef MOD_PERSO
     if( term->has_focus != has_focus) {
         term->has_focus = has_focus;
 
@@ -7778,6 +7781,9 @@ void term_set_focus(Terminal *term, bool has_focus)
                 ldisc_send(term->ldisc, "\033[O", 3,false);
         }
     }
+#else
+    term->has_focus = has_focus;
+#endif
     term_schedule_cblink(term);
 }
 

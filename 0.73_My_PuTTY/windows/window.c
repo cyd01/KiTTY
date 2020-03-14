@@ -382,7 +382,9 @@ static int wintw_char_width(TermWin *, int uc);
 static void wintw_free_draw_ctx(TermWin *);
 static void wintw_set_cursor_pos(TermWin *, int x, int y);
 static void wintw_set_raw_mouse_mode(TermWin *, bool enable);
+#ifdef MOD_PERSO
 static void wintw_set_focus_reporting_mode(TermWin *, bool enable);
+#endif
 static void wintw_set_scrollbar(TermWin *, int total, int start, int page);
 static void wintw_bell(TermWin *, int mode);
 static void wintw_clip_write(
@@ -415,7 +417,9 @@ static const TermWinVtable windows_termwin_vt = {
     wintw_free_draw_ctx,
     wintw_set_cursor_pos,
     wintw_set_raw_mouse_mode,
-	wintw_set_focus_reporting_mode,
+#ifdef MOD_PERSO
+    wintw_set_focus_reporting_mode,
+#endif
     wintw_set_scrollbar,
     wintw_bell,
     wintw_clip_write,
@@ -2023,6 +2027,7 @@ static void wintw_set_raw_mouse_mode(TermWin *tw, bool activate)
     update_mouse_pointer();
 }
 
+#ifdef MOD_PERSO
 /*
  * set or clear the "window focus messages" mode
  */
@@ -2040,6 +2045,7 @@ static void wintw_set_focus_reporting_mode(TermWin *tw, bool activate)
 		}
 	}
 }
+#endif
 
 /*
  * Print a message box and close the connection.
@@ -5265,10 +5271,12 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 				return 0 ;
 			}
 		}
-if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) { 
+/*
+if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 	PopUpSystemMenu( hwnd, 0 ) ;
 	return 0;
 }
+*/
 #endif
 
 	/*

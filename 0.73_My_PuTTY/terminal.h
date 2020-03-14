@@ -331,8 +331,10 @@ struct terminal_tag {
     bool no_applic_k;
     bool no_dbackspace;
     bool no_mouse_rep;
+#ifdef MOD_PERSO
     bool no_focus_rep;
     bool report_focus;
+#endif
     bool no_remote_charset;
     bool no_remote_resize;
     bool no_remote_wintitle;
