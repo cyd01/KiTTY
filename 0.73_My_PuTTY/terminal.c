@@ -1757,6 +1757,10 @@ Terminal *term_init(Conf *myconf, struct unicode_data *ucsdata, TermWin *win)
     term->termstate = TOPLEVEL;
     term->selstate = NO_SELECTION;
     term->curstype = 0;
+#ifdef MOD_PERSO
+	term->no_focus_rep = true;
+	term->report_focus = false;
+#endif
 
     term_copy_stuff_from_conf(term);
 
