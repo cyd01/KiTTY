@@ -1577,7 +1577,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppi(sesskey, "CtrlTabSwitch", 0, conf, CONF_ctrl_tab_switch);
     gpps(sesskey, "Comment", "", conf, CONF_comment );
     gppi(sesskey, "SCPAutoPwd", 0, conf, CONF_scp_auto_pwd);
-    gppb(sesskey, "NoFocusReporting", false, conf, CONF_no_focus_rep);
+    gppb(sesskey, "NoFocusReporting", true, conf, CONF_no_focus_rep);
 #endif
 #ifdef MOD_PORTKNOCKING
 	gpps(sesskey, "PortKnocking", "", conf, CONF_portknockingoptions );

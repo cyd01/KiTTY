@@ -1076,7 +1076,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "CtrlTabSwitch", 0, conf, CONF_ctrl_tab_switch);
     gpps_forced(sesskey, "Comment", "", conf, CONF_comment );
     gppi_forced(sesskey, "SCPAutoPwd", 0, conf, CONF_scp_auto_pwd);
-    gppb_forced(sesskey, "NoFocusReporting", false, conf, CONF_no_focus_rep);
+    gppb_forced(sesskey, "NoFocusReporting", true, conf, CONF_no_focus_rep);
 #endif
 #ifdef MOD_PORTKNOCKING
 	gpps_forced(sesskey, "PortKnocking", "", conf, CONF_portknockingoptions );

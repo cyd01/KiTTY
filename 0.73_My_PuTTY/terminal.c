@@ -7053,7 +7053,7 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
                   input[1] = y + 33;
 
                   l = sprintf(abuf, "\033[M%c", encstate);
-                  l += charset_from_unicode(&inputp, &inputlen,
+                  l += charset_from_unicode((const wchar_t **)&inputp, &inputlen,
                                             abuf + l, 4,
                                             CS_UTF8, NULL, NULL, 0);
                   ldisc_send(term->ldisc, abuf, l, 0);
@@ -7507,7 +7507,6 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
                 sprintf(prefix, "[");
             else
                 sprintf(prefix, "O");
-
             sprintf(suffix, "");
         }
 

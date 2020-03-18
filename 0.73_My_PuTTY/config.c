@@ -2693,7 +2693,11 @@ s = ctrl_getset(b, "Terminal/Bell", "overload",
     ctrl_checkbox(s, "Disable bidirectional text display",
 		  'd', HELPCTX(features_bidi), conf_checkbox_handler,
 		  I(CONF_no_bidi));
-
+#ifdef MOD_PERSO
+    ctrl_checkbox(s, "Disable focus reporting",
+		  NO_SHORTCUT, HELPCTX(no_help), conf_checkbox_handler,
+		  I(CONF_no_focus_rep));
+#endif
     /*
      * The Window panel.
      */

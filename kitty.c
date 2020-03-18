@@ -3665,7 +3665,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 	else if( !strcmp( st, "/redraw" ) ) { InvalidateRect( MainHwnd, NULL, TRUE ) ; return 1 ; }
 	else if( !strcmp( st, "/refresh" ) ) { RefreshBackground( MainHwnd ) ; return 1 ; }
 	else if( strstr( st, "/PrintCharSize " ) == st ) { PrintCharSize=atoi( st+15 ) ; return 1 ; }
-	else if( strstr( st, "/PrintMaxLinePerPage " ) == st ) { PrintMaxLinePerPage=atoi( st+21) ; return 1 ; }
+	else if( strstr( st, "/PrintMaxLinePerPage " ) == st ) { PrintMaxLinePerPage=atoi( st+21 ) ; return 1 ; }
 	else if( strstr( st, "/PrintMaxCharPerLine " ) == st ) { PrintMaxCharPerLine=atoi( st+21 ) ; return 1 ; }
 #ifdef MOD_LAUNCHER
 	else if( !strcmp( st, "/initlauncher" ) ) { InitLauncherRegistry() ; return 1 ; }

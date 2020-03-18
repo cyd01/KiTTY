@@ -45,17 +45,23 @@ adb=yes
 ; antiidledelay: time delay between two sending
 ;antiidledelay=60
 
+; autoreconnect: enable/disable the automatic reconnection feature
+autoreconnect=yes
+
 ; autostoresshkey: enable/disable the automatic ssh key store freature (no confirmation window)
 ;autostoresshkey=no
 
 ; backgroundimage: enable/disable the background image feature
-backgroundimage=yes
+backgroundimage=no
 
 ; bcdelay: time delay between each character in automatic features (autocommand, login script, user function ...)
 ;bcdelay=0
 
 ; capslock: force upper case
 capslock=no
+
+; commanddelay: delay in milliseconds between two lines of the automatic start command script (Connection/Data/Command setting)
+;commanddelay=0.05
 
 ; conf: enable/disable the automatic creation of default configuration file
 conf=yes
@@ -65,10 +71,10 @@ conf=yes
 ;    Usually it the same directory where kitty.exe is
 ;configdir=
 
-; CtHelperPath: The full path to the cthelper.exe binary (Wrapper for Cygwin feature)
+; CtHelperPath: the full path to the cthelper.exe binary (Wrapper for Cygwin feature)
 ;CtHelperPath=
 
-; ctrltab: Switch between PuTTY windows with CTRL+Tab
+; ctrltab: switch between PuTTY windows with CTRL+Tab
 ctrltab=yes
 
 ; cygterm: enable/disable then cygterm feature
@@ -89,6 +95,15 @@ icon=yes
 ; iconfile: point a file where internal icons are located
 ;iconfile=kitty.exe
 
+;initdelay: initial delay in seconds before automatic sending of password, or auto command
+;initdelay=2.0
+
+; KiClassName: change the internal software name to be the same as PuTTY
+;KiClassName=PuTTY
+
+; maxblinkingtime: maximum blinks (in system tray) where receiving bell signal
+maxblinkingtime=5
+
 ; mouseshortcuts: enable/disable mouse shortcuts
 mouseshortcuts=yes
 
@@ -108,8 +123,14 @@ paste=no
 ;    default settings are -scp -r (force scp mode, and recursive mode)
 ;PSCPOptions=-scp -r
 
+; ReconnectDelay: the delay before trying to reconnect automatically (in seconds)
+ReconnectDelay=5
+
 ; remotedir: the default remote directory where files will be uploaded with pscp integration (drag 'n drop in the KiTTY window)
 ;remotedir=.
+
+; sav: path to the save file of the KiTTY registry
+;
 
 ; savemode: specify the save mode for sessions settings
 ;    Allowed values are:
@@ -122,11 +143,18 @@ savemode=registry
 ;    Default value is (*.ksh,*.sh)|*.ksh;*.sh|SQL files (*.sql)|*.sql|All files (*.*)|*.*|
 ;scriptfilefilter=All files (*.*)|*.*|
 
+; scriptmode: enable/disable RuTTY scripting mode
+;scriptmode=yes
+
 ; shortcuts: enable/disable keybord shortcuts
 shortcuts=yes
 
 ; size: enable/disable window size in the window title
 size=no
+
+; slidedelay: delay in seconds before automatic image switching in slideshow mode
+;    0 means no automatic slide, waiting for keyboard event
+;slidedelay=0
 
 ; sshversion: Force the SSH version title. 
 ;    Default value: PuTTY-KiTTY
@@ -143,8 +171,8 @@ transparency=yes
 ; userpasssshnosave: if yes, SSH password will not be save internaly (and can't be reuse automatically) 
 userpasssshnosave=no
 
-; zmodem: enable/disable zmodem feature (to send/receive files with sz/rz commands)
-zmodem=yes
+; winrol: enable/disable the rolling feature (rolling into the title bar)
+winrol=yes
 
 ; WinSCPPath: the full path to the winscp.exe binary
 ;WinSCPPath=
@@ -153,6 +181,12 @@ zmodem=yes
 ;    Allowed values are: scp, sftp, ftp
 ;    Default value is: sftp
 ;WinSCPProtocol=sftp
+
+; wintitle: enable/disable the enhanced title feature (for protected mode and window size)
+wintitle=yes
+
+; zmodem: enable/disable zmodem feature (to send/receive files with sz/rz commands)
+zmodem=yes
 
 
 
@@ -231,26 +265,15 @@ winscp=
 
 
 
-
-;KiClassName=PuTTY
-maxblinkingtime=5
-;autoreconnect=yes
-;ReconnectDelay=5
-;scriptmode=yes
-sav=C:\Users\cyril\AppData\Roaming\KiTTY\kitty.sav
-;bcdelay=0
-;commanddelay=0.05
-;initdelay=2.0
-;internaldelay=10
-slidedelay=0
-wintitle=yes
-winrol=yes
-
-
-
 [Print]
+
+; height: characters size (Printing)
 height=100
-maxline=60s
+
+; maxline: maximum number of lines per page
+maxline=60
+
+; maxchar: maximum number of characters per line
 maxchar=85
 
 
