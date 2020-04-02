@@ -386,4 +386,7 @@ int IsPasswordInConf(void) {
 
 void CleanPassword( char * p ) { memset(p,0,strlen(p)); }
 
+// Extention pour les fichiers de session en mode portable (peut être ktx)
+char FileExtension[15] = "" ;
+
 #endif

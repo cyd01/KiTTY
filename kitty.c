@@ -352,9 +352,6 @@ char * PlinkPath = NULL ;
 // Repertoire de lancement
 char InitialDirectory[4096]="" ;
 
-// Extention pour les fichiers de session en mode portable (peut être ktx)
-char FileExtension[15] = "" ;
-
 // Chemin complet des fichiers de configuration kitty.ini et kitty.sav
 static char * KittyIniFile = NULL ;
 static char * KittySavFile = NULL ;
