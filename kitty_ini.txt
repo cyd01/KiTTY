@@ -86,6 +86,9 @@ cygterm=no
 ; downloaddir: this is the local directory where files are downloaded with the pscp integration
 ;downloaddir=
 
+; fileextension: the extension for session settings files in portable mode
+;fileextension=
+
 ; hyperlink: enable/disable the hyperlink feature
 hyperlink=yes
 

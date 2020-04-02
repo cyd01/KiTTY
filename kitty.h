@@ -220,6 +220,9 @@ extern char PSCPOptions[]  ;
 // Repertoire de lancement
 extern char InitialDirectory[4096] ;
 
+// Extention pour les fichiers de session en mode portable (peut être ktx)
+extern char FileExtension[15] ;
+
 // Répertoire de sauvegarde de la configuration (savemode=dir)
 extern char * ConfigDirectory ;
 

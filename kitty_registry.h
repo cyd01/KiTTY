@@ -12,8 +12,12 @@
 #define MAX_VALUE_NAME 16383
 #endif
 
+
+
 char * GetValueData(HKEY hkTopKey, char * lpSubKey, const char * lpValueName, char * rValue) ;
 
+// Extention pour les fichiers de session en mode portable (peut être ktx)
+extern char FileExtension[15] ;
 
 // Teste l'existance d'une clé
 int RegTestKey( HKEY hMainKey, LPCTSTR lpSubKey ) ;

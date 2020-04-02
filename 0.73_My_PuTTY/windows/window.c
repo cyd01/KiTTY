@@ -661,7 +661,7 @@ static void close_session(void *ignored_context)
 void RestartSession( void ) {
 	win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
 	PostMessage(hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
-	is_backend_first_connected = 0 ;
+	//is_backend_first_connected = 0 ;
 	PostMessage(hwnd,WM_KEYUP,VK_RETURN ,1) ;
 }
 #endif

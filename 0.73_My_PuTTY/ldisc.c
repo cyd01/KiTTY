@@ -157,7 +157,9 @@ void ldisc_send(Ldisc *ldisc, const void *vbuf, int len, bool interactive)
     int keyflag = 0;
 
     assert(ldisc->term);
+#ifndef MOD_PERSO
     assert(len);
+#endif
 
 /* rutty: */
 #ifdef MOD_RUTTY

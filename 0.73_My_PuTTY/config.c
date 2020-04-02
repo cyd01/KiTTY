@@ -850,11 +850,11 @@ static bool load_selected_session(
 	char sessionname[1024] ;
 	int j;
 	dlg_listbox_gettext(ctrlSessionList, dlg, i, sessionname, 1024 ) ;
-	for( j=0; j<ssd->sesslist.nsessions; j++ ){
+	for( j=0; j<ssd->sesslist.nsessions; j++ ) {
 		if( !strcmp( ssd->sesslist.sessions[j], sessionname ) ) i = j ;
-		}
+	}
 	if( (get_param("INIFILE")==2/*SAVEMODE_DIR*/) && GetDirectoryBrowseFlag()
-		&& (sessionname[0]==' ')&&(sessionname[1]=='[')&&(sessionname[strlen(sessionname)-1]==']') ) {
+		&& (sessionname[0]==' ')&&(sessionname[1]=='[')&&(sessionname[strlen(sessionname)-1]==']') ) { // On gère un sous-répertoire
 		sessionname[strlen(sessionname)-1]='\0';
 
 		strcpy( CurrentFolder, SetSessPath( sessionname+2 ) ) ;
@@ -876,21 +876,42 @@ static bool load_selected_session(
 	return false;
     }
     isdef = !strcmp(ssd->sesslist.sessions[i], "Default Settings");
-    load_settings(ssd->sesslist.sessions[i], conf);
 #ifdef MOD_PERSO
-	if( (get_param("INIFILE")==SAVEMODE_DIR) && GetDirectoryBrowseFlag() ) {
+	if( (get_param("INIFILE")==SAVEMODE_DIR) && GetDirectoryBrowseFlag() ) {		// On charge en mode portable
+		if( !strcmp(FileExtension,"") ) {
+			load_settings(ssd->sesslist.sessions[i], conf);
+			sfree(ssd->savedsession);
+			ssd->savedsession = dupstr(isdef ? "" : ssd->sesslist.sessions[i]);
+		} else {
+			int j;
+			char sessionname[1024] ;
+			dlg_listbox_gettext(ctrlSessionList, dlg, i, sessionname, 1024 ) ;
+			for( j=0; j<ssd->sesslist.nsessions; j++ ) {
+				if( !strcmp( ssd->sesslist.sessions[j], sessionname ) ) i = j ;
+			}
+			strcat(sessionname,FileExtension);
+			load_settings(sessionname, conf);
+			sfree(ssd->savedsession);
+			sessionname[strlen(sessionname)-strlen(FileExtension)]='\0';
+			ssd->savedsession = dupstr(isdef ? "" : sessionname);
+		}
 		conf_set_str(conf,CONF_folder,CurrentFolder) ;
-	} else {
+	} else {										// On charge depuis le registre ou alors sans browse directory
+		load_settings(ssd->sesslist.sessions[i], conf);
 		strcpy( CurrentFolder, "Default" ) ;
 		if( conf_get_str(conf,CONF_folder) )
 		if( strlen( conf_get_str(conf,CONF_folder) )>0 ) {
 			strcpy( CurrentFolder, conf_get_str(conf,CONF_folder) ) ;
 			StringList_Add( FolderList, conf_get_str(conf,CONF_folder) ) ;
-			}
 		}
-#endif
+		sfree(ssd->savedsession);
+		ssd->savedsession = dupstr(isdef ? "" : ssd->sesslist.sessions[i]);
+	}
+#else
+    load_settings(ssd->sesslist.sessions[i], conf);
     sfree(ssd->savedsession);
     ssd->savedsession = dupstr(isdef ? "" : ssd->sesslist.sessions[i]);
+#endif
     if (maybe_launch)
         *maybe_launch = !isdef;
     dlg_refresh(NULL, dlg);
@@ -904,6 +925,7 @@ static bool load_selected_session(
 int filter_sessionname( const char * pattern, const char * sessionname, const char * folder, const char * savedsession ) {
 	char buffer[4092] ;
 	int lenpattern = strlen(pattern) ;
+
 	const char * searchpattern = savedsession+lenpattern ;
 	while( ((searchpattern[0]==' ')||(searchpattern[0]=='	'))&&(searchpattern[0]!='\0') ) searchpattern++ ;
 	if( stristr( savedsession, pattern ) != savedsession ) return 0 ;
@@ -973,33 +995,72 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		for (i = 0; i < ssd->sesslist.nsessions; i++) {
 			char folder[1024] ;
 			strcpy( folder, "" ) ;
-			if( (get_param("INIFILE")==SAVEMODE_REG) || ((get_param("INIFILE")==SAVEMODE_DIR) && !GetDirectoryBrowseFlag()) ) {
+			if( (get_param("INIFILE")==SAVEMODE_REG) || ((get_param("INIFILE")==SAVEMODE_DIR) && !GetDirectoryBrowseFlag()) ) { // Registry mode
 				GetSessionFolderName( ssd->sesslist.sessions[i], folder ) ;
-				}
-			if( GetPuttyFlag() )
+			}
+			if( GetPuttyFlag() ) { // In PuTTY mode => all sessions
 				dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-			else if( (get_param("INIFILE")==SAVEMODE_DIR) && GetDirectoryBrowseFlag() )	{
+			} 
+			else if( (get_param("INIFILE")==SAVEMODE_DIR) && GetDirectoryBrowseFlag() ) { // In portable mode
 				CleanFolderName( folder ) ;
-				if (!strcmp( ssd->savedsession, "" )) {
+				if( !strcmp( ssd->savedsession, "" ) ) { // If nothing in session name field
 					if( (!strcmp(CurrentFolder,folder))
 						|| (!strcmp("",folder))
 						|| ( strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i] )
-						)
-						dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-					}
-				else {
-					if( (!strcmp(CurrentFolder,folder))||(!strcmp("",folder)) ) {
-						if( !GetSessionFilterFlag() ) // filtre desactive
+						) {
+						if ( !strcmp(ssd->sesslist.sessions[i]," [..]") ) {
 							dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-						else if( (stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) 
-							|| ( strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i] ) )
+						} else if( !strcmp(FileExtension,"") // No file extension defined
+							&& !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i])
+							) {
 							dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+						} else if( strcmp(FileExtension,"")  // if file extention defined
+							&& (
+							  !strcmp(FileExtension,ssd->sesslist.sessions[i]+strlen(ssd->sesslist.sessions[i])-strlen(FileExtension)) 
+							  ||( (strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i]) && !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i]) )
+							  )
+							) { 
+							char *n=(char*)malloc(strlen(ssd->sesslist.sessions[i])+1);
+							strcpy(n,ssd->sesslist.sessions[i]);
+							if( (n[0]!=' ') || (n[1]!='[') )
+								n[strlen(n)-strlen(FileExtension)]='\0';	// On essaie de supprimer l'affichage de l'extention
+							dlg_listbox_add(ctrl, dlg, n);
+							free(n);
 						}
 					}
+				} else { // If something in session name field
+					if( (!strcmp(CurrentFolder,folder))||(!strcmp("",folder)) ) {
+						if( !GetSessionFilterFlag() ) // No filter
+							dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+						else if( (stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) 
+							|| ( strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i] ) ) {
+							if ( !strcmp(ssd->sesslist.sessions[i]," [..]") ) {
+								dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+							} else if( !strcmp(FileExtension,"") // No file extension defined
+								&& !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i])
+								) {
+								dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+							} else if( strcmp(FileExtension,"")  // if file extention defined
+								&& (
+								!strcmp(FileExtension,ssd->sesslist.sessions[i]+strlen(ssd->sesslist.sessions[i])-strlen(FileExtension)) 
+								||( (strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i]) && !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i]) )
+								)
+								) {
+								char *n=(char*)malloc(strlen(ssd->sesslist.sessions[i])+1);
+								strcpy(n,ssd->sesslist.sessions[i]);
+								if( (n[0]!=' ') || (n[1]!='[') )
+									n[strlen(n)-strlen(FileExtension)]='\0';	// On essaie de supprimer l'affichage de l'extention
+								dlg_listbox_add(ctrl, dlg, n);
+								free(n);
+							}
+
+						} 
+					}
 				}
-			else if( !GetSessionFilterFlag() ) // filtre desactive
+			}
+			else if( !GetSessionFilterFlag() ) // In registry mode without filter => all sessions
 				dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-			else {
+			else { // In registry mode with filter
 				if( (!strcmp(CurrentFolder, "Default" )&&GetSessionsInDefaultFlag()) 
 				    || (!strcmp(CurrentFolder,folder)) ) {
 					if( (!strcmp( ssd->savedsession, "" )) 
@@ -1106,7 +1167,11 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
 		     }
-		char *errmsg = save_settings(ssd->savedsession, conf);
+		char sessionname[1024];
+		strcpy(sessionname,ssd->savedsession);
+		if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
+		char *errmsg = save_settings(sessionname, conf);
+		
 		if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) {
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
@@ -1133,19 +1198,26 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		   ssd->delbutton && ctrl == ssd->delbutton) {
 	    int i = dlg_listbox_index(ssd->listbox, dlg);
 #ifdef MOD_PERSO
-		{ // Pour recuperer le bon index de la session a supprimer quand il y le filtre des sessions
+		// Pour recuperer le bon index de la session a supprimer quand il y le filtre des sessions
 		char sessionname[1024] ;
 		int j;
 		dlg_listbox_gettext(ctrlSessionList, dlg, i, sessionname, 1024 ) ;
 		for( j=0; j<ssd->sesslist.nsessions; j++ ){
 			if( !strcmp( ssd->sesslist.sessions[j], sessionname ) ) i = j ;
-			}
 		}
-#endif
+
+	    if (i <= 0) {
+		dlg_beep(dlg);
+	    } else {
+		if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension) ; }
+		del_settings(sessionname);
+#else
 	    if (i <= 0) {
 		dlg_beep(dlg);
 	    } else {
 		del_settings(ssd->sesslist.sessions[i]);
+
+#endif
 		get_sesslist(&ssd->sesslist, false);
 		get_sesslist(&ssd->sesslist, true);
 		dlg_refresh(ssd->listbox, dlg);
@@ -1211,10 +1283,13 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 #ifdef MOD_PERSO
 #if (defined MOD_PERSO) && (!defined FDJ) && (defined MOD_STARTBUTTON)
 	else if (ctrl == ssd->startbutton) {
+	char sessionname[1024];
 	if( conf_launchable(conf) ) {
 		RunConfig(conf) ;	
 	} else if( (strlen(ssd->savedsession)>0) && isSessionExist(ssd,ssd->savedsession) ) {
-		if( !RunSession( hwnd, CurrentFolder, ssd->savedsession ) ) {  dlg_beep(dlg) ; } 
+		strcpy( sessionname, ssd->savedsession ) ;
+		if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
+		if( !RunSession( hwnd, CurrentFolder, sessionname ) ) {  dlg_beep(dlg) ; } 
 	} else if( dlg_last_focused(ctrl, dlg) == ssd->listbox ) { 
 		Conf *conf2 = conf_new() ; 
 		bool mbl = false;
@@ -1228,8 +1303,11 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 			} else
 			dlg_beep(dlg);
 	    
-		if (conf_launchable(conf)) { RunSession( hwnd, CurrentFolder, ssd->savedsession ) ; }
-		strcpy(ssd->savedsession,oldsavedsession); free(oldsavedsession);
+		strcpy( sessionname, ssd->savedsession ) ;
+		if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
+		if (conf_launchable(conf)) { RunSession( hwnd, CurrentFolder, sessionname ) ; }
+		strcpy(ssd->savedsession,oldsavedsession); 
+		free(oldsavedsession);
 		conf_free(conf2);	
 	} else { dlg_beep(dlg) ; 
 	}
@@ -1240,7 +1318,10 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		   ssd->clearbutton && ctrl == ssd->clearbutton) {
 			SetInitCurrentFolder( "Default" );
 			folder_handler( ctrlFolderList, dlg, data, EVENT_REFRESH ) ;
-			do_defaults("Default Settings", conf) ;
+			char sessionname[1024];
+			strcpy(sessionname,"Default Settings");
+			if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
+			do_defaults(sessionname, conf) ;
 			conf_set_str(conf,CONF_host,"");
 			dlg_editbox_set(ctrlHostnameEdit, dlg,"");
 			if( strlen(ssd->savedsession) > 0 ) {

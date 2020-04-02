@@ -350,7 +350,10 @@ char PSCPOptions[1024] = "-scp -r"  ;
 char * PlinkPath = NULL ;
 
 // Repertoire de lancement
-char InitialDirectory[4096]="" ; 
+char InitialDirectory[4096]="" ;
+
+// Extention pour les fichiers de session en mode portable (peut être ktx)
+char FileExtension[15] = "" ;
 
 // Chemin complet des fichiers de configuration kitty.ini et kitty.sav
 static char * KittyIniFile = NULL ;
@@ -3478,7 +3481,14 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 	
 void SaveCurrentSetting( HWND hwnd ) {
 	char filename[4096], buffer[4096] ;
-	strcpy( buffer, "Connection files (*.ktx)|*.ktx|All files (*.*)|*.*|" ) ;
+	if( strlen(FileExtension)>0 ) {
+		strcpy( buffer, "Connection files (*" ) ;
+		strcat( buffer, FileExtension ) ; strcat( buffer, ")|*" ) ;
+		strcat( buffer, FileExtension ) ; strcat( buffer, "|" ) ;
+	} else {
+		strcpy( buffer, "Connection files (*.ktx)|*.ktx|" ) ;
+	}
+	strcat( buffer, "All files (*.*)|*.*|" ) ;
 	if( buffer[strlen(buffer)-1]!='|' ) strcat( buffer, "|" ) ;
 	if( SaveFileName( hwnd, filename, "Save file...", buffer ) ) {
 		save_open_settings_forced( filename, conf ) ;
@@ -5100,6 +5110,13 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "internaldelay", buffer ) ) { 
 		internal_delay = atoi( buffer ) ; 
 		if( internal_delay < 1 ) internal_delay = 1 ;
+	}
+	if( ReadParameter( INIT_SECTION, "fileextension", buffer ) ) {
+		if( strlen(buffer) > 0 ) {
+			if( buffer[0] != '.' ) { strcpy( FileExtension, "." ) ; } else { strcpy( FileExtension, "" ) ; }
+			strcat( FileExtension, buffer ) ;
+			while( FileExtension[strlen(FileExtension)-1]==' ' ) { FileExtension[strlen(FileExtension)-1] = '\0' ; }
+		}				
 	}
 	if( ReadParameter( INIT_SECTION, "KiPP", buffer ) != 0 ) {
 		if( decryptstring( buffer, MASTER_PASSWORD ) ) ManagePassPhrase( buffer ) ;

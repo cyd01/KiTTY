@@ -1008,7 +1008,14 @@ bool do_config(void)
 	if( GetDefaultSettingsFlag() ) { 
 		char buffer[1024] ;
 		GetSessionFolderName( "Default Settings", buffer ) ;
-		if( strlen( buffer ) == 0 ) { save_settings( "Default Settings", conf ) ; }
+		if( strlen( buffer ) == 0 ) { 
+			if( !strcmp(FileExtension,"") ) {
+				save_settings( "Default Settings", conf ) ; 
+			} else {
+				sprintf(buffer,"Default Settings%s", FileExtension);
+				save_settings( buffer, conf ) ; 
+			}
+		}
 	}
 #endif
     ctrlbox = ctrl_new_box();

@@ -605,6 +605,8 @@ void CreateSSHHandler() {
 // Creation de l'association de fichiers *.ktx
 void CreateFileAssoc() {
 	char path[1024], buffer[1024] ;
+	char ext[15] ;
+	if( strlen( FileExtension ) > 0 ) { strcpy( ext, FileExtension ) ; } else { strcpy( ext, ".ktx") ; }
 
 	GetModuleFileName( NULL, (LPTSTR)path, 1024 ) ;
 
@@ -618,10 +620,10 @@ void CreateFileAssoc() {
 	sprintf(buffer, "\"%s\" -kload \"%%1\"", path ) ;
 	RegTestOrCreate( HKEY_CLASSES_ROOT, "kitty.connect.1\\shell\\open\\command", "", buffer) ;
 	// Création de l'association de fichiers
-	RegTestOrCreate( HKEY_CLASSES_ROOT, ".ktx", "", "kitty.connect.1") ;
-	RegTestOrCreate( HKEY_CLASSES_ROOT, ".ktx", "PerceivedType", "Connection") ;
-	RegTestOrCreate( HKEY_CLASSES_ROOT, ".ktx", "Content Type", "connection/ssh") ;
-	RegTestOrCreate( HKEY_CLASSES_ROOT, ".ktx", "OpenWithProgids", "kitty.connect.1") ;
+	RegTestOrCreate( HKEY_CLASSES_ROOT, ext, "", "kitty.connect.1") ;
+	RegTestOrCreate( HKEY_CLASSES_ROOT, ext, "PerceivedType", "Connection") ;
+	RegTestOrCreate( HKEY_CLASSES_ROOT, ext, "Content Type", "connection/ssh") ;
+	RegTestOrCreate( HKEY_CLASSES_ROOT, ext, "OpenWithProgids", "kitty.connect.1") ;
 }
 	
 // Check for KiTTY registry key. If not, copy from PuTTY one
