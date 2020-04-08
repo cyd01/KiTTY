@@ -19,7 +19,7 @@ KiTTY has all the features from the original software, and adds many others as d
 * Automatic password
 * Automatic command
 * Running a locally saved script on a remote session
-* ZModem integration
+* ~~ZModem integration~~
 
 ### Graphical features
 * An icon for each session
@@ -37,8 +37,8 @@ KiTTY has all the features from the original software, and adds many others as d
 * pscp.exe and WinSCP integration
 * Binary compression
 * Clipboard printing
-* The PuTTYCyg patch
-* Background image
+* Cygwin and cmd.exe intégration
+* ~~Background image~~
 * File association
 * Other settings
 * New command-line options
