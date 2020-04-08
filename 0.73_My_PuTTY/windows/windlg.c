@@ -239,7 +239,8 @@ static INT_PTR CALLBACK LicenceProc(HWND hwnd, UINT msg,
 #if (defined MOD_PERSO) && (!defined FDJ)
 
 //static const char MESSAGE[] = "";
-static const char MESSAGE[] = "                                                                                       KiTTY software is developed by Cyd for 9bis.com, copyright \251 2005-2020, thanks to Leo for bcrypt and mini libraries, thanks to all contributors                                                                                       " ;
+static const char MESSAGE[] = "                                                                                           KiTTY software is developed by Cyd for 9bis.com, copyright \251 2005-2020, thanks to Leo for bcrypt and mini libraries, thanks to all contributors                                                                                       " ;
+
 static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
                                   WPARAM wParam, LPARAM lParam)
 {
@@ -260,7 +261,6 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 	case WM_INITDIALOG: {
 		char buffer[1024] ;
 		LOGFONT lf;
-
 #ifdef FDJ
 		/* Positionnement du ssh handler */
 		CreateSSHHandler() ;
