@@ -5211,18 +5211,20 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #ifdef MOD_PERSO
 
 	if( (wParam == VK_TAB) && (GetKeyState(VK_CONTROL) & 0x8000) ) {					// CTRL + TAB to switch between windows
-		if( (message==WM_KEYUP) && conf_get_int(conf, CONF_ctrl_tab_switch) && GetCtrlTabFlag() ) {
-			struct ctrl_tab_info info = { (GetKeyState(VK_SHIFT) & 0x8000) ? 1 : -1, hwnd, } ;
+		if (conf_get_int(conf, CONF_ctrl_tab_switch) && GetCtrlTabFlag()) {
+			if( message==WM_KEYUP ) {
+				struct ctrl_tab_info info = { (GetKeyState(VK_SHIFT) & 0x8000) ? 1 : -1, hwnd, } ;
 
-			info.next_hi_date_time = info.self_hi_date_time = GetWindowLong(hwnd, 0);
-			info.next_lo_date_time = info.self_lo_date_time = GetWindowLong(hwnd, 4);
-			EnumWindows(CtrlTabWindowProc, (LPARAM) &info);
-			if (info.next != NULL) 
-				if( info.next != hwnd )
-					SetForegroundWindow(info.next);
-		return 0;
+				info.next_hi_date_time = info.self_hi_date_time = GetWindowLong(hwnd, 0);
+				info.next_lo_date_time = info.self_lo_date_time = GetWindowLong(hwnd, 4);
+				EnumWindows(CtrlTabWindowProc, (LPARAM) &info);
+				if (info.next != NULL) 
+					if( info.next != hwnd )
+						SetForegroundWindow(info.next);
+			return 0;
+			}
+			return DefWindowProc(hwnd, message, wParam, lParam);
 		}
-		return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 
 		AntiIdleCount = 0 ;
