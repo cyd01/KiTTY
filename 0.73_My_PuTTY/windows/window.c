@@ -5243,7 +5243,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #endif
 
 
-		if((wParam==VK_TAB)&&(message==WM_KEYDOWN)&&(GetKeyState(VK_CONTROL)&0x8000)&&(GetKeyState(VK_SHIFT)&0x8000))  // CTRL+SHIFT+TAB => Manage shortcut flag
+		if((wParam==VK_F1)&&(message==WM_KEYDOWN)&&(GetKeyState(VK_CONTROL)&0x8000)&&(GetKeyState(VK_SHIFT)&0x8000))  // CTRL+SHIFT+F1 => Manage shortcut flag
 			{ SetShortcutsFlag( abs(GetShortcutsFlag()-1) ) ; return 0 ; }
 		
 		if( GetShortcutsFlag() ) { 
