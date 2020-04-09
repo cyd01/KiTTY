@@ -1868,16 +1868,27 @@ void ManageVisible( HWND hwnd, TermWin *tw, char * title ) {
 			SetWindowPos(hwnd,(HWND)-1,0,0,0,0,  SWP_NOMOVE |SWP_NOSIZE ) ;
 			conf_set_bool( conf, CONF_alwaysontop, true ) ;
 			set_title(tw, title) ;
-			}
-		else {
+		} else {
 			CheckMenuItem( m, (UINT)IDM_VISIBLE, MF_BYCOMMAND|MF_UNCHECKED ) ;
 			SetWindowPos(hwnd,(HWND)-2,0,0,0,0,  SWP_NOMOVE |SWP_NOSIZE ) ;
 			conf_set_bool( conf, CONF_alwaysontop, false ) ;
 			set_title(tw, title) ;
-			}
 		}
 	}
+}
 
+void ManageShortcutsFlag( HWND hwnd ) {
+	HMENU m ;
+	SetShortcutsFlag( abs(GetShortcutsFlag()-1) ) ;
+	if( ( m = GetSystemMenu (hwnd, FALSE) ) != NULL ) {
+		if( GetShortcutsFlag() ) {
+			CheckMenuItem( m, (UINT)IDM_SHORTCUTSTOGGLE, MF_BYCOMMAND|MF_CHECKED ) ;
+		} else {
+			CheckMenuItem( m, (UINT)IDM_SHORTCUTSTOGGLE, MF_BYCOMMAND|MF_UNCHECKED ) ;
+		}
+	}
+}
+	
 // Gere la demande de relance de l'application
 void ManageRestart( HWND hwnd ) {
 	SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ;

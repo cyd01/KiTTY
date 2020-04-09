@@ -1500,6 +1500,12 @@ TrayIcone.hWnd = hwnd ;
 		AppendMenu(FontMenu, MF_ENABLED, IDM_FONTNEGATIVE, "Negative");
 		AppendMenu(FontMenu, MF_ENABLED, IDM_FONTBLACKANDWHITE, "Black and White");
 	AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT) FontMenu, "Font settings");
+	
+	if( GetShortcutsFlag() )
+            AppendMenu(m, MF_ENABLED|MF_CHECKED, IDM_SHORTCUTSTOGGLE, "Shortcuts toggle");
+        else
+            AppendMenu(m, MF_ENABLED, IDM_SHORTCUTSTOGGLE, "Shortcuts toggle");
+	    
 	AppendMenu(m, MF_SEPARATOR, 0, 0);
 	
 	AppendMenu(m, MF_ENABLED, IDM_SCRIPTFILE, "Send scr&ipt file" ) ;
@@ -4023,6 +4029,9 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	  case IDM_VISIBLE: 
 	  	ManageVisible( hwnd, wintw, conf_get_str(conf, CONF_wintitle) ) ;
 		break ;
+	  case IDM_SHORTCUTSTOGGLE:
+		ManageShortcutsFlag( hwnd ) ;
+		break ;
           case IDM_TOTRAY: 
 		if( GetVisibleFlag()==VISIBLE_YES ) {
 			SetVisibleFlag( VISIBLE_TRAY ) ;
@@ -5209,7 +5218,6 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	}
 #endif
 #ifdef MOD_PERSO
-
 	if( (wParam == VK_TAB) && (GetKeyState(VK_CONTROL) & 0x8000) ) {					// CTRL + TAB to switch between windows
 		if (conf_get_int(conf, CONF_ctrl_tab_switch) && GetCtrlTabFlag()) {
 			if( message==WM_KEYUP ) {
@@ -5242,10 +5250,10 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		}
 #endif
 
-
+/*
 		if((wParam==VK_F1)&&(message==WM_KEYDOWN)&&(GetKeyState(VK_CONTROL)&0x8000)&&(GetKeyState(VK_SHIFT)&0x8000))  // CTRL+SHIFT+F1 => Manage shortcut flag
 			{ SetShortcutsFlag( abs(GetShortcutsFlag()-1) ) ; return 0 ; }
-		
+*/
 		if( GetShortcutsFlag() ) { 
 			if ( (message==WM_KEYDOWN)||(message==WM_SYSKEYDOWN) ) {
 

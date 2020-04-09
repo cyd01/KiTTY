@@ -589,9 +589,13 @@ void xyz_updateMenuItems(Terminal *term) ;
 #endif
 #endif
 
+#ifndef IDM_SHORTCUTSTOGGLE
+#define IDM_SHORTCUTSTOGGLE 0xB120
+#endif
+
 // Doit etre le dernier
 #ifndef IDM_LAUNCHER
-#define IDM_LAUNCHER	0xB120
+#define IDM_LAUNCHER	0xB130
 #endif
 
 // USERCMD doit etre la plus grande valeur pour permettre d'avoir autant de raccourcis qu'on le souhaite

@@ -87,7 +87,7 @@ cygterm=no
 ;downloaddir=
 
 ; fileextension: the extension for session settings files in portable mode
-;fileextension=
+;fileextension=.ktx
 
 ; hyperlink: enable/disable the hyperlink feature
 hyperlink=yes
