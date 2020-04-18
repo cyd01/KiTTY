@@ -21,6 +21,7 @@
 #endif
 
 #ifdef MOD_PERSO
+extern char FileExtension[15] ;
 extern char PassKey[1024] ;
 extern int cryptstring( char * st, const char * key ) ;
 extern int decryptstring( char * st, const char * key ) ;
@@ -1668,9 +1669,17 @@ void get_sesslist(struct sesslist *list, bool allocate)
 #ifdef MOD_PERSO
 /* Fonction de creation d'une session */
 void create_settings( const char * name ) {
+	char *nname = NULL ;
 	Conf *cfg = conf_new() ;
 	do_defaults(name,cfg);
-	save_settings(name, cfg);
+	nname = (char*)malloc( strlen(name)+6 ) ;
+	if( !strcmp(FileExtension,"") ) {
+		strcpy(nname,name);
+	} else {
+		sprintf(nname,"%s%s",name,FileExtension);
+	}
+	save_settings(nname, cfg);
+	free(nname) ;
 	conf_free(cfg);
 }
 #include "../kitty_settings.c"

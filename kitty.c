@@ -313,6 +313,12 @@ static int DefaultSettingsFlag = 1 ;
 int GetDefaultSettingsFlag(void) { return DefaultSettingsFlag ; }
 void SetDefaultSettingsFlag( const int flag ) { DefaultSettingsFlag = flag ; }
 
+// Flag pour définir l'action a executer sur un double clic sur une session de la liste des sessions
+// [ConfigBox] dblclick=open
+static int DblClickFlag = 0 ;
+int GetDblClickFlag(void) { return DblClickFlag ; }
+void SetDblClickFlag( const int flag ) { DblClickFlag = flag ; }
+
 // Flag pour inhiber le filtre sur la liste des sessions de la boite de configuration
 static int SessionFilterFlag = 1 ;
 int GetSessionFilterFlag(void) { return SessionFilterFlag ; }
@@ -1417,10 +1423,10 @@ void GetSaveMode( void ) {
 		if( !stricmp( buffer, "registry" ) ) IniFileFlag = SAVEMODE_REG ;
 		else if( !stricmp( buffer, "file" ) ) IniFileFlag = SAVEMODE_FILE ;
 		else if( !stricmp( buffer, "dir" ) ) { IniFileFlag = SAVEMODE_DIR ; DirectoryBrowseFlag = 1 ; }
-		}
+	}
 #endif
 	if( IniFileFlag!=SAVEMODE_DIR ) DirectoryBrowseFlag = 0 ;
-	}
+}
 
 // Sauvegarde de la cle de registre
 void SaveRegistryKeyEx( HKEY hMainKey, LPCTSTR lpSubKey, const char * filename ) {
@@ -5208,7 +5214,10 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "shrinkbitmap", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetShrinkBitmapEnable(1) ; else SetShrinkBitmapEnable(0) ; }
 #endif
 
-
+	if( readINI( KittyIniFile, "ConfigBox", "dblclick", buffer ) ) {
+		if( !strcmp(buffer,"open") ) { SetDblClickFlag(0) ; }
+		if( !strcmp(buffer,"start") ) { SetDblClickFlag(1) ; }
+	}
 	if( readINI( KittyIniFile, "ConfigBox", "height", buffer ) ) {
 		ConfigBoxHeight = atoi( buffer ) ;
 	}

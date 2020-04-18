@@ -14,6 +14,12 @@
 
 [ConfigBox]
 
+; dblclick: define the default action when double click on a session in session list
+;    Allowed values are:
+;    - open: press open button
+;    - start: press start button
+dblclick=open
+
 ; default: if yes all the sessions belong to their own folder and the default folder too
 ;default=yes
 
@@ -140,7 +146,7 @@ ReconnectDelay=5
 ;    - registry : to save sessions into windows regitry
 ;    - file : to save sessions into one unique file (currently not maintained)
 ;    - dir : to save sessions into files in the directory structure
-savemode=registry
+;savemode=registry
 
 ; scriptfilefilter: specify the the local script files extension
 ;    Default value is (*.ksh,*.sh)|*.ksh;*.sh|SQL files (*.sql)|*.sql|All files (*.*)|*.*|

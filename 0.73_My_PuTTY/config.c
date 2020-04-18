@@ -1128,7 +1128,13 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		     MASKPASS( buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
-		     }	
+		     }
+		if( GetDblClickFlag()==1 ) {
+			sessionsaver_handler( ssd->startbutton, dlg, data, EVENT_ACTION ) ;
+			sessionsaver_handler( ssd->clearbutton, dlg, data, EVENT_ACTION ) ;
+			sessionsaver_handler( ctrlSessionList, dlg, data, EVENT_REFRESH ) ;
+		} 
+		else
 		dlg_end(dlg, 1);       /* it's all over, and succeeded */
 	    }
 	if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) { 

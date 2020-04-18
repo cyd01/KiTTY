@@ -143,6 +143,9 @@ FDJFLAG = FDJ1
 
 RCFLAGS += -I ../../ -DMOD_PERSO -D$(FDJFLAG)
 
+# Flag pour éviter les crashes sur processeurs AMD
+CFLAGS += -mms-bitfields -march=i386
+
 CFLAGS += -DNO_SECUREZEROMEMORY -DCOVERITY -DNO_HTMLHELP
 CFLAGS += -D$(FDJFLAG)
 CFLAGS += 	 \

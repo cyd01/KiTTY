@@ -199,6 +199,11 @@ void SetSessionsInDefaultFlag( const int flag ) ;
 int GetDefaultSettingsFlag(void) ;
 void SetDefaultSettingsFlag( const int flag ) ;
 
+// Flag pour définir l'action a executer sur un double clic sur une session de la liste des sessions
+// [ConfigBox] dblclick=open
+int GetDblClickFlag(void) ;
+void SetDblClickFlag( const int flag ) ;
+
 #ifdef MOD_ADB
 // Flag pour inhiber le support d'ADB
 int GetADBFlag(void) ;
