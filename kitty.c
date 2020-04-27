@@ -3296,7 +3296,7 @@ int ReadSpecialMenu( HMENU menu, char * KeyName, int * nbitem, int separator ) {
 			nb = (*nbitem) ;
 			while( ( de = readdir(dir) ) != NULL ) { // Recherche de cle
 				if( strcmp(de->d_name,".") && strcmp(de->d_name,"..") ) {
-				if( strcmp(de->d_name,"Default%20Settings") || strcmp(KeyName,"Launcher") ) { // Default Settings ne doit pas apparitre dans le Launcher
+				if( strcmp(de->d_name,"Default%20Settings") || strcmp(KeyName,"Launcher") ) { // Default Settings ne doit pas apparaitre dans le Launcher
 					
 					sprintf( buffer, "%s\\%s", fullpath, de->d_name ) ;
 					if( !(GetFileAttributes( buffer ) & FILE_ATTRIBUTE_DIRECTORY) ) {
@@ -5446,7 +5446,7 @@ void InitWinMain( void ) {
 		/* Test Default Settings */
 		char * defaultfile = (char*)malloc( strlen(sesspath)+20 ) ;
 		sprintf( defaultfile, "%s\\Default Settings", sesspath ) ;
-		if( !existfile(defaultfile) ) {
+		if( !existfile(defaultfile) && GetDefaultSettingsFlag() ) {
 			create_settings("Default Settings") ;
 		}
 		free( defaultfile ) ;
@@ -5488,7 +5488,7 @@ void InitWinMain( void ) {
 	// Genere un fichier (4096ko max) d'initialisation de toute les Sessions
 	sprintf( buffer, "%s\\%s.ses.updt", InitialDirectory, appname ) ;
 	if( existfile( buffer ) ) { InitAllSessions( HKEY_CURRENT_USER, TEXT(PUTTY_REG_POS), "Sessions", buffer ) ; }
-	/* Format: registry like
+	/* Format: registry like => UTF-8 encoded !!!
 	"ProxyUsername"="mylogin"
 	"ProxyPassword"="mypassword"
 	*/

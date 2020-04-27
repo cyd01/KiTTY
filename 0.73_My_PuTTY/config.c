@@ -1004,8 +1004,8 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 			else if( (get_param("INIFILE")==SAVEMODE_DIR) && GetDirectoryBrowseFlag() ) { // In portable mode
 				CleanFolderName( folder ) ;
 				if( !strcmp( ssd->savedsession, "" ) ) { // If nothing in session name field
-					if( (!strcmp(CurrentFolder,folder))
-						|| (!strcmp("",folder))
+					if( (!strcmp(CurrentFolder,folder)) 
+					        || (!strcmp("",folder))
 						|| ( strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i] )
 						) {
 						if ( !strcmp(ssd->sesslist.sessions[i]," [..]") ) {
@@ -1013,7 +1013,11 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 						} else if( !strcmp(FileExtension,"") // No file extension defined
 							&& !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i])
 							) {
-							dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+							if( !strcmp(ssd->sesslist.sessions[i], "Default Settings")&&strcmp(CurrentFolder,"Default") ) {
+								//dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+							} else {
+								dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+							}
 						} else if( strcmp(FileExtension,"")  // if file extention defined
 							&& (
 							  !strcmp(FileExtension,ssd->sesslist.sessions[i]+strlen(ssd->sesslist.sessions[i])-strlen(FileExtension)) 
@@ -1030,20 +1034,22 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 					}
 				} else { // If something in session name field
 					if( (!strcmp(CurrentFolder,folder))||(!strcmp("",folder)) ) {
-						if( !GetSessionFilterFlag() ) // No filter
-							dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-						else if( (stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) 
+						if( (stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) || !GetSessionFilterFlag()
 							|| ( strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i] ) ) {
-							if ( !strcmp(ssd->sesslist.sessions[i]," [..]") ) {
+							if ( !strcmp(ssd->sesslist.sessions[i]," [..]") ) { // if directory
 								dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
 							} else if( !strcmp(FileExtension,"") // No file extension defined
 								&& !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i])
 								) {
-								dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+								if( !strcmp(ssd->sesslist.sessions[i], "Default Settings")&&strcmp(CurrentFolder,"Default") ) {
+									//dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+								} else {
+									dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
+								}
 							} else if( strcmp(FileExtension,"")  // if file extention defined
 								&& (
 								!strcmp(FileExtension,ssd->sesslist.sessions[i]+strlen(ssd->sesslist.sessions[i])-strlen(FileExtension)) 
-								||( (strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i]) && !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i]) )
+								|| ( (strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i]) && !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i]) )
 								)
 								) {
 								char *n=(char*)malloc(strlen(ssd->sesslist.sessions[i])+1);
