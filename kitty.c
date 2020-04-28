@@ -3930,27 +3930,27 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		}
 	}
 	if( conf_get_int(conf,CONF_proxy_type) != PROXY_NONE ) {
-		if( raw == 0 ) {
-			strcat( cmd, " -rawsettings" ) ;
-			raw++;
-		}
+		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
 		switch( conf_get_int(conf,CONF_proxy_type) ) {
 			case 2: strcat( cmd, " ProxyMethod=2" ) ; break ;
 			case 3: strcat( cmd, " ProxyMethod=3" ) ; break ;
 			case 4: strcat( cmd, " ProxyMethod=4" ) ; break ;
+			case 5: strcat( cmd, " ProxyMethod=5" ) ; break ;
 			default: strcat( cmd, " ProxyMethod=1" ) ; break ;
 		}
 		if( strlen(conf_get_str(conf,CONF_proxy_host))>0 ) { strcat( cmd, " ProxyHost=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_host) ) ; }
 		sprintf( buffer, " ProxyPort=%d", conf_get_int(conf,CONF_proxy_port)) ; strcat( cmd, buffer ) ;
 		if( strlen(conf_get_str(conf,CONF_proxy_username))>0 ) { strcat( cmd, " ProxyUsername=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_username) ) ; }
 		if( strlen(conf_get_str(conf,CONF_proxy_password))>0 ) { strcat( cmd, " ProxyPassword=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_password) ) ; }
+		if( strlen(conf_get_str(conf,CONF_proxy_telnet_command))>0 ) { strcat( cmd, " ProxyTelnetCommand=\"" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_telnet_command) ) ; strcat( cmd, "\"") ; }
 	}
 	if( conf_get_bool(conf,CONF_compression) ) {
-		if( raw == 0 ) {
-			strcat( cmd, " -rawsettings" ) ;
-			raw++;
-		}
+		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
 		strcat( cmd, " Compression=1" ) ;
+	}
+	if( conf_get_bool(conf, CONF_agentfwd) ) {
+		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
+		strcat( cmd, " AgentFwd=1" ) ;
 	}
 	
 	if( debug_flag ) { debug_logevent( "Run: %s", cmd ) ; }
