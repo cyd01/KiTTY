@@ -391,6 +391,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "SaveOnExit", conf_get_bool(conf, CONF_saveonexit) );
     write_setting_i_forced(sesskey, "Icone", conf_get_int(conf, CONF_icone) );
     write_setting_filename_forced(sesskey, "IconeFile", conf_get_filename(conf, CONF_iconefile) );
+    write_setting_i_forced(sesskey, "WinSCPProtocol", conf_get_int(conf, CONF_winscpprot) );
     write_setting_s_forced(sesskey, "SFTPConnect", conf_get_str(conf, CONF_sftpconnect) );
     Filename * fn = filename_from_str( "" ) ;
     conf_set_filename(conf,CONF_scriptfile,fn);
@@ -1016,6 +1017,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "SaveOnExit", false, conf, CONF_saveonexit );
     gppi_forced(sesskey, "Icone", 1, conf, CONF_icone );
     gppfile_forced(sesskey, "IconeFile", conf, CONF_iconefile );
+    gppi_forced(sesskey, "WinSCPProtocol", 1, conf, CONF_winscpprot );
     gpps_forced(sesskey, "SFTPConnect", "", conf, CONF_sftpconnect );
     gppfile_forced(sesskey, "Scriptfile", conf, CONF_scriptfile );
     Filename * fn = filename_from_str( "" ) ;

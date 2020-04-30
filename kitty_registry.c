@@ -478,6 +478,7 @@ return 1 ;
 					RegDeleteValue( hSubKey, "Folder" ) ;
 					RegDeleteValue( hSubKey, "Icone" ) ;
 					RegDeleteValue( hSubKey, "IconeFile" ) ;
+					RegDeleteValue( hSubKey, "WinSCPProtocol" ) ;
 					RegDeleteValue( hSubKey, "SFTPConnect" ) ;
 					RegDeleteValue( hSubKey, "InitDelay" ) ;
 					RegDeleteValue( hSubKey, "Password" ) ;

@@ -350,7 +350,7 @@ char * WinSCPPath = NULL ;
 char * PSCPPath = NULL ;
 
 // Options pour le programme pscp.exe
-char PSCPOptions[1024] = "-scp -r"  ;
+char PSCPOptions[1024] = "-r"  ;
 
 // Chemin vers le programme plink.exe
 char * PlinkPath = NULL ;
@@ -1303,7 +1303,7 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "paste", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#PlinkPath", "" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#PSCPPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#PSCPOptions", "-scp -r" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "#PSCPOptions", "-r" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#remotedir", "" ) ;
 #ifdef MOD_PORTABLE
 			writeINI( KittyIniFile, INIT_SECTION, "savemode", "dir" ) ;
@@ -1330,7 +1330,6 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "#uploaddir", "." ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#userpasssshnosave", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#WinSCPProtocol", "sftp" ) ;
 #ifdef MOD_ZMODEM
 			writeINI( KittyIniFile, INIT_SECTION, "zmodem", "yes" ) ;
 #endif
@@ -2049,7 +2048,8 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 	if( strlen(PSCPOptions)>0 ) {
 		strcat( buffer, PSCPOptions ) ; strcat( buffer, " " ) ;
 	}
-	//strcat( buffer, "-scp -r " ) ; //strcat( buffer, "-batch " ) ;
+	if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; }
+	else { strcat( buffer, "-sftp " ) ; }
 	
 	//if( GetAutoStoreSSHKeyFlag() ) strcat( buffer, "-auto-store-sshkey " ) ;
 	
@@ -2266,7 +2266,8 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 	if( strlen(PSCPOptions)>0 ) {
 		strcat( buffer, PSCPOptions ) ; strcat( buffer, " " ) ;
 	}
-	//strcat( buffer, "-scp -r " ) ; 
+	if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; }
+	else { strcat( buffer, "-sftp " ) ; }	
 	
 	//if( GetAutoStoreSSHKeyFlag() ) strcat( buffer, "-auto-store-sshkey " ) ;
 	
@@ -2381,9 +2382,11 @@ void GetFile( HWND hwnd ) {
 				if( strlen(PSCPOptions)>0 ) {
 					strcat( buffer, PSCPOptions ) ; strcat( buffer, " " ) ;
 				}
+				if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; }
+				else { strcat( buffer, "-sftp " ) ; }
 				if( conf_get_int(conf,CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
 					strcat( buffer, "-2 " ) ;
-					}
+				}
 						
 				if( ReadParameter( INIT_SECTION, "pscpport", pscpport ) ) {
 					pscpport[17]='\0';
@@ -3867,12 +3870,17 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		
 	if( !GetShortPathName( WinSCPPath, shortpath, 4095 ) ) return ;
 
+	switch( conf_get_int(conf, CONF_winscpprot) ) {
+		case 0: strcpy( proto, "scp" ) ; break ;
+		case 2: strcpy( proto, "ftp" ) ; break ;
+		case 3: strcpy( proto, "ftps" ) ; break ;
+		case 4: strcpy( proto, "ftpes" ) ; break ;
+		case 5: strcpy( proto, "http" ) ; break ;
+		case 6: strcpy( proto, "https" ) ; break ;
+		default: strcpy( proto, "sftp" ) ;
+	}
+	
 	if( conf_get_int(conf,CONF_protocol) == PROT_SSH ) {
-		strcpy( proto, "sftp" ) ;
-		if( ReadParameter( INIT_SECTION, "WinSCPProtocol", buffer ) ) { 
-			if( (!strcmp( buffer, "scp" )) || (!strcmp( buffer, "sftp" )) || (!strcmp( buffer, "ftp" )) ) 
-				strcpy( proto, buffer) ;
-		}
 		sprintf( cmd, "%s %s://", shortpath, proto ) ;
 			
 		if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
@@ -3911,7 +3919,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 			}
 		}
 	} else {
-		sprintf( cmd, "%s ftp://%s", shortpath, conf_get_str(conf,CONF_username) ) ;
+		sprintf( cmd, "%s %s://%s", shortpath, proto, conf_get_str(conf,CONF_username) ) ;
 		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
 			char bufpass[1024] ;
 			strcat( cmd, ":" ); 

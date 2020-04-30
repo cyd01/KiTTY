@@ -129,8 +129,8 @@ paste=no
 ;PSCPPath=
 
 ; PSCPOptions: the additionnal options to pass to the pscp command (for download or upload file)
-;    default settings are -scp -r (force scp mode, and recursive mode)
-;PSCPOptions=-scp -r
+;    default settings are -r (force recursive mode)
+;PSCPOptions=-r
 
 ; ReconnectDelay: the delay before trying to reconnect automatically (in seconds)
 ReconnectDelay=5
@@ -183,13 +183,8 @@ userpasssshnosave=no
 ; winrol: enable/disable the rolling feature (rolling into the title bar)
 winrol=yes
 
-; WinSCPPath: the full path to the winscp.exe binary
+; WinSCPPath: the full path to the winscp.exe binary: 
 ;WinSCPPath=
-
-; WinSCPProtocol: force the protocol for WinSCP integration
-;    Allowed values are: scp, sftp, ftp
-;    Default value is: sftp
-;WinSCPProtocol=sftp
 
 ; wintitle: enable/disable the enhanced title feature (for protected mode and window size)
 wintitle=yes
