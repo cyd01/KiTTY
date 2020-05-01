@@ -4022,7 +4022,7 @@ if( !GetPuttyFlag() ) {
 	    ctrl_settitle(b, "Connection/SSH/PSCP&WinSCP",
 			  "PSCP and WinSCP integration");
 	
-           s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "winSCPproto", "General protocol settings") ;
+           s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "winSCPproto", "General protocol setting") ;
 	   ctrl_radiobuttons(s, "Prefered protocol:", NO_SHORTCUT, 7,
               HELPCTX(no_help),
               conf_radiobutton_handler, 
@@ -4047,7 +4047,7 @@ if( !GetPuttyFlag() ) {
 		 I(1));
 	
 	   s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "WinSCP", "WinSCP integration") ;
-	   ctrl_editbox(s, "SFTP connect([user@]hostname[:port])", NO_SHORTCUT, 100,
+	   ctrl_editbox(s, "SFTP connect ([user@]hostname[:port])", NO_SHORTCUT, 100,
 		 HELPCTX(no_help),
 		 conf_editbox_handler, I(CONF_sftpconnect),
 		 I(1));
