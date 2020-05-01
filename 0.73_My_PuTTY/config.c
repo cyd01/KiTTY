@@ -3523,32 +3523,6 @@ if( !GetPuttyFlag() ) {
 		      "exist without looking strange.", HELPCTX(no_help));
 	}
 
-#ifdef MOD_PERSO
-	if( !midsession && !GetPuttyFlag() ) {
-	    s = ctrl_getset(b, "Connection/SSH", "pscp", "WinSCP and PSCP integration") ;
-	   ctrl_checkbox(s, "Send file in current directory (pscp only)", NO_SHORTCUT,
-			  HELPCTX(no_help),
-			  conf_checkbox_handler,
-			  I(CONF_scp_auto_pwd));
-	   ctrl_radiobuttons(s, "WinSCP protocol:", NO_SHORTCUT, 7,
-              HELPCTX(no_help),
-              conf_radiobutton_handler, 
-              I(CONF_winscpprot),
-              "scp", NO_SHORTCUT, I(0),
-              "sftp", NO_SHORTCUT, I(1),
-              "ftp", NO_SHORTCUT, I(2),
-              "ftps", NO_SHORTCUT, I(3),
-              "ftpes", NO_SHORTCUT, I(4),
-              "http", NO_SHORTCUT, I(5),
-              "https", NO_SHORTCUT, I(6),
-              NULL);
-	   ctrl_editbox(s, "SFTP connect", NO_SHORTCUT, 100,
-		 HELPCTX(no_help),
-		 conf_editbox_handler, I(CONF_sftpconnect),
-		 I(1));
-	}
-#endif
-
 	if (!midsession) {
 
 	    s = ctrl_getset(b, "Connection/SSH", "data",
@@ -4042,6 +4016,52 @@ if( !GetPuttyFlag() ) {
 			  HELPCTX(ssh_bugs_rsa1),
 			  sshbug_handler, I(CONF_sshbug_rsa1));
 	}
+
+#ifdef MOD_PERSO
+	if( !GetPuttyFlag() ) {
+	    ctrl_settitle(b, "Connection/SSH/PSCP&WinSCP",
+			  "PSCP and WinSCP integration");
+	
+           s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "winSCPproto", "General protocol settings") ;
+	   ctrl_radiobuttons(s, "Prefered protocol:", NO_SHORTCUT, 7,
+              HELPCTX(no_help),
+              conf_radiobutton_handler, 
+              I(CONF_winscpprot),
+              "scp", NO_SHORTCUT, I(0),
+              "sftp", NO_SHORTCUT, I(1),
+              "ftp", NO_SHORTCUT, I(2),
+              "ftps", NO_SHORTCUT, I(3),
+              "ftpes", NO_SHORTCUT, I(4),
+              "http", NO_SHORTCUT, I(5),
+              "https", NO_SHORTCUT, I(6),
+              NULL);
+	
+	   s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "pscp", "PSCP integration") ;
+	   ctrl_checkbox(s, "Send file in current directory", NO_SHORTCUT,
+			  HELPCTX(no_help),
+			  conf_checkbox_handler,
+			  I(CONF_scp_auto_pwd));
+	   ctrl_editbox(s, "PSCP options", NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_pscpoptions),
+		 I(1));
+	
+	   s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "WinSCP", "WinSCP integration") ;
+	   ctrl_editbox(s, "SFTP connect([user@]hostname[:port])", NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_sftpconnect),
+		 I(1));
+	   ctrl_editbox(s, "WinSCP additional options", NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_winscpoptions),
+		 I(1));
+	   ctrl_editbox(s, "WinSCP additional rawsettings", NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_winscprawsettings),
+		 I(1));
+	}
+#endif
+
     }
 #ifdef MOD_ZMODEM
     // z-modem panel

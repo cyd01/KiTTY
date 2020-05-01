@@ -128,10 +128,6 @@ paste=no
 ; PSCPPath: the full path to the pscp.exe (or kscp.exe) binary
 ;PSCPPath=
 
-; PSCPOptions: the additionnal options to pass to the pscp command (for download or upload file)
-;    default settings are -r (force recursive mode)
-;PSCPOptions=-r
-
 ; ReconnectDelay: the delay before trying to reconnect automatically (in seconds)
 ReconnectDelay=5
 

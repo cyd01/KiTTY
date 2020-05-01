@@ -393,6 +393,9 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_filename_forced(sesskey, "IconeFile", conf_get_filename(conf, CONF_iconefile) );
     write_setting_i_forced(sesskey, "WinSCPProtocol", conf_get_int(conf, CONF_winscpprot) );
     write_setting_s_forced(sesskey, "SFTPConnect", conf_get_str(conf, CONF_sftpconnect) );
+    write_setting_s_forced(sesskey, "PSCPOptions", conf_get_str(conf, CONF_pscpoptions) );
+    write_setting_s_forced(sesskey, "WinSCPOptions", conf_get_str(conf, CONF_winscpoptions) );
+    write_setting_s_forced(sesskey, "WinSCPRawSettings", conf_get_str(conf, CONF_winscprawsettings) );
     Filename * fn = filename_from_str( "" ) ;
     conf_set_filename(conf,CONF_scriptfile,fn);
     write_setting_filename_forced(sesskey, "Scriptfile", conf_get_filename(conf, CONF_scriptfile) );  // C'est le contenu uniquement qui est important a sauvegarder

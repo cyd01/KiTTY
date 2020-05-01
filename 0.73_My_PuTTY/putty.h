@@ -1557,6 +1557,9 @@ NORETURN void cleanup_exit(int);
 	X(FILENAME, NONE, iconefile) \
 	X(INT, NONE, winscpprot) \
 	X(STR, NONE, sftpconnect) \
+	X(STR, NONE, pscpoptions) \
+	X(STR, NONE, winscpoptions) \
+	X(STR, NONE, winscprawsettings) \
 	X(STR, NONE, folder) \
 	X(STR, NONE, password) \
 	X(STR, NONE, autocommand) \

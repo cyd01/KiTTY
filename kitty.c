@@ -349,9 +349,6 @@ char * WinSCPPath = NULL ;
 // Chemin vers le programme pscp.exe
 char * PSCPPath = NULL ;
 
-// Options pour le programme pscp.exe
-char PSCPOptions[1024] = "-r"  ;
-
 // Chemin vers le programme plink.exe
 char * PlinkPath = NULL ;
 
@@ -1303,7 +1300,6 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "paste", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#PlinkPath", "" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#PSCPPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#PSCPOptions", "-r" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#remotedir", "" ) ;
 #ifdef MOD_PORTABLE
 			writeINI( KittyIniFile, INIT_SECTION, "savemode", "dir" ) ;
@@ -2045,8 +2041,8 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 	if( nb_pscp_run<4 ) { sprintf( buffer, "start %s ", pscppath ) ; nb_pscp_run++ ; }
 	else { sprintf( buffer, "%s ", pscppath ) ; nb_pscp_run = 0 ; }
 	
-	if( strlen(PSCPOptions)>0 ) {
-		strcat( buffer, PSCPOptions ) ; strcat( buffer, " " ) ;
+	if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
+		strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ; strcat( buffer, " " ) ;
 	}
 	if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; }
 	else { strcat( buffer, "-sftp " ) ; }
@@ -2263,8 +2259,8 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 	if( nb_pscp_run<4 ) { sprintf( buffer, "start %s ", pscppath ) ; nb_pscp_run++ ; }
 	else { sprintf( buffer, "%s ", pscppath ) ; nb_pscp_run = 0 ; }
 
-	if( strlen(PSCPOptions)>0 ) {
-		strcat( buffer, PSCPOptions ) ; strcat( buffer, " " ) ;
+	if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
+		strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ; strcat( buffer, " " ) ;
 	}
 	if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; }
 	else { strcat( buffer, "-sftp " ) ; }	
@@ -2379,8 +2375,8 @@ void GetFile( HWND hwnd ) {
 				//else { strcpy( dir, InitialDirectory ) ; }
 
 				sprintf( buffer, "start %s ", pscppath ) ;
-				if( strlen(PSCPOptions)>0 ) {
-					strcat( buffer, PSCPOptions ) ; strcat( buffer, " " ) ;
+				if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
+					strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ; strcat( buffer, " " ) ;
 				}
 				if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; }
 				else { strcat( buffer, "-sftp " ) ; }
@@ -3937,6 +3933,11 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 			if( directory[strlen(directory)-1]!='/' ) strcat( cmd, "/" ) ;
 		}
 	}
+	
+	if( strlen(conf_get_str(conf, CONF_winscpoptions))>0 ) {
+		strcat( cmd, " " ) ; strcat( cmd, conf_get_str(conf, CONF_winscpoptions) ) ;
+	}
+	
 	if( conf_get_int(conf,CONF_proxy_type) != PROXY_NONE ) {
 		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
 		switch( conf_get_int(conf,CONF_proxy_type) ) {
@@ -3952,13 +3953,20 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		if( strlen(conf_get_str(conf,CONF_proxy_password))>0 ) { strcat( cmd, " ProxyPassword=" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_password) ) ; }
 		if( strlen(conf_get_str(conf,CONF_proxy_telnet_command))>0 ) { strcat( cmd, " ProxyTelnetCommand=\"" ) ; strcat( cmd, conf_get_str(conf,CONF_proxy_telnet_command) ) ; strcat( cmd, "\"") ; }
 	}
+	
 	if( conf_get_bool(conf,CONF_compression) ) {
 		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
 		strcat( cmd, " Compression=1" ) ;
 	}
+	
 	if( conf_get_bool(conf, CONF_agentfwd) ) {
 		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
 		strcat( cmd, " AgentFwd=1" ) ;
+	}
+	
+	if( strlen(conf_get_str(conf, CONF_winscprawsettings))>0 ) {
+		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
+		strcat( cmd, " " ) ; strcat( cmd, conf_get_str(conf, CONF_winscprawsettings) ) ;
 	}
 	
 	if( debug_flag ) { debug_logevent( "Run: %s", cmd ) ; }
@@ -5153,13 +5161,6 @@ void LoadParameters( void ) {
 		if( existfile( buffer ) ) { 
 			if( PSCPPath!=NULL) { free(PSCPPath) ; PSCPPath = NULL ; }
 			PSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( PSCPPath, buffer ) ;
-		}
-	}
-	if( ReadParameter( INIT_SECTION, "PSCPOptions", buffer ) ) {
-		if( strlen(PSCPOptions)>0 ) { strcpy( PSCPOptions, "" ) ; }
-		if( strlen(buffer)>0 ) {
-			strcpy( PSCPOptions, buffer ) ;
-			PSCPOptions[1023] = '\0' ;
 		}
 	}
 	if( ReadParameter( INIT_SECTION, "readonly", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetReadOnlyFlag(1) ; }

@@ -886,6 +886,9 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_filename(sesskey, "IconeFile", conf_get_filename(conf, CONF_iconefile) );
     write_setting_i(sesskey, "WinSCPProtocol", conf_get_int(conf, CONF_winscpprot) );
     write_setting_s(sesskey, "SFTPConnect", conf_get_str(conf, CONF_sftpconnect) );
+    write_setting_s(sesskey, "PSCPOptions", conf_get_str(conf, CONF_pscpoptions) );
+    write_setting_s(sesskey, "WinSCPOptions", conf_get_str(conf, CONF_winscpoptions) );
+    write_setting_s(sesskey, "WinSCPRawSettings", conf_get_str(conf, CONF_winscprawsettings) );
     Filename * fn = filename_from_str( "" ) ;
     conf_set_filename(conf,CONF_scriptfile,fn);
     write_setting_filename(sesskey, "Scriptfile", conf_get_filename(conf, CONF_scriptfile) );  // C'est le contenu uniquement qui est important a sauvegarder
@@ -1521,6 +1524,9 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppfile(sesskey, "IconeFile", conf, CONF_iconefile );
     gppi(sesskey, "WinSCPProtocol", 1, conf, CONF_winscpprot );
     gpps(sesskey, "SFTPConnect", "", conf, CONF_sftpconnect );
+    gpps(sesskey, "PSCPOptions", "-r", conf, CONF_pscpoptions );
+    gpps(sesskey, "WinSCPOptions", "", conf, CONF_winscpoptions );
+    gpps(sesskey, "WinSCPRawSettings", "", conf, CONF_winscprawsettings );
     gppfile(sesskey, "Scriptfile", conf, CONF_scriptfile );
     Filename * fn = filename_from_str( "" ) ;
     conf_set_filename(conf,CONF_scriptfile,fn);

@@ -492,6 +492,9 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "iconefile=%s\n",			conf_get_filename(conf,CONF_iconefile)->path ) ;
 	fprintf( fp, "winscpprot=%d\n",			conf_get_int(conf,CONF_winscpprot) ) ;
 	fprintf( fp, "sftpconnect=%s\n", 		conf_get_str(conf,CONF_sftpconnect) ) ;
+	fprintf( fp, "pscpoptions=%s\n", 		conf_get_str(conf,CONF_pscpoptions) ) ;
+	fprintf( fp, "winscpoptions=%s\n", 		conf_get_str(conf,CONF_winscpoptions) ) ;
+	fprintf( fp, "winscprawsettings=%s\n", 		conf_get_str(conf,CONF_winscprawsettings) ) ;
 	fprintf( fp, "folder=%s\n", 			conf_get_str(conf,CONF_folder) ) ;
 	/* On decrypte le password */
 	char bufpass[4096] ;
@@ -628,7 +631,6 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "WinHeight=%d\nWinrolFlag=%d\nAutoSendToTray=%d\nNoKittyFileFlag=%d\nConfigBoxHeight=%d\nConfigBoxWindowHeight=%d\nConfigBoxNoExitFlag=%d\nUserPassSSHNoSave=%d\nPuttyFlag=%d\n",WinHeight,WinrolFlag,AutoSendToTray,NoKittyFileFlag,ConfigBoxHeight,ConfigBoxWindowHeight,ConfigBoxNoExitFlag,GetUserPassSSHNoSave(),PuttyFlag);
 
 	fprintf( fp,"BackgroundImageFlag=%d\n",GetBackgroundImageFlag() );
-	fprintf( fp,"PSCPOptions=%s\n",PSCPOptions );
 #ifdef MOD_RECONNECT
 	fprintf( fp,"AutoreconnectFlag=%d\nReconnectDelay=%d\n",AutoreconnectFlag,ReconnectDelay );
 #endif

@@ -219,9 +219,6 @@ extern char * WinSCPPath ;
 // Chemin vers le programme pscp.exe
 extern char * PSCPPath  ;
 
-// Options pour le programme pscp.exe
-extern char PSCPOptions[]  ;
-
 // Repertoire de lancement
 extern char InitialDirectory[4096] ;
 
