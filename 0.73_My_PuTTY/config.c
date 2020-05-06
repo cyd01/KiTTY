@@ -1013,7 +1013,7 @@ void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, c
 	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
 		if( !GetSessionFilterFlag() ) {						// On filter disable
 			sessionlist_add(s,sessionslist[i],&j,true) ;
-		} else if( stristr(sessionslist[i],savedsession)!=NULL ) {		/ If filter match
+		} else if( stristr(sessionslist[i],savedsession)!=NULL ) {		// If filter match
 			sessionlist_add(s,sessionslist[i],&j,true) ;
 		}
 		tabb[i] = false ;	
