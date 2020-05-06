@@ -1300,7 +1300,6 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "paste", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#PlinkPath", "" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#PSCPPath", "" ) ;
-			writeINI( KittyIniFile, INIT_SECTION, "#remotedir", "" ) ;
 #ifdef MOD_PORTABLE
 			writeINI( KittyIniFile, INIT_SECTION, "savemode", "dir" ) ;
 #else
@@ -2015,25 +2014,25 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 	if( PSCPPath==NULL ) {
 		if( IniFileFlag == SAVEMODE_REG ) return ;
 		else if( !SearchPSCP() ) return ;
-		}
+	}
 	if( !existfile( PSCPPath ) ) {
 		if( IniFileFlag == SAVEMODE_REG ) return ;
 		else if( !SearchPSCP() ) return ;
-		}
+	}
 		
 	if( !GetShortPathName( PSCPPath, pscppath, 4095 ) ) return ;
 	
 	if( ReadParameter( INIT_SECTION, "uploaddir", dir ) ) {
 		if( !existdirectory( dir ) ) 
 			strcpy( dir, InitialDirectory ) ;
-		}
+	}
 	if (strlen( dir ) == 0) strcpy( dir, InitialDirectory ) ;
 
 	if( (distantdir != NULL ) && ( strlen(distantdir)>0 ) ) {
 		strcpy( remotedir, distantdir ) ;
-	} else if( !ReadParameter( INIT_SECTION, "remotedir", remotedir ) ) {
-		strcpy( remotedir, "." ) ;
-	}
+	} else if( strlen(conf_get_str(conf,CONF_pscpremotedir))>0 ) {
+		strcpy( remotedir, conf_get_str(conf,CONF_pscpremotedir) ) ;
+	} else { strcpy( remotedir, "." ) ; }
 	if( strlen( remotedir ) == 0 ) strcpy( remotedir, "." ) ;
 
 	strcpy( buffer, "" ) ;

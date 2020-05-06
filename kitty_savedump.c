@@ -493,6 +493,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "winscpprot=%d\n",			conf_get_int(conf,CONF_winscpprot) ) ;
 	fprintf( fp, "sftpconnect=%s\n", 		conf_get_str(conf,CONF_sftpconnect) ) ;
 	fprintf( fp, "pscpoptions=%s\n", 		conf_get_str(conf,CONF_pscpoptions) ) ;
+	fprintf( fp, "pscpremotedir=%s\n", 		conf_get_str(conf,CONF_pscpremotedir) ) ;
 	fprintf( fp, "winscpoptions=%s\n", 		conf_get_str(conf,CONF_winscpoptions) ) ;
 	fprintf( fp, "winscprawsettings=%s\n", 		conf_get_str(conf,CONF_winscprawsettings) ) ;
 	fprintf( fp, "folder=%s\n", 			conf_get_str(conf,CONF_folder) ) ;

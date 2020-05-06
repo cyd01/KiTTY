@@ -481,6 +481,7 @@ return 1 ;
 					RegDeleteValue( hSubKey, "WinSCPProtocol" ) ;
 					RegDeleteValue( hSubKey, "SFTPConnect" ) ;
 					RegDeleteValue( hSubKey, "PSCPOptions" ) ;
+					RegDeleteValue( hSubKey, "PSCPRemoteDir" ) ;
 					RegDeleteValue( hSubKey, "WinSCPOptions" ) ;
 					RegDeleteValue( hSubKey, "WinSCPRawSettings" ) ;
 					RegDeleteValue( hSubKey, "InitDelay" ) ;

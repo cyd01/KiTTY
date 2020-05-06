@@ -969,6 +969,63 @@ int isSessionExist( struct sessionsaver_data *ssd, char * name ) {
 	}
 #endif
 
+void sessionlist_add( char** sessionslist, const char* val, int* pos, bool checkfext) {
+	if( !checkfext || !strcmp(FileExtension,"") ) {
+		sessionslist[*pos] = (char*)malloc( strlen(val)+1 ) ;
+		strcpy(sessionslist[*pos],val) ;
+		*pos = *pos + 1 ;
+	} else {
+		if( !strcmp(FileExtension,val+strlen(val)-strlen(FileExtension)) ) {
+			sessionslist[*pos] = (char*)malloc( strlen(val)+1 ) ;
+			strcpy(sessionslist[*pos],val) ;
+			sessionslist[*pos][strlen(sessionslist[*pos])-strlen(FileExtension)]='\0' ;	// Remove extension
+			*pos = *pos + 1 ;
+		}
+	}
+}
+
+void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, const char** sessionslist, const char * savedsession) {
+	int i, j=0; char **s ; bool * tabb ;
+	// init
+	s = (char**)malloc( nb*sizeof(char*)) ;
+	tabb = (bool*)malloc(nb*sizeof(bool)) ;
+	for( i=0 ; i<nb ; i++ ) { s[i] = NULL ; tabb[i] = true ; }
+	
+	// Adding directories
+	if( GetDirectoryBrowseFlag() )
+	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
+		if( !strcmp(sessionslist[i]," [..]") ) { sessionlist_add(s,sessionslist[i],&j,false) ; tabb[i] = false ;  }			// Add directory ..
+		else if( strstr(sessionslist[i]," [")==sessionslist[i] ) {									// Add other directories
+			if( !(strstr(sessionslist[i]," [.")==sessionslist[i]) ) sessionlist_add(s,sessionslist[i],&j,false) ;			// ... except if start with .
+			tabb[i] = false ; 
+		}
+	}
+	
+	// Adding Default Settings Session only on Main folder
+	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
+		if( strstr(sessionslist[i],"Default Settings")==sessionslist[i] ) {
+			if( !strcmp(CurrentFolder,"Default") ) sessionlist_add(s,sessionslist[i],&j,true) ; 
+			tabb[i] = false ;
+		}
+	}
+	
+	// Adding other session depending on the filter
+	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
+		if( !GetSessionFilterFlag() ) {						// On filter disable
+			sessionlist_add(s,sessionslist[i],&j,true) ;
+		} else if( stristr(sessionslist[i],savedsession)!=NULL ) {		/ If filter match
+			sessionlist_add(s,sessionslist[i],&j,true) ;
+		}
+		tabb[i] = false ;	
+	}
+	
+	for( i=0 ; i<nb ; i++ ) { if( s[i] != NULL ) { dlg_listbox_add(ctrl, dlg, s[i]) ; } }
+	// cleaning
+	for( i=0 ; i<nb ; i++ ) { if( s[i] != NULL ) { free(s[i]) ; } }
+	free(tabb);
+	free(s);
+}
+
 static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 				 void *data, int event)
 {
@@ -991,7 +1048,11 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		
 		ctrlSessionList = ctrl ;
 		if(get_param("INIFILE")==SAVEMODE_DIR) CleanFolderName( CurrentFolder ) ;
-
+		
+		if( get_param("INIFILE")==SAVEMODE_DIR ) {
+			filter_session_portable(ctrl, dlg, ssd->sesslist.nsessions,ssd->sesslist.sessions, ssd->savedsession ) ;
+		}
+		else
 		for (i = 0; i < ssd->sesslist.nsessions; i++) {
 			char folder[1024] ;
 			strcpy( folder, "" ) ;
@@ -1001,69 +1062,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 			if( GetPuttyFlag() ) { // In PuTTY mode => all sessions
 				dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
 			} 
-			else if( (get_param("INIFILE")==SAVEMODE_DIR) && GetDirectoryBrowseFlag() ) { // In portable mode
-				CleanFolderName( folder ) ;
-				if( !strcmp( ssd->savedsession, "" ) ) { // If nothing in session name field
-					if( (!strcmp(CurrentFolder,folder)) 
-					        || (!strcmp("",folder))
-						|| ( strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i] )
-						) {
-						if ( !strcmp(ssd->sesslist.sessions[i]," [..]") ) {
-							dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-						} else if( !strcmp(FileExtension,"") // No file extension defined
-							&& !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i])
-							) {
-							if( !strcmp(ssd->sesslist.sessions[i], "Default Settings")&&strcmp(CurrentFolder,"Default") ) {
-								//dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-							} else {
-								dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-							}
-						} else if( strcmp(FileExtension,"")  // if file extention defined
-							&& (
-							  !strcmp(FileExtension,ssd->sesslist.sessions[i]+strlen(ssd->sesslist.sessions[i])-strlen(FileExtension)) 
-							  ||( (strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i]) && !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i]) )
-							  )
-							) { 
-							char *n=(char*)malloc(strlen(ssd->sesslist.sessions[i])+1);
-							strcpy(n,ssd->sesslist.sessions[i]);
-							if( (n[0]!=' ') || (n[1]!='[') )
-								n[strlen(n)-strlen(FileExtension)]='\0';	// On essaie de supprimer l'affichage de l'extention
-							dlg_listbox_add(ctrl, dlg, n);
-							free(n);
-						}
-					}
-				} else { // If something in session name field
-					if( (!strcmp(CurrentFolder,folder))||(!strcmp("",folder)) ) {
-						if( (stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) || !GetSessionFilterFlag()
-							|| ( strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i] ) ) {
-							if ( !strcmp(ssd->sesslist.sessions[i]," [..]") ) { // if directory
-								dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-							} else if( !strcmp(FileExtension,"") // No file extension defined
-								&& !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i])
-								) {
-								if( !strcmp(ssd->sesslist.sessions[i], "Default Settings")&&strcmp(CurrentFolder,"Default") ) {
-									//dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-								} else {
-									dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-								}
-							} else if( strcmp(FileExtension,"")  // if file extention defined
-								&& (
-								!strcmp(FileExtension,ssd->sesslist.sessions[i]+strlen(ssd->sesslist.sessions[i])-strlen(FileExtension)) 
-								|| ( (strstr(ssd->sesslist.sessions[i]," [")==ssd->sesslist.sessions[i]) && !(strstr(ssd->sesslist.sessions[i]," [.")==ssd->sesslist.sessions[i]) )
-								)
-								) {
-								char *n=(char*)malloc(strlen(ssd->sesslist.sessions[i])+1);
-								strcpy(n,ssd->sesslist.sessions[i]);
-								if( (n[0]!=' ') || (n[1]!='[') )
-									n[strlen(n)-strlen(FileExtension)]='\0';	// On essaie de supprimer l'affichage de l'extention
-								dlg_listbox_add(ctrl, dlg, n);
-								free(n);
-							}
-
-						} 
-					}
-				}
-			}
+			
 			else if( !GetSessionFilterFlag() ) // In registry mode without filter => all sessions
 				dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
 			else { // In registry mode with filter
@@ -4019,10 +4018,10 @@ if( !GetPuttyFlag() ) {
 
 #ifdef MOD_PERSO
 	if( !GetPuttyFlag() ) {
-	    ctrl_settitle(b, "Connection/SSH/PSCP&WinSCP",
+	    ctrl_settitle(b, "Connection/SSH/PSCP and WinSCP",
 			  "PSCP and WinSCP integration");
 	
-           s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "winSCPproto", "General protocol setting") ;
+           s = ctrl_getset(b, "Connection/SSH/PSCP and WinSCP", "winSCPproto", "General protocol setting") ;
 	   ctrl_radiobuttons(s, "Prefered protocol:", NO_SHORTCUT, 7,
               HELPCTX(no_help),
               conf_radiobutton_handler, 
@@ -4036,17 +4035,21 @@ if( !GetPuttyFlag() ) {
               "https", NO_SHORTCUT, I(6),
               NULL);
 	
-	   s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "pscp", "PSCP integration") ;
+	   s = ctrl_getset(b, "Connection/SSH/PSCP and WinSCP", "pscp", "PSCP integration") ;
 	   ctrl_checkbox(s, "Send file in current directory", NO_SHORTCUT,
 			  HELPCTX(no_help),
 			  conf_checkbox_handler,
 			  I(CONF_scp_auto_pwd));
-	   ctrl_editbox(s, "PSCP options", NO_SHORTCUT, 100,
+	   ctrl_editbox(s, "Remote directory (exclusive with previous setting)", NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_pscpremotedir),
+		 I(1));
+           ctrl_editbox(s, "PSCP options", NO_SHORTCUT, 100,
 		 HELPCTX(no_help),
 		 conf_editbox_handler, I(CONF_pscpoptions),
 		 I(1));
 	
-	   s = ctrl_getset(b, "Connection/SSH/PSCP&WinSCP", "WinSCP", "WinSCP integration") ;
+	   s = ctrl_getset(b, "Connection/SSH/PSCP and WinSCP", "WinSCP", "WinSCP integration") ;
 	   ctrl_editbox(s, "SFTP connect ([user@]hostname[:port])", NO_SHORTCUT, 100,
 		 HELPCTX(no_help),
 		 conf_editbox_handler, I(CONF_sftpconnect),

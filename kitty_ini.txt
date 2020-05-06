@@ -131,9 +131,6 @@ paste=no
 ; ReconnectDelay: the delay before trying to reconnect automatically (in seconds)
 ReconnectDelay=5
 
-; remotedir: the default remote directory where files will be uploaded with pscp integration (drag 'n drop in the KiTTY window)
-;remotedir=.
-
 ; sav: path to the save file of the KiTTY registry
 ;
 
@@ -169,9 +166,6 @@ size=no
 
 ; transparency: enable/disable the transparency feature
 transparency=yes
-
-; uploaddir: the default remote directory where files will be uploaded with pscp integration (drag 'n drop in the KiTTY window)
-;uploaddir=.
 
 ; userpasssshnosave: if yes, SSH password will not be save internaly (and can't be reuse automatically) 
 userpasssshnosave=no
