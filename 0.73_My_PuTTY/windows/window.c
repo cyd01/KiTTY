@@ -3595,6 +3595,24 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 		    int size;
 
                     serbuf = strbuf_new();
+#ifdef MOD_PERSO
+			/*On gère le répertoire distant*/
+char *cmd, *cmd2=NULL ;
+cmd = (char*)malloc( strlen(conf_get_str(conf,CONF_autocommand))+1 ) ;
+strcpy( cmd, conf_get_str(conf,CONF_autocommand) ) ;
+
+if( GetRemotePath()!=NULL ) {
+	cmd2 = (char*)malloc( strlen(conf_get_str(conf,CONF_autocommand))+strlen(GetRemotePath())+10 ) ;
+	strcpy( cmd2, cmd ) ;	
+	strcat(cmd2,"\n");
+	strcat(cmd2,"cd ");
+	strcat(cmd2, GetRemotePath());
+} else {
+	cmd2 = (char*)malloc( strlen(conf_get_str(conf,CONF_autocommand))+1 ) ;
+	strcpy( cmd2, cmd ) ;
+}
+conf_set_str( conf,CONF_autocommand,cmd2 ) ;
+#endif
 		    conf_serialise(BinarySink_UPCAST(serbuf), conf);
                     size = serbuf->len;
 
@@ -3613,6 +3631,11 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 			}
 		    }
 
+#ifdef MOD_PERSO
+conf_set_str( conf,CONF_autocommand,cmd ) ;
+free(cmd2);
+free(cmd);
+#endif
                     strbuf_free(serbuf);
 		    inherit_handles = true;
 		    cl = dupprintf("putty %s&%p:%u", argprefix,

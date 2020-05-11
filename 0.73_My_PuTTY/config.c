@@ -967,7 +967,6 @@ int isSessionExist( struct sessionsaver_data *ssd, char * name ) {
 	}
 	return res ;
 	}
-#endif
 
 void sessionlist_add( char** sessionslist, const char* val, int* pos, bool checkfext) {
 	if( !checkfext || !strcmp(FileExtension,"") ) {
@@ -1025,6 +1024,7 @@ void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, c
 	free(tabb);
 	free(s);
 }
+#endif
 
 static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 				 void *data, int event)
