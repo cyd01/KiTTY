@@ -1010,10 +1010,10 @@ bool do_config(void)
 		GetSessionFolderName( "Default Settings", buffer ) ;
 		if( strlen( buffer ) == 0 ) { 
 			if( !strcmp(FileExtension,"") ) {
-				save_settings( "Default Settings", conf ) ; 
+				if( save_settings( "Default Settings", conf )!=NULL ) { lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; }	
 			} else {
 				sprintf(buffer,"Default Settings%s", FileExtension);
-				save_settings( buffer, conf ) ; 
+				if( save_settings( buffer, conf )!=NULL ) { lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; }
 			}
 		}
 	}

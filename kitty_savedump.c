@@ -530,6 +530,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "comment=%s\n",			conf_get_str(conf,CONF_comment) ) ;
 	fprintf( fp, "scp_auto_pwd=%d\n", 		conf_get_int(conf, CONF_scp_auto_pwd));
 	fprintf( fp, "no_focus_rep=%d\n",		conf_get_bool(conf,CONF_no_focus_rep) ) ;
+	fprintf( fp, "scrolllines=%d\n",		conf_get_int(conf,CONF_scrolllines) ) ;
 #endif
 #ifdef MOD_PRINTCLIP
 	fprintf( fp, "printclip=%d\n",			conf_get_int(conf,CONF_printclip) ) ;
@@ -654,6 +655,27 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	if( strlen(ManagePassPhrase(NULL))>0 ) fprintf( fp, "PassPhrase=%s\n", ManagePassPhrase(NULL)) ;
 	fprintf( fp, "is_backend_connected=%d\n", is_backend_connected ) ;
 	fprintf( fp, "is_backend_first_connected=%d\n", is_backend_first_connected ) ;
+}
+
+// Recupere la configuration de kitty_store
+extern char seedpath[2 * MAX_PATH + 10] ;
+extern char seedpath[2 * MAX_PATH + 10] ;
+extern char sesspath[2 * MAX_PATH] ;
+extern char initialsesspath[2 * MAX_PATH] ;
+extern char sshkpath[2 * MAX_PATH] ;
+extern char jumplistpath[2 * MAX_PATH] ;
+extern char oldpath[2 * MAX_PATH] ;
+extern char sessionsuffix[16] ;
+extern char keysuffix[16] ;
+void SaveKiTTYStore( FILE *fp ) {
+	fprintf( fp, "seedpath=%s\n", seedpath ) ;
+	fprintf( fp, "sesspath=%s\n", sesspath ) ;
+	fprintf( fp, "initialsesspath=%s\n", initialsesspath ) ;
+	fprintf( fp, "sshkpath=%s\n", sshkpath ) ;
+	fprintf( fp, "jumplistpath=%s\n", jumplistpath ) ;
+	fprintf( fp, "oldpath=%s\n", oldpath ) ;
+	fprintf( fp, "sessionsuffix=%s\n", sessionsuffix ) ;
+	fprintf( fp, "keysuffix=%s\n", keysuffix ) ;
 }
 
 // recupere la configuration des shortcuts
@@ -819,7 +841,8 @@ void SaveDumpFile( char * filename ) {
 
 		fputs( "\n@@@ RunningConfig @@@\n\n", fpout ) ; fflush( fpout ) ;
 		SaveDumpConfig( fpout, conf ) ; fflush( fpout ) ;
-
+		SaveKiTTYStore( fpout ) ; fflush( fpout ) ;
+			
 		fputs( "\n@@@ RunningConfig in KTX file format @@@\n\n", fpout ) ; fflush( fpout ) ;
 		SaveCurrentConfig( fpout, conf ) ; fputs( "\n", fpout ) ; fflush( fpout ) ;
 				

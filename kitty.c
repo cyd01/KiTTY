@@ -5151,6 +5151,9 @@ void LoadParameters( void ) {
 			while( FileExtension[strlen(FileExtension)-1]==' ' ) { FileExtension[strlen(FileExtension)-1] = '\0' ; }
 		}				
 	}
+	if( ReadParameter( INIT_SECTION, "hostkeyextension", buffer ) ) {
+		if( strlen(buffer) > 0 ) { SetHostKeyExtension(buffer) ; }
+	}
 	if( ReadParameter( INIT_SECTION, "KiPP", buffer ) != 0 ) {
 		if( decryptstring( buffer, MASTER_PASSWORD ) ) ManagePassPhrase( buffer ) ;
 	}

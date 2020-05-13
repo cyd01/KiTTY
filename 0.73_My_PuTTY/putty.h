@@ -1580,6 +1580,7 @@ NORETURN void cleanup_exit(int);
 	X(STR, NONE, comment) \
 	X(INT, NONE, scp_auto_pwd) \
         X(BOOL, NONE, no_focus_rep) /* totally disable mouse reporting */ \
+	X(INT, NONE, scrolllines) /* Options for Scroll Lines per Wheel */ \
 /* #endif */ \
 /* #ifdef MOD_PRINTCLIP */ \
     X(INT, NONE, printclip) \

@@ -95,6 +95,9 @@ cygterm=no
 ; fileextension: the extension for session settings files in portable mode
 ;fileextension=.ktx
 
+; hostkeyextension: the extension for server host key files
+;hostkeyextension=.khk
+
 ; hyperlink: enable/disable the hyperlink feature
 hyperlink=yes
 
@@ -104,7 +107,7 @@ icon=yes
 ; iconfile: point a file where internal icons are located
 ;iconfile=kitty.exe
 
-;initdelay: initial delay in seconds before automatic sending of password, or auto command
+; initdelay: initial delay in seconds before automatic sending of password, or auto command
 ;initdelay=2.0
 
 ; KiClassName: change the internal software name to be the same as PuTTY

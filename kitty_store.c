@@ -69,6 +69,19 @@ void safefree(void *ptr)
     }
 }
 */
+
+void SetHostKeyExtension( const char* ext ) {
+	char * buffer ;
+	buffer = (char*)malloc(strlen(ext)+2);
+	if( ext[0]!='.' ) { strcpy( buffer, "." ) ; } else { strcpy( buffer, "" ) ; }
+	strcat( buffer, ext ) ;
+	while( buffer[strlen(buffer)-1]==' ' ) { buffer[strlen(buffer)-1] = '\0' ; }
+	if( strlen(buffer)>15 ) { buffer[15]='\0' ; }
+	strcpy( keysuffix, buffer ) ;
+	free( buffer ) ;
+}
+
+
 /* JK: my generic function for simplyfing error reporting */
 DWORD errorShow(const char* pcErrText, const char* pcErrParam) {
 	HWND hwRodic;
