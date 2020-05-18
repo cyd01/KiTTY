@@ -79,6 +79,11 @@ IDI_MAINICON_41 ICON "../../res/runner.ico"
 IDI_MAINICON_42 ICON "../../res/bunny.ico"
 IDI_MAINICON_43 ICON "../../res/hellokitty.ico"
 IDI_MAINICON_44 ICON "../../cthelper/puttycyg.ico"
+IDI_MAINICON_45 ICON "../../res/putty4.ico"
+IDI_MAINICON_46 ICON "../../res/putty5.ico"
+IDI_MAINICON_47 ICON "../../res/putty6.ico"
+IDI_MAINICON_48 ICON "../../res/putty7.ico"
+IDI_MAINICON_49 ICON "../../res/putty8.ico"
 #endif
 
 IDC_HOVER CURSOR "../../res/Hover.cur"

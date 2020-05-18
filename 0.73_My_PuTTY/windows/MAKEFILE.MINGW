@@ -165,6 +165,7 @@ CFLAGS += 	 \
 		-DMOD_RUTTY \
 		-DMOD_ADB \
 		-DMOD_BACKGROUNDIMAGE \
+		-DMOD_ZMODEM \
 		-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
@@ -173,7 +174,6 @@ CFLAGS += 	 \
 		-I../../md5 -I../../regex -I../../url -I../../wincrypt -I../../rutty
 		
 #		-DHAS_WINX509 -DMOD_WINCRYPT \
-#		-DMOD_ZMODEM \
 
 
 # Autre flag a gérer

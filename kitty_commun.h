@@ -46,6 +46,12 @@ int GetADBFlag(void) ;
 void SetADBFlag( const int flag ) ;
 #endif
 
+#ifdef MOD_ZMODEM
+// Flag pour inhiber les fonctions ZMODEM
+int GetZModemFlag(void) ;
+void SetZModemFlag( const int flag ) ;
+#endif
+
 // Répertoire de sauvegarde de la configuration (savemode=dir)
 extern char * ConfigDirectory ;
 

@@ -983,13 +983,14 @@ void sessionlist_add( char** sessionslist, const char* val, int* pos, bool check
 	}
 }
 
-void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, const char** sessionslist, const char * savedsession) {
+void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, const char** sessionslist, const char * savedsession, const char* CurrentFolder) {
 	int i, j=0; char **s ; bool * tabb ;
+	char folder[1024] ;
 	// init
 	s = (char**)malloc( nb*sizeof(char*)) ;
 	tabb = (bool*)malloc(nb*sizeof(bool)) ;
 	for( i=0 ; i<nb ; i++ ) { s[i] = NULL ; tabb[i] = true ; }
-	
+
 	// Adding directories
 	if( GetDirectoryBrowseFlag() )
 	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
@@ -998,6 +999,13 @@ void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, c
 			if( !(strstr(sessionslist[i]," [.")==sessionslist[i]) ) sessionlist_add(s,sessionslist[i],&j,false) ;			// ... except if start with .
 			tabb[i] = false ; 
 		}
+	}
+	
+	// Managing browsedirectory setting
+	if( !GetDirectoryBrowseFlag() && strcmp(CurrentFolder,"Default") )
+	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
+		GetSessionFolderName( sessionslist[i], folder ) ;
+		if( strcmp(CurrentFolder,folder) ) { tabb[i] = false ; }
 	}
 	
 	// Adding Default Settings Session only on Main folder
@@ -1047,10 +1055,10 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		if( ssd->savedsession!=NULL ) strcpy( ssd->savedsession, dlg_editbox_get( ssd->editbox, dlg ) ) ; // ajout 0.63 pour que le filtre fonctionne
 		
 		ctrlSessionList = ctrl ;
-		if(get_param("INIFILE")==SAVEMODE_DIR) CleanFolderName( CurrentFolder ) ;
+		//if(get_param("INIFILE")==SAVEMODE_DIR) CleanFolderName( CurrentFolder ) ;
 		
 		if( get_param("INIFILE")==SAVEMODE_DIR ) {
-			filter_session_portable(ctrl, dlg, ssd->sesslist.nsessions,ssd->sesslist.sessions, ssd->savedsession ) ;
+			filter_session_portable(ctrl, dlg, ssd->sesslist.nsessions,ssd->sesslist.sessions, ssd->savedsession, CurrentFolder ) ;
 		}
 		else
 		for (i = 0; i < ssd->sesslist.nsessions; i++) {
@@ -4103,6 +4111,8 @@ if( !GetPuttyFlag() ) {
 		     50,
 		     HELPCTX(no_help),
 		     conf_editbox_handler, I(CONF_rzoptions), I(1)); 
+    ctrl_text(s, "Ctrl+X to quit rz before completing",
+	      HELPCTX(no_help));
 
     ctrl_settitle(b, "Connection/ZModem/sz",
 		  "sz path and options");

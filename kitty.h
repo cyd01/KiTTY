@@ -149,10 +149,12 @@ void SetAutoSendToTray( const int flag ) ;
 int GetTransparencyFlag(void) ;
 void SetTransparencyFlag( const int flag ) ;
 
+#ifdef MOD_ZMODEM
 // Flag pour inhiber les fonctions ZMODEM
 // extern int ZModemFlag ;
 int GetZModemFlag(void) ;
 void SetZModemFlag( const int flag ) ;
+#endif
 
 // Flag pour ne pas creer les fichiers kitty.ini et kitty.sav
 // extern int NoKittyFileFlag ;
@@ -388,6 +390,7 @@ void BlackOnWhiteColours(HWND hwnd) ;
 void ChangeFontSize(HWND hwnd, int dec) ;
 
 void create_settings( const char * name ) ;
+void SetHostKeyExtension( const char* ext ) ;
 
 #ifdef MOD_LAUNCHER
 void InitLauncherRegistry( void ) ;

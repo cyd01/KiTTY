@@ -41,11 +41,20 @@ BEGIN
 	/* "lang-charset" LLLLCCCC = (UK English, Unicode) */
 	BLOCK "080904B0"
 	BEGIN
+#ifdef MOD_PERSO
+	    VALUE "CompanyName",	"9bis.com"  /* required :/ */
+	    VALUE "ProductName",	"KiTTY"
+	    VALUE "FileDescription",	APPDESC
+	    VALUE "InternalName",	APPNAME
+	    VALUE "OriginalFilename",	"KiTTY"
+#else
 	    VALUE "CompanyName",	"Simon Tatham"  /* required :/ */
 	    VALUE "ProductName",	"PuTTY suite"
 	    VALUE "FileDescription",	APPDESC
 	    VALUE "InternalName",	APPNAME
 	    VALUE "OriginalFilename",	APPNAME
+#endif
+
 #if (defined HELPVER)
 	    /* FIXME: this doesn't seem to be visible in Win7/Win10's UI.
 	     * Oh well. */
@@ -54,7 +63,7 @@ BEGIN
 	    VALUE "FileVersion",	TEXTVER
 #endif
 #if (defined MOD_PERSO) && (!defined FDJ)
-		VALUE "ProductVersion",	TEXTVER " - KiTTY fork - Additional features on KiTTY That's all folks! by 9bis.com, 2005-2020"
+		VALUE "ProductVersion",	TEXTVER " - Additional features on KiTTY That's all folks! by 9bis.com, 2005-2020"
 #else
 	    VALUE "ProductVersion",	TEXTVER
 #endif

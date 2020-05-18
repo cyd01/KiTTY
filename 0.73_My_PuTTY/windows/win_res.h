@@ -14,7 +14,7 @@
 #ifdef FDJ
 #define NB_ICONES	4
 #else
-#define NB_ICONES	45
+#define NB_ICONES	50
 #endif
 
 #define IDI_MAINICON_0   1
@@ -62,7 +62,11 @@
 #define IDI_MAINICON_42   43
 #define IDI_MAINICON_43   44
 #define IDI_MAINICON_44   45
-
+#define IDI_MAINICON_45   46
+#define IDI_MAINICON_46   47
+#define IDI_MAINICON_47   48
+#define IDI_MAINICON_48   49
+#define IDI_MAINICON_49   50
 
 #define IDC_HOVER 360
 

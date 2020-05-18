@@ -297,11 +297,6 @@ int GetReconnectDelay(void) { return ReconnectDelay ; }
 void SetReconnectDelay( const int flag ) { ReconnectDelay = flag ; }
 #endif
 
-// Flag pour inhiber les fonctions ZMODEM
-static int ZModemFlag = 0 ;
-int GetZModemFlag(void) { return ZModemFlag ; }
-void SetZModemFlag( const int flag ) { ZModemFlag = flag ; }
-
 // Flag pour inhiber le comportement ou toutes les sessions appartiennent au folder defaut
 static int SessionsInDefaultFlag = 1 ;
 int GetSessionsInDefaultFlag(void) { return SessionsInDefaultFlag ; }
@@ -622,7 +617,7 @@ int get_param( const char * val ) {
 	else if( !stricmp( val, "HYPERLINK" ) ) return HyperlinkFlag ;
 	else if( !stricmp( val, "TRANSPARENCY" ) )return TransparencyFlag ;
 #ifdef MOD_ZMODEM
-	else if( !stricmp( val, "ZMODEM" ) ) return ZModemFlag ;
+	else if( !stricmp( val, "ZMODEM" ) ) return GetZModemFlag() ;
 #endif
 #ifdef MOD_BACKGROUNDIMAGE
 	else if( !stricmp( val, "BACKGROUNDIMAGE" ) ) return GetBackgroundImageFlag() ;
@@ -656,7 +651,7 @@ char * get_param_str( const char * val ) {
 
 #ifdef MOD_ZMODEM
 void xyz_updateMenuItems(Terminal *term) {
-	if( !ZModemFlag ) return ;
+	if( !GetZModemFlag() ) return ;
 	HMENU m = GetSystemMenu(hwnd, FALSE);
 //	EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
 	EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_DISABLED);
@@ -3700,7 +3695,9 @@ int InternalCommand( HWND hwnd, char * st ) {
 	else if( !strcmp( st, "/wintitle" ) ) { TitleBarFlag = abs(TitleBarFlag-1) ; return 1 ; }
 	else if( strstr( st, "/command " ) == st ) { SendCommandAllWindows( hwnd, st+9 ) ; return 1 ; }
 	else if( !strcmp( st, "/sizeall" ) ) { ResizeWinList( hwnd, conf_get_int(conf,CONF_width), conf_get_int(conf,CONF_height) ) ; return 1 ; }
-	else if( !strcmp( st, "/zmodem" ) ) { ZModemFlag = abs(ZModemFlag-1) ; }
+#ifdef MOD_ZMODEM
+	else if( !strcmp( st, "/zmodem" ) ) { SetZModemFlag( abs(GetZModemFlag()-1) ) ; }
+#endif
 	return 0 ;
 	}
 
@@ -5201,8 +5198,8 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "wintitle", buffer ) ) {  if( !stricmp( buffer, "NO" ) ) TitleBarFlag = 0 ; }
 #ifdef MOD_ZMODEM
 	if( ReadParameter( INIT_SECTION, "zmodem", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) ZModemFlag = 0 ; 
-		if( !stricmp( buffer, "YES" ) ) ZModemFlag = 1 ; 
+		if( !stricmp( buffer, "NO" ) ) SetZModemFlag( 0 ) ; 
+//		if( !stricmp( buffer, "YES" ) ) SetZModemFlag( 1 ) ; // ZModem ne marche plsu: on peut réactiver pour tester en passant -zmodem
 		}
 #endif
 #ifdef MOD_RECONNECT

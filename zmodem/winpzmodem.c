@@ -403,9 +403,8 @@ int xyz_ReceiveData(Terminal *term, const u_char *buffer, int len)
 #endif
 //	if( !
 		WriteFile(term->xyz_Internals->write_stdin,buffer,len,&written,NULL)
-	;
 //	) { char buf[1024]; sprintf(buf, "Unable to write %d characters", len); MessageBox(NULL,buf,"Error",MB_OK|MB_ICONERROR); }
-
+;
 	return 0 ;
 }
 

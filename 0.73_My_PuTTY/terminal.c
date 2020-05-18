@@ -6800,12 +6800,6 @@ void term_do_paste(Terminal *term, const wchar_t *data, int len)
 
     queue_toplevel_callback(term_paste_callback, term);
 }
-#ifdef MOD_HYPERLINK
-void urlhack_launch_url_helper( void *frontend, wchar_t * data, int *attr, int len, int must_deselect) {
-	//urlhack_launch_url( (!conf_get_int(term->conf, CONF_url_defbrowser) ? conf_get_filename(term->conf, CONF_url_browser)->path : NULL), (const char *)data) ;
-	//urlhack_launch_url( (!conf_get_int(term->conf, CONF_url_defbrowser) ? conf_get_filename(term->conf, CONF_url_browser)->path : NULL), (const char *)data,0) ;
-}
-#endif
 
 void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
 		Mouse_Action a, int x, int y, bool shift, bool ctrl, bool alt)

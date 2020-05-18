@@ -67,6 +67,13 @@ int GetADBFlag(void) { return ADBFlag ; }
 void SetADBFlag( const int flag ) { ADBFlag = flag ; }
 #endif
 
+#ifdef MOD_ZMODEM
+// Flag pour inhiber les fonctions ZMODEM
+static int ZModemFlag = 0 ;
+int GetZModemFlag(void) { return ZModemFlag ; }
+void SetZModemFlag( const int flag ) { ZModemFlag = flag ; }
+#endif
+
 // Flag pour afficher l'image de fond
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
 // Suite à PuTTY 0.61, le patch covidimus ne fonctionne plus tres bien
