@@ -1832,7 +1832,7 @@ int ManageToTray( HWND hwnd ) {
 	//SendMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
 	//MessageBox( NULL, "To tray", "Tray", MB_OK ) ;
 	//SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) );
-	// Message MYWM_NOTIFYICON pour faire reapparaitre
+	//Message MYWM_NOTIFYICON pour faire reapparaitre
 
 	int ResShell ;
 	char buffer[4096] ;
@@ -3938,7 +3938,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		strcat( cmd, " " ) ; strcat( cmd, conf_get_str(conf, CONF_winscpoptions) ) ;
 	}
 	
-	if( conf_get_int(conf,CONF_proxy_type) != PROXY_NONE ) {
+	if( (conf_get_int(conf,CONF_proxy_type) != PROXY_NONE) && (strlen( conf_get_str(conf, CONF_sftpconnect) )==0) ) {
 		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
 		switch( conf_get_int(conf,CONF_proxy_type) ) {
 			case 2: strcat( cmd, " ProxyMethod=2" ) ; break ;
@@ -5456,12 +5456,14 @@ void InitWinMain( void ) {
 	else if( IniFileFlag == SAVEMODE_DIR ){ // Mode de sauvegarde directory
 		if( strlen(sesspath) == 0 ) { loadPath() ; }
 		/* Test Default Settings */
+		/*
 		char * defaultfile = (char*)malloc( strlen(sesspath)+20 ) ;
 		sprintf( defaultfile, "%s\\Default Settings", sesspath ) ;
 		if( !existfile(defaultfile) && GetDefaultSettingsFlag() ) {
 			create_settings("Default Settings") ;
 		}
 		free( defaultfile ) ;
+		*/
 	}
 
 	// Creer les cles necessaires au programme

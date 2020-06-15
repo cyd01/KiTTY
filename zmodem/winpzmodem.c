@@ -238,7 +238,8 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 	
 	
 	
-	/*   Essai en bypassant le process spawn 
+	//   Essai en bypassant le process spawn 
+	
 	GetStartupInfo(&si);      
 	term->xyz_Internals = (struct zModemInternals *)smalloc(sizeof(struct zModemInternals));
 	memset(term->xyz_Internals, 0, sizeof(struct zModemInternals));
@@ -248,7 +249,7 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 	term->xyz_Internals->read_stderr = si.hStdError ;
 	
 	return 0;
-	*/
+	/**/
 	
 	HANDLE read_stdout, read_stderr, write_stdin, newstdin, newstdout, newstderr; //pipe handles
 

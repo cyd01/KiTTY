@@ -21,6 +21,9 @@
 #endif
 
 #ifdef MOD_PERSO
+#ifndef SAVEMODE_DIR
+#define SAVEMODE_DIR 2
+#endif
 extern char FileExtension[15] ;
 extern char PassKey[1024] ;
 extern int cryptstring( char * st, const char * key ) ;
@@ -945,8 +948,26 @@ bool load_settings(const char *section, Conf *conf)
 	else conf_set_str( conf, CONF_sessionname, "" ) ;
 #endif
     close_settings_r(sesskey);
+#ifdef MOD_PERSO
+    if (exists && conf_launchable(conf)) {
+      if( get_param("INIFILE") == SAVEMODE_DIR ) {
+	char *name;
+	if( strlen(conf_get_str( conf, CONF_folder))>0 ) {
+		name=(char*)malloc( strlen(section)+strlen(conf_get_str( conf, CONF_folder))+2);
+		sprintf(name,"%s/%s",conf_get_str( conf, CONF_folder),section);
+	} else {
+		name=(char*)malloc( strlen(section)+1);
+		sprintf(name,"%s",section);
+	}
+        add_session_to_jumplist(name);
+	free(name);
+      } else
+        add_session_to_jumplist(section);
+    }
+#else
     if (exists && conf_launchable(conf))
         add_session_to_jumplist(section);
+#endif
     return exists;
 }
 

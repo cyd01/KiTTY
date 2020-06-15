@@ -659,7 +659,11 @@ static void close_session(void *ignored_context)
 
 #ifdef MOD_RECONNECT
 void RestartSession( void ) {
-	win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
+	if( GetAutoreconnectFlag() ) {
+		lp_eventlog(default_logpolicy, "User request session restart..." ) ;
+	} else {
+		win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
+	}
 	PostMessage(hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
 	//is_backend_first_connected = 0 ;
 	PostMessage(hwnd,WM_KEYUP,VK_RETURN ,1) ;
@@ -841,7 +845,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    for (i = 0; i < argc; i++) {
 		char *p = argv[i];
 		int ret;
-
 		ret = cmdline_process_param(p, i+1<argc?argv[i+1]:NULL,
 					    1, conf);
 		    
@@ -864,6 +867,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 #endif
 		} else if( !strcmp(p, "-auto_store_sshkey") || !strcmp(p, "-auto-store-sshkey") ) {
 			SetAutoStoreSSHKeyFlag( 1 ) ;
+		} else if( !strcmp(p, "-clearjumplist" ) ) {
+			clear_jumplist();
+			exit(0);
 		} else if( !strcmp(p, "-bgcolor" ) ) {
 			i++ ;
 			int j = 2, r,g,b ;
@@ -1526,8 +1532,7 @@ TrayIcone.hWnd = hwnd ;
 #ifdef MOD_ZMODEM
 	if( (!GetPuttyFlag()) && GetZModemFlag() ) {
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-//	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
-	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_DISABLED, IDM_XYZSTART, "&Zmodem Receive (broken)");
+	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
 	    AppendMenu(m, term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload");
 	    AppendMenu(m, !term->xyz_transfering?MF_GRAYED:MF_ENABLED, IDM_XYZABORT, "Zmodem &Abort");
 	}
