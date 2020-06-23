@@ -1161,8 +1161,8 @@ void showabout(HWND hwnd)
 	if( get_param("PUTTY") ) DialogBox(hinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, AboutProcOrig);
 	else {
 		DialogBox(hinst, MAKEINTRESOURCE(IDD_KITTYABOUT), hwnd, AboutProc);
-		if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
-		/*if( GetIconeFlag() > 0 ) {
+		/*if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+		if( GetIconeFlag() > 0 ) {
 			time_t ttime = time( NULL ) % GetNumberOfIcons() ;
 			SendMessage( hwnd, WM_SETICON, ICON_BIG, (LPARAM)LoadIcon( hinst, MAKEINTRESOURCE(IDI_MAINICON_0 + ttime ) ) );
 			}*/

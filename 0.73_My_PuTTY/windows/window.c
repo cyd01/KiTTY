@@ -902,6 +902,14 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-initdelay") ) {
 			i++ ;
 			init_delay = (int)(1000*atof( argv[i] )) ;
+		} else if( !strcmp(p, "-icon") ) {
+			i++;
+			conf_set_int( conf, CONF_icone, atoi(argv[i])) ;
+		} else if( !strcmp(p, "-iconfile") ) {
+			i++;
+			if( existfile( argv[i] ) ) {
+				conf_set_filename( conf, CONF_iconefile,filename_from_str(argv[i])) ;
+			}
 		} else if( !strcmp(p, "-log") ) {
 			i++ ;
 			conf_set_filename( conf, CONF_logfilename,filename_from_str(argv[i])) ;
