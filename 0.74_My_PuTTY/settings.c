@@ -951,18 +951,19 @@ bool load_settings(const char *section, Conf *conf)
 #ifdef MOD_PERSO
     if (exists && conf_launchable(conf)) {
       if( get_param("INIFILE") == SAVEMODE_DIR ) {
-	char *name;
-	if( strlen(conf_get_str( conf, CONF_folder))>0 ) {
+	char *name=NULL ;
+	if( (section!=NULL) && (strlen(section)>0) && (strlen(conf_get_str( conf, CONF_folder))>0) ) {
 		name=(char*)malloc( strlen(section)+strlen(conf_get_str( conf, CONF_folder))+2);
 		sprintf(name,"%s/%s",conf_get_str( conf, CONF_folder),section);
-	} else {
+	} else if( (section!=NULL) && (strlen(section)>0) ) {
 		name=(char*)malloc( strlen(section)+1);
 		sprintf(name,"%s",section);
 	}
         add_session_to_jumplist(name);
-	free(name);
-      } else
+	if( name!=NULL ) free(name);
+      } else {
         add_session_to_jumplist(section);
+      }
     }
 #else
     if (exists && conf_launchable(conf))
