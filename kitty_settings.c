@@ -125,6 +125,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     wprefs_forced(sesskey, "Cipher", ciphernames, CIPHER_MAX, conf, CONF_ssh_cipherlist);
     wprefs_forced(sesskey, "KEX", kexnames, KEX_MAX, conf, CONF_ssh_kexlist);
     wprefs_forced(sesskey, "HostKey", hknames, HK_MAX, conf, CONF_ssh_hklist);
+    write_setting_b_forced(sesskey, "PreferKnownHostKeys", conf_get_bool(conf, CONF_ssh_prefer_known_hostkeys));
     write_setting_i_forced(sesskey, "RekeyTime", conf_get_int(conf, CONF_ssh_rekey_time));
 #ifndef NO_GSSAPI
     write_setting_i_forced(sesskey, "GssapiRekey", conf_get_int(conf, CONF_gssapirekey));
@@ -658,6 +659,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     }
     gprefs_forced(sesskey, "HostKey", "ed25519,ecdsa,rsa,dsa,WARN",
            hknames, HK_MAX, conf, CONF_ssh_hklist);
+    gppb_forced(sesskey, "PreferKnownHostKeys", true, conf, CONF_ssh_prefer_known_hostkeys);
     gppi_forced(sesskey, "RekeyTime", 60, conf, CONF_ssh_rekey_time);
 #ifndef NO_GSSAPI
     gppi_forced(sesskey, "GssapiRekey", GSS_DEF_REKEY_MINS, conf, CONF_gssapirekey);

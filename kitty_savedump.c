@@ -279,6 +279,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "compression=%d\n",		conf_get_bool(conf,CONF_compression) ) ;
 	//fprintf( fp, "ssh_kexlist=%d\n",		conf_get_int(conf,CONF_ssh_kexlist) ) ;
 	//fprintf( fp, "ssh_hklist=%d\n",			conf_get_int(conf,CONF_ssh_hklist) ) ;
+	fprintf( fp, "ssh_prefer_known_hostkeys=%d\n", 			conf_get_bool(conf,CONF_ssh_prefer_known_hostkeys) ) ;
     	fprintf( fp, "ssh_rekey_time=%d\n",		conf_get_int(conf,CONF_ssh_rekey_time) ) ;
 	fprintf( fp, "ssh_rekey_data=%s\n",		conf_get_str(conf,CONF_ssh_rekey_data) ) ;
 	fprintf( fp, "tryagent=%d\n",			conf_get_bool(conf,CONF_tryagent) ) ;
