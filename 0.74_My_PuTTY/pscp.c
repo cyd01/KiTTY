@@ -52,7 +52,7 @@ static void sink(const char *targ, const char *src);
 
 #ifdef MOD_PERSO
 void SetAutoStoreSSHKey( void ) ;
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 char *appname = "PSCP";
 #else
 const char *const appname = "PSCP";

@@ -94,7 +94,7 @@ static int PasteCommandFlag = 0 ;
 int GetPasteCommandFlag(void) { return PasteCommandFlag ; }
 
 // Flag de gestion de la fonction hyperlink
-#ifdef FDJ
+#ifdef FLJ
 int HyperlinkFlag = 1 ;
 #else
 #ifdef MOD_HYPERLINK
@@ -112,7 +112,7 @@ int GetRuttyFlag(void) { return RuttyFlag ; }
 void SetRuttyFlag( const int flag ) { RuttyFlag = flag ; }
 
 // Flag de gestion de la Transparence
-#ifdef FDJ
+#ifdef FLJ
 static int TransparencyFlag = 1 ;
 #else
 static int TransparencyFlag = 1 ;
@@ -140,7 +140,7 @@ void SetProtectFlag( const int flag ) { ProtectFlag = flag ; }
 #endif
 
 // Definition de la section du fichier de configuration
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 #ifndef INIT_SECTION
 #define INIT_SECTION "KiTTY"
 #endif
@@ -184,7 +184,7 @@ int GetVisibleFlag(void) { return VisibleFlag ; }
 void SetVisibleFlag( const int flag ) { VisibleFlag = flag ; }
 
 // Flag pour inhiber les raccourcis clavier
-#ifdef FDJ
+#ifdef FLJ
 static int ShortcutsFlag = 0 ;
 #else
 static int ShortcutsFlag = 1 ;
@@ -375,7 +375,7 @@ NOTIFYICONDATA TrayIcone ;
 
 #define TIMER_INIT 8701
 #define TIMER_AUTOCOMMAND 8702
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 #define TIMER_SLIDEBG 8703
 #endif
 #define TIMER_REDRAW 8704
@@ -387,7 +387,7 @@ NOTIFYICONDATA TrayIcone ;
 /*
 #define TIMER_INIT 12341
 #define TIMER_AUTOCOMMAND 12342
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 #define TIMER_SLIDEBG 12343
 #endif
 #define TIMER_REDRAW 12344
@@ -631,7 +631,7 @@ int get_param( const char * val ) {
 	return 0 ;
 	}
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	/* Le patch Background image ne marche plus bien sur la version PuTTY 0.61
 		- il est en erreur lorsqu'on passe par la config box
 		- il est ok lorsqu'on demarrer par -load ou par duplicate session
@@ -1150,7 +1150,7 @@ void RegRenameTree( HWND hdlg, HKEY hMainKey, LPCTSTR lpSubKey, LPCTSTR lpDestKe
 // Permet de recuperer les sessions KiTTY dans PuTTY  (PUTTY_REG_POS)
 void RepliqueToPuTTY( LPCTSTR Key ) { 
 	char buffer[1024] ;
-#ifdef FDJ
+#ifdef FLJ
 return ;
 #endif
 	if( IniFileFlag == SAVEMODE_REG )
@@ -1270,7 +1270,7 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "#antiidle=", " \\k08\\" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#antiidledelay", "60" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#autostoresshkey", "no" ) ;
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 			writeINI( KittyIniFile, INIT_SECTION, "backgroundimage", "no" ) ;
 #endif
 			writeINI( KittyIniFile, INIT_SECTION, "#bcdelay", "0" ) ;
@@ -1281,7 +1281,7 @@ void CreateDefaultIniFile_old( void ) {
 //			writeINI( KittyIniFile, INIT_SECTION, "debug", "#no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#downloaddir", "" ) ;
 #ifdef MOD_HYPERLINK
-#ifdef FDJ
+#ifdef FLJ
 			writeINI( KittyIniFile, INIT_SECTION, "hyperlink", "yes" ) ;
 #else
 			writeINI( KittyIniFile, INIT_SECTION, "hyperlink", "no" ) ;
@@ -1303,7 +1303,7 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "savemode", "registry" ) ;
 #endif
 			writeINI( KittyIniFile, INIT_SECTION, "#scriptfilefilter", "All files (*.*)|*.*" ) ;
-#ifdef FDJ
+#ifdef FLJ
 			writeINI( KittyIniFile, INIT_SECTION, "shortcuts", "no" ) ;
 #else
 			writeINI( KittyIniFile, INIT_SECTION, "shortcuts", "yes" ) ;
@@ -1311,7 +1311,7 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "size", "no" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#sshversion", "OpenSSH_5.5" ) ;
 #ifndef MOD_NOTRANSPARENCY
-#ifdef FDJ
+#ifdef FLJ
 			writeINI( KittyIniFile, INIT_SECTION, "transparency", "yes" ) ;
 #else
 			writeINI( KittyIniFile, INIT_SECTION, "transparency", "no" ) ;
@@ -2687,21 +2687,21 @@ void ManageWinrol( HWND hwnd, int resize_action ) {
 	InvalidateRect(hwnd, NULL, TRUE);
 }
 	
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 BOOL load_bg_bmp() ;
 void clean_bg( void ) ;
 void RedrawBackground( HWND hwnd ) ;
 #endif
 
 void RefreshBackground( HWND hwnd ) {
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() ) RedrawBackground( hwnd ) ;
 	else
 #endif
 	InvalidateRect( hwnd, NULL, true ) ;
 }
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 /* Changement du fond d'ecran */
 int GetExt( const char * filename, char * ext) {
 	int i;
@@ -4008,7 +4008,7 @@ int SearchPSCP( void ) {
 				}
 			}
 		}
-#ifndef FDJ
+#ifndef FLJ
 	// kscp dans le meme repertoire
 	sprintf( buffer, "%s\\%s", InitialDirectory, ki ) ;
 	if( existfile( buffer ) ) { 
@@ -4050,7 +4050,7 @@ int SearchPlink( void ) {
 		else { DelParameter( INIT_SECTION, "PlinkPath" ) ; }
 		}
 
-#ifndef FDJ
+#ifndef FLJ
 	// klink dans le meme repertoire
 	sprintf( buffer, "%s\\%s", InitialDirectory, ki ) ;
 	if( existfile( buffer ) ) { 
@@ -4620,7 +4620,7 @@ void ChangeSettings(HWND hwnd) {
 	//ChangeFontSize(hwnd,-1);
 }
 	
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 // Gestion de l'image viewer
 int ManageViewer( HWND hwnd, WORD wParam ) { // Gestion du mode image
 	if( wParam==VK_BACK ) 
@@ -4798,7 +4798,7 @@ void InitShortcuts( void ) {
 //	}
 	if( !readINI(KittyIniFile,"Shortcuts","inputm",buffer) || ( (shortcuts_tab.inputm=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.inputm = SHIFTKEY+VK_F8 ;
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( !readINI(KittyIniFile,"Shortcuts","viewer",buffer) || ( (shortcuts_tab.viewer=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.viewer = SHIFTKEY+VK_F11 ;
 #endif
@@ -4821,7 +4821,7 @@ void InitShortcuts( void ) {
 		shortcuts_tab.input = CONTROLKEY+VK_F8 ;
 	if( !readINI(KittyIniFile,"Shortcuts","protect",buffer) || ( (shortcuts_tab.protect=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.protect = CONTROLKEY+VK_F9 ;
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( !readINI(KittyIniFile,"Shortcuts","imagechange",buffer) || ( (shortcuts_tab.imagechange=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.imagechange = CONTROLKEY+VK_F11 ;
 #endif
@@ -4920,7 +4920,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		}
 	}
 	
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && ImageViewerFlag ) { // Gestion du mode image
 		if( ManageViewer( hwnd, key_num ) ) return 1 ;
 		}
@@ -4960,14 +4960,14 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		SendMessage( hwnd, WM_COMMAND, IDM_PRINT, 0 ) ; 
 		return 1 ; 
 	}
-#ifndef FDJ
+#ifndef FLJ
 	if( key == shortcuts_tab.inputm )	 		// Fenetre de controle
 		{
 		MainHwnd = hwnd ; _beginthread( routine_inputbox_multiline, 0, (void*)&hwnd ) ;
 		return 1 ;
 		}
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (key == shortcuts_tab.viewer) ) 	// Switcher le mode visualiseur d'image
 		{ ImageViewerFlag = abs(ImageViewerFlag-1) ; set_title(NULL, conf_get_str(conf,CONF_wintitle) ) ; return 1 ; }
 #endif
@@ -5012,14 +5012,14 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 	else if( key == shortcuts_tab.keyexchange )		// Repeat key exchange
 		{ SendMessage( hwnd, WM_COMMAND, 1328, 0 ) ; return 1 ; }
 		
-#ifndef FDJ
+#ifndef FLJ
 	else if( key == shortcuts_tab.input ) 			// Fenetre de controle
 			{ MainHwnd = hwnd ; _beginthread( routine_inputbox, 0, (void*)&hwnd ) ;
 			InvalidateRect( hwnd, NULL, TRUE ) ; return 1 ;
 			}
 #endif
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	else if( GetBackgroundImageFlag() && (key == shortcuts_tab.imagechange) ) 		// Changement d'image de fond
 		{ if( NextBgImage( hwnd ) ) InvalidateRect(hwnd, NULL, TRUE) ; return 1 ; }
 #endif
@@ -5072,7 +5072,7 @@ void SetPasteCommand( void ) {
 	}
 	
 // Initialisation des parametres a partir du fichier kitty.ini
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 void SetShrinkBitmapEnable(int) ;
 #endif
 
@@ -5094,7 +5094,7 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "antiidledelay", buffer ) ) 
 		{ AntiIdleCountMax = (int)floor(atoi(buffer)/10.0) ; if( AntiIdleCountMax<=0 ) AntiIdleCountMax =1 ; }
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( debug_flag )
 	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) {	
 		if( !stricmp( buffer, "NO" ) ) SetBackgroundImageFlag( 0 ) ; 
@@ -5222,7 +5222,7 @@ void LoadParameters( void ) {
 	}
 #endif
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( ReadParameter( INIT_SECTION, "shrinkbitmap", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetShrinkBitmapEnable(1) ; else SetShrinkBitmapEnable(0) ; }
 #endif
 
@@ -5366,7 +5366,7 @@ void InitWinMain( void ) {
 	
 	if( existfile("kitty.log") ) { unlink( "kitty.log" ) ; }
 	
-#ifdef FDJ
+#ifdef FLJ
 	CreateSSHHandler();
 	CreateFileAssoc() ;
 	SetADBFlag(0) ;
@@ -5395,7 +5395,7 @@ void InitWinMain( void ) {
 	// Initialisation du nom de la classe
 	strcpy( KiTTYClassName, appname ) ;
 
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 	if( ReadParameter( INIT_SECTION, "KiClassName", buffer ) ) 
 		{ if( (strlen(buffer)>0) && (strlen(buffer)<128) ) { buffer[127]='\0'; strcpy( KiTTYClassName, buffer ) ; } }
 	appname = KiTTYClassName ;

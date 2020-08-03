@@ -5,7 +5,7 @@
 
 
 // Essai de compilation séparée
-#ifdef FDJ
+#ifdef FLJ
 #undef MOD_BACKGROUNDIMAGE
 #endif
 

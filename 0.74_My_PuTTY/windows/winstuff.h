@@ -173,7 +173,7 @@ struct FontSpec *fontspec_new(
 #endif
 
 #ifdef MOD_PERSO
-#ifdef FDJ
+#ifdef FLJ
 #define PUTTY_REG_POS_SAVE "Software\\9bis.com\\PuTTY_save"
 #define PUTTY_REG_POS "Software\\SimonTatham\\PuTTY"
 #define PUTTY_REG_PARENT "Software\\SimonTatham"
@@ -328,7 +328,7 @@ void write_aclip(int clipboard, char *, int, bool);
 #define FILTER_DYNLIB_FILES ("Dynamic Library Files (*.dll)\0*.dll\0" \
 				 "All Files (*.*)\0*\0\0\0")
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 #define FILTER_IMAGE_FILES ("Image Files\0*.BMP;*.JPG;*.JPEG\0" \
 			"BMP Files (*.bmp)\0*.BMP\0" \
 			"JPEG Files (*.jpg)\0*.JPG;*.JPEG\0" \

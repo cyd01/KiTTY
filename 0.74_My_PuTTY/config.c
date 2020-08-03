@@ -813,7 +813,7 @@ static void folder_handler(union control *ctrl, dlgparam *dlg,
 struct sessionsaver_data {
 #ifdef MOD_PERSO
     union control *editbox, *listbox, *clearbutton, *loadbutton, *savebutton, *delbutton, *createbutton, *delfolderbutton, *arrangebutton
-#if (defined MOD_PERSO) && (!defined FDJ) && (defined MOD_STARTBUTTON)
+#if (defined MOD_PERSO) && (!defined FLJ) && (defined MOD_STARTBUTTON)
 	, *startbutton 
 #endif
 	;
@@ -1016,6 +1016,11 @@ void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, c
 		}
 	}
 	
+	// Removing session that starts with __
+	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
+		if( (sessionslist[i][0]=='_')&&(sessionslist[i][1]=='_') ) {  }
+	}
+	
 	// Adding other session depending on the filter
 	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
 		if( !GetSessionFilterFlag() ) {						// On filter disable
@@ -1067,10 +1072,11 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 			if( (get_param("INIFILE")==SAVEMODE_REG) || ((get_param("INIFILE")==SAVEMODE_DIR) && !GetDirectoryBrowseFlag()) ) { // Registry mode
 				GetSessionFolderName( ssd->sesslist.sessions[i], folder ) ;
 			}
+		
 			if( GetPuttyFlag() ) { // In PuTTY mode => all sessions
 				dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-			} 
-			
+			}
+			else if( (ssd->sesslist.sessions[i][0]=='_') && (ssd->sesslist.sessions[i][1]=='_') ) { } // Do nothing if session name starts with __
 			else if( !GetSessionFilterFlag() ) // In registry mode without filter => all sessions
 				dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
 			else { // In registry mode with filter
@@ -1083,8 +1089,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 					|| ( filter_sessionname( "comment:", ssd->sesslist.sessions[i], folder, ssd->savedsession ) )
 					|| ( filter_sessionname( "title:", ssd->sesslist.sessions[i], folder, ssd->savedsession ) )
 					|| ( filter_sessionname( "class:", ssd->sesslist.sessions[i], folder, ssd->savedsession ) )
-					//|| (stristr(host,ssd->savedsession)!=NULL)			/* Filtre sur le nom du host */
-					|| (stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) )
+					|| ( stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) )
 						dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]) ;
 					}
 				}
@@ -1300,7 +1305,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_end(dlg, 0);
 	}
 #ifdef MOD_PERSO
-#if (defined MOD_PERSO) && (!defined FDJ) && (defined MOD_STARTBUTTON)
+#if (defined MOD_PERSO) && (!defined FLJ) && (defined MOD_STARTBUTTON)
 	else if (ctrl == ssd->startbutton) {
 	char sessionname[1024];
 	if( conf_launchable(conf) ) {
@@ -2259,7 +2264,7 @@ void setup_config_box(struct controlbox *b, bool midsession,
     if( GetConfigBoxHeight() > 7 ) ssd->okbutton->generic.column = 0 ; else 
 #endif
     ssd->okbutton->generic.column = 3;
-#if (defined MOD_PERSO) && (!defined FDJ) && (defined MOD_STARTBUTTON)
+#if (defined MOD_PERSO) && (!defined FLJ) && (defined MOD_STARTBUTTON)
 	if( (!midsession)&&(!GetPuttyFlag()) ) {
 		ssd->startbutton = ctrl_pushbutton(s, "Start", NO_SHORTCUT, HELPCTX(no_help), sessionsaver_handler, P(ssd));
 		if( GetConfigBoxHeight() > 7 ) ssd->startbutton->generic.column = 0 ; else ssd->startbutton->generic.column = 3;
@@ -2450,7 +2455,7 @@ void setup_config_box(struct controlbox *b, bool midsession,
 		ctrl_droplist(s, "Folder", NO_SHORTCUT, 80,
 			  HELPCTX(no_help),
 			  folder_handler, I(CONF_folder)) ;
-	}
+    }
 #else
     ssd->savebutton = ctrl_pushbutton(s, "Save", 'v',
 				      HELPCTX(session_saved),
@@ -2920,7 +2925,7 @@ s = ctrl_getset(b, "Terminal/Bell", "overload",
 
     }
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( !GetPuttyFlag() && GetBackgroundImageFlag() ) {
     /*
      * The Window/Background panel.

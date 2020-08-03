@@ -14,7 +14,6 @@ static void about_handler(union control *ctrl, dlgparam *dlg,
 			  void *data, int event)
 {
     HWND *hwndp = (HWND *)ctrl->generic.context.p;
-
     if (event == EVENT_ACTION) {
 	modal_about_box(*hwndp);
     }
@@ -44,7 +43,7 @@ static void variable_pitch_handler(union control *ctrl, dlgparam *dlg,
 #include "kitty.h"
 int get_param( const char * val ) ;
 char * get_param_str( const char * val ) ;
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 void DisableBackgroundImage( void ) ;
 #endif
 void CheckVersionFromWebSite( HWND hwnd ) ;
@@ -155,7 +154,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, bool has_help,
 		if( GetConfigBoxHeight() > 7 ) c->generic.column = 0 ; else 
 	    c->generic.column = 1;
 	}
-#ifndef FDJ
+#ifndef FLJ
 	if( !get_param("PUTTY") ) {
 		c = ctrl_pushbutton(s, "Check Update", NO_SHORTCUT, HELPCTX(no_help),
 			    checkupdate_handler, P(hwndp));
@@ -616,7 +615,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, bool has_help,
 		conf_filesel_handler, I(CONF_url_browser)); 
 	}
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	/* Le patch Background image ne marche plus bien sur la version PuTTY 0.61
 		- il est en erreur lorsqu'on passe par la config box
 		- il est ok lorsqu'on démarrer par -load ou par duplicate session

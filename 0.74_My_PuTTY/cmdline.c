@@ -30,6 +30,7 @@
 
 #ifdef MOD_PERSO
 #include "kitty_crypt.h"
+#include "kitty.h"
 int decode64(char *buffer) ;
 void SetAutoStoreSSHKey( void ) ;
 void load_open_settings_forced(char *filename, Conf *conf) ;
@@ -470,9 +471,36 @@ int cmdline_process_param(const char *p, char *value,
 	RETURN(2);
 	/* This parameter must be processed immediately rather than being
 	 * saved. */
+#if MOD_PERSO
+	if( IniFileFlag == SAVEMODE_REG ) {
+	    do_defaults(value, conf);
+	    loaded_session = true;
+	    cmdline_session_name = dupstr(value) ; 
+	} else {
+	    char *pst = strstr( value, "/" ) ;
+	    if( pst==NULL ) {
+		do_defaults(value, conf);
+		loaded_session = true;
+		cmdline_session_name = dupstr(value) ; 
+	    } else {
+		char *name = (char*)malloc( strlen(value)+1 ) ;
+		strcpy(name,value) ;
+	        pst = strstr( name, "/" ) ;
+	        cmdline_session_name = dupstr(pst+1) ;
+	        pst[0]='\0';
+	        conf_set_str(conf,CONF_folder,name) ;
+		SetSessPath( name ) ;
+		SetInitCurrentFolder( name ) ;
+		do_defaults(pst+1, conf);
+		loaded_session = true;
+		free(value) ;
+	    }
+        }
+#else
 	do_defaults(value, conf);
 	loaded_session = true;
 	cmdline_session_name = dupstr(value);
+#endif
 	return 2;
     }
     if (!strcmp(p, "-ssh")) {

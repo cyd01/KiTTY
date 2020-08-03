@@ -11,6 +11,11 @@
 // Flag permettant d'activer l'acces a du code particulier permettant d'avoir plus d'info dans le kitty.dmp
 extern int debug_flag ;
 
+// Flag pour le fonctionnement en mode "portable" (gestion par fichiers)
+int GetIniFileFlag(void) ;
+void SetIniFileFlag( const int flag ) ;
+void SwitchIniFileFlag(void) ;
+
 // Flag permettant de sauvegarder automatique les cles SSH des serveurs
 // extern int AutoStoreSSHKeyFlag  ;
 int GetAutoStoreSSHKeyFlag(void) ;

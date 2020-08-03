@@ -236,7 +236,7 @@ static INT_PTR CALLBACK LicenceProc(HWND hwnd, UINT msg,
 
 
 
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 
 //static const char MESSAGE[] = "";
 static const char MESSAGE[] = "                                                                                           KiTTY software is developed by Cyd for 9bis.com, copyright \251 2005-2020, thanks to Leo for bcrypt and mini libraries, thanks to all contributors                                                                                       " ;
@@ -261,7 +261,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 	case WM_INITDIALOG: {
 		char buffer[1024] ;
 		LOGFONT lf;
-#ifdef FDJ
+#ifdef FLJ
 		/* Positionnement du ssh handler */
 		CreateSSHHandler() ;
 		/* Creation des association de fichiers .ktx */
@@ -968,7 +968,7 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 void modal_about_box(HWND hwnd)
 {
     EnableWindow(hwnd, 0);
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 	if( get_param("PUTTY") ) DialogBox(hinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, AboutProcOrig);
 	else DialogBox(hinst, MAKEINTRESOURCE(IDD_KITTYABOUT), hwnd, AboutProc);
 #else
@@ -1082,7 +1082,7 @@ bool do_reconfig(HWND hwnd, int protcfginfo)
 
     if (!ret)
 	conf_copy_into(conf, backup_conf);
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (conf_get_int(conf,CONF_bg_slideshow)!=conf_get_int(backup_conf,CONF_bg_slideshow)) ) {
 		KillTimer( hwnd, TIMER_SLIDEBG ) ;
 		if((conf_get_int(conf,CONF_bg_type)!=0)&&(conf_get_int(conf,CONF_bg_slideshow)>0)) 
@@ -1149,7 +1149,7 @@ void showeventlog(HWND hwnd)
     SetActiveWindow(logbox);
 }
 
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 void showabout(HWND hwnd)
 {
 	/*

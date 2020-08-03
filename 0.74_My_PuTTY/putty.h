@@ -622,7 +622,7 @@ extern const int be_default_protocol;
  * Name of this particular application, for use in the config box
  * and other pieces of text.
  */
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 extern char *appname;
 #else
 extern const char *const appname;
@@ -1589,7 +1589,7 @@ NORETURN void cleanup_exit(int);
    X(STR, NONE, script_waitfor) \
    X(STR, NONE, script_halton) \
 /* #endif */ \
-/* #if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ) */\
+/* #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ) */\
     X(INT, NONE, bg_opacity) \
     X(INT, NONE, bg_slideshow) \
     X(INT, NONE, bg_type)                   /* 0=solid 1=wallpaper 2=bitmap */ \

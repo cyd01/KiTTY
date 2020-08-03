@@ -344,7 +344,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_i_forced(sesskey, "WakeupReconnect", conf_get_int(conf,CONF_wakeup_reconnect) );
     write_setting_i_forced(sesskey, "FailureReconnect", conf_get_int(conf,CONF_failure_reconnect) );
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() ) {
     write_setting_i_forced(sesskey, "BgOpacity", conf_get_int(conf, CONF_bg_opacity) );
     write_setting_i_forced(sesskey, "BgSlideshow", conf_get_int(conf, CONF_bg_slideshow) );
@@ -732,7 +732,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "TelnetRet", true, conf, CONF_telnet_newline);
     gppi_forced(sesskey, "LocalEcho", AUTO, conf, CONF_localecho);
     gppi_forced(sesskey, "LocalEdit", AUTO, conf, CONF_localedit);
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
     gpps_forced(sesskey, "Answerback", "KiTTY", conf, CONF_answerback);
 #else
     gpps_forced(sesskey, "Answerback", "PuTTY", conf, CONF_answerback);
@@ -982,7 +982,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "WakeupReconnect", 0, conf, CONF_wakeup_reconnect );
     gppi_forced(sesskey, "FailureReconnect", 0, conf, CONF_failure_reconnect );
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
     gppi_forced(sesskey, "BgOpacity", 50, conf, CONF_bg_opacity );
     gppi_forced(sesskey, "BgSlideshow", 0, conf, CONF_bg_slideshow );
     gppi_forced(sesskey, "BgType", 0, conf, CONF_bg_type );

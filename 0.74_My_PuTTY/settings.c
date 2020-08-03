@@ -839,7 +839,7 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_i(sesskey, "WakeupReconnect", conf_get_int(conf,CONF_wakeup_reconnect) );
     write_setting_i(sesskey, "FailureReconnect", conf_get_int(conf,CONF_failure_reconnect) );
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() ) {
     write_setting_i(sesskey, "BgOpacity", conf_get_int(conf, CONF_bg_opacity) );
     write_setting_i(sesskey, "BgSlideshow", conf_get_int(conf, CONF_bg_slideshow) );
@@ -953,14 +953,18 @@ bool load_settings(const char *section, Conf *conf)
       if( get_param("INIFILE") == SAVEMODE_DIR ) {
 	char *name=NULL ;
 	if( (section!=NULL) && (strlen(section)>0) && (strlen(conf_get_str( conf, CONF_folder))>0) ) {
-		name=(char*)malloc( strlen(section)+strlen(conf_get_str( conf, CONF_folder))+2);
-		sprintf(name,"%s/%s",conf_get_str( conf, CONF_folder),section);
+		if( !strcmp(conf_get_str( conf, CONF_folder),"Default") ) {
+		    add_session_to_jumplist(section);
+		} else {
+		    name=(char*)malloc( strlen(section)+strlen(conf_get_str( conf, CONF_folder))+5);
+		    sprintf(name,"%s/%s",conf_get_str( conf, CONF_folder),section);
+		}
 	} else if( (section!=NULL) && (strlen(section)>0) ) {
 		name=(char*)malloc( strlen(section)+1);
 		sprintf(name,"%s",section);
 	}
-        add_session_to_jumplist(name);
-	if( name!=NULL ) free(name);
+        if( name!=NULL ) { add_session_to_jumplist(name); free(name) ; }
+	else { add_session_to_jumplist(section); }
       } else {
         add_session_to_jumplist(section);
       }
@@ -1255,7 +1259,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppb(sesskey, "TelnetRet", true, conf, CONF_telnet_newline);
     gppi(sesskey, "LocalEcho", AUTO, conf, CONF_localecho);
     gppi(sesskey, "LocalEdit", AUTO, conf, CONF_localedit);
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
     gpps(sesskey, "Answerback", "KiTTY", conf, CONF_answerback);
 #else
     gpps(sesskey, "Answerback", "PuTTY", conf, CONF_answerback);
@@ -1505,7 +1509,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppi(sesskey, "WakeupReconnect", 0, conf, CONF_wakeup_reconnect );
     gppi(sesskey, "FailureReconnect", 0, conf, CONF_failure_reconnect );
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
     gppi(sesskey, "BgOpacity", 50, conf, CONF_bg_opacity );
     gppi(sesskey, "BgSlideshow", 0, conf, CONF_bg_slideshow );
     gppi(sesskey, "BgType", 0, conf, CONF_bg_type );

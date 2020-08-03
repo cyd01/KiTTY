@@ -518,7 +518,7 @@ LRESULT CALLBACK Launcher_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	TrayIcone.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;	// On lui indique les champs valables
 	// On lui dit qu'il devra "écouter" son environement (clique de souris, etc)
 	TrayIcone.uCallbackMessage = KLWM_NOTIFYICON;
-#ifdef FDJ
+#ifdef FLJ
 	TrayIcone.szTip[1024] = (TCHAR*)"PuTTY\0" ;			// Le tooltip par défaut, soit rien
 #else
 	//TrayIcone.szTip[1024] = "KiTTY That\'s all folks!\0" ;			// Le tooltip par défaut, soit rien
@@ -527,7 +527,7 @@ LRESULT CALLBACK Launcher_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	TrayIcone.hWnd = hwnd ;
 	ResShell = Shell_NotifyIcon(NIM_ADD, &TrayIcone);
 	if( ResShell ) {
-#ifdef FDJ
+#ifdef FLJ
 		strcpy( TrayIcone.szTip, "PuTTY\0" ) ;
 #else
 		strcpy( TrayIcone.szTip, "KiTTY That\'s all folks!\0" ) ;
@@ -851,7 +851,7 @@ int RunSession( HWND hwnd, const char * folder_in, char * session_in ) {
 		}
 	else if( IniFileFlag==SAVEMODE_DIR ) {
 		if( DirectoryBrowseFlag ) {
-			if( strcmp(folder_in,"")&&strcmp(folder_in,"Default") ) {
+			if( (folder_in!=NULL)&&strcmp(folder_in,"")&&strcmp(folder_in,"Default") ) {
 				strcat( shortname, " -folder \"" ) ;
 				strcat( shortname, folder_in ) ;
 				strcat( shortname, "\"" ) ;

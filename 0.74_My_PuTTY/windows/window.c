@@ -330,7 +330,7 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS n'est pas défini dans le fichier wtsapi32.h !!!
 #include <wtsapi32.h>
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 #include "../../kitty_image.h"
 #endif
 #ifdef MOD_RECONNECT
@@ -553,7 +553,18 @@ static void start_backend(void)
 	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 	    lp_eventlog(default_logpolicy, msg) ; 
         } else {
-	    MessageBox(NULL, msg, str, MB_ICONERROR | MB_OK);
+	    if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) ) {
+		if( MessageBox(NULL, msg, str, MB_ICONERROR | MB_RETRYCANCEL | MB_DEFBUTTON2) == IDCANCEL ) {
+		    sfree(str);
+		    sfree(msg);
+		    exit(0);
+		} else {
+		    start_backend() ;
+		    return ;
+		}
+	    } else {
+	        MessageBox(NULL, msg, str, MB_OK);
+	    }
         }
 	sfree(str);
 	sfree(msg);
@@ -565,7 +576,7 @@ static void start_backend(void)
 	    lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
 	    SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 	    return ;
-	    }
+	}
 	else
 #else
 	char *str = dupprintf("%s Error", appname);
@@ -722,6 +733,12 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     // Initialisation specifique a KiTTY
     SethInstIcons( hinst ) ;
     InitWinMain();
+    if( debug_flag ) { 
+	char * buf = (char*)malloc( strlen(cmdline)+20 ) ;
+	sprintf( buf, "Command-line: %s", cmdline ) ;
+	lp_eventlog(default_logpolicy, buf) ; 
+	free(buf);
+    }
 #endif
 #ifdef MOD_NOTRANSPARENCY
 	SetTransparencyFlag(0);
@@ -791,6 +808,18 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    p[i] = '\0';
 #ifdef MOD_PERSO
 	if( GetDirectoryBrowseFlag() ) {
+		char *pst = strstr( p+1, "/" ) ;
+		if( pst!=NULL ) {
+			pst[0]='\0';
+			char *name = (char*)malloc( strlen(p)+1 ) ;
+			strcpy( name, p+1 ) ;
+			conf_set_str(conf,CONF_folder,name) ;
+			SetSessPath( name ) ;
+			SetInitCurrentFolder( name ) ;
+			free(name) ;
+			pst[0]='@' ;
+			p=pst;
+		}
 		char * pfolder ;
 		if( (pfolder=strstr(p+1," -folder \"")) ) {
 			pfolder[0]='\0';
@@ -1017,7 +1046,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 				if( conf_get_int( conf, CONF_xpos)<0) conf_set_int( conf, CONF_xpos,0);
 				conf_set_bool( conf, CONF_save_windowpos, true ) ;
 				}
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 		} else if( !strcmp(p, "-nobgimage") ) {
 			SetBackgroundImageFlag(0) ;
 		} else if( !strcmp(p, "-bgimage") ) {
@@ -1043,7 +1072,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			SetRuttyFlag( 0 ) ;
 			SetDefaultSettingsFlag(1);
 			SetReadOnlyFlag(0);
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 			SetBackgroundImageFlag(0) ;
 #endif
 #ifdef MOD_RECONNECT
@@ -1064,7 +1093,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			CreateSSHHandler() ; return 0 ;
 		} else if( !strcmp(p, "-fileassoc") ) {
 			CreateFileAssoc() ; return 0 ;
-#ifndef FDJ
+#ifndef FLJ
 		} else if( !strcmp(p, "-key") ) {
 			GenerePrivateKey( "private.key.ppk" ) ; return  0 ;
 #endif
@@ -1105,7 +1134,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-title") ) {
 			i++ ;
 			conf_set_str( conf, CONF_wintitle, argv[i] );
-#ifndef FDJ
+#ifndef FLJ
 		} else if( !strcmp(p, "-classname") ) {
 			i++ ;
 			if( strlen( argv[i] ) > 0 ) {
@@ -1229,7 +1258,7 @@ if( conf_get_int(conf,CONF_icone) == 0 ) {
 	wndclass.hCursor = LoadCursor(NULL, IDC_IBEAM);
 	wndclass.hbrBackground = NULL;
 	wndclass.lpszMenuName = NULL;
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 	wndclass.lpszClassName = dup_mb_to_wc(DEFAULT_CODEPAGE, 0, KiTTYClassName);
 #else
 	wndclass.lpszClassName = dup_mb_to_wc(DEFAULT_CODEPAGE, 0, appname);
@@ -1277,7 +1306,7 @@ TrayIcone.hWnd = hwnd ;
 	if (guess_height > r.bottom - r.top)
 	    guess_height = r.bottom - r.top;
     }
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
     	const char* winname = appname;
 #endif
     {
@@ -1301,7 +1330,7 @@ TrayIcone.hWnd = hwnd ;
 	if (conf_get_bool(conf, CONF_sunken_edge))
 	    exwinmode |= WS_EX_CLIENTEDGE;
 #ifdef MOD_PERSO
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	// TODO: This is the beginning of some work to have windows with fancy
 	// no-client-edge borders.  It's not ready yet.
 	if( GetBackgroundImageFlag() && (!GetPuttyFlag()) )
@@ -1608,7 +1637,7 @@ TrayIcone.hWnd = hwnd ;
 			}
 		
 		// Lancement des timer (changement image de fond, rafraichissement)
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 		if( (!GetBackgroundImageFlag()) || GetPuttyFlag() ) conf_set_int(conf,CONF_bg_type,0); 
 		if( conf_get_int(conf,CONF_bg_type)!=0 ) {
 			if(conf_get_int(conf,CONF_bg_slideshow)>0)
@@ -3112,7 +3141,7 @@ static bool is_alt_pressed(void)
 	return true;
     return false;
 }
-#if (!defined MOD_BACKGROUNDIMAGE) || (defined FDJ)
+#if (!defined MOD_BACKGROUNDIMAGE) || (defined FLJ)
 static bool resizing;
 #endif
 #ifdef MOD_PERSO
@@ -3130,7 +3159,7 @@ struct ctrl_tab_info {
 static BOOL CALLBACK CtrlTabWindowProc(HWND hwnd, LPARAM lParam) {
     struct ctrl_tab_info* info = (struct ctrl_tab_info*) lParam;
     char lpszClassName[256];
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 	strcpy(lpszClassName,KiTTYClassName) ;
 #else
 	strcpy(lpszClassName,appname) ;
@@ -3399,7 +3428,7 @@ else if((UINT_PTR)wParam == TIMER_AUTOPASTE) {  // AutoPaste
 			}
 		}
 	}
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 else if( GetBackgroundImageFlag() && ((UINT_PTR)wParam == TIMER_SLIDEBG) ) {  // Changement automatique de l'image de fond
 	NextBgImage( hwnd ) ;
 	InvalidateRect( hwnd, NULL, true ) ;
@@ -3478,7 +3507,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 			SetTransparency( hwnd, 255-conf_get_int(conf,CONF_transparencynumber) ) ;
 			}
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 		if( GetIconeFlag() == -1 ) conf_set_int( conf, CONF_bg_type, 0 ) ; 
 		if( !GetBackgroundImageFlag() ) conf_set_int( conf, CONF_bg_type, 0 ); 
 #endif
@@ -3788,7 +3817,7 @@ free(cmd);
 		    break;
                 }
 #endif
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 		if( GetBackgroundImageFlag() && (!GetPuttyFlag()) ) {
 			if(textdc) {
 				DeleteObject(textbm);
@@ -4360,11 +4389,27 @@ free(cmd);
 		}
 #endif
 		break ;
-		}
+	}
+        if( (message == WM_LBUTTONUP) && (wParam & MK_SHIFT) ) { // shift + bouton gauche => duplicate session dans la fenêtre d'édition
+		char * host= (char*)malloc(strlen(conf_get_str(conf,CONF_host))+1) ;
+		strcpy( host, conf_get_str(conf,CONF_host) ) ;
+		conf_set_str(conf,CONF_host,"") ;
+		save_settings("__STARTUP",conf) ;
+		RunSession( hwnd, "", "__STARTUP" );
+		conf_set_str(conf,CONF_host,host) ;
+		free(host) ;
+		del_settings("__STARTUP");
+        }
 	else if (message == WM_LBUTTONUP && ((wParam & MK_CONTROL) ) ) {// ctrl+bouton gauche => nouvelle icone
-		if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+		if( !GetHyperlinkFlag() || !conf_get_int(conf,CONF_url_ctrl_click) ) { // si les hyperliens ou le ctrl sont désactivés
+			if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+		} else {
+			if( !urlhack_is_in_link_region(TO_CHR_X(cursor_pt.x), TO_CHR_Y(cursor_pt.y)) ) { // Si sou sla position de la souris il n'y a pas un hyperlien
+				if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+			}
+		}
 		RefreshBackground( hwnd ) ;
-		//break ;
+		break ;
 		}
 
 	else if (message == WM_MBUTTONUP && ((wParam & MK_CONTROL) ) ) { // ctrl+bouton milieu => send to tray
@@ -4611,7 +4656,7 @@ free(cmd);
       case WM_PAINT:
 	{
 	    PAINTSTRUCT p;
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
         HDC hdccod=0, hdcScreen, hdcBack = 0;
 	if( GetBackgroundImageFlag() && (!GetPuttyFlag()) ) {
 		HideCaret(hwnd);
@@ -4682,7 +4727,7 @@ free(cmd);
 	     */
             //assert(!wintw_hdc);
             wintw_hdc = hdc;
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (!GetPuttyFlag()) ) {
         term_paint(term,
             (p.rcPaint.left-offset_width)/font_width,
@@ -4770,7 +4815,7 @@ free(cmd);
 	    SelectObject(hdc, GetStockObject(WHITE_PEN));
 	    EndPaint(hwnd, &p);
 	    ShowCaret(hwnd);
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
     }
 #endif
 	}
@@ -4816,7 +4861,7 @@ free(cmd);
 	debug("WM_ENTERSIZEMOVE\n");
 #endif
 	EnableSizeTip(true);
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (!PuttyFlag) ) GetClientRect(hwnd, &size_before);
 #endif
 	resizing = true;
@@ -4832,7 +4877,7 @@ free(cmd);
 	    term_size(term, conf_get_int(conf, CONF_height),
 		      conf_get_int(conf, CONF_width),
 		      conf_get_int(conf, CONF_savelines));
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (conf_get_int(conf,CONF_bg_image_abs_fixed)==1) && (conf_get_int(conf,CONF_bg_type)!=0) ) RefreshBackground( hwnd ) ;
 #endif
 	    InvalidateRect(hwnd, NULL, true);
@@ -4935,7 +4980,7 @@ free(cmd);
 	fullscr_on_max = true;
 	break;
 #ifdef MOD_PERSO
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	case WM_DISPLAYCHANGE:
 		if( (!GetBackgroundImageFlag()) || GetPuttyFlag() ) return DefWindowProc(hwnd, message, wParam, lParam) ;
 	case WM_MOVE:
@@ -5285,7 +5330,7 @@ free(cmd);
 		if( debug_flag ) addkeypressed( message, wParam, lParam, GetKeyState(VK_SHIFT)&0x8000, GetKeyState(VK_CONTROL)&0x8000, (GetKeyState(VK_MENU)&0x8000)||(GetKeyState(VK_LMENU)&0x8000),GetKeyState(VK_RMENU)&0x8000, (GetKeyState(VK_RWIN)&0x8000)||(GetKeyState(VK_LWIN)&0x8000 ) );
 #endif
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 		if( (wParam==VK_SNAPSHOT)&&(GetKeyState(VK_CONTROL)&0x8000) ) {					// CTRL + PrintScreen => Screenshot
 			char screenShotFile[1024] ;
 			sprintf( screenShotFile, "%s\\screenshot-%d-%ld.jpg", InitialDirectory, getpid(), time(0) );
@@ -5731,7 +5776,7 @@ static void do_text_internal(
     static size_t lpDx_len = 0;
     int *lpDx_maybe;
     int len2; /* for SURROGATE PAIR */
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
     int transBg = backgrounddc ? 1 : 0;
     UINT etoFlagOpaque = transBg ? 0 : ETO_OPAQUE;
 #endif
@@ -5927,7 +5972,7 @@ static void do_text_internal(
                  GetGValue(fg) * 2 / 3,
                  GetBValue(fg) * 2 / 3);
     }
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
     HDC hdc = wintw_hdc ; 
     if( GetBackgroundImageFlag() && (!GetPuttyFlag()) ) {
 	line_box.left = x;
@@ -6114,7 +6159,7 @@ static void do_text_internal(
             }
             if (nlen <= 0)
                 return;		       /* Eeek! */
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (!GetPuttyFlag()) )
 	// ExtTextOutW(hdc, x,
 	//	    y - font_height * (lattr == LATTR_BOT) + text_adjust,
@@ -6147,7 +6192,7 @@ static void do_text_internal(
             sgrowarray(directbuf, directlen, len);
             for (size_t i = 0; i < len; i++)
                 directbuf[i] = text[i] & 0xFF;
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (!GetPuttyFlag()) )
 	// ExtTextOut(hdc, x,
 	// 	   y - font_height * (lattr == LATTR_BOT) + text_adjust,
@@ -6193,7 +6238,7 @@ static void do_text_internal(
 
             for (i = 0; i < len; i++)
                 wbuf[i] = text[i];
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
  	/* print Glyphs as they are, without Windows' Shaping*/
 	if( GetBackgroundImageFlag() && (!PuttyFlag) )
  	// exact_textout(hdc, x, y - font_height * (lattr == LATTR_BOT) + text_adjust,
@@ -6241,7 +6286,7 @@ static void do_text_internal(
 	oldpen = SelectObject(wintw_hdc, oldpen);
 	DeleteObject(oldpen);
     }
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag() && (!PuttyFlag) )
     if(textdc)
     {
@@ -7291,7 +7336,7 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	if( strstr(title, " (PROTECTED)")==(title+strlen(title)-12) ) 
 		{ title[strlen(title)-12]='\0' ; }
 
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	buffer = (char*) malloc( strlen( title ) + strlen( conf_get_str(conf,CONF_host)) + strlen( conf_get_filename(conf,CONF_bg_image_filename)->path ) + 40 ) ; 
 	if( GetBackgroundImageFlag() && GetImageViewerFlag() && (!PuttyFlag) ) { sprintf( buffer, "%s", conf_get_filename(conf,CONF_bg_image_filename)->path ) ; }
 	else 
@@ -8440,7 +8485,7 @@ static void flip_full_screen()
 	SendMessage(hwnd, WM_FULLSCR_ON_MAX, 0, 0);
 	ShowWindow(hwnd, SW_MAXIMIZE);
     }
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	if( GetBackgroundImageFlag()&&(!PuttyFlag)&&(conf_get_int(conf,CONF_bg_image_abs_fixed)==1)&&(conf_get_int(conf,CONF_bg_type)!=0) ) RefreshBackground( hwnd ) ;
 #endif
 }

@@ -133,6 +133,9 @@ void SetRuttyFlag( const int flag ) ;
 
 // Flag pour le fonctionnement en mode "portable" (gestion par fichiers), defini dans kitty_commun.c
 extern int IniFileFlag ;
+int GetIniFileFlag(void) ;
+void SetIniFileFlag( const int flag ) ;
+void SwitchIniFileFlag(void) ;
 
 // Flag permettant la gestion de l'arborscence (dossier=folder) dans le cas d'un savemode=dir, defini dans kitty_commun.c
 //extern int DirectoryBrowseFlag ;
@@ -399,7 +402,7 @@ void InitLauncherRegistry( void ) ;
 int getpid(void) ;
 
 // Definition de la section du fichier de configuration
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 
 #ifndef INIT_SECTION
 #define INIT_SECTION "KiTTY"
@@ -451,7 +454,7 @@ int getpid(void) ;
 #endif
 
 #ifndef TIMER_SLIDEBG
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 #define TIMER_SLIDEBG 8703
 #endif
 #endif

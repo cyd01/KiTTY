@@ -24,7 +24,7 @@ IDI_PUTTY_LAUNCH ICON "../../res/putty_launcher.ico"
 IDI_BLACKBALL ICON "../../res/black.ico"
 IDI_NOCON ICON "../../res/nocon/kitty_nocon.ico"
 
-#ifndef FDJ
+#ifndef FLJ
 IDI_MAINICON_0 ICON "../../kitty.ico"
 IDI_MAINICON_1 ICON "putty.ico"
 #else
@@ -36,7 +36,7 @@ IDI_MAINICON_2 ICON "../../res/puttyprd.ico"
 IDI_MAINICON_3 ICON "../../res/putty2.ico"
 IDI_MAINICON_4 ICON "../../res/putty3.ico"
 
-#ifndef FDJ
+#ifndef FLJ
 IDI_MAINICON_5 ICON "../../res/coyote.ico"
 IDI_MAINICON_6 ICON "../../res/daffy.ico"
 IDI_MAINICON_7 ICON "../../res/tweety.ico"
@@ -108,16 +108,16 @@ BEGIN
     PUSHBUTTON "View &Licence", IDA_LICENCE, 6, 118, 70, 14
     PUSHBUTTON "Visit &Web Site", IDA_WEB, 140, 118, 70, 14
     EDITTEXT IDA_TEXT, 10, 6, 250, 110, ES_READONLY | ES_MULTILINE | ES_CENTER, WS_EX_STATICEDGE
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 	CTEXT "KiTTY (http://kitty.9bis.com), by 9bis.com", IDA_TEXT2, 10, 26, 194, 16
 #endif
-#if (defined MOD_PERSO) && (defined FDJ)
+#if (defined MOD_PERSO) && (defined FLJ)
 	CTEXT "PuTTY", IDA_TEXT2, 10, 26, 194, 16
 #endif
 END
 
 /* Accelerators used: aco */
-#if (defined MOD_PERSO) && (!defined FDJ)
+#if (defined MOD_PERSO) && (!defined FLJ)
 IDD_MAINBOX DIALOG DISCARDABLE 0, 0, 300, 610
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU /*| WS_SIZEBOX*/
 #else
@@ -198,7 +198,7 @@ END
 120 DIALOG DISCARDABLE  0, 0, 350, 28
 //STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE
 STYLE WS_DLGFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE 
-#ifdef FDJ
+#ifdef FLJ
 CAPTION "PuTTY"
 #else
 CAPTION "KiTTY"

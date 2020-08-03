@@ -11,7 +11,7 @@
 
 #ifdef MOD_PERSO
 
-#ifdef FDJ
+#ifdef FLJ
 #define NB_ICONES	4
 #else
 #define NB_ICONES	50

@@ -26,6 +26,9 @@ int IniFileFlag = SAVEMODE_DIR ;
 #else
 int IniFileFlag = SAVEMODE_REG ;
 #endif
+int GetIniFileFlag(void) { return IniFileFlag ; }
+void SetIniFileFlag( const int flag ) { IniFileFlag = flag ; }
+void SwitchIniFileFlag(void) { if( IniFileFlag == SAVEMODE_REG ) { IniFileFlag = SAVEMODE_DIR ; } else if ( IniFileFlag == SAVEMODE_DIR ) { IniFileFlag; } }
 
 // Flag permettant la gestion de l'arborscence (dossier=folder) dans le cas d'un savemode=dir
 #ifdef MOD_PORTABLE
@@ -75,7 +78,7 @@ void SetZModemFlag( const int flag ) { ZModemFlag = flag ; }
 #endif
 
 // Flag pour afficher l'image de fond
-#if (defined MOD_BACKGROUNDIMAGE) && (!defined FDJ)
+#if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 // Suite à PuTTY 0.61, le patch covidimus ne fonctionne plus tres bien
 // Il impose de demarrer les sessions avec -load meme depuis la config box (voir CONFIG.C)
 // Le patch est desactive par defaut
@@ -156,7 +159,7 @@ int LoadParametersLight( void ) {
 	int ret = 0 ;
 	char buffer[4096] ;
 
-#ifndef FDJ
+#ifndef FLJ
 	if( (getenv("KITTY_INI_FILE")!=NULL) && ((fp = fopen( getenv("KITTY_INI_FILE"), "r" )) != NULL) ) {
 		fclose(fp ) ;
 		IniFile = (char*)malloc(strlen(getenv("KITTY_INI_FILE"))+1) ; 
@@ -239,7 +242,7 @@ int LoadParametersLight( void ) {
 		else  DirectoryBrowseFlag = 0 ;
 		}
 	else {
-#ifndef FDJ
+#ifndef FLJ
 		sprintf( buffer, "%s/KiTTY/kitty.ini", getenv("APPDATA") );
 		if( (fp = fopen( buffer, "r" )) != NULL ) {
 			IniFile = (char*)malloc(strlen(buffer)+1) ; 
@@ -255,7 +258,7 @@ int LoadParametersLight( void ) {
 			strcpy(INIT_SECTION,"PuTTY");
 			fclose(fp);
 		} 
-#ifndef FDJ
+#ifndef FLJ
 		}
 #endif
 	}
