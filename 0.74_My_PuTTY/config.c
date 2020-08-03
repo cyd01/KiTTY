@@ -738,7 +738,7 @@ int RunSession( HWND hwnd, const char * folder_in, char * session_in ) ;
 
 extern char ** FolderList ;
 
-static char CurrentFolder[1024]="Default" ;
+extern char CurrentFolder[1024] ;
 union control * ctrlSessionList = NULL ;
 union control * ctrlSessionEdit = NULL ;
 union control * ctrlFolderList = NULL ;

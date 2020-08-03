@@ -113,4 +113,8 @@ int _rmdir(const char *) ;
 
 // Extention pour les fichiers de session en mode portable (peut être ktx)
 extern char FileExtension[15] ;
+
+// Répertoire courant pourle mode portable
+extern char CurrentFolder[1024] ;
+
 #endif

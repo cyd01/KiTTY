@@ -28,7 +28,7 @@ int IniFileFlag = SAVEMODE_REG ;
 #endif
 int GetIniFileFlag(void) { return IniFileFlag ; }
 void SetIniFileFlag( const int flag ) { IniFileFlag = flag ; }
-void SwitchIniFileFlag(void) { if( IniFileFlag == SAVEMODE_REG ) { IniFileFlag = SAVEMODE_DIR ; } else if ( IniFileFlag == SAVEMODE_DIR ) { IniFileFlag; } }
+void SwitchIniFileFlag(void) { if( IniFileFlag == SAVEMODE_REG ) { IniFileFlag = SAVEMODE_DIR ; } else if ( IniFileFlag == SAVEMODE_DIR ) { IniFileFlag = SAVEMODE_REG ; } }
 
 // Flag permettant la gestion de l'arborscence (dossier=folder) dans le cas d'un savemode=dir
 #ifdef MOD_PORTABLE
@@ -398,5 +398,8 @@ void CleanPassword( char * p ) { memset(p,0,strlen(p)); }
 
 // Extention pour les fichiers de session en mode portable (peut être ktx)
 char FileExtension[15] = "" ;
+
+// Répertoire courant pourle mode portable
+char CurrentFolder[1024] = "Default" ;
 
 #endif

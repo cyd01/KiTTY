@@ -34,6 +34,7 @@
 int decode64(char *buffer) ;
 void SetAutoStoreSSHKey( void ) ;
 void load_open_settings_forced(char *filename, Conf *conf) ;
+extern char CurrentFolder[1024] ;
 #endif
 #ifdef MOD_ADB
 int GetADBFlag(void) ;
@@ -490,7 +491,7 @@ int cmdline_process_param(const char *p, char *value,
 	        pst[0]='\0';
 	        conf_set_str(conf,CONF_folder,name) ;
 		SetSessPath( name ) ;
-		SetInitCurrentFolder( name ) ;
+		strcpy( CurrentFolder, name ) ;
 		do_defaults(pst+1, conf);
 		loaded_session = true;
 		free(value) ;
