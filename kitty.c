@@ -2027,7 +2027,8 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 		strcpy( remotedir, distantdir ) ;
 	} else if( strlen(conf_get_str(conf,CONF_pscpremotedir))>0 ) {
 		strcpy( remotedir, conf_get_str(conf,CONF_pscpremotedir) ) ;
-	} else { strcpy( remotedir, "." ) ; }
+	} else { strcpy( remotedir, "." ) ; 
+	}
 	if( strlen( remotedir ) == 0 ) strcpy( remotedir, "." ) ;
 
 	strcpy( buffer, "" ) ;
@@ -2049,8 +2050,7 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 		strcat( buffer, "-P " ) ;
 		strcat( buffer, pscpport ) ;
 		strcat( buffer, " " ) ;
-		}
-	else {
+	} else {
 		if( (p=poss(":",conf_get_str(conf, CONF_sftpconnect) )) > 0 ) {
 			sprintf( b1, "-P %d ", atoi(conf_get_str(conf, CONF_sftpconnect)+p) ) ;
 		} else {
@@ -2061,31 +2061,34 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 
 	if( conf_get_int(conf, CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
 		strcat( buffer, "-2 " ) ;
-		}
+	}
 	if( strlen( conf_get_str(conf,CONF_password)) > 0 ) {
 		strcat( buffer, "-pw \"" ) ;
 		char bufpass[1024] ;
 		strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
 		MASKPASS(bufpass) ; strcat( buffer, bufpass ) ; memset( bufpass, 0, strlen(bufpass) ) ;
 		strcat( buffer, "\" " ) ;
-		}
+	}
+	if( strlen( conf_get_str(conf,CONF_portknockingoptions)) > 0 ) {
+		strcat( buffer, "-knock \"" ) ;
+		strcat( buffer, conf_get_str(conf,CONF_portknockingoptions) ) ;
+		strcat( buffer, "\" " ) ;
+	}
 	if( strlen( conf_get_filename(conf, CONF_keyfile)->path ) > 0 ) {
 		strcat( buffer, "-i \"" ) ;
 		strcat( buffer, conf_get_filename(conf, CONF_keyfile)->path ) ;
 		strcat( buffer, "\" " ) ;
-		}
+	}
 	strcat( buffer, "\"" ) ; //strcat( buffer, filename ) ; 
 	if( (strlen(directory)>0) && (strlen(filename)>0) ) {
 		strcat( buffer, directory ) ; 
 		strcat( buffer, "\\" ) ; 
 		strcat( buffer, filename ) ;
-		}
-	else if( (directory!=NULL)&&(strlen(directory)>0) ) { 
+	} else if( (directory!=NULL)&&(strlen(directory)>0) ) { 
 		strcat(buffer, directory ) ; 
-		}
-	else { 
+	} else { 
 		strcat(buffer, filename ) ; 
-		}
+	}
 	strcat( buffer, "\" " ) ;
 	
 	if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
@@ -2103,8 +2106,10 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 	chdir( InitialDirectory ) ;
 	if( debug_flag ) { debug_logevent( "Run: %s", buffer ) ; }
 	if( system( buffer ) ) MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ;
+	
+	//debug_log("%s\n",buffer);MessageBox( NULL, buffer, "Info",MB_OK );
+	
 	memset(buffer,0,strlen(buffer));
-	//debug_log("%s\n",buffer);//MessageBox( NULL, buffer, "Info",MB_OK );
 	}
 
 void SendFileList( HWND hwnd, char * filelist ) {
@@ -2234,30 +2239,30 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 	if( PSCPPath==NULL ) {
 		if( IniFileFlag == SAVEMODE_REG ) return ;
 		else if( !SearchPSCP() ) return ;
-		}
+	}
 	if( !existfile( PSCPPath ) ) {
 		if( IniFileFlag == SAVEMODE_REG ) return ;
 		else if( !SearchPSCP() ) return ;
-		}
+	}
 		
 	if( !GetShortPathName( PSCPPath, pscppath, 4095 ) ) return ;
 
 	if( ReadParameter( INIT_SECTION, "downloaddir", dir ) ) {
 		if( !existdirectory( dir ) )
 			strcpy( dir, InitialDirectory ) ;
-		}
+	}
 	if(strlen( dir ) == 0) strcpy( dir, InitialDirectory ) ;
 
 	strcpy( buffer, "" ) ;
 	
-	if( nb_pscp_run<4 ) { sprintf( buffer, "start %s ", pscppath ) ; nb_pscp_run++ ; }
-	else { sprintf( buffer, "%s ", pscppath ) ; nb_pscp_run = 0 ; }
+	if( nb_pscp_run<4 ) { sprintf( buffer, "start %s ", pscppath ) ; nb_pscp_run++ ; 
+	} else { sprintf( buffer, "%s ", pscppath ) ; nb_pscp_run = 0 ; }
 
 	if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
 		strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ; strcat( buffer, " " ) ;
 	}
-	if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; }
-	else { strcat( buffer, "-sftp " ) ; }	
+	if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; 
+	} else { strcat( buffer, "-sftp " ) ; }	
 	
 	//if( GetAutoStoreSSHKeyFlag() ) strcat( buffer, "-auto-store-sshkey " ) ;
 	
@@ -2285,12 +2290,17 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 		strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
 		MASKPASS(bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
 		strcat( buffer, "\" " ) ;
-		}
+	}
+	if( strlen( conf_get_str(conf,CONF_portknockingoptions)) > 0 ) {
+		strcat( buffer, "-knock \"" ) ;
+		strcat( buffer, conf_get_str(conf,CONF_portknockingoptions) ) ;
+		strcat( buffer, "\" " ) ;
+	}
 	if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
 		strcat( buffer, "-i \"" ) ;
 		strcat( buffer, conf_get_filename(conf,CONF_keyfile)->path ) ;
 		strcat( buffer, "\" " ) ;
-		}
+	}
 	
 	strcat( buffer, "\"" ) ; 
 	if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
@@ -2299,20 +2309,23 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 		strcat( buffer, b1 ) ;
 	} else {		
 		strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
-		if( poss( ":", conf_get_str(conf,CONF_host) )>0 ) { strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; }
-		else { strcat( buffer, conf_get_str(conf,CONF_host) ) ; }
+		if( poss( ":", conf_get_str(conf,CONF_host) )>0 ) { strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; 
+		} else { 
+			strcat( buffer, conf_get_str(conf,CONF_host) ) ; 
+		}
 	}
 	strcat( buffer, ":" ) ; 
 	
-	if( filename[0]=='/' ) { strcat(buffer, filename ) ; }
-	else {
+	if( filename[0]=='/' ) { strcat(buffer, filename ) ; 
+	} else {
 		if( (directory!=NULL) && (strlen(directory)>0) && (strlen(filename)>0) ) {
 			strcat( buffer, directory ) ; strcat( buffer, "/" ) ; strcat( buffer, filename ) ;
-			}
-		else if( (directory!=NULL) && (strlen(directory)>0) ) 
-			{ strcat(buffer, directory ) ; strcat( buffer, "/*") ; }
-		else { strcat(buffer, filename ) ; }
+		} else if( (directory!=NULL) && (strlen(directory)>0) ) {
+			strcat(buffer, directory ) ; strcat( buffer, "/*") ; 
+		} else { 
+			strcat(buffer, filename ) ; 
 		}
+	}
 	strcat( buffer, "\" \"" ) ; strcat( buffer, dir ) ; strcat( buffer, "\"" ) ;
 	//strcat( buffer, " > kitty.log 2>&1" ) ; //if( !system( buffer ) ) unlink( "kitty.log" ) ;
 
@@ -2320,7 +2333,10 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 
 	if( debug_flag ) { debug_logevent( "Run: %s", buffer) ; }
 	if( system( buffer ) ) MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ;
+	
 	//debug_log("%s\n",buffer);//MessageBox( NULL, buffer, "Info",MB_OK );
+	
+	memset(buffer,0,strlen(buffer));
 	}
 
 // Reception d'un fichier par SCP

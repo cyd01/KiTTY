@@ -551,6 +551,10 @@ int cmdline_process_param(const char *p, char *value,
 	cmdline_session_name = dupstr(value);
 	return 2;
     }
+    if (!strcmp(p, "-knock")) {
+	RETURN(2);
+	conf_set_str( conf, CONF_portknockingoptions, value ) ;
+    }
     if ( !strcmp(p, "-auto_store_sshkey") || !strcmp(p, "-auto-store-sshkey") ) {
 	RETURN(1);
 	SetAutoStoreSSHKey();
