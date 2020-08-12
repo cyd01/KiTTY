@@ -444,6 +444,7 @@ static struct TShortcuts {
 	int resetterminal ;
 	int duplicate ;
 	int opennew ;
+	int opennewcurrent ;
 	int changesettings ;
 	int clearscrollback ;
 	int closerestart ;
@@ -1887,7 +1888,19 @@ void ManageShortcutsFlag( HWND hwnd ) {
 // Gere la demande de relance de l'application
 void ManageRestart( HWND hwnd ) {
 	SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ;
-	}
+}
+
+// Lance une configbox avec les paramètres courants (mais sans hostname)
+void ConfigBoxWithCurrentSettings( HWND hwnd ) {
+	char * host= (char*)malloc(strlen(conf_get_str(conf,CONF_host))+1) ;
+	strcpy( host, conf_get_str(conf,CONF_host) ) ;
+	conf_set_str(conf,CONF_host,"") ;
+	save_settings("__STARTUP",conf) ;
+	RunSession( hwnd, "", "__STARTUP" );
+	conf_set_str(conf,CONF_host,host) ;
+	free(host) ;
+	del_settings("__STARTUP");
+}
 
 // Modification de l'icone de l'application
 //SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) );
@@ -1929,7 +1942,7 @@ void SetNewIcon( HWND hwnd, char * iconefile, int icone, const int mode ) {
 		}
 	}
 	Shell_NotifyIcon(NIM_MODIFY, &TrayIcone);
-	}
+}
 
 // Modification de l'icone pour mettre l'icone de perte de connexion
 void SetConnBreakIcon( void ) {
@@ -4849,6 +4862,8 @@ void InitShortcuts( void ) {
 		shortcuts_tab.duplicate = CONTROLKEY+ALTKEY+84 ;
 	if( !readINI(KittyIniFile,"Shortcuts","opennew",buffer) || ( (shortcuts_tab.opennew=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.opennew = 0 ;
+	if( !readINI(KittyIniFile,"Shortcuts","opennewcurrent",buffer) || ( (shortcuts_tab.opennewcurrent=DefineShortcuts(buffer))<0 ) )
+		shortcuts_tab.opennewcurrent = 0 ;
 	if( !readINI(KittyIniFile,"Shortcuts","changesettings",buffer) || ( (shortcuts_tab.changesettings=DefineShortcuts(buffer))<0 ) )
 		shortcuts_tab.changesettings = 0 ;
 	if( !readINI(KittyIniFile,"Shortcuts","clearscrollback",buffer) || ( (shortcuts_tab.clearscrollback=DefineShortcuts(buffer))<0 ) )
@@ -5005,6 +5020,8 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		{ SendMessage( hwnd, WM_COMMAND, IDM_DUPSESS, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.opennew ) 		// Open new session
 		{ SendMessage( hwnd, WM_COMMAND, IDM_NEWSESS, 0 ) ; return 1 ; }
+	else if( key == shortcuts_tab.opennewcurrent ) 		// Open new config box with current settings
+		{ ConfigBoxWithCurrentSettings( hwnd ) ; return 1 ; }
 	else if( key == shortcuts_tab.changesettings ) 		// Change settings
 		{ SendMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.clearscrollback )		// Clear scrollback

@@ -671,6 +671,7 @@ static void close_session(void *ignored_context)
 
 #ifdef MOD_RECONNECT
 void RestartSession( void ) {
+	queue_toplevel_callback(close_session, NULL);
 	if( GetAutoreconnectFlag() ) {
 		lp_eventlog(default_logpolicy, "User request session restart..." ) ;
 	} else {
@@ -3645,7 +3646,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 
                     serbuf = strbuf_new();
 #ifdef MOD_PERSO
-			/*On gère le répertoire distant*/
+/*On gère le répertoire distant*/
 char *cmd, *cmd2=NULL ;
 cmd = (char*)malloc( strlen(conf_get_str(conf,CONF_autocommand))+1 ) ;
 strcpy( cmd, conf_get_str(conf,CONF_autocommand) ) ;
@@ -4390,16 +4391,7 @@ free(cmd);
 #endif
 		break ;
 	}
-        if( (message == WM_LBUTTONUP) && (wParam & MK_SHIFT) ) { // shift + bouton gauche => duplicate session dans la fenêtre d'édition
-		char * host= (char*)malloc(strlen(conf_get_str(conf,CONF_host))+1) ;
-		strcpy( host, conf_get_str(conf,CONF_host) ) ;
-		conf_set_str(conf,CONF_host,"") ;
-		save_settings("__STARTUP",conf) ;
-		RunSession( hwnd, "", "__STARTUP" );
-		conf_set_str(conf,CONF_host,host) ;
-		free(host) ;
-		del_settings("__STARTUP");
-        }
+
 	else if (message == WM_LBUTTONUP && ((wParam & MK_CONTROL) ) ) {// ctrl+bouton gauche => nouvelle icone
 		if( !GetHyperlinkFlag() || !conf_get_int(conf,CONF_url_ctrl_click) ) { // si les hyperliens ou le ctrl sont désactivés
 			if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
@@ -4410,7 +4402,7 @@ free(cmd);
 		}
 		RefreshBackground( hwnd ) ;
 		break ;
-		}
+	}
 
 	else if (message == WM_MBUTTONUP && ((wParam & MK_CONTROL) ) ) { // ctrl+bouton milieu => send to tray
 		SendMessage( hwnd, WM_COMMAND, IDM_TOTRAY, 0 ) ;

@@ -233,6 +233,8 @@ inputm=
 keyexchange=
 ; New session ...
 opennew=
+; Start a new configuration box with current settings but without hostname
+opennewcurrent=
 ; Print current clipboard content (default if SHIFT+F7)
 print=
 ; Print all window buffer content (default is F7)
