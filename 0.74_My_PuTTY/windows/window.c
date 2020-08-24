@@ -1094,10 +1094,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			CreateSSHHandler() ; return 0 ;
 		} else if( !strcmp(p, "-fileassoc") ) {
 			CreateFileAssoc() ; return 0 ;
-#ifndef FLJ
-		} else if( !strcmp(p, "-key") ) {
-			GenerePrivateKey( "private.key.ppk" ) ; return  0 ;
-#endif
 		} else if( !strcmp(p, "-ed") ) {
 			char buffer[1024];
 			sprintf(buffer, "%s|%s|0", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;

@@ -427,7 +427,12 @@ char * SetInitialSessPath( void ) { return strcpy( sesspath, initialsesspath ) ;
 char * GetSessPath( void ) {
 	return sesspath ;
 }
-	
+
+bool SessPathIsInitial( void ) {
+	if( !strcmp( sesspath, initialsesspath ) ) { return true ; }
+	else { return false ; }
+}
+
 int CreateFolderInPath( const char * d ) {
 	char buf[MAX_PATH] ;
 	int res = 0 ;

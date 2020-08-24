@@ -15,6 +15,7 @@
 #endif  /* rutty */
 #ifdef MOD_PERSO
 #include "kitty.h"
+#include "kitty_store.h"
 union control * ctrlHostnameEdit = NULL ;
 void MASKPASS( char * password ) ;
 int stricmp(const char *s1, const char *s2) ;
@@ -722,7 +723,7 @@ static void sshbug_handler(union control *ctrl, dlgparam *dlg,
 int dlg_listbox_get(union control *ctrl, void *dlg, int index, char * pstr, int maxcount) ;
 int dlg_listbox_gettext(union control *ctrl, void *dlg, int index, char * pstr, int maxcount) ;
 
-int StringList_Add( char **list, char *str ) ;
+int StringList_Add( char **list, const char *str ) ;
 int StringList_Exist( const char **list, const char * name ) ;
 void StringList_Del( char **list, const char * name ) ;
 void StringList_Up( char **list, const char * name ) ;
@@ -1011,7 +1012,7 @@ void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, c
 	// Adding Default Settings Session only on Main folder
 	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
 		if( strstr(sessionslist[i],"Default Settings")==sessionslist[i] ) {
-			if( !strcmp(CurrentFolder,"Default") ) sessionlist_add(s,sessionslist[i],&j,true) ; 
+			if( !strcmp(CurrentFolder,"Default") && SessPathIsInitial() ) sessionlist_add(s,sessionslist[i],&j,true) ; 
 			tabb[i] = false ;
 		}
 	}

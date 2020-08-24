@@ -1005,8 +1005,9 @@ bool do_config(void)
     bool ret;
 #ifdef MOD_PERSO
 	// On cree la session "Default Settings" si elle n'existe pas
-	if( GetDefaultSettingsFlag() ) { 
+	if( GetDefaultSettingsFlag() ) if( (IniFileFlag==SAVEMODE_REG) || SessPathIsInitial() ) { 
 		char buffer[1024] ;
+		
 		GetSessionFolderName( "Default Settings", buffer ) ;
 		if( strlen( buffer ) == 0 ) { 
 			if( !strcmp(FileExtension,"") ) {

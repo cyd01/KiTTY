@@ -34,7 +34,87 @@
 int decode64(char *buffer) ;
 void SetAutoStoreSSHKey( void ) ;
 void load_open_settings_forced(char *filename, Conf *conf) ;
+void SetPasswordInConfig( const char * password ) ;
 extern char CurrentFolder[1024] ;
+// Manage connect string as: user:pass@@@hostname:port/cmd
+void ManageConnectString( Conf *cf, char * hostname ) {
+	int i, j ;
+	char *p, *us, *pw, *hn, *po, *cm ;
+	us = (char*)malloc(strlen(hostname)+1); strcpy(us,"");
+	pw = (char*)malloc(strlen(hostname)+1); strcpy(pw,"");
+	hn = (char*)malloc(strlen(hostname)+1); strcpy(hn,hostname);
+	po = (char*)malloc(strlen(hostname)+1); strcpy(po,"");
+	cm = (char*)malloc(strlen(hostname)+1); strcpy(cm,"");
+	for( i=0 ; i<strlen(hostname) ; i++ ) {
+		if( hostname[i]=='@' ) {
+			if( hostname[i+1]=='@' ) {
+				i++ ; 
+			} else {
+				strcpy( us, hostname ) ;
+				us[i] = '\0' ;
+				j = 0 ;
+				do { i++; hn[j]=hostname[i]; j++; } while( hostname[i]!='\0' ) ;
+				break ;
+			}
+		}
+	}
+	if( hn[0]=='[' ) { // IPv6
+		char *q ;
+		if( (q = strstr( hn, "]" )) != NULL ) {
+			q++ ;
+			if( (p = strstr( q, "/"  )) != NULL ) {
+				strcpy( cm, p+1 ) ;
+				p[0] = '\0' ;
+			}
+			if( (p = strstr( q, ":"  )) != NULL ) {
+				strcpy( po, p+1 ) ;
+				p[0] = '\0' ;
+			}
+			q[0] = '\0' ;
+		}
+	} else { // IPv4
+		if( (p = strstr( hn, "/"  )) != NULL ) {
+			strcpy( cm, p+1 ) ;
+			p[0] = '\0' ;
+		}
+		if( (p = strstr( hn, ":"  )) != NULL ) {
+			strcpy( po, p+1 ) ;
+			p[0] = '\0' ;
+		}
+	}
+	if( strlen(us)>0 ) {
+		if( (p = strstr( us, ":" )) != NULL ) {
+			strcpy( pw, p+1 ) ;
+			p[0] = '\0' ;
+			while( (p = strstr( pw, "@@" )) != NULL ) { // Manage @ in password ( @ => double @@)
+				do { p[0] = p[1] ; p++ ; } while( p[0] != '\0' ) ;
+			}
+		}
+		if( strlen(pw)>0 ) {
+			SetPasswordInConfig( pw ) ;
+		}
+		sprintf( hostname, "%s@%s", us, hn ) ;
+	} else {
+		strcpy( hostname, hn ) ;
+	}
+	if( strlen(po)>0 ) {
+		conf_set_int( cf, CONF_port, atoi(po) ) ;
+	}
+	if( strlen(cm)>0 ) {
+		if( cm[0] == '#' ) {
+			decryptstring( (char*)cm+1, MASTER_PASSWORD ) ;
+			conf_set_str( conf, CONF_autocommand, cm+1 ) ;
+		} else {
+			char *s = (char*)malloc( strlen(cm)+1 ) ;
+			strcpy( s, cm ) ;
+			int i = decode64(s) ;
+			s[i] = '\0' ;
+			conf_set_str( conf,CONF_autocommand,s ) ;
+			free(s) ;
+		}
+	}
+	free(cm);free(po);free(hn);free(pw);free(us);
+}
 #endif
 #ifdef MOD_ADB
 int GetADBFlag(void) ;
@@ -174,7 +254,6 @@ int cmdline_process_param(const char *p, char *value,
                           int need_save, Conf *conf)
 {
     int ret = 0;
-
     if (p[0] != '-') {
         if (need_save < 0)
             return 0;
@@ -209,6 +288,7 @@ int cmdline_process_param(const char *p, char *value,
              * the default session and never be able to do anything
              * else).
              */
+
             if (!strncmp(p, "telnet:", 7)) {
                 /*
                  * If the argument starts with "telnet:", set the
@@ -264,14 +344,20 @@ int cmdline_process_param(const char *p, char *value,
 				* set the protocol to SSH and process
 				* the string as a SSH URL
 				*/
-				char c;
 				q += 4;
 				if (q[0] == '/' && q[1] == '/')
 				q += 2;
 				conf_set_int( conf, CONF_protocol, PROT_SSH); 
 				pst = q;
 				while (*pst && *pst != ':' && *pst != '/')
-					pst++;
+					pst++ ;
+
+				ManageConnectString( conf, q ) ;
+				conf_set_str( conf, CONF_host, q ) ;
+				seen_hostname_argument = true ;
+		
+		/*
+				char c;
 				c = *pst;
 
 		if (*pst) *pst++ = '\0';
@@ -307,6 +393,7 @@ int cmdline_process_param(const char *p, char *value,
 				conf_set_str( conf, CONF_host, buf);
 				free(buf);
 				seen_hostname_argument = true ;
+				*/
 			free(pst);
 		} else if (!strncmp(p, "putty:", 4)) {
 				char * q = (char*)p ;
@@ -394,6 +481,10 @@ int cmdline_process_param(const char *p, char *value,
                                    hostname[len-1] == '\t'))
                     hostname[--len] = '\0';
                 seen_hostname_argument = true;
+#ifdef MOD_PERSO
+		// Manage connect string user:pass@hostname
+		ManageConnectString( conf, hostname ) ;
+#endif
                 conf_set_str(conf, CONF_host, hostname);
 
                 if ((cmdline_tooltype & TOOLTYPE_HOST_ARG_CAN_BE_SESSION) &&

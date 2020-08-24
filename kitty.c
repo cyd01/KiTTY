@@ -692,7 +692,7 @@ char **FolderList=NULL ;
 int readINI( const char * filename, const char * section, const char * key, char * pStr) ;
 int writeINI( const char * filename, const char * section, const char * key, char * pStr) ;
 int delINI( const char * filename, const char * section, const char * key ) ;
-// Initialise la liste des folders a  partir des sessions deja existantes et du fichier kitty.ini
+// Initialise la liste des folders a partir des sessions deja existantes et du fichier kitty.ini
 void InitFolderList( void ) {
 	char * pst, fList[4096], buffer[4096] ;
 	int i ;
