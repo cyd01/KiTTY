@@ -3322,6 +3322,9 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 	if( GetSessionField( conf_get_str( conf, CONF_sessionname), conf_get_str( conf, CONF_folder), "Notes", buffer )  )
 		{ if( strlen( buffer ) > 0 ) MessageBox( hwnd, buffer, "Notes", MB_OK ) ; }
 
+	// On met le focus sur la fenêtre
+	SetFocus(hwnd) ;
+	
 	// Envoi automatiquement dans le systeme tray si besoin
 	if( GetAutoSendToTray() ) ManageToTray( hwnd ) ;
 
@@ -3521,6 +3524,8 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 #ifdef MOD_WTS
 		WTSRegisterSessionNotification(hwnd,NOTIFY_FOR_THIS_SESSION);
 #endif
+		//SetFocus(hwnd);
+		//PostMessage(hwnd,WM_SETFOCUS,0,0);
 		}
 #endif
 	break;

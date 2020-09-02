@@ -1891,6 +1891,7 @@ void ManageRestart( HWND hwnd ) {
 }
 
 // Lance une configbox avec les paramètres courants (mais sans hostname)
+void del_settings(const char *sessionname);
 void ConfigBoxWithCurrentSettings( HWND hwnd ) {
 	char * host= (char*)malloc(strlen(conf_get_str(conf,CONF_host))+1) ;
 	strcpy( host, conf_get_str(conf,CONF_host) ) ;
@@ -4690,18 +4691,19 @@ int ManageViewer( HWND hwnd, WORD wParam ) { // Gestion du mode image
 	}
 #endif
 	
-// GESTION DES RACCOURCI
+// Shortcuts managment
 int DefineShortcuts( char * buf ) {
 	char * pst = buf ;
 	if( strlen(buf)==0 ) return 0 ;
 	int key = 0 ;
+	// Special keys
 	while( (strstr(pst,"{SHIFT}")==pst) || (strstr(pst,"{CONTROL}")==pst) || (strstr(pst,"{ALT}")==pst) || (strstr(pst,"{ALTGR}")==pst) || (strstr(pst,"{WIN}")==pst) ) {
 		while( strstr(pst,"{ALT}")==pst ) { key += ALTKEY ; pst += 5 ; }
 		while( strstr(pst,"{ALTGR}")==pst ) { key += ALTGRKEY ; pst += 7 ; }
 		while( strstr(pst,"{WIN}")==pst ) { key += WINKEY ; pst += 5 ; }
 		while( strstr(pst,"{SHIFT}")==pst ) { key += SHIFTKEY ; pst += 7 ; }
 		while( strstr(pst,"{CONTROL}")==pst ) { key += CONTROLKEY ; pst += 9 ; }
-		}
+	}
 	
 	if( strstr( pst, "{F12}" )==pst ) { key = key + VK_F12 ; pst += 5 ; }
 	else if( strstr( pst, "{F11}" )==pst ) { key = key + VK_F11 ; pst += 5 ; }
@@ -4760,7 +4762,8 @@ int DefineShortcuts( char * buf ) {
 	else if( strstr( pst, "{OEM_MINUS}" )==pst ) { key = key + VK_OEM_MINUS  ; pst += 11 ; } // -
 	else if( strstr( pst, "{OEM_PERIOD}" )==pst ) { key = key + VK_OEM_PERIOD  ; pst += 12 ; } // .
 	
-/* Pour changer automatiqueent la , en .
+/* 
+Example to change automatically , in .
 [Shortcuts]
 list={OEM_COMMA}
 {OEM_COMMA}=.\
@@ -4771,7 +4774,7 @@ list={OEM_COMMA}
 	
 	if( key==0 ) { key = -1 ; }
 	return key ;
-	}
+}
 	
 void TranslateShortcuts( char * st ) {
 	int i,j,k,r ;
@@ -4805,7 +4808,8 @@ void TranslateShortcuts( char * st ) {
 	}
 	free(buffer);
 }
-	
+
+// Init shortcuts map at startup
 void InitShortcuts( void ) {
 	char buffer[4096], list[4096], *pl ;
 	int i, t=0 ;
@@ -4900,22 +4904,23 @@ void InitShortcuts( void ) {
 			if( ReadParameter( "Shortcuts", pl, buffer ) ) {
 				if( (pl[0]<'0')||(pl[0]>'9') ) {
 					shortcuts_tab2[NbShortCuts].num = DefineShortcuts( pl );
-					}
-				else shortcuts_tab2[NbShortCuts].num = atoi(pl) ;
+				} else {
+					shortcuts_tab2[NbShortCuts].num = atoi(pl) ;
+				}
 				TranslateShortcuts( buffer ) ;
 				if( debug_flag ) { debug_logevent( "Remap key %s to %s", pl, buffer ) ; }
 
 				shortcuts_tab2[NbShortCuts].st=(char*)malloc( strlen(buffer)+1 ) ;
 				strcpy( shortcuts_tab2[NbShortCuts].st, buffer ) ;
 				NbShortCuts++;
-				}
-			if( t==1 ) { pl[i]=' ' ; t = 0 ; pl=pl+i+1 ;}
+			}
+			if( t==1 ) { pl[i]=' ' ; t = 0 ; pl=pl+i+1 ; }
 			else pl=pl+i ;
 
 			while( pl[0]==' ' ) pl++ ;
-			}
 		}
 	}
+}
 
 int SwitchLogMode(void) ;
 int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) {
@@ -4931,7 +4936,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 
 	if( key == shortcuts_tab.protect )				// Protection
 		{ SendMessage( hwnd, WM_COMMAND, IDM_PROTECT, 0 ) ; InvalidateRect( hwnd, NULL, TRUE ) ; return 1 ; }
-	if( key == shortcuts_tab.rollup ) 				// Fonction winroll
+	if( key == shortcuts_tab.rollup ) 				// Winroll
 			{ SendMessage( hwnd, WM_COMMAND, IDM_WINROL, 0 ) ; return 1 ; }
 	if( key == shortcuts_tab.switchlogmode ) {
 		i = SwitchLogMode() ;
@@ -4958,7 +4963,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 #endif
 	if( control_flag && shift_flag && (key_num==VK_F12) ) {
 		ResizeWinList( hwnd, conf_get_int(conf,CONF_width), conf_get_int(conf,CONF_height) ) ; return 1 ; 
-	} // Retaille toutes les autres fenetres a la dimension de celle-ci
+	} // Resize all PuTTY windows to the size of the current one
 
 	if( key == shortcuts_tab.printall ) {		
 		SendMessage( hwnd, WM_COMMAND, IDM_COPYALL, 0 ) ;
@@ -5047,9 +5052,10 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 		
 #ifndef FLJ
 	else if( key == shortcuts_tab.input ) 			// Fenetre de controle
-			{ MainHwnd = hwnd ; _beginthread( routine_inputbox, 0, (void*)&hwnd ) ;
+		{ 
+			MainHwnd = hwnd ; _beginthread( routine_inputbox, 0, (void*)&hwnd ) ;
 			InvalidateRect( hwnd, NULL, TRUE ) ; return 1 ;
-			}
+		}
 #endif
 
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
@@ -5079,9 +5085,9 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 			{ SendMessage( hwnd, WM_COMMAND, IDM_GONEXT, 0 ) ; return 1 ; }
 		*/
 #endif
-		}
-	return 0 ;
 	}
+	return 0 ;
+}
 
 // shift+bouton droit => paste ameliore pour serveur "lent"
 // Le paste utilise la methode "autocommand"
