@@ -109,7 +109,7 @@ BEGIN
     PUSHBUTTON "Visit &Web Site", IDA_WEB, 140, 118, 70, 14
     EDITTEXT IDA_TEXT, 10, 6, 250, 110, ES_READONLY | ES_MULTILINE | ES_CENTER, WS_EX_STATICEDGE
 #if (defined MOD_PERSO) && (!defined FLJ)
-	CTEXT "KiTTY (http://kitty.9bis.com), by 9bis.com", IDA_TEXT2, 10, 26, 194, 16
+	CTEXT "KiTTY (https://www.9bis.net/kitty), by 9bis.com", IDA_TEXT2, 10, 26, 194, 16
 #endif
 #if (defined MOD_PERSO) && (defined FLJ)
 	CTEXT "PuTTY", IDA_TEXT2, 10, 26, 194, 16
@@ -218,7 +218,7 @@ BEGIN
     ICON            IDI_MAINICON_0,IDC_STATIC,7,7,30,20
     LTEXT           "",IDA_VERSION,45,7,198,8
     LTEXT           "Copyright \251 2005-2020",IDC_STATIC,45,19,78,8
-    LTEXT           "9bis software - http://kitty.9bis.com",
+    LTEXT           "9bis software - https://www.9bis.net/kitty",
                     IDC_WEBPAGE,45,31,145,8
     LTEXT           "Contact:",IDC_STATIC,45,43,46,8
     LTEXT           "kitty@9bis.com",IDC_EMAIL,77,43,83,8

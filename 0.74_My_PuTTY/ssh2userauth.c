@@ -482,7 +482,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
             s->username = s->locally_allocated_username =
                 prompt_get_result(s->cur_prompt->prompts[0]);
 #ifdef MOD_PERSO
-	SetUsernameInConfig( (char*)s->username ) ;
+	SetUsernameInConfig( (const char*)s->username ) ;
 #endif
             free_prompts(s->cur_prompt);
         } else {
@@ -490,7 +490,6 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                 ppl_printf("Using username \"%s\".\r\n", s->username);
         }
         s->got_username = true;
-
         /*
          * Send an authentication request using method "none": (a)
          * just in case it succeeds, and (b) so that we know what
@@ -615,6 +614,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                      * prompt (iff we're configured to allow
                      * username change attempts).
                      */
+
                     if (s->type == AUTH_TYPE_NONE) {
                         /* do nothing */
                     } else if (s->type == AUTH_TYPE_PUBLICKEY_OFFER_LOUD ||
@@ -849,7 +849,6 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 
             } else if (s->can_pubkey && s->publickey_blob &&
                        s->privatekey_available && !s->tried_pubkey_config) {
-
                 ssh2_userkey *key;   /* not live over crReturn */
                 char *passphrase;           /* not live over crReturn */
 
@@ -922,6 +921,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 				logevent(NULL,"Test passphrase");
 				ManagePassPhrase("");
 				s->userpass_ret = 1 ;
+
 			} else
 #endif
                         s->userpass_ret = seat_get_userpass_input(
@@ -1056,7 +1056,6 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 
 #ifndef NO_GSSAPI
             } else if (s->can_gssapi && !s->tried_gssapi) {
-
                 /* gssapi-with-mic authentication */
 
                 ptrlen data;
@@ -1255,7 +1254,6 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                 continue;
 #endif
             } else if (s->can_keyb_inter && !s->kbd_inter_refused) {
-
                 /*
                  * Keyboard-interactive authentication.
                  */
@@ -1417,6 +1415,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                      * Our prompts_t is fully constructed now. Get the
                      * user's response(s).
                      */
+
 #ifdef MOD_PERSO
 	if( IsPasswordInConf() ) {
 		GetPasswordInConfig(bufpass) ;
@@ -1488,7 +1487,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 	if(!GetUserPassSSHNoSave()) {
 		if(s!=NULL) 
 		if(s->cur_prompt->prompts!=NULL)  
-		if(s->cur_prompt->prompts[i]->result!=NULL) { SetPasswordInConfig( s->cur_prompt->prompts[i]->result ) ; }
+		if(s->cur_prompt->prompts[i]->result!=NULL) { SetPasswordInConfig( (const char *) s->cur_prompt->prompts[i]->result ) ; }
 	}
 #endif
                         put_stringz(s->pktout, prompt_get_result_ref(
@@ -1527,7 +1526,6 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                 pq_push_front(s->ppl.in_pq, pktin);
 
             } else if (s->can_passwd) {
-
                 /*
                  * Plain old password authentication.
                  */

@@ -978,13 +978,16 @@ void SetPasswordInConfig( const char * password ) {
 	}
 }
 
-void SetUsernameInConfig( char * username ) {
+void SetUsernameInConfig( const char * username ) {
 	int len ;
 	if( (!GetUserPassSSHNoSave())&&(username!=NULL) ) {
 		len = strlen( username ) ;
-		if( len > 126 ) len = 126 ;
-		username[len] = '\0' ;
-		conf_set_str(conf,CONF_username,username);
+		if( len > 126 ) { len = 126 ; }
+		char *b = (char*) malloc( len+1 ) ;
+		memcpy( (void*)b, (const void*)username, len+1 ) ;
+		b[len] = '\0' ;
+		conf_set_str(conf,CONF_username,b);
+		free(b);
 		}
 	}
 

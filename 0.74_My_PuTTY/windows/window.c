@@ -7254,7 +7254,6 @@ void set_title_internal(TermWin *tw, const char *title) {
 	SetWindowText(hwnd, title);
 }
 
-
 /* Creer un titre de fenetre a partir d'un schema donne
 	%%f: le folder auquel apprtient le session
 	%%h: le hostname

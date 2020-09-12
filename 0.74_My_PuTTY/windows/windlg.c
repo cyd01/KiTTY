@@ -406,8 +406,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 				ShellExecute(hwnd,"open","mailto:kitty@9bis.com",NULL,NULL,SW_SHOWNORMAL);
 				}
 			else if (dwId == IDC_WEBPAGE && capture_webpage) {
-				//ShellExecute(hwnd,"open","http://www.9bis.net/kitty/?zone=en",NULL,NULL,SW_SHOWNORMAL);
-				ShellExecute(hwnd,"open","http://kitty.9bis.com",NULL,NULL,SW_SHOWNORMAL);
+				ShellExecute(hwnd,"open","https://www.9bis.net/kitty",NULL,NULL,SW_SHOWNORMAL);
 				}
 			capture_email = FALSE;
 			capture_webpage = FALSE;
@@ -445,14 +444,14 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 		for( i = 0 ; i < strlen( vers ) ; i ++ ) {
 			if( !(((vers[i]>='0')&&(vers[i]<='9'))||(vers[i]=='.')) ) { vers[i] = '\0' ; break ; }
 			}
-		sprintf( buffer, "http://www.9bis.net/kitty/check_update.php?version=%s", vers ) ;
+		sprintf( buffer, "https://www.9bis.net/kitty/check_update.php?version=%s", vers ) ;
 		ShellExecute(hwnd, "open", buffer, 0, 0, SW_SHOWDEFAULT);
 	  }*/
 	    return 0;
 	  case IDA_DON:
 	    /* Load web browser */
 	  {	char buffer[1024]="";
-		sprintf( buffer, "http://kitty.9bis.com/?page=Donation&zone=en" ) ;
+		sprintf( buffer, "https://www.9bis.net/kitty/#!pages/donation.md" ) ;
 		ShellExecute(hwnd, "open", buffer, 0, 0, SW_SHOWDEFAULT);
 	  }
 	    return 0;
