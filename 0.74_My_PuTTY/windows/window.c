@@ -5057,10 +5057,9 @@ free(cmd);
 	if (wParam == SIZE_MINIMIZED) {
 		if( GetKeyState( VK_CONTROL ) & 0x8000 ) {
 			SendMessage( hwnd, WM_COMMAND, IDM_TOTRAY, 0 ) ; return 0 ;
-			}
-		else 
-			SetWindowText(hwnd, conf_get_bool(conf,CONF_win_name_always) ? window_name : icon_name);
 		}
+		else SetWindowText(hwnd, conf_get_bool(conf,CONF_win_name_always) ? window_name : icon_name);
+	}
 #else
 	if (wParam == SIZE_MINIMIZED)
 	    SetWindowText(hwnd,
@@ -7262,7 +7261,7 @@ void set_title_internal(TermWin *tw, const char *title) {
 	%%P: le protocole
 	%%s: nom de la session (vide sinon)
 	%%u: le user
-	%%w: la list des port forward locaux
+	%%w: la liste des port forward locaux
 Ex: %%P://%%u@%%h:%%p
 Ex: %%f / %%s
 */
@@ -7285,7 +7284,7 @@ void make_title( char * res, char * fmt, const char * title ) {
 		case PROT_RLOGIN: strcpy(b,"rlogin"); break;
 		case PROT_SSH: strcpy(b,"ssh"); if(port==-1) port=22 ; break;
 		case PROT_SERIAL: strcpy(b,"serial"); break;
-		}
+	}
 	while( (p=poss( "%%P", res)) > 0 ) { del(res,p,3); insert(res,b,p); }
 	
 	sprintf(b,"%d", port ) ; 
@@ -7293,15 +7292,14 @@ void make_title( char * res, char * fmt, const char * title ) {
 	
 	sprintf(b,"%ld", GetCurrentProcessId() ) ; 
 	while( (p=poss( "%%i", res)) > 0 ) { del(res,p,3); insert(res,b,p); }
-	
 	while( (p=poss( "%%w", res)) > 0 ) { // forward port locaux
 		char *key, *val;
 		int nb=0 ;
 		del(res,p,3) ;
 		b[0]='\0';
 		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
-		val != NULL;
-		val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
+			val != NULL;
+			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
 			if ( key[0]=='L' ) {
 				if(nb!=0) {strcat(b,"|");}
 				strcat(b,key+1);
@@ -7309,13 +7307,13 @@ void make_title( char * res, char * fmt, const char * title ) {
 			}
 		}
 		insert(res,b,p) ;
-		}
 	}
+}
 
 static void wintw_set_title(TermWin *tw, const char *title_in) {
 	char *buffer, fmt[256]="%s" ;
 	char *title ;
-	
+
 	if( title_in==NULL ) { return ; }
 	title = (char*)malloc(strlen(title_in)+1); strcpy(title,title_in);
 
@@ -7337,18 +7335,22 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 #endif
 	if( GetSizeFlag() && (!IsZoomed( MainHwnd )) ) {
 		if( strlen( title ) > 0 ) {
-			if( title[strlen(title)-1] == ']' ) make_title( buffer, "%s", title ) ;
-			else { 
+			if( title[strlen(title)-1] == ']' ) {
+				make_title( buffer, "%s", title ) ;
+			} else { 
 				sprintf( fmt, "%%s [%dx%d]", conf_get_int(conf,CONF_height), conf_get_int(conf,CONF_width)) ;
 				make_title( buffer, fmt, title ) ;
-				}
 			}
-		else sprintf( buffer, "%s [%dx%d] - %s", conf_get_str(conf,CONF_host), conf_get_int(conf,CONF_height), conf_get_int(conf,CONF_width), appname ) ;
+		} else {
+			sprintf( buffer, "%s [%dx%d] - %s", conf_get_str(conf,CONF_host), conf_get_int(conf,CONF_height), conf_get_int(conf,CONF_width), appname ) ;
 		}
-	else {
-		if( strlen( title ) > 0 ) make_title( buffer, "%s", title ) ;
-		else sprintf( buffer, "%s - %s", conf_get_str(conf,CONF_host), appname ) ;
+	} else {
+		if( strlen( title ) > 0 ) { 
+			make_title( buffer, "%s", title ) ; 
+		} else {
+			sprintf( buffer, "%s - %s", conf_get_str(conf,CONF_host), appname ) ;
 		}
+	}
 	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) { strcat( buffer, " (PROTECTED)" ) ; }
 	if( conf_get_bool(conf, CONF_alwaysontop) ) if( strstr(buffer, " (ONTOP)")==NULL ) { strcat( buffer, " (ONTOP)" ) ; }
 	set_title_internal( tw, buffer ) ;

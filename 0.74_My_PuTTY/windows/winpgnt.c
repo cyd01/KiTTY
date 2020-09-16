@@ -31,6 +31,8 @@ extern int DirectoryBrowseFlag ;
 
 #include "../../kitty_crypt.h"
 #include "../../kitty_commun.h"
+
+static char pphrase[2048]="";
 #endif
 
 #ifndef NO_SECURITY
@@ -404,6 +406,14 @@ static void win_add_keyfile(Filename *filename)
 
         pps.passphrase = &passphrase;
         pps.comment = err;
+#ifdef MOD_PERSO
+	if( strlen(pphrase)>0 ) {
+	    passphrase=(char*)malloc(strlen(pphrase)+1);
+	    strcpy(passphrase,pphrase);
+	    
+        } 
+	else
+#endif
         dlgret = DialogBoxParam(hinst, MAKEINTRESOURCE(210),
                                 NULL, PassphraseProc, (LPARAM) &pps);
         passphrase_box = NULL;
@@ -1287,6 +1297,11 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
         } else if (!strcmp(argv[i], "-restrict-putty-acl") ||
                    !strcmp(argv[i], "-restrict_putty_acl")) {
             restrict_putty_acl = true;
+#ifdef MOD_PERSO
+	} else if (!strcmp(argv[i], "-pass")) {
+		i++;
+		strcpy(pphrase,argv[i]);
+#endif
 	} else if (!strcmp(argv[i], "-c")) {
 	    /*
 	     * If we see `-c', then the rest of the

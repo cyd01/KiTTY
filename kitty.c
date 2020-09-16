@@ -3472,20 +3472,19 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 	if( hLib ) {
 		pGetExtendedTcpTable = (DWORD (WINAPI *)(PVOID,PDWORD,BOOL,ULONG,TCP_TABLE_CLASS,ULONG))
 		GetProcAddress(hLib, "GetExtendedTcpTable");
-		}
+	}
 	dwResult = pGetExtendedTcpTable(NULL, &size, 0, AF_INET, TCP_TABLE_OWNER_PID_LISTENER, 0);
 	pTCPInfo = (MIB_TCPTABLE_OWNER_PID*)malloc(size);
 	dwResult = pGetExtendedTcpTable(pTCPInfo, &size, 0, AF_INET, TCP_TABLE_OWNER_PID_LISTENER, 0);
 
 	for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
-	val != NULL;
-	val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
+		val != NULL;
+		val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
 		char *p;
 		
 		if( key[0]=='R' ) {
 			p = dupprintf("[-] %s \t\t<-- \t%s\n", key+1,val);
-			}
-		else if ( key[0]=='L' ) {
+		} else if ( key[0]=='L' ) {
 			if( pGetExtendedTcpTable && (dwResult == NO_ERROR) ) {
 				int found=0 ;
 				if( pTCPInfo->dwNumEntries > 0 ) {
@@ -3497,31 +3496,30 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 								else p = dupprintf("[X] %s(%u)\t--> \t%s\n", key+1,(unsigned int)owner->dwOwningPid,val) ;
 								found=1;
 								break;
-								}
 							}
 						}
 					}
+				}
 				if( !found ) { p = dupprintf("[-] %s \t\t--> \t%s\n", key+1,val); }
-				}
-			else {
+			} else {
 				p = dupprintf("[-] %s \t\t--> \t%s\n", key+1,val);
-				}
 			}
-		else if ( key[0]=='D' )
-			p = dupprintf("D%s\t\n", key+1);
-		else
-			p = dupprintf("%s\t%s\n", key, val);
+		} else if ( key[0]=='D' ) {
+			p = dupprintf("D%s\t\n", key+1) ;
+		} else {
+			p = dupprintf("%s\t%s\n", key, val) ;
+		}
 		
 		strcat( pf, p ) ;
 		sfree(p);
-		}
+	}
 	
 	if( hLib ) { FreeLibrary( hLib ) ; }
 		
 	strcat( pf, "\n[C] Listening in the current process\n[X] Listening in another process\n[-] No Listening\n" );
 	MessageBox( NULL, pf, "Port forwarding", MB_OK ) ;
 	return SetTextToClipboard( pf ) ;
-	}
+}
 	
 void SaveCurrentSetting( HWND hwnd ) {
 	char filename[4096], buffer[4096] ;
