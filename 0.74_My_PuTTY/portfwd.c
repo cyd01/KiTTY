@@ -786,6 +786,45 @@ void portfwdmgr_free(PortFwdManager *mgr)
     sfree(mgr);
 }
 
+#ifdef MOD_PERSO
+// Manage sftpconnect that ends with :* (create a local forward port dynamically)
+void AddDynamicSFTPConnect( Conf *conf ) {
+	char * p = conf_get_str( conf, CONF_sftpconnect ) ;
+	if( p[0]==':' ) {
+	    if( (conf_get_str( conf, CONF_username )!=NULL) && (strlen(conf_get_str( conf, CONF_username ))>0) ) {
+		char *b ;
+		b = (char*) malloc( strlen(conf_get_str( conf, CONF_username )) + 20 ) ;
+		sprintf( b, "%s@localhost%s", conf_get_str( conf, CONF_username ),p ) ;
+		conf_set_str( conf, CONF_sftpconnect, b ) ;
+		p = conf_get_str( conf, CONF_sftpconnect ) ;
+		free(b);
+	    } else if( strstr(conf_get_str( conf, CONF_host ),"@")!=NULL ) {
+		char *b ;
+		b = (char*) malloc( strlen(conf_get_str( conf, CONF_host )) + 20 ) ;
+		strcpy(b,conf_get_str( conf, CONF_host ));
+		strstr(b,"@")[0]='\0';
+		strcat(b,"@localhost");
+		strcat(b,p);
+		conf_set_str( conf, CONF_sftpconnect, b ) ;
+		p = conf_get_str( conf, CONF_sftpconnect ) ;
+		free(b) ;
+	    }
+	}
+	if( (p[strlen(p)-1]=='*') && (p[strlen(p)-2]==':') ) {
+		char key[10], val[20] ; 
+		p[strlen(p)-2]='\0' ;
+		int rnd = (rand() % (65000 - 60000)) + 60000 ;
+		sprintf(key,"L%d",rnd);
+		sprintf(val,"localhost:%d",conf_get_int(conf, CONF_port));
+		conf_set_str_str(conf, CONF_portfwd, key, val) ;
+		char *b = (char*) malloc( strlen(p)+20 );
+		sprintf(b,"%s:%d",p,rnd) ;
+		conf_set_str( conf, CONF_sftpconnect, b ) ;
+		free(b);
+	}
+}
+#endif
+
 void portfwdmgr_config(PortFwdManager *mgr, Conf *conf)
 {
     PortFwdRecord *pfr;
@@ -805,7 +844,6 @@ void portfwdmgr_config(PortFwdManager *mgr, Conf *conf)
      */
     for (i = 0; (pfr = index234(mgr->forwardings, i)) != NULL; i++)
         pfr->status = DESTROY;
-
     for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
          val != NULL;
          val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {

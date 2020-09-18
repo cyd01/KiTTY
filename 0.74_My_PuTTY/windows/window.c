@@ -1664,6 +1664,9 @@ else {
 #ifdef MOD_PORTKNOCKING
 ManagePortKnocking(conf_get_str(conf,CONF_host),conf_get_str(conf,CONF_portknockingoptions));
 #endif
+#ifdef MOD_PERSO
+AddDynamicSFTPConnect( conf ) ;
+#endif
 
     if (restricted_acl) {
         lp_eventlog(default_logpolicy, "Running with restricted process ACL");
@@ -7261,7 +7264,8 @@ void set_title_internal(TermWin *tw, const char *title) {
 	%%P: le protocole
 	%%s: nom de la session (vide sinon)
 	%%u: le user
-	%%w: la liste des port forward locaux
+	%%l: la liste des port forward locaux
+	%%d: la liste des port forward dynamic
 Ex: %%P://%%u@%%h:%%p
 Ex: %%f / %%s
 */
@@ -7292,7 +7296,7 @@ void make_title( char * res, char * fmt, const char * title ) {
 	
 	sprintf(b,"%ld", GetCurrentProcessId() ) ; 
 	while( (p=poss( "%%i", res)) > 0 ) { del(res,p,3); insert(res,b,p); }
-	while( (p=poss( "%%w", res)) > 0 ) { // forward port locaux
+	while( (p=poss( "%%d", res)) > 0 ) { // forward port dynamic
 		char *key, *val;
 		int nb=0 ;
 		del(res,p,3) ;
@@ -7300,7 +7304,23 @@ void make_title( char * res, char * fmt, const char * title ) {
 		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
 			val != NULL;
 			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
-			if ( key[0]=='L' ) {
+			if( (key[0]=='L') && (!strcmp(val,"D")) ) {
+				if(nb!=0) {strcat(b,"|");}
+				strcat(b,key+1);
+				nb++;
+			}
+		}
+		insert(res,b,p) ;
+	}
+	while( (p=poss( "%%l", res)) > 0 ) { // forward port locaux
+		char *key, *val;
+		int nb=0 ;
+		del(res,p,3) ;
+		b[0]='\0';
+		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
+			val != NULL;
+			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
+			if( (key[0]=='L') && (strcmp(val,"D")) ) {
 				if(nb!=0) {strcat(b,"|");}
 				strcat(b,key+1);
 				nb++;

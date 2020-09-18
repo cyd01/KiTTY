@@ -1,10 +1,3 @@
-// Probleme du bug de consommation memoire avec le shrink => 
-//	- voir 0/1 dans la fonction RedrawBackground
-//	- voir dans le fichier WINDOW.C le  if((UINT_PTR)wParam == TIMER_REDRAW)
-// Le probleme est dans load_file_jpeg => il manquait un GlobalFree
-
-
-// Essai de compilation séparée
 #ifdef FLJ
 #undef MOD_BACKGROUNDIMAGE
 #endif
@@ -13,12 +6,12 @@
 #include "jpeg/jpeglib.h"
 #include <stdio.h>
 
+#include <windows.h>
 
 #ifdef MOD_BACKGROUNDIMAGE
 
 #include <math.h>
 #include "putty.h"
-#include <windows.h>
 #include "terminal.h"
 
 #include "kitty_image.h"

@@ -1058,7 +1058,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_update_start(ctrl, dlg);
 	    dlg_listbox_clear(ctrl, dlg);
 #ifdef MOD_PERSO
-		if( ssd->savedsession!=NULL ) strcpy( ssd->savedsession, dlg_editbox_get( ssd->editbox, dlg ) ) ; // ajout 0.63 pour que le filtre fonctionne
+		if( ssd->savedsession!=NULL ) strcpy( ssd->savedsession, dlg_editbox_get( ssd->editbox, dlg ) ) ;
 		
 		ctrlSessionList = ctrl ;
 		//if(get_param("INIFILE")==SAVEMODE_DIR) CleanFolderName( CurrentFolder ) ;
@@ -1096,11 +1096,15 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 				}
 				
 			}
+	    dlg_update_done(ctrl, dlg);
+	    
+	    if( get_param("INIFILE")==SAVEMODE_DIR ) { dlg_listbox_select(ctrl, dlg,1) ; }
 #else 
 	    for (i = 0; i < ssd->sesslist.nsessions; i++)
 		dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
-#endif
 	    dlg_update_done(ctrl, dlg);
+#endif
+
 	}
     } else if (event == EVENT_VALCHANGE) {
         int top, bottom, halfway, i;
@@ -3034,7 +3038,8 @@ if( !GetPuttyFlag() ) {
       ctrl_text(s, "     %%P: protocol name", HELPCTX(appearance_title));
       ctrl_text(s, "     %%s: session name", HELPCTX(appearance_title));
       ctrl_text(s, "     %%u: username", HELPCTX(appearance_title));
-      ctrl_text(s, "     %%w: forwarded ports list", HELPCTX(appearance_title));
+      ctrl_text(s, "     %%l: forwarded local ports list", HELPCTX(appearance_title));
+      ctrl_text(s, "     %%d: forwarded dynamic ports list", HELPCTX(appearance_title));
 }
 #endif
     ctrl_checkbox(s, "Separate window and icon titles", 'i',
@@ -4052,7 +4057,7 @@ if( !GetPuttyFlag() ) {
 			  "PSCP and WinSCP integration");
 	
            s = ctrl_getset(b, "Connection/SSH/PSCP and WinSCP", "winSCPproto", "General protocol setting") ;
-	   ctrl_radiobuttons(s, "Prefered protocol:", NO_SHORTCUT, 7,
+	   ctrl_radiobuttons(s, "Prefered protocol:", NO_SHORTCUT, 4,
               HELPCTX(no_help),
               conf_radiobutton_handler, 
               I(CONF_winscpprot),

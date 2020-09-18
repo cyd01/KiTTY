@@ -480,7 +480,7 @@ return 1 ;
 					RegDeleteValue( hSubKey, "IconeFile" ) ;
 					RegDeleteValue( hSubKey, "WinSCPProtocol" ) ;
 					RegDeleteValue( hSubKey, "SFTPConnect" ) ;
-					RegDeleteValue( hSubKey, "PSCPOptions" ) ;
+    					RegDeleteValue( hSubKey, "PSCPOptions" ) ;
 					RegDeleteValue( hSubKey, "PSCPRemoteDir" ) ;
 					RegDeleteValue( hSubKey, "WinSCPOptions" ) ;
 					RegDeleteValue( hSubKey, "WinSCPRawSettings" ) ;
