@@ -32,7 +32,6 @@ jobs:
         mkdir ../builds
         docker run --rm -i -v $(pwd)/../builds:/builds -v $(pwd):/sources cyd01/cross-gcc "cd ${VERSION}_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
         mv -f $(pwd)/../builds ./
-        cd builds ; zip kitty.zip *.exe
 
     # Upload runner package tar.gz/zip as artifact
     - name: Publish Artifact
@@ -40,7 +39,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: kitty.zip
-        path: builds/kitty.zip
+        path: builds/
 
   # Build for Win 64bits
   build64:
@@ -57,7 +56,6 @@ jobs:
         mkdir ../builds
         docker run --rm -i -v $(pwd)/../builds:/builds -v $(pwd):/sources cyd01/cross-gcc "cd ${VERSION}_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 ; cd /builds ; ls -l"
         mv -f $(pwd)/../builds ./
-        cd builds ; zip kitty.zip *.exe
 
     # Upload runner package tar.gz/zip as artifact
     - name: Publish Artifact
@@ -65,4 +63,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: kitty64.zip
-        path: builds/kitty.zip
+        path: builds/
