@@ -605,7 +605,7 @@ void CreateSSHHandler() {
 
 	sprintf(buffer, "\"%s\" -load \"%%1\"", path ) ;
 	RegTestOrCreate( HKEY_CLASSES_ROOT, "putty\\shell\\open\\command", "", buffer ) ;
-		}
+}
 
 // Creation de l'association de fichiers *.ktx
 void CreateFileAssoc() {

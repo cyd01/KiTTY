@@ -671,11 +671,12 @@ static void close_session(void *ignored_context)
 
 #ifdef MOD_RECONNECT
 void RestartSession( void ) {
-	queue_toplevel_callback(close_session, NULL);
+	if( backend ) { queue_toplevel_callback(close_session, NULL) ; backend = NULL ; }
 	if( GetAutoreconnectFlag() ) {
 		lp_eventlog(default_logpolicy, "User request session restart..." ) ;
 	} else {
 		win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
+		SetTimer(hwnd, TIMER_RECONNECT, 10, NULL) ;
 	}
 	PostMessage(hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
 	//is_backend_first_connected = 0 ;
@@ -878,7 +879,6 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		int ret;
 		ret = cmdline_process_param(p, i+1<argc?argv[i+1]:NULL,
 					    1, conf);
-		    
 		if (ret == -2) {
 		    cmdline_error("option \"%s\" requires an argument", p);
 		} else if (ret == 2) {
@@ -917,6 +917,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-codepage") ) {
 			i++ ;
 			conf_set_str( conf, CONF_line_codepage, argv[i] ) ;
+		} else if( !strcmp(p, "-defini") ) {
+			CreateIniFile( "kitty.template.ini" ) ;
+			exit(0);
 		} else if( !strcmp(p, "-rcmd") ) {
 			i++ ;
 			conf_set_str( conf, CONF_remote_cmd, argv[i] ) ;
@@ -3291,7 +3294,6 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	 */ 
 	POINT cursor_pt;
 #endif
-
     switch (message) {
       case WM_TIMER:
 	if ((UINT_PTR)wParam == TIMING_TIMER_ID) {
@@ -3481,12 +3483,11 @@ else if((UINT_PTR)wParam == TIMER_BLINKTRAYICON) {  // Clignotement de l'icone d
 	}
 #ifdef MOD_RECONNECT
 else if((UINT_PTR)wParam == TIMER_RECONNECT) {
-	if( !backend && GetAutoreconnectFlag() ) { 
+	if( !backend ) { 
 		lp_eventlog(default_logpolicy, "No backend connection, reconnecting...") ;
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
-	} else {
-		KillTimer( hwnd, TIMER_RECONNECT ) ;
 	}
+	KillTimer( hwnd, TIMER_RECONNECT ) ;
 }
 #endif
 else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
@@ -3755,7 +3756,7 @@ free(cmd);
 		is_backend_connected = 0 ;
 		start_backend();
 		//if( (!backend || !is_backend_connected) && GetAutoreconnectFlag() ) {
-		if( (!backend) && GetAutoreconnectFlag() ) {
+		if( !backend ) {
 		    if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 			lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
@@ -3779,7 +3780,6 @@ free(cmd);
 		Conf *prev_conf;
 		int init_lvl = 1;
 		bool reconfig_result;
-
 		if (reconfiguring)
 		    break;
 		else
@@ -3788,7 +3788,6 @@ free(cmd);
 		char buftitle[1024] = "" ;
 		GetWindowText(hwnd, buftitle, sizeof(buftitle));
 		conf_set_str( conf, CONF_wintitle, buftitle ) ;
-#endif
 
 		/*
 		 * Copy the current window title into the stored
@@ -3797,6 +3796,7 @@ free(cmd);
 		 * reset the title to its startup state.
 		 */
 		conf_set_str(conf, CONF_wintitle, window_name);
+#endif
 
 		prev_conf = conf_copy(conf);
 #ifdef MOD_PERSO
@@ -4567,7 +4567,6 @@ free(cmd);
 	if (urlhack_mouse_old_x != TO_CHR_X(X_POS(lParam)) || urlhack_mouse_old_y != TO_CHR_Y(Y_POS(lParam))) {
 		urlhack_mouse_old_x = TO_CHR_X(X_POS(lParam));
 		urlhack_mouse_old_y = TO_CHR_Y(Y_POS(lParam));
-
 		if ((!conf_get_int(term->conf, CONF_url_ctrl_click) || urlhack_is_ctrl_pressed()) &&
 			urlhack_is_in_link_region(urlhack_mouse_old_x, urlhack_mouse_old_y)) {
 				if (urlhack_cursor_is_hand == 0) {
@@ -4581,19 +4580,15 @@ free(cmd);
 			urlhack_cursor_is_hand = 0;
 			term_update(term); // Force the terminal to update, see above
 		}
-
 		// If mouse jumps from one link directly into another, we need a forced terminal update too
 		if (urlhack_is_in_link_region(urlhack_mouse_old_x, urlhack_mouse_old_y) != urlhack_current_region) {
 			urlhack_current_region = urlhack_is_in_link_region(urlhack_mouse_old_x, urlhack_mouse_old_y);
 			term_update(term);
 		}
-
 	}
-	/* HACK: PuttyTray / Nutty : END */
 	/* HACK: PuttyTray / Nutty : END */
 	}
 #endif
-
 #ifdef MOD_PERSO
 	{
             // debug("X %d Y %d => %d:%d\n", X_POS(lParam), Y_POS(lParam), TO_CHR_X(X_POS(lParam)), TO_CHR_Y(Y_POS(lParam)));
@@ -7297,32 +7292,34 @@ void make_title( char * res, char * fmt, const char * title ) {
 	sprintf(b,"%ld", GetCurrentProcessId() ) ; 
 	while( (p=poss( "%%i", res)) > 0 ) { del(res,p,3); insert(res,b,p); }
 	while( (p=poss( "%%d", res)) > 0 ) { // forward port dynamic
-		char *key, *val;
+		char *key, *val, *k;
 		int nb=0 ;
 		del(res,p,3) ;
 		b[0]='\0';
 		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
 			val != NULL;
 			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
-			if( (key[0]=='L') && (!strcmp(val,"D")) ) {
+			k=key; if( (k[0]=='4')||(k[0]=='6') ) { k++; }
+			if( (k[0]=='L') && (!strcmp(val,"D")) ) {
 				if(nb!=0) {strcat(b,"|");}
-				strcat(b,key+1);
+				strcat(b,k+1);
 				nb++;
 			}
 		}
 		insert(res,b,p) ;
 	}
 	while( (p=poss( "%%l", res)) > 0 ) { // forward port locaux
-		char *key, *val;
+		char *key, *val, *k;
 		int nb=0 ;
 		del(res,p,3) ;
 		b[0]='\0';
 		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
 			val != NULL;
 			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
-			if( (key[0]=='L') && (strcmp(val,"D")) ) {
+			k=key; if( (k[0]=='4')||(k[0]=='6') ) { k++; }
+			if( (k[0]=='L') && (strcmp(val,"D")) ) {
 				if(nb!=0) {strcat(b,"|");}
-				strcat(b,key+1);
+				strcat(b,k+1);
 				nb++;
 			}
 		}

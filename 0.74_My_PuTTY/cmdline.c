@@ -81,6 +81,7 @@ void ManageConnectString( Conf *cf, char * hostname ) {
 			strcpy( po, p+1 ) ;
 			p[0] = '\0' ;
 		}
+
 	}
 	if( strlen(us)>0 ) {
 		if( (p = strstr( us, ":" )) != NULL ) {
@@ -336,66 +337,26 @@ int cmdline_process_param(const char *p, char *value,
                     conf_set_int(conf, CONF_port, -1);
                 }
 #ifdef MOD_PERSO
-		} else if (!strncmp(p, "ssh:", 4)) {
+	    } else if (!strncmp(p, "ssh:", 4)) {
 			char *pst = (char*)malloc(strlen(p)+1) ; strcpy(pst,p);
 			char *q = (char*)pst ;
-				/*
-				* If the hostname starts with "ssh:",
-				* set the protocol to SSH and process
-				* the string as a SSH URL
-				*/
-				q += 4;
-				if (q[0] == '/' && q[1] == '/')
-				q += 2;
-				conf_set_int( conf, CONF_protocol, PROT_SSH); 
-				pst = q;
-				while (*pst && *pst != ':' && *pst != '/')
-					pst++ ;
+			/*
+			* If the hostname starts with "ssh:",
+			* set the protocol to SSH and process
+			* the string as a SSH URL
+			*/
+			q += 4;
+			if (q[0] == '/' && q[1] == '/')
+			q += 2;
+			//while (*q && *q != ':' && *q != '/') q++ ;
+			conf_set_int( conf, CONF_protocol, PROT_SSH); 
+			conf_set_int( conf, CONF_port, 22);
+			ManageConnectString( conf, q ) ;
 
-				ManageConnectString( conf, q ) ;
-				conf_set_str( conf, CONF_host, q ) ;
-				seen_hostname_argument = true ;
-		
-		/*
-				char c;
-				c = *pst;
-
-		if (*pst) *pst++ = '\0';
-		
-				if (c == ':')
-					conf_set_int( conf,CONF_port,atoi(pst)); 
-				else if( (c == '/')&&(strlen(pst)>0) ) {
-					conf_set_int( conf,CONF_port,22); 
-					char * buf;
-					buf=(char*)malloc(strlen(pst)+10);
-					strcpy(buf,pst);
-					if( pst[0]=='#' ) {
-						decryptstring( (char*)pst+1, MASTER_PASSWORD ) ;
-						conf_set_str( conf,CONF_autocommand, pst+1);
-						}
-					else
-						{
-						char *s = (char*)malloc( strlen(pst)+1 ) ;
-						strcpy( s, pst ) ;
-						int i = decode64(s) ;
-						s[i]='\0';
-						conf_set_str(conf,CONF_autocommand,s);
-						free(s);
-						}
-					free(buf);
-					}
-				else
-					conf_set_int( conf,CONF_port,22) ;
-				char * buf;
-				buf=(char*)malloc( strlen(q)+10 );
-				strncpy(buf,q,strlen(q)+1);
-				buf[strlen(q)+1] = '\0' ;
-				conf_set_str( conf, CONF_host, buf);
-				free(buf);
-				seen_hostname_argument = true ;
-				*/
+			conf_set_str( conf, CONF_host, q ) ;
+			seen_hostname_argument = true ;
 			free(pst);
-		} else if (!strncmp(p, "putty:", 4)) {
+	    } else if (!strncmp(p, "putty:", 4)) {
 				char * q = (char*)p ;
 				int ret = 0;
 				q += 6;

@@ -85,7 +85,12 @@ static filereq *keypath = NULL;
 #define IDM_PUTTY         0x0060
 #define IDM_SESSIONS_BASE 0x1000
 #define IDM_SESSIONS_MAX  0x2000
+#ifdef MOD_PERSO
+#define PUTTY_REGKEY      "Software\\9bis.com\\KiTTY\\Sessions"
+#else
 #define PUTTY_REGKEY      "Software\\SimonTatham\\PuTTY\\Sessions"
+#endif
+
 #define PUTTY_DEFAULT     "Default%20Settings"
 static int initial_menuitems_count;
 

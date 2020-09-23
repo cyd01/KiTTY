@@ -31,6 +31,7 @@
 #define MAX_TICK_MINS	(INT_MAX / (60 * TICKSPERSEC))
 
 #ifdef MOD_PERSO
+extern int debug_flag ;
 #define ATTR_ITALIC  0x1000000U
 #include <stdint.h>
 void debug_log( const char *fmt, ...) ;

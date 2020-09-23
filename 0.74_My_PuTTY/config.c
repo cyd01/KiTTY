@@ -1059,10 +1059,8 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_listbox_clear(ctrl, dlg);
 #ifdef MOD_PERSO
 		if( ssd->savedsession!=NULL ) strcpy( ssd->savedsession, dlg_editbox_get( ssd->editbox, dlg ) ) ;
-		
 		ctrlSessionList = ctrl ;
 		//if(get_param("INIFILE")==SAVEMODE_DIR) CleanFolderName( CurrentFolder ) ;
-		
 		if( get_param("INIFILE")==SAVEMODE_DIR ) {
 			filter_session_portable(ctrl, dlg, ssd->sesslist.nsessions,ssd->sesslist.sessions, ssd->savedsession, CurrentFolder ) ;
 		}
@@ -1073,7 +1071,6 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 			if( (get_param("INIFILE")==SAVEMODE_REG) || ((get_param("INIFILE")==SAVEMODE_DIR) && !GetDirectoryBrowseFlag()) ) { // Registry mode
 				GetSessionFolderName( ssd->sesslist.sessions[i], folder ) ;
 			}
-		
 			if( GetPuttyFlag() ) { // In PuTTY mode => all sessions
 				dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
 			}
@@ -1097,7 +1094,6 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 				
 			}
 	    dlg_update_done(ctrl, dlg);
-	    
 	    if( get_param("INIFILE")==SAVEMODE_DIR ) { dlg_listbox_select(ctrl, dlg,1) ; }
 #else 
 	    for (i = 0; i < ssd->sesslist.nsessions; i++)

@@ -192,75 +192,109 @@ zmodem=yes
 ; Shortcuts: definition for the menu shortcuts keys
 
 ; (re)send automatic command (default is SHIFT+F12)
-autocommand=
+;autocommand=
+
 ; Change settings ...
-changesettings=
+;changesettings=
+
 ; Clear scrollback
-clearscrollback=
+;clearscrollback=
+
 ; Close and restart current session
-closerestart=
+;closerestart=
+
 ; run a local command (default is CONTROL+F5)
-command=
+;command=
+
 ; Copy all window buffer to clipboard
-copyall=
+;copyall=
+
 ; Open a duplicate window (with same session settings)
-duplicate=
+;duplicate=
+
 ; open text editor connected to the main window (default is SHIFT+F2)
-editor=
+;editor=
+
 ; open text editor with clipboard content, connected to the main window (default is CONTROL+SHIFT+F2)
-editorclipboard=
+;editorclipboard=
+
 ; Show event log
-eventlog=
+;eventlog=
+
 ; Switch font to black on white colors
-fontblackandwhite=
+;fontblackandwhite=
+
 ; Decrease font size
-fontdown=
+;fontdown=
+
 ; Switch font to negative colors
-fontnegative=
+;fontnegative=
+
 ; Increase fonr size
-fontup=
+;fontup=
+
 ; Switch to full screen
-fullscreen=
+;fullscreen=
+
 ; receive a remote file with pscp.exe: the full path must be selected in clipboard (default is CONTROL+F4)
-getfile=
+;getfile=
+
 ; change the background image (default is CONTROL+F11)
-imagechange=
+;imagechange=
+
 ; special command box (default is CONTROL+F8)
-input=
+;input=
+
 ; special command with multi-line editor (default is SHIFT+F8)
-inputm=
+;inputm=
+
 ; Repeat key exchange
-keyexchange=
+;keyexchange=
+
 ; New session ...
-opennew=
+;opennew=
+
 ; Start a new configuration box with current settings but without hostname
-opennewcurrent=
+;opennewcurrent=
+
 ; Print current clipboard content (default if SHIFT+F7)
-print=
+;print=
+
 ; Print all window buffer content (default is F7)
-printall=
+;printall=
+
 ; Protect the window, disable keyboard and mouse input (default is CONTROL+F9)
-protect=
+;protect=
+
 ; Reset terminal
-resetterminal=
+;resetterminal=
+
 ; Roll-up the window into the title bar (default is CONTROL+F12)
-rollup=
+;rollup=
+
 ; Load a local script and run it remotely (default is CONTROL+F2)
-script=
+;script=
+
 ; Send a local file with pscp.exe (default is CONTROL+F3)
-sendfile=
+;sendfile=
+
 ; Show current port forwarding definition (default is SHIFT+F6)
-showportforward=
+;showportforward=
+
 ; Enable or disable logging (default is SHIFT+F5)
-switchlogmode=
+;switchlogmode=
+
 ; Send the window to the system tray (default is CONTROL+F6)
-tray=
+;tray=
+
 ; Switch to embedded image viewer (default SHIFT+F11)
-viewer=
+;viewer=
+
 ; Switch to always visible (default is CONTROL+F7)
-visible=
+;visible=
+
 ; Start WinSCP (default is SHIFT+F3)
-winscp=
+;winscp=
 
 
 
@@ -281,4 +315,3 @@ maxchar=85
 
 ; reload: enable session list reload on each menu respawn
 reload=yes
-
