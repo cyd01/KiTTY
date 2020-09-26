@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\9bis.com\KiTTY]
+
+[HKEY_CURRENT_USER\Software\9bis.com\KiTTY\Commands]
+"Listing directory"="ls -lrtA"
+
+[HKEY_CURRENT_USER\Software\9bis.com\KiTTY\Commands\SQL]
+"Connection"="connect login/password"

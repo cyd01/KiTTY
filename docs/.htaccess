@@ -1,0 +1,56 @@
+RewriteEngine On
+
+RewriteCond %{QUERY_STRING} ^.*page=Donation.*$
+RewriteRule ^.*$ https://www.9bis.net/kitty/\#!pages/donation.md? [NE,R,L]
+
+RewriteCond %{QUERY_STRING} ^.*page=Download.*$
+RewriteRule ^.*$ https://www.9bis.net/kitty/#!pages/download.md? [NE,R,L]
+
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+
+Options -Indexes
+
+<Files .htaccess>
+order allow,deny
+deny from all
+</Files>
+
+<Files ~ "\.php">
+order deny,allow
+deny from all
+</Files>
+
+<Files ~ "^(index|edit|version1|check_update).php">
+order deny,allow
+allow from all
+</Files>
+
+<filesMatch "\.(html|htm|xml|xsl)$">
+  <ifModule mod_headers.c>
+    Header set Cache-Control "max-age=7200, must-revalidate"
+  </ifModule>
+</filesMatch>
+
+<filesMatch "\.(png|gif|ico|jpg|pdf)$">
+  <ifModule mod_headers.c>
+    Header set Cache-Control "max-age=7200, must-revalidate"
+  </ifModule>
+</filesMatch>
+
+<filesMatch "\.(exe|dll|zip|rtf|ktx|reg)$">
+  <ifModule mod_headers.c>
+    Header set Cache-Control "max-age=1200, must-revalidate"
+  </ifModule>
+</filesMatch>
+
+<filesMatch "\.(md|txt)$">
+  FileETag None
+  <ifModule mod_headers.c>
+     Header unset ETag
+     Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+     Header set Pragma "no-cache"
+     Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+  </ifModule>
+</filesMatch>

@@ -1,0 +1,7 @@
+{
+    "useSideMenu": false,
+    "lineBreaks": "gfm",
+    "additionalFooterText": "Original address of this website is <a href='http://kitty.9bis.com'>http://kitty.9bis.com/</a><br/>by <a href='https://github.com/cyd01'>Cyd</a> since 2005",
+    "anchorCharacter": "#",
+    "title": "KiTTY, a free telnet/ssh client for Windows"
+}
