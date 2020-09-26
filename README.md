@@ -1,10 +1,10 @@
 # Welcome to the KiTTY introduction web site
 
-<center>
+<p style="text-align: center;">
 All KiTTY documentation is available<br/>
 on the official website<br/>
 https://www.9bis.com/kitty/
-</center>
+</p>
 
 ## What is KiTTY ?
 KiTTY is a fork from version 0.71 of **PuTTY**, the best telnet / SSH client in the world.
