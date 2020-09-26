@@ -24,7 +24,6 @@ KiTTY has all the features from the original software, and adds many others as d
 * Automatic password
 * Automatic command
 * Running a locally saved script on a remote session
-* ~~ZModem integration~~
 
 ### Graphical features
 * An icon for each session
@@ -43,7 +42,6 @@ KiTTY has all the features from the original software, and adds many others as d
 * Binary compression
 * Clipboard printing
 * Cygwin and cmd.exe intégration
-* ~~Background image~~
 * File association
 * Other settings
 * New command-line options
