@@ -1,8 +1,7 @@
 # Welcome to the KiTTY introduction web site
 
 <p style="text-align: center;">
-All KiTTY documentation is available<br/>
-on the official website<br/>
+All KiTTY documentation is available on the official website<br/>
 https://www.9bis.com/kitty/
 </p>
 
