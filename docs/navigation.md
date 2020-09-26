@@ -22,7 +22,6 @@
   * [Automatic command](pages/AutomaticCommand.md)
   * [Force CR/LF on enter key](pages/ForceCRLF.md)
   * [Running a locally saved script on a remote session](pages/LocalScript.md)
-  * [ZModem integration](pages/ZModem.md)
 
 [Graphical]()
 
@@ -43,7 +42,6 @@
   * [Binary compression](pages/BinaryCompression.md)
   * [Clipboard printing](pages/ClipboardPrinting.md)
   * [Start Cygwin or cmd.exe into KiTTY](pages/cygtermd.md)
-  * [Background image](pages/covidimus.md)
   * [File association](pages/FileAssociation.md)
   * [Other settings](pages/OtherSettings.md)
   * [Menu key shortcuts definition](pages/MenuShortcuts.md)
