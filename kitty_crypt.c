@@ -1,13 +1,47 @@
 #include "kitty_crypt.h"
-char PassKey[1024] ="" ;
 
-int cryptstring( char * st, const char * key ) { return bcrypt_string_base64( st, st, strlen( st ), key, 0 ) ; }
+int cryptstring( char * st, const char * key ) { 
+	return bcrypt_string_base64( st, st, strlen( st ), key, 0 ) ; 
+}
+
 int decryptstring( char * st, const char * key ) { 
 	if( strlen(st)==0 ) { return 0 ; }
 	int res = buncrypt_string_base64( st, st, strlen( st ), key ) ; 
 	if( res == 0 ) strcpy( st, "" ) ;
 	return res ;
 	}
+
+void dopasskey( int mode, char * passkey, const char * host, const char * termtype ) {
+    if( mode > 0 ) {
+	strcpy( passkey, "KiTTY" ) ;
+    } else {
+	if( strlen(host)>0 ) {
+		if( (strlen(host)+strlen(termtype)) < 1000 ) { 
+			sprintf( passkey, "%s%sKiTTY", host, termtype ) ;
+		} else {
+			strcpy( passkey, "" ) ;
+		}
+	} else { 
+		if( strlen(termtype) < 1000 ) { 
+			sprintf( passkey, "%sKiTTY", termtype ) ;
+		} else {
+			strcpy( passkey, "" ) ;
+		}
+	}
+    }
+}
+
+int cryptpassword( int mode, char * password, const char * host, const char * termtype ) {
+	char PassKey[1024] = "" ;
+	dopasskey( mode, PassKey, host, termtype ) ;
+	return cryptstring( password, PassKey ) ;
+}
+
+int decryptpassword( int mode, char * password, const char * host, const char * termtype ) {
+	char PassKey[1024] = "" ;
+	dopasskey( mode, PassKey, host, termtype ) ;
+	return decryptstring( password, PassKey ) ;
+}
 
 //static char MASKKEY[128] = MASTER_PASSWORD ;
 static char MASKKEY[128] = "¤¥©ª³¼½¾" ;

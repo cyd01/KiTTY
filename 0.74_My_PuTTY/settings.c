@@ -25,12 +25,12 @@
 #define SAVEMODE_DIR 2
 #endif
 extern char FileExtension[15] ;
-extern char PassKey[1024] ;
-extern int cryptstring( char * st, const char * key ) ;
-extern int decryptstring( char * st, const char * key ) ;
+int cryptpassword( int mode, char * password, const char * host, const char * termtype ) ;
+int decryptpassword( int mode, char * password, const char * host, const char * termtype ) ;
 int get_param( const char * val ) ;
 void MASKPASS( char * password ) ;
 int GetBackgroundImageFlag(void) ;
+int GetCryptSaltFlag() ;
 #endif
 
 /* The cipher order given here is the default order. */
@@ -910,16 +910,11 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_b(sesskey, "SaveWindowPos", conf_get_bool(conf, CONF_save_windowpos) ); /* BKG */
     write_setting_b(sesskey, "ForegroundOnBell", conf_get_bool(conf, CONF_foreground_on_bell) );
 
-    if( (strlen(conf_get_str(conf, CONF_host))+strlen(conf_get_str(conf, CONF_termtype))) < 1000 ) { 
-	sprintf( PassKey, "%s%sKiTTY", conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
-    } else {
-	strcpy( PassKey, "" ) ;
-    }
-    char pst[4096] ;
 #ifndef MOD_NOPASSWORD
+    char pst[4096] ;
     strcpy( pst, conf_get_str(conf, CONF_password ) );
     MASKPASS(pst);
-    cryptstring( pst, PassKey ) ;
+    cryptpassword( GetCryptSaltFlag(), pst, conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
     write_setting_s(sesskey, "Password", pst);
     memset(pst,0,strlen(pst));
 #endif
@@ -1575,27 +1570,12 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppb(sesskey, "SaveWindowPos", false, conf, CONF_save_windowpos ); /* BKG */
     gppb(sesskey, "ForegroundOnBell", false, conf, CONF_foreground_on_bell );
 #ifndef MOD_NOPASSWORD
-    if( strlen(conf_get_str(conf, CONF_host))>0 ) {
-	if( (strlen(conf_get_str(conf, CONF_host))+strlen(conf_get_str(conf, CONF_termtype))) < 1000 ) { 
-		sprintf( PassKey, "%s%sKiTTY", conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
-	} else {
-		strcpy( PassKey, "" ) ;
-	}
-	gpps(sesskey, "Password", "", conf, CONF_password );
-   } else { 
-	if( strlen(conf_get_str(conf, CONF_termtype)) < 1000 ) { 
-		sprintf( PassKey, "%sKiTTY", conf_get_str(conf, CONF_termtype) ) ;
-	} else {
-		strcpy( PassKey, "" ) ;
-	}
-	gpps(sesskey, "Password", "", conf, CONF_password );
-    }
-
+    gpps(sesskey, "Password", "", conf, CONF_password );
     if( strlen(conf_get_str(conf, CONF_password))>0 ) {
 	char pst[4096] ;
 	if( strlen(conf_get_str(conf, CONF_password))<=4095 ) { strcpy( pst, conf_get_str(conf, CONF_password) ) ; }
 	else { memcpy( pst, conf_get_str( conf, CONF_password ), 4095 ) ; pst[4095]='\0'; }
-	decryptstring( pst, PassKey ) ;
+	decryptpassword( GetCryptSaltFlag(), pst, conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
 	if( strlen( pst ) > 0 ) {
 		FILE *fp ;
 		if( ( fp = fopen( "kitty.password", "r") ) != NULL ) { // Affichage en clair du password dans le fichier kitty.password si celui-ci existe

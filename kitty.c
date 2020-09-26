@@ -946,8 +946,7 @@ void RenewPassword( Conf *conf ) {
 		if( GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "Password", buffer ) ) {
 			GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "HostName", host );
 			GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "TerminalType", termtype );
-			sprintf( PassKey, "%s%sKiTTY", host, termtype ) ;
-			decryptstring(buffer, PassKey ) ;
+			decryptpassword( GetCryptSaltFlag(), buffer, host, termtype ) ;
 			MASKPASS(buffer);
 			conf_set_str(conf,CONF_password,buffer) ;
 			memset(buffer,0,strlen(buffer) );
@@ -2536,6 +2535,10 @@ function wcl {
   echo -ne '\e''[4i'
   echo "Copied to Windows clipboard" 1>&2
 }
+*/
+/* Lance WinSCP dans le répertoire courant
+winscp() { printf "\033]0;__ws:"`pwd`"\007" ; printf "\033]0;__ti\007" ; }
+winscp() { echo -ne "\033];__ws:${PWD}\007" ; }
 */
 /* Lance WinSCP sur un user et un host dans un répertoire donnés
 wt() { printf "\033]0;__wt:"$(hostname)":"${USER}":"`pwd`"\007" ; printf "\033]0;__ti\007" ; }
@@ -5158,6 +5161,7 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "configdir", buffer ) ) { 
 		if( strlen( buffer ) > 0 ) { if( existdirectory(buffer) ) SetConfigDirectory( buffer ) ; }
 	}
+	if( ReadParameter( INIT_SECTION, "cryptsalt", buffer ) ) { SetCryptSaltFlag( atoi(buffer) ) ; }
 	if( ReadParameter( INIT_SECTION, "ctrltab", buffer ) ) { if( !stricmp( buffer, "NO" ) ) SetCtrlTabFlag( 0 ) ; }
 #ifdef MOD_HYPERLINK
 #ifndef MOD_NOHYPERLINK
@@ -5291,7 +5295,13 @@ void LoadParameters( void ) {
 	if( readINI( KittyIniFile, "ConfigBox", "defaultsettings", buffer ) ) {
 		if( !stricmp( buffer, "NO" ) ) DefaultSettingsFlag = 0 ;
 	}
-
+	
+	// Param RandomActiveFlag défini dans kitty_commun.c
+	// Pour gérer le bug sur certaines machines:  https://github.com/cyd01/KiTTY/issues/113
+	if( readINI( KittyIniFile, "Debug", "randomactive", buffer ) ) {
+		if( !stricmp( buffer, "NO" ) ) SetRandomActiveFlag( 0 ) ;
+		if( !stricmp( buffer, "YES" ) ) SetRandomActiveFlag( 1 ) ;
+	}
 
 	if( readINI( KittyIniFile, "Print", "height", buffer ) ) {
 		PrintCharSize = atoi( buffer ) ;

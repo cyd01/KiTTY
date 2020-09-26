@@ -89,6 +89,16 @@ int BackgroundImageFlag = 0 ;
 int GetBackgroundImageFlag(void) { return BackgroundImageFlag ; }
 void SetBackgroundImageFlag( const int flag ) { BackgroundImageFlag = flag ; }
 
+// Pour supprimer le salt dans la cryptography: issue: https://github.com/cyd01/KiTTY/issues/113
+int RandomActiveFlag = 0 ;
+int GetRandomActiveFlag() { return RandomActiveFlag ; }
+void SetRandomActiveFlag( const int flag ) { RandomActiveFlag = flag ; }
+
+// Pour supprimer le sel dans le cryptage du mot de passe
+int CryptSaltFlag = 0 ;
+int GetCryptSaltFlag() { return CryptSaltFlag ; }
+void SetCryptSaltFlag( int flag ) { CryptSaltFlag = flag ; }
+
 // Répertoire de sauvegarde de la configuration (savemode=dir)
 char * ConfigDirectory = NULL ;
 

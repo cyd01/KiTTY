@@ -45,6 +45,15 @@ void SetScrumbleKeyFlag( const int flag ) ;
 int GetBackgroundImageFlag(void) ;
 void SetBackgroundImageFlag( const int flag ) ;
 
+// Pour supprimer le salt dans la cryptography: issue:https://github.com/cyd01/KiTTY/issues/113
+// extern int RandomActiveFlag ;
+int GetRandomActiveFlag() ;
+void SetRandomActiveFlag( const int flag ) ;
+
+// Pour supprimer le sel dans le cryptage du mot de passe
+int GetCryptSaltFlag() ;
+void SetCryptSaltFlag( int flag ) ;
+
 #ifdef MOD_ADB
 // Flag pour inhiber le support d'ADB
 int GetADBFlag(void) ;

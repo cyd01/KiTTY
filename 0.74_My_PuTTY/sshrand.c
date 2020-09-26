@@ -7,6 +7,10 @@
 #include "storage.h"
 #include <assert.h>
 
+#ifdef MOD_PERSO
+int GetRandomActiveFlag() ;
+#endif
+
 /* Collect environmental noise every 5 minutes */
 #define NOISE_REGULAR_INTERVAL (5*60*TICKSPERSEC)
 
@@ -37,6 +41,9 @@ static unsigned long next_noise_collection;
 
 void random_add_noise(NoiseSourceId source, const void *noise, int length)
 {
+#ifdef MOD_PERSO
+	if( !GetRandomActiveFlag() ) { return ; }
+#endif
     if (!random_active)
 	return;
 

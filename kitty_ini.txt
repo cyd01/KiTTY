@@ -77,6 +77,9 @@ conf=yes
 ;    Usually it the same directory where kitty.exe is
 ;configdir=
 
+; cryptsalt: set salt mode for password encryption 
+;cryptsalt=0
+
 ; CtHelperPath: the full path to the cthelper.exe binary (Wrapper for Cygwin feature)
 ;CtHelperPath=
 
@@ -134,7 +137,7 @@ paste=no
 ; ReconnectDelay: the delay before trying to reconnect automatically (in seconds)
 ReconnectDelay=5
 
-; sav: path to the save file of the KiTTY registry
+; sav: path to the save file of the KiTTY registry. In most case it is located here %APPDATA%/KiTTY/kitty.sav
 ;
 
 ; savemode: specify the save mode for sessions settings

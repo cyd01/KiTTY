@@ -3,10 +3,10 @@
 
 #include "nbcrypt.h"
 
-extern char PassKey[1024] ;
-
 int cryptstring( char * st, const char * key ) ;
 int decryptstring( char * st, const char * key ) ;
+int cryptpassword( int mode, char * password, const char * host, const char * termtype ) ;
+int decryptpassword( int mode, char * password, const char * host, const char * termtype ) ;
 
 // Procedure de management de la passphrase
 int GetUserPassSSHNoSave(void) ;

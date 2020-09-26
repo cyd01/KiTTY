@@ -1994,7 +1994,7 @@ kitty: putty.exe
 	mv putty.exe kitty.exe
 
 cleanall: clean FORCE
-	rm -f *.o *.exe *.res.o *.map *.bak ../*.bak ../../*.bak kitty.log ../*.o kitty.dll
+	rm -f *.o *.exe *.res.o *.map *.dmp *.bak ../*.bak ../../*.bak kitty.log ../*.o kitty.dll
 
 version:
 	expr `cat version_minor.txt|tr -d '\r\n 	'` + 1 > version_minor.txt

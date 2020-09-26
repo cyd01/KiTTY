@@ -258,11 +258,7 @@ void prng_add_entropy(prng *pr, unsigned source_id, ptrlen data)
 
     prngdebug("prng_add_entropy source=%u size=%"SIZEu" -> collector %zi\n",
               source_id, data.len, index);
-#ifdef MOD_PERSO
-    if( (data.len>0)&&(data.ptr!=NULL) ) put_datapl(pi->collectors[index], data);
-#else
     put_datapl(pi->collectors[index], data);
-#endif
 
     if (index == 0)
         pi->until_reseed = (pi->until_reseed < data.len ? 0 :

@@ -5,6 +5,7 @@ void WriteCountUpAndPath(void) ;
 void SaveDumpPortableConfig( FILE * fp ) ;
 int GetAutoStoreSSHKeyFlag(void) ;
 int GetUserPassSSHNoSave(void) ;
+int GetCryptSaltFlag() ;
 
 // Buffer contenant du texte a ecrire au besoin dans le fichier kitty.dmp
 static char * DebugText = NULL ;
@@ -74,8 +75,48 @@ void PrintProcessNameAndID( DWORD processID, FILE * fp  ) {
 	// Print the process name and identifier.
 	fprintf( fp, TEXT("%05u %u \t%s\n"), (unsigned int)processID, (unsigned int)SizeOfImage, szProcessName ) ;
 	CloseHandle( hProcess );
+}
+
+void PrintOSInfo( FILE * fp ) {
+    DWORD dwVersion = 0; 
+    DWORD dwMajorVersion = 0;
+    DWORD dwMinorVersion = 0; 
+    DWORD dwBuild = 0;
+
+    dwVersion = GetVersion();
+ 
+    // Get the Windows version.
+
+    dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
+    dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
+
+    // Get the build number.
+
+    if (dwVersion < 0x80000000)              
+        dwBuild = (DWORD)(HIWORD(dwVersion));
+
+    fprintf( fp, "Version is %d.%d (%d)\n",  dwMajorVersion, dwMinorVersion, dwBuild ) ;
+
+}
+
+void PrintSystemInfo( FILE * fp ) {
+	// https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/ns-sysinfoapi-system_info
+	SYSTEM_INFO si;
+	GetSystemInfo( &si );
+	fprintf( fp, "wProcessorArchitecture=%d ",si.wProcessorArchitecture ) ;
+	switch(si.wProcessorArchitecture) {
+		case PROCESSOR_ARCHITECTURE_ARM: fprintf(fp,"(PROCESSOR_ARCHITECTURE_ARM: ARM)\n") ; break ;
+//		case PROCESSOR_ARCHITECTURE_ARM64: fprintf(fp,"(PROCESSOR_ARCHITECTURE_ARM64: ARM64)\n") ; break ;
+		case PROCESSOR_ARCHITECTURE_AMD64: fprintf(fp,"(PROCESSOR_ARCHITECTURE_AMD64: x64 (AMD or Intel))\n") ; break ;
+		case PROCESSOR_ARCHITECTURE_IA64: fprintf(fp,"(PROCESSOR_ARCHITECTURE_IA64: Intel Itanium-based)\n") ; break ;
+		case PROCESSOR_ARCHITECTURE_INTEL: fprintf(fp,"(PROCESSOR_ARCHITECTURE_INTEL: x86)\n") ; break ;
+		case PROCESSOR_ARCHITECTURE_UNKNOWN: fprintf(fp,"(PROCESSOR_ARCHITECTURE_UNKNOWN: unknown)\n") ; break ;
 	}
-	
+	fprintf( fp, "wProcessorLevel=%d\n",si.wProcessorLevel ) ;
+	fprintf( fp, "wProcessorRevision=%d\n",si.wProcessorRevision ) ;
+	fprintf( fp, "dwNumberOfProcessors=%d\n",si.dwNumberOfProcessors ) ;
+}
+
 void PrintWindowSettings( FILE * fp ) {
 	int ret ;
 	RECT r ;
@@ -634,6 +675,8 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "WinHeight=%d\nWinrolFlag=%d\nAutoSendToTray=%d\nNoKittyFileFlag=%d\nConfigBoxHeight=%d\nConfigBoxWindowHeight=%d\nConfigBoxNoExitFlag=%d\nUserPassSSHNoSave=%d\nPuttyFlag=%d\n",WinHeight,WinrolFlag,AutoSendToTray,NoKittyFileFlag,ConfigBoxHeight,ConfigBoxWindowHeight,ConfigBoxNoExitFlag,GetUserPassSSHNoSave(),PuttyFlag);
 
 	fprintf( fp,"BackgroundImageFlag=%d\n",GetBackgroundImageFlag() );
+	fprintf( fp,"RandomActiveFlag=%d\n",GetRandomActiveFlag() );
+	fprintf( fp,"CryptSaltFlag=%d\n",GetCryptSaltFlag() );
 #ifdef MOD_RECONNECT
 	fprintf( fp,"AutoreconnectFlag=%d\nReconnectDelay=%d\n",AutoreconnectFlag,ReconnectDelay );
 #endif
@@ -819,8 +862,14 @@ void SaveDumpFile( char * filename ) {
 			}
 		fflush( fpout ) ;
 			
+		fputs( "\n@@@ SystemInfos @@@\n\n", fpout ) ;
+		PrintSystemInfo( fpout ) ; fflush( fpout ) ;
+			
+		fputs( "\n@@@ OSInfos @@@\n\n", fpout ) ;
+		PrintOSInfo( fpout ) ; fflush( fpout ) ;
+
 		fputs( "\n@@@ WindowSettings @@@\n\n", fpout ) ;
-		PrintWindowSettings( fpout ) ;
+		PrintWindowSettings( fpout ) ; fflush( fpout ) ;
 
 		fputs( "\n@@@ RunningProcess @@@\n\n", fpout ) ;
 		PrintAllProcess( fpout ) ; fflush( fpout ) ;
