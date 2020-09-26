@@ -1,5 +1,11 @@
 # Welcome to the KiTTY introduction web site
 
+<center>
+All KiTTY documentation is available<br/>
+on the official website<br/>
+https://www.9bis.com/kitty/
+</center>
+
 ## What is KiTTY ?
 KiTTY is a fork from version 0.71 of **PuTTY**, the best telnet / SSH client in the world.
 KiTTY is only designed for the Microsoft(c) Windows(c) platform. For more information about the original software, or pre-compiled binaries on other systems, you can go to the [Simon Tatham PuTTY page](http://www.chiark.greenend.org.uk/~sgtatham/putty/ "PuTTY").
