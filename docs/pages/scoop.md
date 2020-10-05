@@ -7,5 +7,5 @@ After installing **Scoop**, just run these commands to install **KiTTY**:
 
 ```
 scoop bucket add extras
-sccop install kitty
+scoop install kitty
 ```

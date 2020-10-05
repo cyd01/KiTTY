@@ -742,7 +742,7 @@ void RunConfig( Conf * conf ) {
 	
 		char bufpass[1024] ;
 		strcpy( bufpass, conf_get_str(conf,CONF_password)) ;
-		MASKPASS(bufpass) ;
+		MASKPASS(GetCryptSaltFlag(),bufpass) ;
 		conf_set_str(conf,CONF_password,bufpass) ;
 	
                 if (restricted_acl) {
@@ -782,7 +782,7 @@ void RunConfig( Conf * conf ) {
 		    cl = dupprintf("putty %s&%p:%u", argprefix,
                                    filemap, (unsigned)size);
 		    
-		MASKPASS(bufpass);
+		MASKPASS(GetCryptSaltFlag(),bufpass);
 		conf_set_str(conf,CONF_password,bufpass);
 		memset(bufpass,0,strlen(bufpass));
 		    

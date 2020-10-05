@@ -420,7 +420,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 #ifndef MOD_NOPASSWORD
     char pst[4096] ;
     strcpy( pst, conf_get_str(conf, CONF_password ) );
-    MASKPASS(pst);
+    MASKPASS(GetCryptSaltFlag(),pst);
     cryptpassword( GetCryptSaltFlag(), pst, conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
     write_setting_s_forced(sesskey, "Password", pst);
     memset(pst,0,strlen(pst));
@@ -1061,7 +1061,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 			}
 		}
 	}
-	MASKPASS(pst);
+	MASKPASS(GetCryptSaltFlag(),pst);
 	conf_set_str( conf, CONF_password, pst ) ;
 	memset(pst,0,strlen(pst));
     }

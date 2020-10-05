@@ -1918,7 +1918,7 @@ kitty_win.o: ../../kitty_win.c ../../kitty_win.h
 
 urlhack.o: ../../url/urlhack.c ../../url/urlhack.h \
 		../puttymem.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../../url/urlhack.c -DEXTERN_REGEXLIB 
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../../url/urlhack.c -DEXTERN_REGEXLIB
 
 urlhack_nohyperlink.o: ../../url/urlhack.c ../../url/urlhack.h \
 		../puttymem.h

@@ -28,7 +28,7 @@ extern char FileExtension[15] ;
 int cryptpassword( int mode, char * password, const char * host, const char * termtype ) ;
 int decryptpassword( int mode, char * password, const char * host, const char * termtype ) ;
 int get_param( const char * val ) ;
-void MASKPASS( char * password ) ;
+void MASKPASS( const int mode, char * password ) ;
 int GetBackgroundImageFlag(void) ;
 int GetCryptSaltFlag() ;
 #endif
@@ -913,7 +913,7 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
 #ifndef MOD_NOPASSWORD
     char pst[4096] ;
     strcpy( pst, conf_get_str(conf, CONF_password ) );
-    MASKPASS(pst);
+    MASKPASS(GetCryptSaltFlag(), pst);
     cryptpassword( GetCryptSaltFlag(), pst, conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
     write_setting_s(sesskey, "Password", pst);
     memset(pst,0,strlen(pst));
@@ -945,24 +945,27 @@ bool load_settings(const char *section, Conf *conf)
     close_settings_r(sesskey);
 #ifdef MOD_PERSO
     if (exists && conf_launchable(conf)) {
-      if( get_param("INIFILE") == SAVEMODE_DIR ) {
-	char *name=NULL ;
-	if( (section!=NULL) && (strlen(section)>0) && (strlen(conf_get_str( conf, CONF_folder))>0) ) {
-		if( !strcmp(conf_get_str( conf, CONF_folder),"Default") ) {
-		    add_session_to_jumplist(section);
-		} else {
-		    name=(char*)malloc( strlen(section)+strlen(conf_get_str( conf, CONF_folder))+5);
-		    sprintf(name,"%s/%s",conf_get_str( conf, CONF_folder),section);
+	if( get_param("INIFILE") == SAVEMODE_DIR ) {
+		char *name = NULL ;
+		if( (section!=NULL) && (strlen(section)>0) && (strlen(conf_get_str( conf, CONF_folder))>0) ) {
+			if( strcmp(conf_get_str( conf, CONF_folder), "Default" ) ) {
+				name = (char*)malloc( strlen(section)+strlen(conf_get_str( conf, CONF_folder)) + 2 ) ;
+				sprintf( name, "%s/%s", conf_get_str( conf, CONF_folder), section ) ;
+			}
+		} else if( (section!=NULL) && (strlen(section)>0) ) {
+			name = (char*)malloc( strlen(section)+1 ) ;
+			sprintf( name, "%s", section ) ;
 		}
-	} else if( (section!=NULL) && (strlen(section)>0) ) {
-		name=(char*)malloc( strlen(section)+1);
-		sprintf(name,"%s",section);
+		if( name!=NULL ) {
+			//add_session_to_jumplist(section) ;
+			add_session_to_jumplist(name) ;
+			free(name) ;
+		} else { 
+			add_session_to_jumplist(section) ;
+		}
+	} else {
+		add_session_to_jumplist(section);
 	}
-        if( name!=NULL ) { add_session_to_jumplist(name); free(name) ; }
-	else { add_session_to_jumplist(section); }
-      } else {
-        add_session_to_jumplist(section);
-      }
     }
 #else
     if (exists && conf_launchable(conf))
@@ -1586,7 +1589,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
 			}
 		}
 	}
-	MASKPASS(pst);
+	MASKPASS(GetCryptSaltFlag(), pst);
 	conf_set_str( conf, CONF_password, pst ) ;
 	memset(pst,0,strlen(pst));
     }

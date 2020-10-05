@@ -78,7 +78,7 @@ conf=yes
 ;configdir=
 
 ; cryptsalt: set salt mode for password encryption 
-;cryptsalt=0
+;cryptsalt=1
 
 ; CtHelperPath: the full path to the cthelper.exe binary (Wrapper for Cygwin feature)
 ;CtHelperPath=

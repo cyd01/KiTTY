@@ -309,6 +309,8 @@ COLORREF return_colours258(void) { return colours[258]; }
 struct netscheduler_tag* netscheduler_new(void) ;
 void netscheduler_free(struct netscheduler_tag* netscheduler) ;
 
+void AddDynamicSFTPConnect( Conf *conf ) ;
+
 /* String pour charger automatiquement au démarrage un fichier dans un editeur connecté */
 static char *LoadFile = NULL ;
 
@@ -317,6 +319,8 @@ int force_reconf = 1 ;
 
 // Reinitialiser le fichier de logs
 void logfile_reinit(void *handle) ;
+
+void set_cmd_line( const char * st ) ;
 
 #ifdef MOD_INTEGRATED_KEYGEN
 int WINAPI KeyGen_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show);
@@ -733,6 +737,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 #endif
 #ifdef MOD_PERSO
     // Initialisation specifique a KiTTY
+    set_cmd_line( cmdline ) ;
     SethInstIcons( hinst ) ;
     InitWinMain();
     if( debug_flag ) { 
@@ -891,7 +896,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			i++ ;
 			char bufpass[1024] ;
 			strcpy( bufpass, argv[i] );
-			MASKPASS( bufpass ) ;
+			MASKPASS( GetCryptSaltFlag(), bufpass ) ;
 			conf_set_str( conf, CONF_password, bufpass ) ;
 			memset( bufpass, 0, strlen(bufpass) ) ;
 			memset( argv[i], 0, strlen(argv[i]) ) ;
@@ -3338,7 +3343,7 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 		if( strlen( conf_get_str(conf,CONF_username) ) > 0 ) {
 			if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
 				char bufpass[1024]; strcpy(bufpass,conf_get_str(conf,CONF_password)) ;
-				MASKPASS(bufpass); strcat(buffer,bufpass); memset(bufpass,0,strlen(bufpass));
+				MASKPASS(GetCryptSaltFlag(), bufpass); strcat(buffer,bufpass); memset(bufpass,0,strlen(bufpass));
 				strcat( buffer, "\\n" ) ;
 			}
 		}
@@ -4368,7 +4373,7 @@ free(cmd);
       case WM_MBUTTONDOWN:
       case WM_RBUTTONDOWN:
 #ifdef MOD_RECONNECT
-	if( ((!backend) || (!is_backend_connected)) && GetAutoreconnectFlag() && is_backend_first_connected ) { // On essaie de se reconnecter
+	if( ((!backend) || (!is_backend_connected)) && GetAutoreconnectFlag() && is_backend_first_connected ) { // trying to reconnect
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
 		lp_eventlog(default_logpolicy, "No connection on mouse click, trying to reconnect...") ;
 		break ; 
@@ -4380,7 +4385,7 @@ free(cmd);
 #ifdef MOD_PERSO
 	if( GetProtectFlag() ) { break ; }
         if(!PuttyFlag && GetMouseShortcutsFlag() ) {
-	if( (message == WM_LBUTTONUP) && ((wParam & MK_SHIFT)&&(wParam & MK_CONTROL) ) ) { // shift + CTRL + bouton gauche => duplicate session
+	if( (message == WM_LBUTTONUP) && ((wParam & MK_SHIFT) && (wParam & MK_CONTROL) ) ) { // shift + CTRL + left button => duplicate session
 		if( backend && is_backend_connected ) {
 			lp_eventlog(default_logpolicy, "Duplicate session") ;
 			SendMessage( hwnd, WM_COMMAND, IDM_DUPSESS, 0 ) ;
@@ -4396,16 +4401,20 @@ free(cmd);
 		break ;
 	}
 
-	else if (message == WM_LBUTTONUP && ((wParam & MK_CONTROL) ) ) {// ctrl+bouton gauche => nouvelle icone
-		if( !GetHyperlinkFlag() || !conf_get_int(conf,CONF_url_ctrl_click) ) { // si les hyperliens ou le ctrl sont désactivés
-			if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+	else if (message == WM_LBUTTONUP && ((wParam & MK_CONTROL) ) ) { 				// ctrl + left button => new icon ?
+		if( !GetHyperlinkFlag() || !conf_get_int(conf,CONF_url_ctrl_click) ) { 			// if no hyperlink feature or if ctrl + link is disable
+			if( GetIconeFlag() != -1 ) {
+				SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+			}
+			break ;
 		} else {
-			if( !urlhack_is_in_link_region(TO_CHR_X(cursor_pt.x), TO_CHR_Y(cursor_pt.y)) ) { // Si sou sla position de la souris il n'y a pas un hyperlien
-				if( GetIconeFlag() != -1 ) SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+			if( !urlhack_is_in_link_region(TO_CHR_X(cursor_pt.x), TO_CHR_Y(cursor_pt.y)) ) { // If the is no hyperlink under mouse
+				if( GetIconeFlag() != -1 ) {
+					SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_NEXT ) ;
+				}
+				break ;
 			}
 		}
-		RefreshBackground( hwnd ) ;
-		break ;
 	}
 
 	else if (message == WM_MBUTTONUP && ((wParam & MK_CONTROL) ) ) { // ctrl+bouton milieu => send to tray

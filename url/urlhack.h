@@ -5,7 +5,7 @@
 #ifndef _URLHACK_H
 #define _URLHACK_H
 
-#include "regex.h"
+#include <regex.h>
 
 typedef struct { int x0, y0, x1, y1; } text_region;
 

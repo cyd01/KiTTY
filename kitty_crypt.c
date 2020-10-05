@@ -31,13 +31,13 @@ void dopasskey( int mode, char * passkey, const char * host, const char * termty
     }
 }
 
-int cryptpassword( int mode, char * password, const char * host, const char * termtype ) {
+int cryptpassword( const int mode, char * password, const char * host, const char * termtype ) {
 	char PassKey[1024] = "" ;
 	dopasskey( mode, PassKey, host, termtype ) ;
 	return cryptstring( password, PassKey ) ;
 }
 
-int decryptpassword( int mode, char * password, const char * host, const char * termtype ) {
+int decryptpassword( const int mode, char * password, const char * host, const char * termtype ) {
 	char PassKey[1024] = "" ;
 	dopasskey( mode, PassKey, host, termtype ) ;
 	return decryptstring( password, PassKey ) ;
@@ -46,8 +46,8 @@ int decryptpassword( int mode, char * password, const char * host, const char * 
 //static char MASKKEY[128] = MASTER_PASSWORD ;
 static char MASKKEY[128] = "¤¥©ª³¼½¾" ;
 
-void MASKPASS( char * password ) {
-	//return ;    //   POUR SIMPLIFIER EN ATTENDANT QUE TOUT FONCTIONNE DANS LA MISE A JOUR > 2013/06/27
+void MASKPASS( const int mode, char * password ) {
+	if( mode > 0 ) return ;    //   POUR SIMPLIFIER EN ATTENDANT QUE TOUT FONCTIONNE DANS LA MISE A JOUR > 2013/06/27
 	if( password==NULL ) return ;
 	if( strlen(password)==0) return ;
 	

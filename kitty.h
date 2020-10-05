@@ -337,7 +337,6 @@ HWND InfoBox( HINSTANCE hInstance, HWND hwnd ) ;
 // Renomme une Cle de registre
 void RegRenameTree( HWND hdlg, HKEY hMainKey, LPCTSTR lpSubKey, LPCTSTR lpDestKey ) ;
 void DelRegistryKey( void ) ;
-void MASKPASS( char * password ) ;
 void RenewPassword( Conf *conf ) ;
 // Gere l'envoi dans le System Tray
 int ManageToTray( HWND hwnd ) ;
@@ -394,6 +393,11 @@ void ChangeFontSize(HWND hwnd, int dec) ;
 
 void create_settings( const char * name ) ;
 void SetHostKeyExtension( const char* ext ) ;
+
+void CreateIniFile( const char * filename ) ;
+void SendKeyboard( HWND hwnd, const char * buffer ) ;
+char * GetRemotePath() ;
+void ManageShortcutsFlag( HWND hwnd ) ;
 
 #ifdef MOD_LAUNCHER
 void InitLauncherRegistry( void ) ;

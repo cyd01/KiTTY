@@ -389,7 +389,7 @@ void GetPasswordInConfig( char * p ) {
 	int len = strlen( conf_get_str(conf,CONF_password) ) ;
 	if( len>4095 ) { len = 4095 ; }
 	memcpy( bufpass, conf_get_str(conf,CONF_password), len ) ; bufpass[len]='\0';
-	MASKPASS(bufpass);
+	MASKPASS(GetCryptSaltFlag(),bufpass);
 	memcpy( p, bufpass, strlen(bufpass)+1 ) ;
 	memset(bufpass,0,strlen(bufpass));
 }
@@ -403,7 +403,7 @@ int IsPasswordInConf(void) {
 	if( len>4095 ) { len = 4095 ; }
 	memcpy( bufpass, conf_get_str(conf,CONF_password), len ) ; 
 	bufpass[len]='\0';
-	MASKPASS(bufpass);
+	MASKPASS(GetCryptSaltFlag(),bufpass);
 	len = strlen( bufpass ) ;
 	memset(bufpass,0,strlen(bufpass));
 	return len ;

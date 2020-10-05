@@ -7,11 +7,22 @@ int GetAutoStoreSSHKeyFlag(void) ;
 int GetUserPassSSHNoSave(void) ;
 int GetCryptSaltFlag() ;
 
-// Buffer contenant du texte a ecrire au besoin dans le fichier kitty.dmp
-static char * DebugText = NULL ;
-
 extern int is_backend_connected ;
 extern int is_backend_first_connected ;
+
+// String contenant la ligne de commande
+static char * CmdLine = NULL ;
+void set_cmd_line( const char * st ) {
+	if( st != NULL ) {
+		if( CmdLine != NULL ) { free( CmdLine ) ; CmdLine = NULL ; }
+		CmdLine = (char*) malloc( strlen(st) + 1 ) ;
+		//if( strlen(st)>0 ) MessageBox(NULL,st,"ici",MB_OK);
+		strcpy( CmdLine, st ) ;
+	}
+}
+
+// Buffer contenant du texte a ecrire au besoin dans le fichier kitty.dmp
+static char * DebugText = NULL ;
 
 void set_debug_text( const char * txt ) {
 	if( DebugText!=NULL ) { free( DebugText ) ; DebugText = NULL ; }
@@ -95,7 +106,7 @@ void PrintOSInfo( FILE * fp ) {
     if (dwVersion < 0x80000000)              
         dwBuild = (DWORD)(HIWORD(dwVersion));
 
-    fprintf( fp, "Version is %d.%d (%d)\n",  dwMajorVersion, dwMinorVersion, dwBuild ) ;
+    fprintf( fp, "Version is %lu.%lu (%lu)\n",  dwMajorVersion, dwMinorVersion, dwBuild ) ;
 
 }
 
@@ -103,7 +114,7 @@ void PrintSystemInfo( FILE * fp ) {
 	// https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/ns-sysinfoapi-system_info
 	SYSTEM_INFO si;
 	GetSystemInfo( &si );
-	fprintf( fp, "wProcessorArchitecture=%d ",si.wProcessorArchitecture ) ;
+	fprintf( fp, "wProcessorArchitecture=%lu ",si.wProcessorArchitecture ) ;
 	switch(si.wProcessorArchitecture) {
 		case PROCESSOR_ARCHITECTURE_ARM: fprintf(fp,"(PROCESSOR_ARCHITECTURE_ARM: ARM)\n") ; break ;
 //		case PROCESSOR_ARCHITECTURE_ARM64: fprintf(fp,"(PROCESSOR_ARCHITECTURE_ARM64: ARM64)\n") ; break ;
@@ -121,6 +132,8 @@ void PrintWindowSettings( FILE * fp ) {
 	int ret ;
 	RECT r ;
 	char buffer[MAX_VALUE_NAME] ;
+	
+	fprintf( fp, "CmdLine=%s\n", CmdLine ) ;
 	
 	GetOSInfo( buffer ) ;
 	fprintf( fp, "OSVersion=%s\n", buffer ) ;
@@ -542,7 +555,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	/* On decrypte le password */
 	char bufpass[4096] ;
 	memcpy( bufpass, conf_get_str(conf,CONF_password), 4095 ) ; bufpass[4095]='\0';
-	MASKPASS(bufpass);
+	MASKPASS(GetCryptSaltFlag(),bufpass);
 	fprintf( fp, "password=%s\n",			bufpass ) ;
 	memset(bufpass,0,strlen(bufpass));
 

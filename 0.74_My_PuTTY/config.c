@@ -17,7 +17,7 @@
 #include "kitty.h"
 #include "kitty_store.h"
 union control * ctrlHostnameEdit = NULL ;
-void MASKPASS( char * password ) ;
+void MASKPASS( const int mode, char * password ) ;
 int stricmp(const char *s1, const char *s2) ;
 int GetReadOnlyFlag(void) ;
 #endif
@@ -1144,7 +1144,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) {
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
-		     MASKPASS( buffer ) ;
+		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
 		     }
@@ -1159,7 +1159,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) { 
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
-		     MASKPASS( buffer ) ;
+		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
 		}
@@ -1188,7 +1188,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) {
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
-		     MASKPASS( buffer ) ;
+		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
 		     }
@@ -1200,7 +1200,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) {
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
-		     MASKPASS( buffer ) ;
+		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
 	            }
@@ -1262,7 +1262,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) {
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
-		     MASKPASS( buffer ) ;
+		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
 		}

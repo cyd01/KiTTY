@@ -947,7 +947,7 @@ void RenewPassword( Conf *conf ) {
 			GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "HostName", host );
 			GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "TerminalType", termtype );
 			decryptpassword( GetCryptSaltFlag(), buffer, host, termtype ) ;
-			MASKPASS(buffer);
+			MASKPASS(GetCryptSaltFlag(),buffer);
 			conf_set_str(conf,CONF_password,buffer) ;
 			memset(buffer,0,strlen(buffer) );
 			}
@@ -969,7 +969,7 @@ void SetPasswordInConfig( const char * password ) {
 				bufpass[strlen(bufpass)-1]='\0'; 
 			}
 			while( (bufpass[strlen(bufpass)-1]=='\n') || (bufpass[strlen(bufpass)-1]=='\r') || (bufpass[strlen(bufpass)-1]=='\t') || (bufpass[strlen(bufpass)-1]==' ') ) { bufpass[strlen(bufpass)-1]='\0' ; }
-			MASKPASS(bufpass) ;
+			MASKPASS(GetCryptSaltFlag(),bufpass) ;
 		} else {
 			strcpy( bufpass, "" ) ;
 		}
@@ -2085,7 +2085,7 @@ void SendOneFile( HWND hwnd, char * directory, char * filename, char * distantdi
 		strcat( buffer, "-pw \"" ) ;
 		char bufpass[1024] ;
 		strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
-		MASKPASS(bufpass) ; strcat( buffer, bufpass ) ; memset( bufpass, 0, strlen(bufpass) ) ;
+		MASKPASS(GetCryptSaltFlag(),bufpass) ; strcat( buffer, bufpass ) ; memset( bufpass, 0, strlen(bufpass) ) ;
 		strcat( buffer, "\" " ) ;
 	}
 	if( strlen( conf_get_str(conf,CONF_portknockingoptions)) > 0 ) {
@@ -2212,7 +2212,7 @@ void RunExternPlink( HWND hwnd, const char * cmd ) {
 		strcat( buffer, "-pw \"" ) ;
 		char bufpass[1024] ;
 		strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
-		MASKPASS(bufpass); strcat( buffer, bufpass ) ; 
+		MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; 
 		memset(bufpass,0,strlen(bufpass));
 		strcat( buffer, "\" " ) ;
 	}
@@ -2307,7 +2307,7 @@ void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
 		strcat( buffer, "-pw \"" ) ;
 		char bufpass[1024] ;
 		strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
-		MASKPASS(bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
+		MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
 		strcat( buffer, "\" " ) ;
 	}
 	if( strlen( conf_get_str(conf,CONF_portknockingoptions)) > 0 ) {
@@ -2431,7 +2431,7 @@ void GetFile( HWND hwnd ) {
 					strcat( buffer, "-pw " ) ;
 					char bufpass[1024] ;
 					strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
-					MASKPASS(bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
+					MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
 					strcat( buffer, " " ) ;
 					}
 				if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
@@ -3678,7 +3678,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
 			char bufpass[4096], buffer[4096] ;
 			strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
-			MASKPASS(bufpass);
+			MASKPASS(GetCryptSaltFlag(),bufpass);
 			sprintf( buffer, "Your password is\n-%s-", bufpass ) ;
 			memset(bufpass,0,strlen(bufpass));
 			MessageBox( hwnd, buffer, "Password", MB_OK|MB_ICONWARNING ) ;
@@ -3769,30 +3769,32 @@ int SearchWinSCP( void ) {
 	if( WinSCPPath!=NULL) { free(WinSCPPath) ; WinSCPPath = NULL ; }
 	if( ReadParameter( INIT_SECTION, "WinSCPPath", buffer ) != 0 ) {
 		if( existfile( buffer ) ) { 
-			WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ; return 1 ;
-			}
-		else { DelParameter( INIT_SECTION, "WinSCPPath" ) ; }
+			WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ; 
+			return 1 ;
+		} else { 
+			DelParameter( INIT_SECTION, "WinSCPPath" ) ; 
 		}
+	}
 	//strcpy( buffer, "C:\\Program Files\\WinSCP\\WinSCP.exe" ) ;
 	sprintf( buffer, "%s\\WinSCP\\WinSCP.exe", getenv("ProgramFiles") ) ;
 	if( existfile( buffer ) ) { 
 		WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ; 
 		WriteParameter( INIT_SECTION, "WinSCPPath", WinSCPPath ) ;
 		return 1 ;
-		}
+	}
 	//strcpy( buffer, "C:\\Program Files\\WinSCP3\\WinSCP3.exe" ) ;
 	sprintf( buffer, "%s\\WinSCP3\\WinSCP3.exe", getenv("ProgramFiles") ) ;
 	if( existfile( buffer ) ) { 
 		WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ; 
 		WriteParameter( INIT_SECTION, "WinSCPPath", WinSCPPath ) ;
 		return 1 ;
-		}
+	}
 	sprintf( buffer, "%s\\WinSCP.exe", InitialDirectory ) ;
 	if( existfile( buffer ) ) { 
 		WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ; 
 		WriteParameter( INIT_SECTION, "WinSCPPath", WinSCPPath ) ;
 		return 1 ;
-		}
+	}
 	if( ReadParameter( INIT_SECTION, "winscpdir", buffer ) ) {
 		buffer[4076]='\0';
 		strcat( buffer, "\\" ) ; strcat( buffer, "WinSCP.exe" ) ;
@@ -3800,10 +3802,10 @@ int SearchWinSCP( void ) {
 			WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ; 
 			WriteParameter( INIT_SECTION, "WinSCPPath", WinSCPPath ) ;
 			return 1 ;
-			}
 		}
-	return 0 ;
 	}
+	return 0 ;
+}
 
 // Lance une session dupliquee au meme endroit
 /* ALIAS UNIX A DEFINIR POUR DUPLIQUER LA SESSION COURANTE Dans le repertoire courant
@@ -3841,7 +3843,7 @@ void StartNewSession( HWND hwnd, char * directory, char * host, char * user ) {
 			char bufpass[1024] ;
 			strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
 			strcat( cmd, " -pw " ) ; 
-			MASKPASS(bufpass) ; 
+			MASKPASS(GetCryptSaltFlag(),bufpass) ; 
 			strcat(cmd,"\"") ; strcat(cmd,bufpass) ; strcat(cmd,"\"") ;
 			memset(bufpass,0,strlen(bufpass));
 			}
@@ -3854,7 +3856,7 @@ void StartNewSession( HWND hwnd, char * directory, char * host, char * user ) {
 			char bufpass[1024] ;
 			strcpy(bufpass,conf_get_str(conf,CONF_password));
 			strcat( cmd, " -pw " ) ; 
-			MASKPASS(bufpass) ; 
+			MASKPASS(GetCryptSaltFlag(),bufpass) ; 
 			strcat(cmd,"\"") ; strcat(cmd,bufpass) ; strcat(cmd,"\"") ;
 			memset(bufpass,0,strlen(bufpass));
 			}
@@ -3928,7 +3930,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 				char bufpass[1024] ;
 				strcat( cmd, ":" ); 
 				strcpy(bufpass,conf_get_str(conf,CONF_password));
-				MASKPASS(bufpass);
+				MASKPASS(GetCryptSaltFlag(),bufpass);
 				strcat(cmd,bufpass);
 				memset(bufpass,0,strlen(bufpass));
 			}
@@ -3957,7 +3959,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 			char bufpass[1024] ;
 			strcat( cmd, ":" ); 
 			strcpy(bufpass,conf_get_str(conf,CONF_password));
-			MASKPASS(bufpass);
+			MASKPASS(GetCryptSaltFlag(),bufpass);
 			strcat(cmd,bufpass);
 			memset(bufpass,0,strlen(bufpass));
 		}

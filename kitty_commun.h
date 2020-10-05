@@ -113,7 +113,7 @@ void mungestr( const char *in, char *out ) ;
 void unmungestr( const char *in, char *out, int outlen ) ;
 
 // Fonctions de gestion du mot de passe
-void MASKPASS( char * password ) ;
+void MASKPASS( const int mode, char * password ) ;
 void GetPasswordInConfig( char * p ) ;
 int IsPasswordInConf(void) ;
 void CleanPassword( char * p ) ;

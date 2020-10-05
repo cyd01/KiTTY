@@ -1,6 +1,9 @@
 /*
  * HACK: PuttyTray / Nutty
  * Hyperlink stuff: CORE FILE! Don't forget to COPY IT TO THE NEXT VERSION
+ *
+ * On-line tester: https://regex101.com/
+ *
  */
 #include <windows.h>
 #include <string.h>
@@ -18,11 +21,15 @@ static text_region **link_regions;
 static unsigned int link_regions_len;
 static unsigned int link_regions_current_pos;
 
-// Essai de regex qui accepte aussi les lien mailto://
-const char* urlhack_default_regex = " (((((https?|ftp|svn):\\/\\/)|www\\.)(([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost|([a-zA-Z0-9\\-]+\\.)*[a-zA-Z0-9\\-]+\\.(com|net|org|info|biz|int|gov|name|edu|[a-zA-Z][a-zA-Z]))(:[0-9]+)?((\\/|\\?)[^ \"]*[^ ,;\\.:\">)])?)|(mailto:\\/\\/[a-zA-Z0-9\\-_\\.]+@[a-zA-Z0-9\\-_\\.]+\\.[a-z]{2,}))" ;
+// Regex with http://, https://, ftp://, mailto: and ssh:// links
+const char* urlhack_default_regex = "(((((https?|ftp):\\/\\/)|www\\.)(([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost|([a-zA-Z0-9\\-]+\\.)*[a-zA-Z0-9\\-]+\\.(com|net|org|info|biz|int|gov|name|edu|[a-zA-Z][a-zA-Z]))(:[0-9]+)?((\\/|\\?)[^ \"]*[^ ,;\\.:\">)]?)?)|(mailto:[a-zA-Z0-9\\-_\\.]+@[a-zA-Z0-9\\-_\\.]+\\.[a-z]{2,})|(ssh:\\/\\/([a-zA-Z0-9\\-_]+(:[^@]*)?@)?[a-zA-Z0-9\\-_\\.]+(:[0-9]{2,5})?(\\/[a-zA-Z0-9\\-_]+)?))" ;
+//  (((((https?|ftp):\/\/)|www\.)(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|net|org|info|biz|int|gov|name|edu|[a-zA-Z][a-zA-Z]))(:[0-9]+)?((\/|\?)[^ "]*[^ ,;\.:">)]?)?)|(mailto:[a-zA-Z0-9\-_\.]+@[a-zA-Z0-9\-_\.]+\.[a-z]{2,})|(ssh:\/\/([a-zA-Z0-9\-_]+(:[^@]*)?@)?[a-zA-Z0-9\-_\.]+(:[0-9]{2,5})?(\/[a-zA-Z0-9\-_]+)?))
 
 
-// Celle-là marche c'est sûr
+// Regex with http://, https://, ftp://, mailto://
+//const char* urlhack_default_regex = " (((((https?|ftp|svn):\\/\\/)|www\\.)(([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost|([a-zA-Z0-9\\-]+\\.)*[a-zA-Z0-9\\-]+\\.(com|net|org|info|biz|int|gov|name|edu|[a-zA-Z][a-zA-Z]))(:[0-9]+)?((\\/|\\?)[^ \"]*[^ ,;\\.:\">)])?)|(mailto:\\/\\/[a-zA-Z0-9\\-_\\.]+@[a-zA-Z0-9\\-_\\.]+\\.[a-z]{2,}))" ;
+
+
 //const char* urlhack_default_regex =  "(((https?|ftp):\\/\\/)|www\\.)(([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost|([a-zA-Z0-9\\-]+\\.)*[a-zA-Z0-9\\-]+\\.(com|net|org|info|biz|int|gov|name|edu|[a-zA-Z][a-zA-Z]))(:[0-9]+)?((\\/|\\?)[^ \"]*[^ ,;\\.:\">)])?";
 
 const char* urlhack_liberal_regex =
