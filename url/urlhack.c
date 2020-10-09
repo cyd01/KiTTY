@@ -317,6 +317,6 @@ void FixWrongRegex() {
 	char *st;
 	st = (char*) malloc(strlen(urlhack_default_regex)+100);
 	sprintf(st,"\"HyperlinkRegularExpression\"=\"%s\"",urlhack_default_regex);
-	InitRegistryAllSessions( HKEY_CURRENT_USER, "Software\\9bis.com\\KiTTY", "Sessions", "hyperlinkfix.reg",st ) ;
+	InitRegistryAllSessions( HKEY_CURRENT_USER, "Software\\9bis.com\\KiTTY", "Sessions", "hyperlinkfix.reg", st ) ;
 	free(st);
 }

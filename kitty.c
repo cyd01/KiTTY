@@ -940,6 +940,7 @@ int GetSessionField( const char * session_in, const char * folder_in, const char
 	}
 	
 void RenewPassword( Conf *conf ) {
+	return ;
 	if( !GetUserPassSSHNoSave() )
 	if( strlen( conf_get_str(conf,CONF_password) ) == 0 ) {
 		char buffer[1024] = "", host[1024], termtype[1024] ;
@@ -974,6 +975,7 @@ void SetPasswordInConfig( const char * password ) {
 			strcpy( bufpass, "" ) ;
 		}
 		conf_set_str(conf,CONF_password,bufpass);
+		memset( bufpass, 0, strlen(bufpass) ) ;
 	}
 }
 
@@ -2212,8 +2214,7 @@ void RunExternPlink( HWND hwnd, const char * cmd ) {
 		strcat( buffer, "-pw \"" ) ;
 		char bufpass[1024] ;
 		strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
-		MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; 
-		memset(bufpass,0,strlen(bufpass));
+		MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
 		strcat( buffer, "\" " ) ;
 	}
 
@@ -2428,11 +2429,11 @@ void GetFile( HWND hwnd ) {
 					strcat( buffer, b1 ) ;
 				}
 				if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
-					strcat( buffer, "-pw " ) ;
+					strcat( buffer, "-pw \"" ) ;
 					char bufpass[1024] ;
 					strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
 					MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
-					strcat( buffer, " " ) ;
+					strcat( buffer, "\" " ) ;
 					}
 				if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
 					strcat( buffer, "-i \"" ) ;
@@ -4998,7 +4999,8 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 	else if( key == shortcuts_tab.winscp )			// Lancement de WinSCP
 		{ SendMessage( hwnd, WM_COMMAND, IDM_WINSCP, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.autocommand ) 		// Rejouer la commande de demarrage
-		{ RenewPassword( conf ) ; 
+		{ 
+			RenewPassword( conf ) ; 
 			SetTimer(hwnd, TIMER_AUTOCOMMAND,autocommand_delay, NULL) ;
 			return 1 ; }
 	if( key == shortcuts_tab.print ) {			// Impression presse papier

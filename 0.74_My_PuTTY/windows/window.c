@@ -3333,8 +3333,10 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 		{ if( strlen( buffer ) > 0 ) MessageBox( hwnd, buffer, "Notes", MB_OK ) ; }
 
 	// On met le focus sur la fenêtre
-	SetFocus(hwnd) ;
+	BringWindowToTop( hwnd ) ;
+	SetForegroundWindow( hwnd ) ;
 	
+		
 	// Envoi automatiquement dans le systeme tray si besoin
 	if( GetAutoSendToTray() ) ManageToTray( hwnd ) ;
 
@@ -3343,7 +3345,9 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 		if( strlen( conf_get_str(conf,CONF_username) ) > 0 ) {
 			if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
 				char bufpass[1024]; strcpy(bufpass,conf_get_str(conf,CONF_password)) ;
-				MASKPASS(GetCryptSaltFlag(), bufpass); strcat(buffer,bufpass); memset(bufpass,0,strlen(bufpass));
+				MASKPASS(GetCryptSaltFlag(), bufpass); 
+				strcat(buffer,bufpass); 
+				memset(bufpass,0,strlen(bufpass));
 				strcat( buffer, "\\n" ) ;
 			}
 		}
@@ -3356,7 +3360,7 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 			conf_set_str( conf, CONF_autocommand, buffer ); 
 		}
 	}
-
+	
 	RenewPassword( conf ) ;
 
 	// On envoie l'autocommand
@@ -4579,13 +4583,13 @@ free(cmd);
 		if ((!conf_get_int(term->conf, CONF_url_ctrl_click) || urlhack_is_ctrl_pressed()) &&
 			urlhack_is_in_link_region(urlhack_mouse_old_x, urlhack_mouse_old_y)) {
 				if (urlhack_cursor_is_hand == 0) {
-					SetClassLongPtr(hwnd,  GCLP_HCURSOR, (LONG_PTR)(LONG)LoadCursor(NULL, IDC_HAND));
+					SetClassLongPtr(hwnd,  GCLP_HCURSOR, (LONG_PTR)LoadCursor(NULL, IDC_HAND));
 					urlhack_cursor_is_hand = 1;
 					term_update(term); // Force the terminal to update, otherwise the underline will not show (bug somewhere, this is an ugly fix)
 				}
 		}
 		else if (urlhack_cursor_is_hand == 1) {
-			SetClassLongPtr(hwnd,  GCLP_HCURSOR, (LONG_PTR)(LONG)LoadCursor(NULL, IDC_IBEAM));
+			SetClassLongPtr(hwnd,  GCLP_HCURSOR, (LONG_PTR)LoadCursor(NULL, IDC_IBEAM));
 			urlhack_cursor_is_hand = 0;
 			term_update(term); // Force the terminal to update, see above
 		}
@@ -5332,7 +5336,7 @@ free(cmd);
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 		if( (wParam==VK_SNAPSHOT)&&(GetKeyState(VK_CONTROL)&0x8000) ) {					// CTRL + PrintScreen => Screenshot
 			char screenShotFile[1024] ;
-			sprintf( screenShotFile, "%s\\screenshot-%d-%ld.jpg", InitialDirectory, getpid(), time(0) );
+			sprintf( screenShotFile, "%s\\screenshot-%d-%lld.jpg", InitialDirectory, getpid(), time(0) );
 			screenCaptureClientRect( hwnd, screenShotFile, 100 ) ;
 		}
 #endif

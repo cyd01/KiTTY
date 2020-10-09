@@ -410,4 +410,94 @@ static inline int term_char_width(Terminal *term, unsigned int c)
  */
 #define CC_LIMIT 32
 
+/* ----------------------------------------------------------------------
+ * Helper functions for dealing with the small 'pos' structure.
+ */
+
+static inline bool poslt(pos p1, pos p2)
+{
+    if (p1.y != p2.y)
+        return p1.y < p2.y;
+    return p1.x < p2.x;
+}
+
+static inline bool posle(pos p1, pos p2)
+{
+    if (p1.y != p2.y)
+        return p1.y < p2.y;
+    return p1.x <= p2.x;
+}
+
+static inline bool poseq(pos p1, pos p2)
+{
+    return p1.y == p2.y && p1.x == p2.x;
+}
+
+static inline int posdiff_fn(pos p1, pos p2, int cols)
+{
+    return (p1.y - p2.y) * (cols+1) + (p1.x - p2.x);
+}
+
+/* Convenience wrapper on posdiff_fn which uses the 'Terminal *term'
+ * that more or less every function in terminal.c will have in scope.
+ * For safety's sake I include a TYPECHECK that ensures it really is a
+ * structure pointer of the right type. */
+#define GET_TERM_COLS TYPECHECK(term == (Terminal *)0, term->cols)
+#define posdiff(p1,p2) posdiff_fn(p1, p2, GET_TERM_COLS)
+
+/* Product-order comparisons for rectangular block selection. */
+
+static inline bool posPle(pos p1, pos p2)
+{
+    return p1.y <= p2.y && p1.x <= p2.x;
+}
+
+static inline bool posPle_left(pos p1, pos p2)
+{
+    /*
+     * This function is used for checking whether a given character
+     * cell of the terminal ought to be highlighted as part of the
+     * selection, by comparing with term->selend. term->selend stores
+     * the location one space to the right of the last highlighted
+     * character. So we want to highlight the characters that are
+     * less-or-equal (in the product order) to the character just left
+     * of p2.
+     *
+     * (Setting up term->selend that way was the easiest way to get
+     * rectangular selection working at all, in a code base that had
+     * done lexicographic selection the way I happened to have done
+     * it.)
+     */
+    return p1.y <= p2.y && p1.x < p2.x;
+}
+
+static inline bool incpos_fn(pos *p, int cols)
+{
+    if (p->x == cols) {
+        p->x = 0;
+        p->y++;
+        return true;
+    }
+    p->x++;
+    return false;
+}
+
+static inline bool decpos_fn(pos *p, int cols)
+{
+    if (p->x == 0) {
+        p->x = cols;
+        p->y--;
+        return true;
+    }
+    p->x--;
+    return false;
+}
+
+/* Convenience wrappers on incpos and decpos which use term->cols
+ * (similarly to posdiff above), and also (for mild convenience and
+ * mostly historical inertia) let you leave off the & at every call
+ * site. */
+#define incpos(p) incpos_fn(&(p), GET_TERM_COLS)
+#define decpos(p) decpos_fn(&(p), GET_TERM_COLS)
+
 #endif
