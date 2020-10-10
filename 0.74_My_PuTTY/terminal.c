@@ -7051,8 +7051,8 @@ void term_mouse(Terminal *term, Mouse_Button braw, Mouse_Button bcooked,
 #else
 		if (term->mouse_is_down == braw)
 #endif
-#endif
 		    return;
+#endif
 		term->mouse_is_down = braw;
 		break;
               default:
