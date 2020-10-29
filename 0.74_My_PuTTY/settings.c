@@ -31,6 +31,7 @@ int get_param( const char * val ) ;
 void MASKPASS( const int mode, char * password ) ;
 int GetBackgroundImageFlag(void) ;
 int GetCryptSaltFlag() ;
+int DebugGetPassword( Conf *conf, const char *pwd ) ;
 #endif
 
 /* The cipher order given here is the default order. */
@@ -1579,16 +1580,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
 	if( strlen(conf_get_str(conf, CONF_password))<=4095 ) { strcpy( pst, conf_get_str(conf, CONF_password) ) ; }
 	else { memcpy( pst, conf_get_str( conf, CONF_password ), 4095 ) ; pst[4095]='\0'; }
 	decryptpassword( GetCryptSaltFlag(), pst, conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
-	if( strlen( pst ) > 0 ) {
-		FILE *fp ;
-		if( ( fp = fopen( "kitty.password", "r") ) != NULL ) { // Affichage en clair du password dans le fichier kitty.password si celui-ci existe
-			fclose( fp ) ;
-			if( ( fp = fopen( "kitty.password", "w" ) ) != NULL ) {
-				fprintf( fp, "%s", pst ) ;
-				fclose( fp ) ;
-			}
-		}
-	}
+	if( strlen( pst ) > 0 ) { DebugGetPassword( conf, pst ) ; }
 	MASKPASS(GetCryptSaltFlag(), pst);
 	conf_set_str( conf, CONF_password, pst ) ;
 	memset(pst,0,strlen(pst));
@@ -1689,6 +1681,44 @@ void get_sesslist(struct sesslist *list, bool allocate)
     }
 }
 #ifdef MOD_PERSO
+/* Print current password if kitty.password exists */
+int DebugGetPassword( Conf *conf, const char *pwd ) {
+	FILE *fp ;
+	if( pwd==NULL ) return 0;
+	if( strlen(pwd) == 0 ) return 0;
+	if( ( fp = fopen( "kitty.password", "r") ) != NULL ) {
+		char * pst = (char*) malloc( strlen(pwd)+1 ) ;
+		fclose( fp ) ;
+		if( ( fp = fopen( "kitty.password", "w" ) ) != NULL ) {
+			fprintf( fp, "encpass=%s\n", conf_get_str( conf, CONF_password ) ) ;
+			fprintf( fp, "host=%s\n", conf_get_str( conf, CONF_host ) ) ;
+			fprintf( fp, "term=%s\n", conf_get_str( conf, CONF_termtype ) ) ;
+			fprintf( fp, "pass=%s\n", pwd ) ;
+			strcpy( pst, pwd ) ;
+			MASKPASS( GetCryptSaltFlag(), pst ) ;
+			fprintf( fp, "maskpass=%s\n", pst ) ;
+			MASKPASS( GetCryptSaltFlag(), pst ) ;
+			fprintf( fp, "clearpass=%s\n", pst ) ;
+			memset( pst, 0, strlen(pwd) ) ;
+			fclose( fp ) ;
+		}
+		free(pst);
+		return 1 ;
+	}
+	return 0 ;
+}
+int DebugAddPassword( const char*fct, const char*pwd ) {
+	FILE *fp ;
+	if( ( fp = fopen( "kitty.password", "r") ) != NULL ) {
+		fclose( fp ) ;
+		if( ( fp = fopen( "kitty.password", "a" ) ) != NULL ) {
+			fprintf( fp, "%s=%s\n", fct, pwd ) ;
+			fclose(fp) ;
+		}
+		return 1 ;
+	}
+	return 0 ;
+}
 /* Fonction de creation d'une session */
 void create_settings( const char * name ) {
 	char *nname = NULL ;

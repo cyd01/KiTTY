@@ -35,6 +35,7 @@ int decode64(char *buffer) ;
 void SetAutoStoreSSHKey( void ) ;
 void load_open_settings_forced(char *filename, Conf *conf) ;
 void SetPasswordInConfig( const char * password ) ;
+int GetCryptSaltFlag() ;
 extern char CurrentFolder[1024] ;
 // Manage connect string as: user:pass@@@hostname:port/cmd
 void ManageConnectString( Conf *cf, char * hostname ) {
@@ -103,7 +104,7 @@ void ManageConnectString( Conf *cf, char * hostname ) {
 	}
 	if( strlen(cm)>0 ) {
 		if( cm[0] == '#' ) {
-			decryptstring( (char*)cm+1, MASTER_PASSWORD ) ;
+			decryptstring( GetCryptSaltFlag(), (char*)cm+1, MASTER_PASSWORD ) ;
 			conf_set_str( conf, CONF_autocommand, cm+1 ) ;
 		} else {
 			char *s = (char*)malloc( strlen(cm)+1 ) ;

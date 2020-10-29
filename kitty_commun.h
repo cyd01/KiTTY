@@ -126,4 +126,5 @@ extern char FileExtension[15] ;
 // Répertoire courant pourle mode portable
 extern char CurrentFolder[1024] ;
 
+//int DebugAddPassword( const char*fct, const char*pwd ) ;
 #endif

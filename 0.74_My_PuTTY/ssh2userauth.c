@@ -26,6 +26,8 @@ typedef struct agent_key {
 #ifdef MOD_PERSO
 #include "kitty.h"
 void SetSSHConnected( int flag );
+size_t iso8859_1_to_utf8(char *content, size_t max_size) ; 					// Latin-1 = iso8859-1
+size_t utf8_to_iso8859_15(char *const output, const char *const input, const size_t length) ;   // Latin-9 = iso8859-15
 char bufpass[1024]="";
 #endif
 
@@ -1423,6 +1425,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 			bufpass[strlen(bufpass)-2]='\0'; 
 			bufpass[strlen(bufpass)-1]='\0'; 
 		}
+		iso8859_1_to_utf8( bufpass, 1024 );
 		bufchain bc;
 		bufchain_init(&bc);
 		bufchain_add(&bc, bufpass, strlen(bufpass));
@@ -1483,11 +1486,11 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     put_uint32(s->pktout, s->num_prompts);
                     for (uint32_t i = 0; i < s->num_prompts; i++) {
 #ifdef MOD_PERSO
-	ppl_logevent("Sent password");
+	ppl_logevent("Sent a password");
 	if(!GetUserPassSSHNoSave()) {
 		if(s!=NULL) 
 		if(s->cur_prompt->prompts!=NULL)  
-		if(s->cur_prompt->prompts[i]->result!=NULL) { SetPasswordInConfig( (const char *) s->cur_prompt->prompts[i]->result ) ; }
+		if(s->cur_prompt->prompts[i]->result!=NULL) {SetPasswordInConfig( (const char *) s->cur_prompt->prompts[i]->result ) ; }
 	}
 #endif
                         put_stringz(s->pktout, prompt_get_result_ref(
@@ -1602,7 +1605,12 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 			bufpass[strlen(bufpass)-2]='\0'; 
 			bufpass[strlen(bufpass)-1]='\0'; 
 		}
-		put_stringz(s->pktout, bufpass);
+		char bufpass2[1024];
+		strcpy(bufpass2,bufpass);
+		iso8859_1_to_utf8( bufpass2, 1024 );
+		put_stringz(s->pktout, bufpass2);
+		memset(bufpass2,0,1024);
+	
 		SetPasswordInConfig("");
 		{ // Log de l'envoi du password
 			char *userlog = dupprintf("Send automatic password" );
@@ -1637,7 +1645,11 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 				memset( bufpass, 0, strlen(bufpass) ) ;
 			} else if( s != NULL ) {
 				if( s->password != NULL ) {
-					SetPasswordInConfig( s->password ) ;
+					char bufpass2[1024] ;
+					utf8_to_iso8859_15( bufpass2, s->password, 1024 ) ;
+					SetPasswordInConfig( bufpass2 ) ;
+					memset(bufpass2,0,1024) ;
+					//SetPasswordInConfig( s->password ) ;
 				}
 			}
 		}

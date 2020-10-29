@@ -570,7 +570,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	/* On decrypte le script */
 	buf=(char*)malloc( strlen(conf_get_str(conf,CONF_scriptfilecontent)) + 20 ) ;
 	strcpy( buf, conf_get_str(conf,CONF_scriptfilecontent) ) ;
-	long l=decryptstring( buf, MASTER_PASSWORD ) ;
+	long l=decryptstring( GetCryptSaltFlag(), buf, MASTER_PASSWORD ) ;
 	int i;
 	for( i=0; i<l ; i++ ) { if( buf[i]=='\0' ) buf[i]='\n' ; }
 	fprintf( fp, " (%s)\n", buf ) ;
@@ -724,6 +724,7 @@ extern char jumplistpath[2 * MAX_PATH] ;
 extern char oldpath[2 * MAX_PATH] ;
 extern char sessionsuffix[16] ;
 extern char keysuffix[16] ;
+
 void SaveKiTTYStore( FILE *fp ) {
 	fprintf( fp, "seedpath=%s\n", seedpath ) ;
 	fprintf( fp, "sesspath=%s\n", sesspath ) ;

@@ -3344,7 +3344,8 @@ if( !GetPuttyFlag() ) {
 	c = ctrl_editbox(s, "Auto-login password", NO_SHORTCUT, 50,
 		     HELPCTX(no_help),
 		     conf_editbox_handler, I(CONF_password), I(1) ) ;
-	c->editbox.password = 1;
+	//if( !debug_flag ) 
+	    c->editbox.password = 1;
 #endif
 	ctrlAutoCommandContentEdit = ctrl_editbox(s, "Command", NO_SHORTCUT, 74,
 		     HELPCTX(no_help),

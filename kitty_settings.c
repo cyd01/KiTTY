@@ -1051,16 +1051,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 	if( strlen(conf_get_str(conf, CONF_password))<=4095 ) { strcpy( pst, conf_get_str(conf, CONF_password) ) ; }
 	else { memcpy( pst, conf_get_str( conf, CONF_password ), 4095 ) ; pst[4095] = '\0' ; }
 	decryptpassword( GetCryptSaltFlag(), pst, conf_get_str(conf, CONF_host), conf_get_str(conf, CONF_termtype) ) ;
-	if( strlen( pst ) > 0 ) {
-		FILE *fp ;
-		if( ( fp = fopen( "kitty.password", "r") ) != NULL ) { // Affichage en clair du password dans le fichier kitty.password si celui-ci existe
-			fclose( fp ) ;
-			if( ( fp = fopen( "kitty.password", "w" ) ) != NULL ) {
-				fprintf( fp, "%s", pst ) ;
-				fclose( fp ) ;
-			}
-		}
-	}
+	if( strlen( pst ) > 0 ) { DebugGetPassword( conf, pst ) ; }
 	MASKPASS(GetCryptSaltFlag(),pst);
 	conf_set_str( conf, CONF_password, pst ) ;
 	memset(pst,0,strlen(pst));

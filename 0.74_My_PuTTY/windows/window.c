@@ -1637,7 +1637,7 @@ TrayIcone.hWnd = hwnd ;
 
 		if( IniFileFlag == SAVEMODE_REG ) {
 			sprintf( reg_buffer, "%s@%s:%d (prot=%d) name=%s", conf_get_str(conf,CONF_username), conf_get_str(conf,CONF_host), conf_get_int(conf,CONF_port), conf_get_int(conf,CONF_protocol), conf_get_str(conf,CONF_sessionname)) ;
-			cryptstring( reg_buffer, MASTER_PASSWORD ) ;
+			cryptstring( GetCryptSaltFlag(), reg_buffer, MASTER_PASSWORD ) ;
 			WriteParameter( INIT_SECTION, "KiLastSe", reg_buffer ) ;
 			}
 		

@@ -955,9 +955,12 @@ void RenewPassword( Conf *conf ) {
 		}
 	}
 
+int DebugAddPassword( const char*fct, const char*pwd ) ;
 void SetPasswordInConfig( const char * password ) {
 	int len ;
 	char bufpass[1024] ;
+	
+debug_log("password=%s\n",password) ;
 	
 	if( (!GetUserPassSSHNoSave())&&(password!=NULL) ) {
 		len = strlen( password ) ;
@@ -970,7 +973,9 @@ void SetPasswordInConfig( const char * password ) {
 				bufpass[strlen(bufpass)-1]='\0'; 
 			}
 			while( (bufpass[strlen(bufpass)-1]=='\n') || (bufpass[strlen(bufpass)-1]=='\r') || (bufpass[strlen(bufpass)-1]=='\t') || (bufpass[strlen(bufpass)-1]==' ') ) { bufpass[strlen(bufpass)-1]='\0' ; }
+			DebugAddPassword( "SetPasswordInConfig(before mask)", bufpass ) ;
 			MASKPASS(GetCryptSaltFlag(),bufpass) ;
+			DebugAddPassword( "SetPasswordInConfig(after mask)", bufpass ) ;
 		} else {
 			strcpy( bufpass, "" ) ;
 		}
@@ -1055,7 +1060,7 @@ void QueryKey( HKEY hMainKey, LPCTSTR lpSubKey, FILE * fp_out ) {
  
 	//fprintf( fp_out, "\r\n[HKEY_CURRENT_USER\\%s]\r\n" TEXT(lpSubKey) ) ;
 	sprintf( str, "[HKEY_CURRENT_USER\\%s]", TEXT(lpSubKey) ) ;
-	if( strlen( PasswordConf ) > 0 ) { cryptstring( str, PasswordConf ) ; }
+	if( strlen( PasswordConf ) > 0 ) { cryptstring( GetCryptSaltFlag(), str, PasswordConf ) ; }
 	fprintf( fp_out, "\r\n%s\r\n", str ) ;
 
     // Enumerate the key values. 
@@ -1106,7 +1111,7 @@ void QueryKey( HKEY hMainKey, LPCTSTR lpSubKey, FILE * fp_out ) {
 						break;
 					}
 				//fprintf( fp_out, "\r\n");
-				if( strlen( PasswordConf ) > 0 ) { cryptstring( str, PasswordConf ) ; }
+				if( strlen( PasswordConf ) > 0 ) { cryptstring( GetCryptSaltFlag(), str, PasswordConf ) ; }
 				fprintf( fp_out, "%s\r\n", str ) ;
             } 
         }
@@ -1198,7 +1203,7 @@ void CountUp( void ) {
 		strcat( buffer, "@" ) ;
 		len = 1024 ;
 		if( GetComputerName( buffer+strlen(buffer), (void*)&len ) ) {
-			cryptstring( buffer, MASTER_PASSWORD ) ;
+			cryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ;
 			WriteParameter( INIT_SECTION, "KiLastUH", buffer) ;
 			}
 		}
@@ -1214,7 +1219,7 @@ void CountUp( void ) {
 	}
 			
 	GetOSInfo( buffer ) ;
-	cryptstring( buffer, MASTER_PASSWORD ) ;
+	cryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ;
 	WriteParameter( INIT_SECTION, "KiVers", buffer) ;
 		
 	if( GetModuleFileName( NULL, (LPTSTR)buffer, 1024 ) ) 
@@ -1436,7 +1441,7 @@ void SaveRegistryKeyEx( HKEY hMainKey, LPCTSTR lpSubKey, const char * filename )
 	
 	strcpy( buffer, "Windows Registry Editor Version 5.00" ) ;
 
-	if( strlen( PasswordConf ) > 0 ) cryptstring( buffer, PasswordConf ) ;
+	if( strlen( PasswordConf ) > 0 ) cryptstring( GetCryptSaltFlag(), buffer, PasswordConf ) ;
 	fprintf( fp_out, "%s\r\n", buffer ); 
 
 	QueryKey( hMainKey, lpSubKey, fp_out ) ;
@@ -1482,7 +1487,7 @@ void LoadRegistryKey( HWND hdlg ) { // hdlg est la boite de dialogue d'informati
 				if( InputBoxResult == NULL ) exit(0) ;
 				if( strlen( InputBoxResult ) == 0 ) exit(0) ;
 				strcpy( PasswordConf, InputBoxResult ) ;
-				decryptstring( buffer, PasswordConf ) ;
+				decryptstring( GetCryptSaltFlag(), buffer, PasswordConf ) ;
 				if( strcmp( buffer, "Windows Registry Editor Version 5.00" ) ) {
 					MessageBox( NULL, "Wrong password", "Error", MB_OK|MB_ICONERROR ) ;
 					exit(1) ;
@@ -1493,7 +1498,7 @@ void LoadRegistryKey( HWND hdlg ) { // hdlg est la boite de dialogue d'informati
 			}
 		nb++ ;
 		if( strlen( PasswordConf ) > 0 ) {
-			decryptstring( buffer, PasswordConf ) ;
+			decryptstring( GetCryptSaltFlag(), buffer, PasswordConf ) ;
 			}
 			
 		if( strlen( buffer ) == 0 ) ;
@@ -2974,13 +2979,13 @@ BOOL FAR PASCAL EditMultilineCallBack(HWND hwnd, UINT message, WPARAM wParam, LP
 				}
 			else if( (wParam==VK_F12) && (GetKeyState( VK_SHIFT )& 0x8000) ){
 				GetWindowText( hwnd, buffer, 4096 ) ;
-				cryptstring( buffer, MASTER_PASSWORD ) ;
+				cryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ;
 				SetWindowText( hwnd, buffer ) ;
 				return 0 ;
 				}
 			else if( (wParam==VK_F11) && (GetKeyState( VK_SHIFT )& 0x8000) ){
 				GetWindowText( hwnd, buffer, 4096 ) ;
-				decryptstring( buffer, MASTER_PASSWORD ) ;
+				decryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ;
 				SetWindowText( hwnd, buffer ) ;
 				return 0 ;
 				}
@@ -3703,7 +3708,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 			strcpy( buffer, PasswordConf ) ;
 			WriteParameter( INIT_SECTION, "password", PasswordConf ) ;
 			SaveRegistryKey() ;
-			cryptstring( buffer, MASTER_PASSWORD ) ;
+			cryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ;
 			// On passe automatiquement en mode de sauvegarde par fichier
 			if(!NoKittyFileFlag) writeINI( KittyIniFile, INIT_SECTION, "savemode", "file" ) ;
 			IniFileFlag = SAVEMODE_FILE ;
@@ -3713,7 +3718,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 		}
 	else if( !strcmp( st, "/-configpassword" ) ) {
 		if( ReadParameter( INIT_SECTION, "password", buffer ) ) {
-			if( decryptstring( buffer, MASTER_PASSWORD ) ) {
+			if( decryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ) {
 				MessageBox( hwnd, buffer, "Your password is ...", MB_OK|MB_ICONWARNING ) ;
 			}
 		}
@@ -4320,7 +4325,7 @@ void ReadInitScript( const char * filename ) {
 		} else {
 			if( (buffer=(char*)malloc(strlen(name)+1))!=NULL ) {
 				strcpy( buffer, name ) ;
-				l = decryptstring( buffer, MASTER_PASSWORD ) ;
+				l = decryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ;
 				if( ScriptFileContent!= NULL ) free( ScriptFileContent ) ;
 				ScriptFileContent = (char*) malloc( l + 1 ) ;
 				memcpy( ScriptFileContent, buffer, l ) ;
@@ -5203,7 +5208,7 @@ void LoadParameters( void ) {
 		if( strlen(buffer) > 0 ) { SetHostKeyExtension(buffer) ; }
 	}
 	if( ReadParameter( INIT_SECTION, "KiPP", buffer ) != 0 ) {
-		if( decryptstring( buffer, MASTER_PASSWORD ) ) ManagePassPhrase( buffer ) ;
+		if( decryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ) ManagePassPhrase( buffer ) ;
 	}
 	if( ReadParameter( INIT_SECTION, "maxblinkingtime", buffer ) ) { MaxBlinkingTime=2*atoi(buffer);if(MaxBlinkingTime<0) MaxBlinkingTime=0; }
 	if( ReadParameter( INIT_SECTION, "mouseshortcuts", buffer ) ) { 
