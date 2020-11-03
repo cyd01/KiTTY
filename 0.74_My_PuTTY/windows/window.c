@@ -322,6 +322,9 @@ void logfile_reinit(void *handle) ;
 
 void set_cmd_line( const char * st ) ;
 
+/* Flag to manage first connection */
+bool first_connect = true ;
+
 #ifdef MOD_INTEGRATED_KEYGEN
 int WINAPI KeyGen_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show);
 #endif
@@ -3333,10 +3336,13 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 		{ if( strlen( buffer ) > 0 ) MessageBox( hwnd, buffer, "Notes", MB_OK ) ; }
 
 	// On met le focus sur la fenêtre
-	BringWindowToTop( hwnd ) ;
-	SetForegroundWindow( hwnd ) ;
+	if( first_connect ) {
+		if( GetVisibleFlag()!=VISIBLE_TRAY ) {
+			BringWindowToTop( hwnd ) ;
+			SetForegroundWindow( hwnd ) ;
+		}
+	}
 	
-		
 	// Envoi automatiquement dans le systeme tray si besoin
 	if( GetAutoSendToTray() ) ManageToTray( hwnd ) ;
 
@@ -3373,6 +3379,8 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 	}
 
 	RefreshBackground( hwnd ) ;
+	
+	first_connect = false ;
 	}
 
 else if((UINT_PTR)wParam == TIMER_DND){
@@ -3473,23 +3481,23 @@ else if((UINT_PTR)wParam == TIMER_BLINKTRAYICON) {  // Clignotement de l'icone d
 	static int BlinkingState = 0 ;
 	static HICON hBlinkingIcon = NULL ; 
 
-	if( GetVisibleFlag()!=VISIBLE_TRAY ) 
-		{ KillTimer( hwnd, TIMER_BLINKTRAYICON ) ; TrayIcone.hIcon = hBlinkingIcon ; BlinkingState = 0 ; break ; }
+	if( GetVisibleFlag()!=VISIBLE_TRAY ) {
+		KillTimer( hwnd, TIMER_BLINKTRAYICON ) ; TrayIcone.hIcon = hBlinkingIcon ; BlinkingState = 0 ; break ; 
+	}
 	if( (BlinkingState%2)==0 ) {
 		hBlinkingIcon = TrayIcone.hIcon ;
 		TrayIcone.hIcon = LoadIcon(NULL, NULL) ;
 		Shell_NotifyIcon(NIM_MODIFY, &TrayIcone) ;
 		BlinkingState++ ;
-		}
-	else {
+	} else {
 		if( hBlinkingIcon ) {
 			TrayIcone.hIcon = hBlinkingIcon ;
 			Shell_NotifyIcon(NIM_MODIFY, &TrayIcone) ;
 			BlinkingState++ ;
 			if(MaxBlinkingTime) if(BlinkingState>=MaxBlinkingTime) { KillTimer( hwnd, TIMER_BLINKTRAYICON ) ; BlinkingState = 0 ; break ; }
-			}
 		}
 	}
+}
 #ifdef MOD_RECONNECT
 else if((UINT_PTR)wParam == TIMER_RECONNECT) {
 	if( !backend ) { 
@@ -8259,19 +8267,21 @@ static void wintw_bell(TermWin *tw, int mode)
 		if(conf_get_bool(conf,CONF_foreground_on_bell) ) {		// Tester avec   sleep 4 ; echo -e '\a'
 			if( IsIconic(hwnd) ) SwitchToThisWindow( hwnd, TRUE ) ; 
 			else SetForegroundWindow( MainHwnd ) ;
-			}
-		else { 
+		} else { 
 			if( mode == BELL_VISUAL ) {
 				if( IsIconic(hwnd) ) 
 					FlashWindow(hwnd, TRUE) ;
 				else 
 					flash_window(2) ; 
-				}
-			else { if( conf_get_int(conf,CONF_beep_ind)==B_IND_FLASH ) flash_window(2) ; }
+			} else { 
+				if( conf_get_int(conf,CONF_beep_ind)==B_IND_FLASH ) flash_window(2) ; 
 			}
+		}
 	} else if( GetVisibleFlag()==VISIBLE_TRAY ) {
-		if( conf_get_bool(conf,CONF_foreground_on_bell) ) { SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 ); }
-		else if(mode == BELL_VISUAL) SetTimer(hwnd, TIMER_BLINKTRAYICON, (int)500, NULL) ;
+		if( conf_get_bool(conf,CONF_foreground_on_bell) ) {
+			SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 ) ;
+		} else if(mode == BELL_VISUAL)
+			SetTimer(hwnd, TIMER_BLINKTRAYICON, (int)500, NULL) ;
 		//SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 );
 		//flash_window(2);	       /* start */
 	    	//ShowWindow( MainHwnd, SW_MINIMIZE);

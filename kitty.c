@@ -959,9 +959,6 @@ int DebugAddPassword( const char*fct, const char*pwd ) ;
 void SetPasswordInConfig( const char * password ) {
 	int len ;
 	char bufpass[1024] ;
-	
-debug_log("password=%s\n",password) ;
-	
 	if( (!GetUserPassSSHNoSave())&&(password!=NULL) ) {
 		len = strlen( password ) ;
 		if( len > 126 ) len = 126 ;
