@@ -1548,6 +1548,7 @@ NORETURN void cleanup_exit(int);
 	X(INT, NONE, winscpprot) \
 	X(STR, NONE, sftpconnect) \
 	X(STR, NONE, pscpoptions) \
+	X(STR, NONE, pscpshell) \
 	X(STR, NONE, pscpremotedir) \
 	X(STR, NONE, winscpoptions) \
 	X(STR, NONE, winscprawsettings) \

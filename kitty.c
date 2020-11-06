@@ -276,6 +276,16 @@ static int ConfigBoxNoExitFlag = 0 ;
 int GetConfigBoxNoExitFlag(void) { return ConfigBoxNoExitFlag ; }
 void SetConfigBoxNoExitFlag( const int flag ) { ConfigBoxNoExitFlag = flag ; }
 
+// ConfigBox X-position
+static int ConfigBoxLeft = -1 ;
+int GetConfigBoxLeft() { return ConfigBoxLeft ; }
+void SetConfigBoxLeft( const int val ) { ConfigBoxLeft = val ; }
+
+// ConfigBox Y-position
+static int ConfigBoxTop = -1 ;
+int GetConfigBoxTop() { return ConfigBoxTop ; }
+void SetConfigBoxTop( const int val ) { ConfigBoxTop= val ; }
+
 // Flag pour inhiber la gestion du CTRL+TAB
 static int CtrlTabFlag = 1 ;
 int GetCtrlTabFlag(void) { return CtrlTabFlag  ; }
@@ -4011,6 +4021,11 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		strcat( cmd, " " ) ; strcat( cmd, conf_get_str(conf, CONF_winscprawsettings) ) ;
 	}
 	
+	if( !strcmp(proto,"scp") && (strlen(conf_get_str(conf, CONF_pscpshell))>0) ) {
+		if( raw == 0 ) { strcat( cmd, " /rawsettings" ) ; raw++ ; }
+		strcat( cmd, " " ) ; strcat( cmd, "Shell=\"" ) ; strcat( cmd, conf_get_str(conf, CONF_pscpshell) ) ; strcat( cmd, "\"" ) ;
+	}
+	
 	if( debug_flag ) { debug_logevent( "Run: %s", cmd ) ; }
 	RunCommand( hwnd, cmd ) ;
 	memset(cmd,0,strlen(cmd));
@@ -5300,6 +5315,12 @@ void LoadParameters( void ) {
 	}
 	if( readINI( KittyIniFile, "ConfigBox", "defaultsettings", buffer ) ) {
 		if( !stricmp( buffer, "NO" ) ) DefaultSettingsFlag = 0 ;
+	}
+	if( readINI( KittyIniFile, "ConfigBox", "left", buffer ) ) {
+		SetConfigBoxLeft( atoi(buffer) ) ;
+	}
+	if( readINI( KittyIniFile, "ConfigBox", "top", buffer ) ) {
+		SetConfigBoxTop( atoi(buffer) ) ;
 	}
 	
 	// Param RandomActiveFlag défini dans kitty_commun.c

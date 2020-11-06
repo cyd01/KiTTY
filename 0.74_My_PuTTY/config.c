@@ -4094,6 +4094,10 @@ if( !GetPuttyFlag() ) {
 		 HELPCTX(no_help),
 		 conf_editbox_handler, I(CONF_winscprawsettings),
 		 I(1));
+	    ctrl_editbox(s, "Shell (scp mode only)", NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_pscpshell),
+		 I(1));
 	}
 #endif
 

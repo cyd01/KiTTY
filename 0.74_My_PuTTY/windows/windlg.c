@@ -62,6 +62,7 @@ extern char BuildVersionTime[256] ;
 void CenterDlgInParent(HWND hDlg) ;
 int get_param( const char * val ) ;
 void CheckVersionFromWebSite( HWND hwnd ) ;
+bool SessPathIsInitial( void );
 
 #ifndef TIMER_SLIDEBG
 //#define TIMER_SLIDEBG 12343
@@ -723,8 +724,13 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 	    hw = GetDesktopWindow();
 	    if (GetWindowRect(hw, &rs) && GetWindowRect(hwnd, &rd))
 		MoveWindow(hwnd,
+#ifdef MOD_PERSO
+			   GetConfigBoxLeft()>0 ? GetConfigBoxLeft() : (rs.right + rs.left + rd.left - rd.right) / 2,
+			   GetConfigBoxTop()>0 ? GetConfigBoxTop() : (rs.bottom + rs.top + rd.top - rd.bottom) / 2,
+#else
 			   (rs.right + rs.left + rd.left - rd.right) / 2,
 			   (rs.bottom + rs.top + rd.top - rd.bottom) / 2,
+#endif
 			   rd.right - rd.left, rd.bottom - rd.top, true);
 	}
 
@@ -863,7 +869,7 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
          */
 	SetWindowLongPtr(hwnd, GWLP_USERDATA, 1);
 #ifdef MOD_PERSO
-	ShowWindow(hwnd,SW_HIDE);
+	//ShowWindow(hwnd,SW_HIDE);
 	ShowWindow(hwnd,SW_SHOW);
 #endif
 	return 0;

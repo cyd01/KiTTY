@@ -397,6 +397,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_i_forced(sesskey, "WinSCPProtocol", conf_get_int(conf, CONF_winscpprot) );
     write_setting_s_forced(sesskey, "SFTPConnect", conf_get_str(conf, CONF_sftpconnect) );
     write_setting_s_forced(sesskey, "PSCPOptions", conf_get_str(conf, CONF_pscpoptions) );
+    write_setting_s_forced(sesskey, "PSCPShell", conf_get_str(conf, CONF_pscpshell) );
     write_setting_s_forced(sesskey, "PSCPRemoteDir", conf_get_str(conf, CONF_pscpremotedir) );
     write_setting_s_forced(sesskey, "WinSCPOptions", conf_get_str(conf, CONF_winscpoptions) );
     write_setting_s_forced(sesskey, "WinSCPRawSettings", conf_get_str(conf, CONF_winscprawsettings) );
@@ -1024,6 +1025,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "WinSCPProtocol", 1, conf, CONF_winscpprot );
     gpps_forced(sesskey, "SFTPConnect", "", conf, CONF_sftpconnect );
     gpps_forced(sesskey, "PSCPOptions", "-r", conf, CONF_pscpoptions );
+    gpps_forced(sesskey, "PSCPShell", "", conf, CONF_pscpshell );
     gpps_forced(sesskey, "PSCPRemoteDir", "", conf, CONF_pscpremotedir );
     gpps_forced(sesskey, "WinSCPOptions", "", conf, CONF_winscpoptions );
     gpps_forced(sesskey, "WinSCPRawSettings", "", conf, CONF_winscprawsettings );

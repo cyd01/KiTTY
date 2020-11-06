@@ -32,8 +32,14 @@ filter=yes
 ; height: the number of visible lines into the saved sessions selection box (in main window)
 height=21
 
+; left: X position of the confuguration box (-1 means center)
+;left=-1
+
 ; noexit: if set to yes, return to the configuration box at main program exit
 ;noexit=no
+
+; top: Y position of the confuguration box (-1 means center)
+;top=-1
 
 ; windowheight: the size of the configuration box
 ;windowheight=800

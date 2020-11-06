@@ -548,6 +548,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "winscpprot=%d\n",			conf_get_int(conf,CONF_winscpprot) ) ;
 	fprintf( fp, "sftpconnect=%s\n", 		conf_get_str(conf,CONF_sftpconnect) ) ;
 	fprintf( fp, "pscpoptions=%s\n", 		conf_get_str(conf,CONF_pscpoptions) ) ;
+	fprintf( fp, "pscpshell=%s\n", 			conf_get_str(conf,CONF_pscpshell) ) ;
 	fprintf( fp, "pscpremotedir=%s\n", 		conf_get_str(conf,CONF_pscpremotedir) ) ;
 	fprintf( fp, "winscpoptions=%s\n", 		conf_get_str(conf,CONF_winscpoptions) ) ;
 	fprintf( fp, "winscprawsettings=%s\n", 		conf_get_str(conf,CONF_winscprawsettings) ) ;
@@ -690,6 +691,8 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp,"BackgroundImageFlag=%d\n",GetBackgroundImageFlag() );
 	fprintf( fp,"RandomActiveFlag=%d\n",GetRandomActiveFlag() );
 	fprintf( fp,"CryptSaltFlag=%d\n",GetCryptSaltFlag() );
+	fprintf( fp, "ConfigBoxLeft=%d\n",GetConfigBoxLeft());
+	fprintf( fp, "ConfigBoxTop=%d\n",GetConfigBoxTop());
 #ifdef MOD_RECONNECT
 	fprintf( fp,"AutoreconnectFlag=%d\nReconnectDelay=%d\n",AutoreconnectFlag,ReconnectDelay );
 #endif

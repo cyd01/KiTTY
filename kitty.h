@@ -23,6 +23,14 @@ void SetPuttyFlag( const int flag ) ;
 // extern int ConfigBoxNoExitFlag ;
 int GetConfigBoxNoExitFlag(void) ;
 
+// ConfigBox X-position
+int GetConfigBoxLeft() ;
+void SetConfigBoxLeft( const int val ) ;
+
+// ConfigBox Y-position
+int GetConfigBoxTop();
+void SetConfigBoxTop( const int val ) ;
+
 // Flag pour inhiber la gestion du CTRL+TAB
 int GetCtrlTabFlag(void) ;
 void SetCtrlTabFlag( const int flag ) ;
