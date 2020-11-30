@@ -154,7 +154,7 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 	AppendMenu(hMenu,MF_POPUP,(UINT)hSMApropos,Notepad_LoadString(NOTEPAD_STR_HELP));
 
 	//hwnd = CreateWindow(Notepad_szprogname, Notepad_szprogname, WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, cxScreen, cyScreen, NULL, hMenu, hinstance, NULL);
-	hwnd = CreateWindowEx(WS_EX_ACCEPTFILES,Notepad_szprogname, Notepad_szprogname, WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, cxScreen, cyScreen, NULL, hMenu, hinstance, NULL);
+	hwnd = CreateWindowEx(WS_EX_ACCEPTFILES,Notepad_szprogname, Notepad_szprogname, WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, (int)cxScreen/2, (int)cyScreen/2, NULL, hMenu, hinstance, NULL);
 	
 	if (!hwnd) return FALSE;
 
@@ -193,9 +193,17 @@ LRESULT CALLBACK Notepad_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	switch (uMsg) {
 		case WM_CREATE: {
-			hEdit = CreateWindow("edit", "", WS_CHILD | WS_VISIBLE |
-				ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL,
-                                0, 0, 0, 0, hwnd, NULL, notepad_hinst, NULL);
+			
+			if( (LoadFile!=NULL)&&(strlen(LoadFile)>0)&&(!strcmp(LoadFile,"2")) ) {
+				hEdit = CreateWindow("edit", "", WS_CHILD | WS_VISIBLE | ES_READONLY |
+					ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL,
+					0, 0, 0, 0, hwnd, NULL, notepad_hinst, NULL);
+				strcpy(LoadFile,"1");
+			} else {
+				hEdit = CreateWindow("edit", "", WS_CHILD | WS_VISIBLE |
+					ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL,
+					0, 0, 0, 0, hwnd, NULL, notepad_hinst, NULL);
+			}
 
 			ZeroMemory(&lf, sizeof(LOGFONT));
 			lstrcpy(lf.lfFaceName,"Courier");

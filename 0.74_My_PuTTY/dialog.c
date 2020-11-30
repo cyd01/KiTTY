@@ -352,7 +352,6 @@ union control *ctrl_listbox(struct controlset *s, const char *label,
     c->listbox.percentwidth = 100;
     c->listbox.ncols = 0;
     c->listbox.percentages = NULL;
-    c->listbox.hscroll = true;
     return c;
 }
 

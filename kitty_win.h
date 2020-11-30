@@ -29,7 +29,7 @@ int SetTextToClipboard( const char * buf ) ;
 void RunCommand( HWND hwnd, const char * cmd ) ;
 
 // Démarre l'éditeur embarqué
-void RunPuttyEd( HWND hwnd, char * filename ) ;
+void RunPuttyEd( HWND hwnd, char * filename, bool readonly ) ;
 
 // Verifie si une mise a jour est disponible sur le site web
 void CheckVersionFromWebSite( HWND hwnd ) ;
@@ -40,4 +40,6 @@ void debug_logevent( const char *fmt, ... ) ;
 // Affiche le menu system de l'application
 void PopUpSystemMenu( HWND hwnd, int npos  ) ;
 
+// Affiche une bulle tooltip
+HWND CreateToolTip(int toolID, HWND hDlg, PTSTR pszText) ;
 #endif

@@ -396,16 +396,18 @@ void RunCommand( HWND hwnd, const char * cmd ) {
 		}
 	}
 
-void RunPuttyEd( HWND hwnd, char * filename ) {
+void RunPuttyEd( HWND hwnd, char * filename, bool readonly ) {
 	char buffer[1024]="", shortname[1024]="" ;
-	if( GetModuleFileName( NULL, (LPTSTR)buffer, 1023 ) ) 
-		if( GetShortPathName( buffer, shortname, 1023 ) ) {
+	if( GetModuleFileName( NULL, (LPTSTR)buffer, 1023 ) ) if( GetShortPathName( buffer, shortname, 1023 ) ) {
 			strcat( shortname, " -ed" );
-			if( filename!=NULL ) if( strlen(filename)>0 ) { strcat( shortname, "b " ) ; strcat( shortname, filename ) ; }
+			if( filename!=NULL ) if( strlen(filename)>0 ) { 
+				strcat( shortname, "b " ) ; 
+				strcat( shortname, filename ) ; 
+			}
 			debug_logevent( shortname ) ;
 			RunCommand( hwnd, shortname ) ; 
-			}
-	}
+		}
+}
 
 // Verifie si une mise a jour est disponible sur le site web
 extern char BuildVersionTime[256] ;
@@ -453,4 +455,70 @@ void PopUpSystemMenu( HWND hwnd, int npos ) {
 	}
 	}
 	
+}
+
+// Description:
+//   Creates a tooltip for an item in a dialog box. 
+// Parameters:
+//   idTool - identifier of an dialog box item.
+//   nDlg - window handle of the dialog box.
+//   pszText - string to use as the tooltip text.
+// Returns:
+//   The handle to the tooltip.
+//
+HWND CreateToolTip(int toolID, HWND hDlg, PTSTR pszText)
+{
+    if (!toolID || !hDlg || !pszText)
+    {
+        return FALSE;
+    }
+    // Get the window of the tool.
+    HWND hwndTool = GetDlgItem(hDlg, toolID);
+    
+    // Create the tooltip. g_hInst is the global instance handle.
+    HWND hwndTip = CreateWindowEx((DWORD)NULL, TOOLTIPS_CLASS, NULL,
+                              WS_POPUP |TTS_ALWAYSTIP | TTS_BALLOON,
+                              CW_USEDEFAULT, CW_USEDEFAULT,
+                              CW_USEDEFAULT, CW_USEDEFAULT,
+                              hDlg, NULL, 
+                              hinst /*g_hInst*/, NULL);
+    
+   if (!hwndTool || !hwndTip)
+   {
+       return (HWND)NULL;
+   }                              
+                              
+    // Associate the tooltip with the tool.
+    TOOLINFO toolInfo = { 0 };
+    toolInfo.cbSize = sizeof(toolInfo);
+    toolInfo.hwnd = hDlg;
+    toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+    toolInfo.uId = (UINT_PTR)hwndTool;
+    toolInfo.lpszText = pszText;
+    SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
+
+    return hwndTip;
+}
+
+HWND CreateToolTip2(int toolID, HWND hDlg, PTSTR pszText) {
+    HWND hwndToolTips = CreateWindow(TOOLTIPS_CLASS, NULL, 
+                            WS_POPUP | TTS_NOPREFIX | TTS_BALLOON, 
+                            0, 0, 0, 0, NULL, NULL, GetModuleHandle(NULL), NULL);
+    if (hwndToolTips)
+{
+    TOOLINFO ti;
+
+    ti.cbSize   = sizeof(ti);
+    ti.uFlags   = TTF_TRANSPARENT | TTF_CENTERTIP;
+    ti.hwnd     = hDlg;
+    ti.uId      = toolID;
+    ti.hinst    = NULL;
+    ti.lpszText = pszText;
+
+    GetClientRect(hwnd, &ti.rect);
+
+    SendMessage(hwndToolTips, TTM_ADDTOOL, 0, (LPARAM) &ti );
+
+}
+return hwndToolTips ;
 }

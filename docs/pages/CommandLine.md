@@ -1,6 +1,8 @@
 <div style="text-align: center;"><iframe src="gad.html" frameborder="0" scrolling="no" style="border: 1px solid gray; padding: 0; overflow:hidden; scrolling: no; top:0; left: 0; width: 100%;" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+5)+'px';"></iframe></div>
 ## New command-line options
 
+<!-- CmdLineOptions_begin -->
+
 In **KiTTY** some new command-line options are available:
 
 * **-auto-store-sshkey**: automatically store server SSH key without prompting
@@ -14,6 +16,7 @@ In **KiTTY** some new command-line options are available:
 * **-fileassoc**: associate **.ktx** files with **KiTTY**. See [Portability feature](Portability.md) to define file extention
 * **-folder**: directly open a specific folder (for [savemode=dir mode](Portability.md) only). It must precede **-load** option
 * **-fullscreen**: start directly in full screen mode
+* **-help**: print this help message
 * **-icon**: choose a specific [build-in icon](kitty_icon.md)
 * **-iconfile**: choose an external icon file
 * **-initdelay**: delay (in seconds) before initial configured actions (send to tray, autocommand ...). Default is 2.0
@@ -48,3 +51,7 @@ In **Klink** there is one of the **KiTTY** option:
 In **Kageant** there is only one:
 
 * **-pass**: to set the passphrase of the ssh key to add
+
+<!-- CmdLineOptions_end -->
+
+> All original **PuTTY** command-line options are available on [PuTTY website](https://the.earth.li/~sgtatham/putty/latest/htmldoc/Chapter3.html#using-cmdline)

@@ -1854,7 +1854,7 @@ winpgnt_integrated.o: ../windows/winpgnt.c ../putty.h ../ssh.h ../misc.h ../tree
 adb.o: ../putty.h ../../adb/adb.c
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../../adb/adb.c -I../../adb -I../../
 
-kitty.o: ../../kitty.c ../../kitty.h ../../kitty_savedump.c ../../kitty_launcher.c ../../kitty_launcher.h ../windows/window.c  ../../kitty_ini.h
+kitty.o: ../../kitty.c ../../kitty.h ../../kitty_savedump.c ../../kitty_launcher.c ../../kitty_launcher.h ../windows/window.c  ../../kitty_ini.h ../../kitty_help.h
 	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty.c \
 	-DBUILD_TIME=`date +'"%d/%m/%Y-%H:%M:%S(%Z)"'` \
 	-DBUILD_VERSION=`cat version_major.txt` \
@@ -1981,6 +1981,9 @@ kitty.dll: ../../kitty_dll.c kitty_dll.res.o
 
 ../../kitty_ini.h: ../../kitty_ini.txt
 	( printf 'static char *default_init_file_content = "' ; sed 's/\\/\\\\/g' ../../kitty_ini.txt | sed 's/$$/\\n\\/' ; printf '" ;\n' ) > ../../kitty_ini.h
+
+../../kitty_help.h: ../../docs/pages/CommandLine.md
+	( printf 'static char *default_help_file_content = "' ; sed -n '/CmdLineOptions_begin/,/CmdLineOptions_end/p' ../../docs/pages/CommandLine.md|sed 's/<!--.*-->//'|sed 's/\*\*//g'|sed 's/$$/\\r\\n\\/' ; printf '" ;\n' ) > ../../kitty_help.h
 
 nohyperlink: putty_nohyperlink.exe
 

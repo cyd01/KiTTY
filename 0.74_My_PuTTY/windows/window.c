@@ -965,7 +965,12 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if( existfile(argv[i]) ) {
 				LoadFile = (char*) malloc( strlen(argv[i])+1 ) ;
 				strcpy( LoadFile, argv[i] ) ;
+				RunPuttyEd( hwnd, LoadFile, true ) ; 
+				free( LoadFile ) ;
+			} else {
+				MessageBox(hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
 			}
+			exit( 0 ) ;
 		} else if( !strcmp(p, "-folder") ) {
 			char *pfolder ;
 			pfolder=p+7;
@@ -1110,9 +1115,19 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			sprintf(buffer, "%s|%s|0", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;
 			return Notepad_WinMain(inst, prev, buffer, show) ;
 		} else if( !strcmp(p, "-edb") ) {
-			char buffer[1024];
 			i++;
-			sprintf(buffer, "%s|%s|%s", (char*)get_param_str("INI"), (char*)get_param_str("SAV"), argv[i] ) ;
+			if( existfile(argv[i]) ) {
+				char buffer[1024];
+				sprintf(buffer, "%s|%s|%s", (char*)get_param_str("INI"), (char*)get_param_str("SAV"), argv[i] ) ;
+				return Notepad_WinMain(inst, prev, buffer, show) ;
+			} else {
+				MessageBox(hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
+			}
+			exit(0);
+		} else if( !strcmp(p, "-help") ) {
+			SetTextToClipboard(GetHelpMessage()) ;
+			char buffer[1024];
+			sprintf(buffer, "%s|%s|2", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;
 			return Notepad_WinMain(inst, prev, buffer, show) ;
 #ifdef MOD_LAUNCHER
 		} else if( !strcmp(p, "-launcher") ) {
@@ -3318,7 +3333,11 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 	char buffer[4096] = "" ;
 
 	// On charge automatiquement au démarrage (-edit) un fichier dans l'editeur connecté
-	if( !PuttyFlag ) if( LoadFile!=NULL ) { RunPuttyEd( hwnd, LoadFile ) ; free( LoadFile ) ; LoadFile = NULL ; }
+	if( !PuttyFlag ) if( LoadFile!=NULL ) {
+		RunPuttyEd( hwnd, LoadFile, true ) ;
+		free( LoadFile ) ;
+		LoadFile = NULL ; 
+	}
 
 	if( (conf_get_int(conf,CONF_protocol) == PROT_SSH) && (!is_backend_connected) ) break ; // On sort si en SSH on n'est pas connecte
 	// Lancement d'une (ou plusieurs separees par \\n) commande(s) automatique(s) a l'initialisation

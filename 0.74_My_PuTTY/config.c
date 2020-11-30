@@ -2355,6 +2355,7 @@ void setup_config_box(struct controlbox *b, bool midsession,
     ssd->editbox = ctrl_editbox(s, "Saved Sessions/New Folder", 'e', 100,
 				HELPCTX(session_saved),
 				sessionsaver_handler, P(ssd), P(NULL));
+
     ssd->editbox->generic.column = 0;
     if( !midsession && ( (get_param("INIFILE")!=2)||(!GetDirectoryBrowseFlag()) ) ) {
 	ssd->clearbutton = ctrl_pushbutton(s, "Clear", NO_SHORTCUT,
@@ -2381,6 +2382,7 @@ void setup_config_box(struct controlbox *b, bool midsession,
     ssd->listbox->generic.column = 0;
 #ifdef MOD_PERSO
 	ssd->listbox->listbox.height = GetConfigBoxHeight() ;
+	ssd->listbox->listbox.hscroll = true ; /* Does nothing */
 #else
     ssd->listbox->listbox.height = 7;
 #endif

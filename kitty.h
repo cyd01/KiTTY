@@ -402,6 +402,7 @@ void ChangeFontSize(HWND hwnd, int dec) ;
 void create_settings( const char * name ) ;
 void SetHostKeyExtension( const char* ext ) ;
 
+char * GetHelpMessage(void) ;
 void CreateIniFile( const char * filename ) ;
 void SendKeyboard( HWND hwnd, const char * buffer ) ;
 char * GetRemotePath() ;
