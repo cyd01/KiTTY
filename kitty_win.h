@@ -29,7 +29,7 @@ int SetTextToClipboard( const char * buf ) ;
 void RunCommand( HWND hwnd, const char * cmd ) ;
 
 // Démarre l'éditeur embarqué
-void RunPuttyEd( HWND hwnd, char * filename, bool readonly ) ;
+void RunPuttyEd( HWND hwnd, char * filename ) ;
 
 // Verifie si une mise a jour est disponible sur le site web
 void CheckVersionFromWebSite( HWND hwnd ) ;

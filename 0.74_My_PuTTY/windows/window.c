@@ -965,7 +965,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if( existfile(argv[i]) ) {
 				LoadFile = (char*) malloc( strlen(argv[i])+1 ) ;
 				strcpy( LoadFile, argv[i] ) ;
-				RunPuttyEd( hwnd, LoadFile, true ) ; 
+				RunPuttyEd( hwnd, LoadFile ) ; 
 				free( LoadFile ) ;
 			} else {
 				MessageBox(hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
@@ -1112,22 +1112,22 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			CreateFileAssoc() ; return 0 ;
 		} else if( !strcmp(p, "-ed") ) {
 			char buffer[1024];
-			sprintf(buffer, "%s|%s|0", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;
+			sprintf(buffer, "%s|%s|0|0", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;
 			return Notepad_WinMain(inst, prev, buffer, show) ;
 		} else if( !strcmp(p, "-edb") ) {
 			i++;
 			if( existfile(argv[i]) ) {
 				char buffer[1024];
-				sprintf(buffer, "%s|%s|%s", (char*)get_param_str("INI"), (char*)get_param_str("SAV"), argv[i] ) ;
+				sprintf(buffer, "%s|%s|%s|0", (char*)get_param_str("INI"), (char*)get_param_str("SAV"), argv[i] ) ;
 				return Notepad_WinMain(inst, prev, buffer, show) ;
 			} else {
 				MessageBox(hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
 			}
 			exit(0);
-		} else if( !strcmp(p, "-help") ) {
+		} else if( !strcmp(p, "-help") || !strcmp(p, "-h") ) {
 			SetTextToClipboard(GetHelpMessage()) ;
 			char buffer[1024];
-			sprintf(buffer, "%s|%s|2", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;
+			sprintf(buffer, "%s|%s|1|1", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;
 			return Notepad_WinMain(inst, prev, buffer, show) ;
 #ifdef MOD_LAUNCHER
 		} else if( !strcmp(p, "-launcher") ) {
@@ -3334,7 +3334,7 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 
 	// On charge automatiquement au démarrage (-edit) un fichier dans l'editeur connecté
 	if( !PuttyFlag ) if( LoadFile!=NULL ) {
-		RunPuttyEd( hwnd, LoadFile, true ) ;
+		RunPuttyEd( hwnd, LoadFile ) ;
 		free( LoadFile ) ;
 		LoadFile = NULL ; 
 	}

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "notepad.h"
 
 LRESULT CALLBACK Notepad_WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -20,6 +21,7 @@ static const char Notepad_szFilenameFilter[] = "Text files, (*.txt, *.log, *.ini
 static char * IniFile = NULL ;
 static char * SavFile = NULL ;
 static char * LoadFile = NULL ;
+static bool readonly = false ;
 #endif
 
 BOOL FileExists(LPCTSTR szPath) {
@@ -64,7 +66,7 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 
 #ifdef NOMAIN	
 	if( lpCmdLine!=NULL ) {
-		if( strlen(lpCmdLine) > 0 ) {
+		if( strlen(lpCmdLine) > 0 ) {	
 			char *st = strstr( lpCmdLine, "|" ) ;
 			if( st!=NULL ) {
 				SavFile=(char*)malloc(strlen(st)+1);
@@ -77,6 +79,11 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 					LoadFile = (char*)malloc(strlen(st)+1);
 					strcpy( LoadFile, st+1 ) ;
 					st[0] = '\0' ;
+					st = strstr( LoadFile, "|" );
+					if( st!=NULL ) {
+						if( !strcmp(st+1,"1") ) { readonly = true ; }
+						st[0] = '\0' ;
+					}
 				}
 			}
 		}
@@ -115,25 +122,28 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 	AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_SETFONT, Notepad_LoadString(NOTEPAD_STR_SETFONT));
 
 	hSMFichier = CreateMenu();
-	AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_NEW, Notepad_LoadString(NOTEPAD_STR_NEW));
-	AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_OPEN, Notepad_LoadString(NOTEPAD_STR_OPEN));
-	AppendMenu(hSMFichier, MF_STRING|MF_GRAYED|MF_DISABLED, NOTEPAD_IDM_SAVE, Notepad_LoadString(NOTEPAD_STR_SAVE));
-	AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_SAVEAS, Notepad_LoadString(NOTEPAD_STR_SAVEAS));
+	
+	if( !readonly ) {
+		AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_NEW, Notepad_LoadString(NOTEPAD_STR_NEW));
+		AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_OPEN, Notepad_LoadString(NOTEPAD_STR_OPEN));
+		AppendMenu(hSMFichier, MF_STRING|MF_GRAYED|MF_DISABLED, NOTEPAD_IDM_SAVE, Notepad_LoadString(NOTEPAD_STR_SAVE));
+		AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_SAVEAS, Notepad_LoadString(NOTEPAD_STR_SAVEAS));
 #ifdef NOMAIN
-	AppendMenu(hSMFichier, MF_SEPARATOR, 0, NULL );
-	AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_LOAD_INI, TEXT("ini file"));
-	AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_LOAD_SAV, TEXT("sav file"));
-	if( ParentWindow!=NULL ) {
 		AppendMenu(hSMFichier, MF_SEPARATOR, 0, NULL );
-		AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_RESIZE, TEXT("&Resize"));
-		}
+		AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_LOAD_INI, TEXT("ini file"));
+		AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_LOAD_SAV, TEXT("sav file"));
+		if( ParentWindow!=NULL ) {
+			AppendMenu(hSMFichier, MF_SEPARATOR, 0, NULL );
+			AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_RESIZE, TEXT("&Resize"));
+			}
 #endif
-	AppendMenu(hSMFichier, MF_SEPARATOR, 0, NULL );
+		AppendMenu(hSMFichier, MF_SEPARATOR, 0, NULL );
+	}
 	AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_QUIT, Notepad_LoadString(NOTEPAD_STR_QUIT));
 
 	hMenu = CreateMenu();
 	AppendMenu(hMenu,MF_POPUP,(UINT)hSMFichier,Notepad_LoadString(NOTEPAD_STR_FILE));
-	AppendMenu(hMenu,MF_POPUP,(UINT)hSMEdition,Notepad_LoadString(NOTEPAD_STR_EDIT));
+	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hSMEdition,Notepad_LoadString(NOTEPAD_STR_EDIT)); }
 
 #ifdef NOMAIN
 	HMENU hSMDelim = CreateMenu() ;
@@ -141,17 +151,17 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 	AppendMenu(hSMDelim, MF_STRING|MF_CHECKED, NOTEPAD_IDM_SCOLON, Notepad_LoadString(NOTEPAD_STR_SCOLON));
 	AppendMenu(hSMDelim, MF_STRING|MF_UNCHECKED, NOTEPAD_IDM_SLASH, Notepad_LoadString(NOTEPAD_STR_SLASH));
 	AppendMenu(hSMDelim, MF_STRING|MF_UNCHECKED, NOTEPAD_IDM_TILDE, Notepad_LoadString(NOTEPAD_STR_TILDE));
-	AppendMenu(hMenu,MF_POPUP,(UINT)hSMDelim,Notepad_LoadString(NOTEPAD_STR_DELIM));
+	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hSMDelim,Notepad_LoadString(NOTEPAD_STR_DELIM)); }
 	
 	HMENU hWindows = CreateMenu() ;
 	AppendMenu(hWindows, MF_STRING, NOTEPAD_IDM_RESIZE_ALL, "&Arrange");
 	AppendMenu(hWindows, MF_STRING, NOTEPAD_IDM_CASCADE_ALL, "&Cascade");
-	AppendMenu(hMenu,MF_POPUP,(UINT)hWindows,"&Windows");
+	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hWindows,"&Windows"); }
 	
-	AppendMenu(hMenu,MF_STRING, NOTEPAD_IDM_SEND, Notepad_LoadString(NOTEPAD_STR_SEND));
+	if( !readonly ) { AppendMenu(hMenu,MF_STRING, NOTEPAD_IDM_SEND, Notepad_LoadString(NOTEPAD_STR_SEND)) ; }
 	//AppendMenu(hMenu,MF_STRING, NOTEPAD_IDM_SEND_ALL, Notepad_LoadString(NOTEPAD_STR_SEND_ALL));
 #endif
-	AppendMenu(hMenu,MF_POPUP,(UINT)hSMApropos,Notepad_LoadString(NOTEPAD_STR_HELP));
+	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hSMApropos,Notepad_LoadString(NOTEPAD_STR_HELP)); }
 
 	//hwnd = CreateWindow(Notepad_szprogname, Notepad_szprogname, WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, cxScreen, cyScreen, NULL, hMenu, hinstance, NULL);
 	hwnd = CreateWindowEx(WS_EX_ACCEPTFILES,Notepad_szprogname, Notepad_szprogname, WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, (int)cxScreen/2, (int)cyScreen/2, NULL, hMenu, hinstance, NULL);
@@ -194,11 +204,10 @@ LRESULT CALLBACK Notepad_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	switch (uMsg) {
 		case WM_CREATE: {
 			
-			if( (LoadFile!=NULL)&&(strlen(LoadFile)>0)&&(!strcmp(LoadFile,"2")) ) {
+			if( readonly ) {
 				hEdit = CreateWindow("edit", "", WS_CHILD | WS_VISIBLE | ES_READONLY |
 					ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL,
 					0, 0, 0, 0, hwnd, NULL, notepad_hinst, NULL);
-				strcpy(LoadFile,"1");
 			} else {
 				hEdit = CreateWindow("edit", "", WS_CHILD | WS_VISIBLE |
 					ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL,

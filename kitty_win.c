@@ -396,17 +396,17 @@ void RunCommand( HWND hwnd, const char * cmd ) {
 		}
 	}
 
-void RunPuttyEd( HWND hwnd, char * filename, bool readonly ) {
+void RunPuttyEd( HWND hwnd, char * filename ) {
 	char buffer[1024]="", shortname[1024]="" ;
 	if( GetModuleFileName( NULL, (LPTSTR)buffer, 1023 ) ) if( GetShortPathName( buffer, shortname, 1023 ) ) {
-			strcat( shortname, " -ed" );
-			if( filename!=NULL ) if( strlen(filename)>0 ) { 
-				strcat( shortname, "b " ) ; 
-				strcat( shortname, filename ) ; 
-			}
-			debug_logevent( shortname ) ;
-			RunCommand( hwnd, shortname ) ; 
+		strcat( shortname, " -ed" );
+		if( filename!=NULL ) if( strlen(filename)>0 ) { 
+			strcat( shortname, "b " ) ; 
+			strcat( shortname, filename ) ; 
 		}
+		debug_logevent( shortname ) ;
+		RunCommand( hwnd, shortname ) ; 
+	}
 }
 
 // Verifie si une mise a jour est disponible sur le site web
