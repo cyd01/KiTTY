@@ -8,7 +8,7 @@
 
 
 #ifdef MOD_PERSO
-void SetUsernameInConfig( char * username ) ;
+void SetUsernameInConfig( const char * username ) ;
 char * ManagePassPhrase( const char * st ) ;
 void SetPasswordInConfig( const char * password ) ;
 void GetPasswordInConfig( char * p ) ;

@@ -29,6 +29,7 @@ void SetSSHConnected( int flag );
 size_t iso8859_1_to_utf8(char *content, size_t max_size) ; 					// Latin-1 = iso8859-1
 size_t utf8_to_iso8859_15(char *const output, const char *const input, const size_t length) ;   // Latin-9 = iso8859-15
 char bufpass[1024]="";
+int auth_loop_num = 0 ;
 #endif
 
 struct ssh2_userauth_state {
@@ -262,7 +263,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
     PktIn *pktin;
 
 #ifdef MOD_RECONNECT
-	SetSSHConnected(1);
+	SetSSHConnected(0);
 #endif
 
     ssh2_userauth_filter_queue(s);     /* no matter why we were called */
@@ -1392,7 +1393,6 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                         s->cur_prompt->name_reqd = false;
                     }
                     s->cur_prompt->name = strbuf_to_str(sb);
-
                     sb = strbuf_new();
                     if (inst.len) {
                         if (s->ki_scc) {
@@ -1412,20 +1412,24 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                         s->cur_prompt->instruction = strbuf_to_str(sb);
                     else
                         strbuf_free(sb);
-
                     /*
                      * Our prompts_t is fully constructed now. Get the
                      * user's response(s).
                      */
-
+    
 #ifdef MOD_PERSO
-	if( IsPasswordInConf() ) {
+	auth_loop_num++ ;
+//char b[128];sprintf(b,"%d",auth_loop_num);MessageBox(NULL,b,"info",MB_OK);
+	if( debug_flag && !IsPasswordInConf() ) { debug_logevent( "No password in configuration" ) ; }
+	if( (auth_loop_num==1) && IsPasswordInConf() ) {
 		GetPasswordInConfig(bufpass) ;
 		while( ((bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\')) || ((bufpass[strlen(bufpass)-1]=='r')&&(bufpass[strlen(bufpass)-2]=='\\')) ) { 
 			bufpass[strlen(bufpass)-2]='\0'; 
 			bufpass[strlen(bufpass)-1]='\0'; 
 		}
-		iso8859_1_to_utf8( bufpass, 1024 );
+		    if( debug_flag ) { debug_logevent( "Raw password: %s", bufpass ) ; }
+		iso8859_1_to_utf8( bufpass, 1024 ) ;
+		    if( debug_flag ) { debug_logevent( "UTF-8 password: %s", bufpass ) ; }
 		bufchain bc;
 		bufchain_init(&bc);
 		bufchain_add(&bc, bufpass, strlen(bufpass));
@@ -1450,7 +1454,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     s->userpass_ret = seat_get_userpass_input(
                         s->ppl.seat, s->cur_prompt, NULL);
 #ifdef MOD_PERSO
-			if( !IsPasswordInConf() )
+		if( (auth_loop_num!=1) || !IsPasswordInConf() )
 #endif
                     while (1) {
                         while (s->userpass_ret < 0 &&
@@ -1487,10 +1491,14 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     for (uint32_t i = 0; i < s->num_prompts; i++) {
 #ifdef MOD_PERSO
 	ppl_logevent("Sent a password");
-	if(!GetUserPassSSHNoSave()) {
+	if( (auth_loop_num==1) && !GetUserPassSSHNoSave() ) {
 		if(s!=NULL) 
 		if(s->cur_prompt->prompts!=NULL)  
-		if(s->cur_prompt->prompts[i]->result!=NULL) {SetPasswordInConfig( (const char *) s->cur_prompt->prompts[i]->result ) ; }
+		if(s->cur_prompt->prompts[i]->result!=NULL) {
+			ppl_logevent("Save a password");
+			//SetPasswordInConfig( (const char *) s->cur_prompt->prompts[i]->result ) ; 
+			SetPasswordInConfig( (const char *) prompt_get_result_ref(s->cur_prompt->prompts[i]) ) ; 
+		}
 	}
 #endif
                         put_stringz(s->pktout, prompt_get_result_ref(
@@ -1522,7 +1530,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                     ssh2_userauth_antispoof_msg(
                         s, "End of keyboard-interactive prompts from server");
                 }
-
+	
                 /*
                  * We should have SUCCESS or FAILURE now.
                  */
@@ -1599,6 +1607,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
                 put_stringz(s->pktout, "password");
                 put_bool(s->pktout, false);
 #ifdef MOD_PERSO
+        if( debug_flag && !IsPasswordInConf() ) { debug_logevent( "No password in configuration" ) ; }
 	if( IsPasswordInConf() ) {
 		GetPasswordInConfig(bufpass);
 		while( ((bufpass[strlen(bufpass)-1]=='n')&&(bufpass[strlen(bufpass)-2]=='\\')) || ((bufpass[strlen(bufpass)-1]=='r')&&(bufpass[strlen(bufpass)-2]=='\\')) ) { 
@@ -1607,7 +1616,9 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 		}
 		char bufpass2[1024];
 		strcpy(bufpass2,bufpass);
+			if( debug_flag ) { debug_logevent( "Raw password: %s", bufpass2 ) ; }
 		iso8859_1_to_utf8( bufpass2, 1024 );
+			if( debug_flag ) { debug_logevent( "UTF-8 password: %s", bufpass2 ) ; }
 		put_stringz(s->pktout, bufpass2);
 		memset(bufpass2,0,1024);
 	
@@ -1641,11 +1652,13 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 #ifdef MOD_PERSO
 		if( !GetUserPassSSHNoSave() ) {
 			if( strlen(bufpass)>0 ) {
+				ppl_logevent("Save password");
 				SetPasswordInConfig( bufpass ) ;
 				memset( bufpass, 0, strlen(bufpass) ) ;
 			} else if( s != NULL ) {
 				if( s->password != NULL ) {
 					char bufpass2[1024] ;
+					ppl_logevent("Save the password");
 					utf8_to_iso8859_15( bufpass2, s->password, 1024 ) ;
 					SetPasswordInConfig( bufpass2 ) ;
 					memset(bufpass2,0,1024) ;
@@ -1837,7 +1850,8 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 
   userauth_success:
 #ifdef MOD_PERSO
-	SetSSHConnected(1) ;
+    SetSSHConnected(1) ;
+    auth_loop_num=0;
 #endif
     /*
      * We've just received USERAUTH_SUCCESS, and we haven't sent

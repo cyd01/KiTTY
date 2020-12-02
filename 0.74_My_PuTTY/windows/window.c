@@ -256,6 +256,7 @@ void SaveDump( void ) ;
 #include "../../kitty_tools.h"
 #include "../../kitty_win.h"
 extern int PuttyFlag ;
+extern char BuildVersionTime[256] ;
 void SendStrToTerminal( const char * str, const int len ) {
 	char c ;
 	int i ;
@@ -678,15 +679,15 @@ static void close_session(void *ignored_context)
 
 #ifdef MOD_RECONNECT
 void RestartSession( void ) {
-	if( backend ) { queue_toplevel_callback(close_session, NULL) ; backend = NULL ; }
+	if( backend ) { SetSSHConnected(0) ; queue_toplevel_callback(close_session, NULL) ; backend = NULL ; }
 	if( GetAutoreconnectFlag() ) {
 		lp_eventlog(default_logpolicy, "User request session restart..." ) ;
 	} else {
 		win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
 		SetTimer(hwnd, TIMER_RECONNECT, 10, NULL) ;
 	}
+	
 	PostMessage(hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
-	//is_backend_first_connected = 0 ;
 	PostMessage(hwnd,WM_KEYUP,VK_RETURN ,1) ;
 }
 #endif
@@ -743,11 +744,11 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     set_cmd_line( cmdline ) ;
     SethInstIcons( hinst ) ;
     InitWinMain();
-    if( debug_flag ) { 
-	char * buf = (char*)malloc( strlen(cmdline)+20 ) ;
-	sprintf( buf, "Command-line: %s", cmdline ) ;
-	lp_eventlog(default_logpolicy, buf) ; 
-	free(buf);
+    if( debug_flag ) {
+      if( IniFileFlag == SAVEMODE_REG ) { debug_logevent( "Save mode is set to registry (classic)" ) ; }
+      if( IniFileFlag == SAVEMODE_DIR ) { debug_logevent( "Save mode is set to directory (portable)" ) ; }
+      debug_logevent( "Command-line: %s", cmdline ) ;
+      debug_logevent( "Version: %s", BuildVersionTime ) ;
     }
 #endif
 #ifdef MOD_NOTRANSPARENCY
@@ -1238,6 +1239,13 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     }
 
 #ifdef MOD_PERSO
+    if( debug_flag ) {
+      if( strlen(conf_get_str(conf,CONF_sessionname))>0 ) {
+        debug_logevent( "Session name: %s", conf_get_str(conf,CONF_sessionname) ) ;
+      } else {
+        debug_logevent( "Session name: -" ) ;
+      }
+    }
 	HICON icon_m ;
 	if( GetIconeFlag() > 0 ) 
 		icon_m = LoadIcon( GethInstIcons(), MAKEINTRESOURCE(IDI_MAINICON_0 + GetIconeNum() ) );
@@ -1617,17 +1625,17 @@ TrayIcone.hWnd = hwnd ;
 		ScriptFileContent = NULL ;
 		ReadInitScript( NULL ) ;
 		
-		// Lancement du serveur de chat
 		static char reg_buffer[4096];
-		if( ReadParameter( INIT_SECTION, "chat", reg_buffer ) ) 
-			{
+    
+		// Lancement du serveur de chat
+		if( ReadParameter( INIT_SECTION, "chat", reg_buffer ) ) {
 			int chat_flag = atoi( reg_buffer ) ;
 			if ( chat_flag > 0 ) {
 				//if( chat_flag != 1 ) PORT = chat_flag ; 
 				_beginthread( routine_server, 0, NULL ) ;
-				}
 			}
-
+		}
+		
 		// Parametrage specifique a la session
 		if( GetSessionField( conf_get_str(conf,CONF_sessionname), conf_get_str(conf,CONF_folder), "InitDelay", reg_buffer ) ) {
 			if( init_delay != (int)(1000*atof( reg_buffer ) ) ) { 
@@ -2135,10 +2143,8 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 		session_closed = true;
 		ReadInitScript(NULL);
 	
-    char *title = dupprintf("%s Fatal Error: %s", appname,msg);
+    debug_logevent( "%s Fatal Error: %s", appname,msg ) ;
     show_mouseptr(true);
-    lp_eventlog(default_logpolicy, title);//MessageBox(hwnd, msg, title, MB_ICONERROR | MB_OK);
-    sfree(title);
 	
 		if( conf_get_int(conf,CONF_failure_reconnect) ) {
 			queue_toplevel_callback(close_session, NULL);
@@ -3338,7 +3344,9 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 		free( LoadFile ) ;
 		LoadFile = NULL ; 
 	}
-
+	
+	if( debug_flag ) { debug_logevent( "Starting post connection operations" ) ; }
+	
 	if( (conf_get_int(conf,CONF_protocol) == PROT_SSH) && (!is_backend_connected) ) break ; // On sort si en SSH on n'est pas connecte
 	// Lancement d'une (ou plusieurs separees par \\n) commande(s) automatique(s) a l'initialisation
 
@@ -3390,6 +3398,7 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 
 	// On envoie l'autocommand
 	if( strlen( conf_get_str(conf,CONF_autocommand) ) > 0 ) {
+		lp_eventlog(default_logpolicy, "Start autocommand timer" );
 		SetTimer(hwnd, TIMER_AUTOCOMMAND, autocommand_delay, NULL) ;
 	}
 	if( conf_get_int(conf,CONF_logtimerotation) > 0 ) {
@@ -3536,7 +3545,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	      {
 		// Initialiation
 		MainHwnd = hwnd ;
-		if( debug_flag ) lp_eventlog(default_logpolicy,"Init");
+		if( debug_flag ) { lp_eventlog(default_logpolicy,"Starting window creation") ; }
       		if( GetIconeFlag() != -1 )
 			SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_INIT ) ;
 

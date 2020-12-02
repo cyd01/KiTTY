@@ -30,7 +30,7 @@ You can also get virus analysis from our official CDN [fosshub.com](https://www.
 
 ## Third-part softwares that work with KiTTY
 * [KiTTY session manager](https://www.noobunbox.net/projects/kitty-session-manager "KiTTY session manager")
-* [PuTTY tab manager](https://sites.google.com/site/macdsite/utilidades/puttytabmanager "PuTTY tab manager")
+* [PuTTY tab manager](https://sites.google.com/site/macdsite/puttytabmanager "PuTTY tab manager")
 
 ## KiTTY source code
 * The KiTTY source code is available from

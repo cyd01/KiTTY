@@ -739,6 +739,8 @@ int RunSession( HWND hwnd, const char * folder_in, char * session_in ) ;
 
 extern char ** FolderList ;
 
+static char * selectedsession = NULL ;
+
 extern char CurrentFolder[1024] ;
 union control * ctrlSessionList = NULL ;
 union control * ctrlSessionEdit = NULL ;
@@ -851,6 +853,11 @@ static bool load_selected_session(
 	char sessionname[1024] ;
 	int j;
 	dlg_listbox_gettext(ctrlSessionList, dlg, i, sessionname, 1024 ) ;
+	
+	if( selectedsession!=NULL ) { free(selectedsession); }
+	selectedsession = (char*)malloc(strlen(sessionname)+1);
+	strcpy(selectedsession,sessionname);
+	
 	for( j=0; j<ssd->sesslist.nsessions; j++ ) {
 		if( !strcmp( ssd->sesslist.sessions[j], sessionname ) ) i = j ;
 	}
@@ -1032,7 +1039,12 @@ void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, c
 		tabb[i] = false ;	
 	}
 	
-	for( i=0 ; i<nb ; i++ ) { if( s[i] != NULL ) { dlg_listbox_add(ctrl, dlg, s[i]) ; } }
+	for( i=0 ; i<nb ; i++ ) { 
+		if( s[i] != NULL ) { 
+			dlg_listbox_add(ctrl, dlg, s[i]) ; 
+			if( !strcmp(s[i],selectedsession) ) { dlg_listbox_select(ctrl, dlg, i); }
+		}
+	}
 	// cleaning
 	for( i=0 ; i<nb ; i++ ) { if( s[i] != NULL ) { free(s[i]) ; } }
 	free(tabb);
@@ -1051,6 +1063,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	if (ctrl == ssd->editbox) {
 #ifdef MOD_PERSO
 	    ctrlSessionEdit = ctrl ;
+	    if( selectedsession==NULL ) { selectedsession=(char*)malloc(1);strcpy(selectedsession,""); }
 #endif
 	    dlg_editbox_set(ctrl, dlg, ssd->savedsession);
 	} else if (ctrl == ssd->listbox) {
@@ -1061,11 +1074,12 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		if( ssd->savedsession!=NULL ) strcpy( ssd->savedsession, dlg_editbox_get( ssd->editbox, dlg ) ) ;
 		ctrlSessionList = ctrl ;
 		//if(get_param("INIFILE")==SAVEMODE_DIR) CleanFolderName( CurrentFolder ) ;
+		int j;
 		if( get_param("INIFILE")==SAVEMODE_DIR ) {
 			filter_session_portable(ctrl, dlg, ssd->sesslist.nsessions,ssd->sesslist.sessions, ssd->savedsession, CurrentFolder ) ;
 		}
 		else
-		for (i = 0; i < ssd->sesslist.nsessions; i++) {
+		for (i = 0, j=0; i < ssd->sesslist.nsessions; i++) {
 			char folder[1024] ;
 			strcpy( folder, "" ) ;
 			if( (get_param("INIFILE")==SAVEMODE_REG) || ((get_param("INIFILE")==SAVEMODE_DIR) && !GetDirectoryBrowseFlag()) ) { // Registry mode
@@ -1087,14 +1101,17 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 					|| ( filter_sessionname( "comment:", ssd->sesslist.sessions[i], folder, ssd->savedsession ) )
 					|| ( filter_sessionname( "title:", ssd->sesslist.sessions[i], folder, ssd->savedsession ) )
 					|| ( filter_sessionname( "class:", ssd->sesslist.sessions[i], folder, ssd->savedsession ) )
-					|| ( stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) )
+					|| ( stristr(ssd->sesslist.sessions[i],ssd->savedsession)!=NULL) ) {
 						dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]) ;
+						if( !strcmp(ssd->sesslist.sessions[i],selectedsession) ) { dlg_listbox_select(ctrl, dlg, j); }
+						j++;
+						}
 					}
 				}
 				
 			}
 	    dlg_update_done(ctrl, dlg);
-	    if( get_param("INIFILE")==SAVEMODE_DIR ) { dlg_listbox_select(ctrl, dlg,1) ; }
+	    //if( get_param("INIFILE")!=SAVEMODE_DIR ) { dlg_listbox_select(ctrl,dlg,0) ; }
 #else 
 	    for (i = 0; i < ssd->sesslist.nsessions; i++)
 		dlg_listbox_add(ctrl, dlg, ssd->sesslist.sessions[i]);
@@ -1139,24 +1156,23 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	     * contains a hostname.
 	     */
 #ifdef MOD_PERSO
-	     if (load_selected_session(ssd, dlg, conf, &mbl) &&
-		(mbl && ctrl == ssd->listbox && conf_launchable(conf))) {
+	if (load_selected_session(ssd, dlg, conf, &mbl) &&
+	   (mbl && ctrl == ssd->listbox && conf_launchable(conf))) {
 		if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) {
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
 		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
-		     }
+		}
 		if( GetDblClickFlag()==1 ) {
-			sessionsaver_handler( ssd->startbutton, dlg, data, EVENT_ACTION ) ;
-			sessionsaver_handler( ssd->clearbutton, dlg, data, EVENT_ACTION ) ;
-			sessionsaver_handler( ctrlSessionList, dlg, data, EVENT_REFRESH ) ;
-		} 
-		else
-		dlg_end(dlg, 1);       /* it's all over, and succeeded */
-	    }
-	if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) { 
+		    sessionsaver_handler( ssd->startbutton, dlg, data, EVENT_ACTION ) ;
+		    sessionsaver_handler( ssd->clearbutton, dlg, data, EVENT_ACTION ) ;
+		    sessionsaver_handler( ctrlSessionList, dlg, data, EVENT_REFRESH ) ;
+		} else
+		    dlg_end(dlg, 1);       /* it's all over, and succeeded */
+	}
+	    	if( conf_get_int(conf, CONF_protocol) != PROT_SERIAL ) { 
 		     char buffer[1024] ;
 		     strcpy( buffer, conf_get_str( conf, CONF_password) ) ;
 		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
