@@ -1427,9 +1427,9 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 			bufpass[strlen(bufpass)-2]='\0'; 
 			bufpass[strlen(bufpass)-1]='\0'; 
 		}
-		    if( debug_flag ) { debug_logevent( "Raw password: %s", bufpass ) ; }
+		    //if( debug_flag ) { debug_logevent( "Raw password: %s", bufpass ) ; }
 		iso8859_1_to_utf8( bufpass, 1024 ) ;
-		    if( debug_flag ) { debug_logevent( "UTF-8 password: %s", bufpass ) ; }
+		    //if( debug_flag ) { debug_logevent( "UTF-8 password: %s", bufpass ) ; }
 		bufchain bc;
 		bufchain_init(&bc);
 		bufchain_add(&bc, bufpass, strlen(bufpass));
@@ -1616,9 +1616,9 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 		}
 		char bufpass2[1024];
 		strcpy(bufpass2,bufpass);
-			if( debug_flag ) { debug_logevent( "Raw password: %s", bufpass2 ) ; }
+			//if( debug_flag ) { debug_logevent( "Raw password: %s", bufpass2 ) ; }
 		iso8859_1_to_utf8( bufpass2, 1024 );
-			if( debug_flag ) { debug_logevent( "UTF-8 password: %s", bufpass2 ) ; }
+			//if( debug_flag ) { debug_logevent( "UTF-8 password: %s", bufpass2 ) ; }
 		put_stringz(s->pktout, bufpass2);
 		memset(bufpass2,0,1024);
 	

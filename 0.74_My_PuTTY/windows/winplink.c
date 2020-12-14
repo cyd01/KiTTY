@@ -20,34 +20,39 @@ extern int IniFileFlag ;
 // Flag permettant la gestion de l'arborscence (dossier=folder) dans le cas d'un savemode=dir
 extern int DirectoryBrowseFlag ;
 
-
 #include "../../kitty_crypt.c"
 #include "../../kitty_commun.h"
 
 int GetPuttyFlag() { return 1 ; }
 size_t win_seat_output_local(Seat *seat, bool is_stderr, const void *data, size_t len) { return 0 ; }
-
 int get_param( const char * val ) {
 	if( !stricmp( val, "INIFILE" ) ) { return IniFileFlag ; }
 	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) { return DirectoryBrowseFlag ; }
 	return 0 ;
-	}
-
+}
 void SetPasswordInConfig( char * password ) {
 	int len ;
 	if( password!=NULL ) {
 		len = strlen( password ) ;
 		if( len > 126 ) len = 126 ;
-		}
 	}
-
+}
 void SetUsernameInConfig( char * username ) {
 	int len ;
 	if( username!=NULL ) {
 		len = strlen( username ) ;
 		if( len > 126 ) len = 126 ;
-		}
 	}
+}
+void debug_logevent( const char *fmt, ... ) {
+	va_list ap;
+	char *buf;
+	va_start(ap, fmt);
+	buf = dupvprintf(fmt, ap) ;
+	va_end(ap);
+	printf(buf) ;
+	free(buf);
+}
 #endif
 
 #define WM_AGENT_CALLBACK (WM_APP + 4)

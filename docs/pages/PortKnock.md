@@ -2,7 +2,7 @@
 ## Port knocking
 
 Sometimes it can be useful to protect the **ssh port** of a server from attack, especially if the server is available on internet.
-[Port knocking](http://yalis.fr/cms/index.php/post/2016/06/07/Light-weight-port-knocking-to-protect-SSH) is one of the well known method.
+[Port knocking](https://en.wikipedia.org/wiki/Port_knocking) is one of the well known method.
 
 **KiTTY** can handle with port knocking sequence. Define you sequence in **Connection** tab of the configuration box.
 

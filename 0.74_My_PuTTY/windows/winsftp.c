@@ -28,25 +28,31 @@ int get_param( const char * val ) {
 	if( !stricmp( val, "INIFILE" ) ) {return IniFileFlag ; }
 	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) { return DirectoryBrowseFlag ; }
 	return 0 ;
-	}
-
+}
 int GetPuttyFlag() { return 1 ; }
-
 void SetPasswordInConfig( const char * password ) {
 	int len ;
 	if( password!=NULL ) {
 		len = strlen( password ) ;
 		if( len > 126 ) len = 126 ;
-		}
 	}
-	
-void SetUsernameInConfig( char * username ) {
+}
+void SetUsernameInConfig( const char * username ) {
 	int len ;
 	if( username!=NULL ) {
 		len = strlen( username ) ;
 		if( len > 126 ) len = 126 ;
-		}
 	}
+}
+void debug_logevent( const char *fmt, ... ) {
+	va_list ap;
+	char *buf;
+	va_start(ap, fmt);
+	buf = dupvprintf(fmt, ap) ;
+	va_end(ap);
+	printf(buf) ;
+	free(buf);
+}
 #endif
 
 int filexfer_get_userpass_input(Seat *seat, prompts_t *p, bufchain *input)

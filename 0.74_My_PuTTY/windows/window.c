@@ -58,6 +58,8 @@
 #define IDM_FULLSCREEN	0x0180
 #define IDM_COPY      0x0190
 #define IDM_PASTE     0x01A0
+#define IDM_NEWDUPSESS   0x01B0
+
 #define IDM_SPECIALSEP 0x0200
 
 #define IDM_SPECIAL_MIN 0x0400
@@ -325,6 +327,84 @@ void set_cmd_line( const char * st ) ;
 
 /* Flag to manage first connection */
 bool first_connect = true ;
+
+/* Start a session with conf structure */
+void RunSessionWithConfSettings( Conf *conf ) {
+	char b[2048];
+	char *cl=NULL;
+        const char *argprefix;
+	bool inherit_handles;
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	HANDLE filemap = NULL;
+        if (restricted_acl)
+		argprefix = "&R";
+	else
+		argprefix = "";
+	/*
+	 * Allocate a file-mapping memory chunk for the
+	 * config structure.
+	 */
+	SECURITY_ATTRIBUTES sa;
+        strbuf *serbuf;
+	void *p;
+	int size;
+        serbuf = strbuf_new();
+	conf_serialise(BinarySink_UPCAST(serbuf), conf);
+        size = serbuf->len;
+
+	sa.nLength = sizeof(sa);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = true;
+	filemap = CreateFileMapping(INVALID_HANDLE_VALUE,&sa,PAGE_READWRITE,0, size, NULL);
+	if (filemap && filemap != INVALID_HANDLE_VALUE) {
+		p = MapViewOfFile(filemap, FILE_MAP_WRITE, 0, 0, size);
+		if (p) {
+		    memcpy(p, serbuf->s, size);
+		    UnmapViewOfFile(p);
+		}
+	}
+        strbuf_free(serbuf);
+	inherit_handles = true;
+	cl = dupprintf("putty %s&%p:%u", argprefix,filemap, (unsigned)size);
+	GetModuleFileName(NULL, b, sizeof(b) - 1);
+	si.cb = sizeof(si);
+	si.lpReserved = NULL;
+	si.lpDesktop = NULL;
+	si.lpTitle = NULL;
+	si.dwFlags = 0;
+	si.cbReserved2 = 0;
+	si.lpReserved2 = NULL;
+	CreateProcess(b, cl, NULL, NULL, inherit_handles,NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+	CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+	if (filemap)
+		CloseHandle(filemap);
+	sfree(cl);
+}
+/* Start new session with current settings */
+void RunSessionWithCurrentSettings( HWND hwnd, Conf * oldconf, const char * host, const char * user, const char * pass, const int port, const char * remotepath ) {
+	Conf *newconf = conf_copy(oldconf) ;
+	if( host != NULL ) { conf_set_str(newconf,CONF_host,host) ; }
+	if( user != NULL ) { conf_set_str(newconf,CONF_username,user) ; }
+	if( pass != NULL ) { conf_set_str(newconf,CONF_password,pass) ; }
+	if( remotepath != NULL ) {
+		char *buf=(char*)malloc(strlen(remotepath)+5);
+		sprintf(buf,"cd %s",remotepath);
+		conf_set_str(newconf,CONF_autocommand,buf) ; 
+	} //else { conf_set_str(newconf,CONF_autocommand,"") ; }
+	//if( port != 0 ) { conf_set_int(newconf,CONF_port,port) ; } else { conf_set_int(newconf,CONF_port,22) ; }
+
+	if( conf_launchable(newconf) ) {
+		RunSessionWithConfSettings( newconf ) ;
+	} else {
+		save_settings("__STARTUP",newconf) ;
+		RunSession( hwnd, "", "__STARTUP" ) ;
+		del_settings("__STARTUP");
+	}
+	conf_free( newconf ) ;
+}
+
 
 #ifdef MOD_INTEGRATED_KEYGEN
 int WINAPI KeyGen_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show);
@@ -1537,6 +1617,7 @@ TrayIcone.hWnd = hwnd ;
 	    AppendMenu(m, MF_ENABLED, IDM_NEWSESS, "Ne&w Session...");
 	    AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "&Duplicate Session");
 #ifdef MOD_RECONNECT
+	AppendMenu(m, MF_ENABLED, IDM_NEWDUPSESS, "New duplicated session...");
 	AppendMenu(m, MF_ENABLED, IDM_RESTARTSESSION, "Close+Restart") ;
 #endif
 	    AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT_PTR) savedsess_menu,
@@ -4138,6 +4219,9 @@ free(cmd);
 	   break;
 #endif  /* rutty */
 #ifdef MOD_PERSO
+	  case IDM_NEWDUPSESS:
+	        RunSessionWithCurrentSettings( hwnd, conf, "", NULL, NULL, 0, NULL ) ;
+		break;
 	  /*case IDM_USERCMD:  
 	  	ManageSpecialCommand( hwnd, wParam-IDM_USERCMD ) ;
 	        break ;*/

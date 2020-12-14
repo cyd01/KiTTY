@@ -1026,7 +1026,7 @@ void filter_session_portable(union control *ctrl, dlgparam *dlg, const int nb, c
 	
 	// Removing session that starts with __
 	for( i=0 ; i<nb ; i++ ) if( tabb[i] ) {
-		if( (sessionslist[i][0]=='_')&&(sessionslist[i][1]=='_') ) {  }
+		if( (sessionslist[i][0]=='_')&&(sessionslist[i][1]=='_') ) { tabb[i] = false ; }
 	}
 	
 	// Adding other session depending on the filter

@@ -1916,16 +1916,7 @@ void ManageRestart( HWND hwnd ) {
 
 // Lance une configbox avec les paramètres courants (mais sans hostname)
 void del_settings(const char *sessionname);
-void ConfigBoxWithCurrentSettings( HWND hwnd ) {
-	char * host= (char*)malloc(strlen(conf_get_str(conf,CONF_host))+1) ;
-	strcpy( host, conf_get_str(conf,CONF_host) ) ;
-	conf_set_str(conf,CONF_host,"") ;
-	save_settings("__STARTUP",conf) ;
-	RunSession( hwnd, "", "__STARTUP" );
-	conf_set_str(conf,CONF_host,host) ;
-	free(host) ;
-	del_settings("__STARTUP");
-}
+void RunSessionWithCurrentSettings( HWND hwnd, Conf *conf, const char * host, const char * user, const char * pass, const int port, const char * remotepath ) ;
 
 // Modification de l'icone de l'application
 //SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) );
@@ -2622,8 +2613,7 @@ int ManageLocalCmd( HWND hwnd, const char * cmd ) {
 		if( RemotePath!= NULL ) free( RemotePath ) ;
 		RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
 		strcpy( RemotePath, cmd+3 ) ;
-		StartNewSession( hwnd, RemotePath, NULL, NULL ) ;
-		// free( RemotePath ) ; RemotePath = NULL ;
+		RunSessionWithCurrentSettings( hwnd, conf, NULL, NULL, NULL, 0, RemotePath ) ;
 		return 1 ;
 	} else if( (cmd[0]=='d')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __dt: Lance une session dupliquee dans le meme repertoire, meme host, meme user dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
 		char host[1024]="";char user[256]="";
@@ -2636,8 +2626,7 @@ int ManageLocalCmd( HWND hwnd, const char * cmd ) {
 		i=poss(":",user);
 		strcpy( RemotePath, user+i ) ;
 		user[i-1]='\0';
-		StartNewSession( hwnd, RemotePath, host, user ) ;
-		// free( RemotePath ) ; RemotePath = NULL ;
+		RunSessionWithCurrentSettings( hwnd, conf, host, user, NULL, 0, RemotePath ) ;
 		return 1 ;
 	} else if( (cmd[0]=='l')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ls: envoie un script sauvegardé localement (comme fait le CTRL+F2)
 		RunScriptFile( hwnd, cmd+3 ) ;
@@ -3555,9 +3544,10 @@ void InitShortcuts( void ) ;
 
 int InternalCommand( HWND hwnd, char * st ) {
 	char buffer[4096] ;
-
-	if( strstr( st, "/message " ) == st ) { MessageBox( hwnd, st+9, "Info", MB_OK ) ; return 1 ; }
-	else if( !strcmp( st, "/copytoputty" ) ) {
+	if( strstr( st, "/message " ) == st ) { 
+		MessageBox( hwnd, st+9, "Info", MB_OK ) ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/copytoputty" ) ) {
 		RegDelTree (HKEY_CURRENT_USER, "Software\\SimonTatham\\PuTTY\\Sessions" ) ;
 		sprintf( buffer, "%s\\Sessions", PUTTY_REG_POS ) ;
 		RegCopyTree( HKEY_CURRENT_USER, buffer, "Software\\SimonTatham\\PuTTY\\Sessions" ) ;
@@ -3565,86 +3555,109 @@ int InternalCommand( HWND hwnd, char * st ) {
 		RegCopyTree( HKEY_CURRENT_USER, buffer, "Software\\SimonTatham\\PuTTY\\SshHostKeys" ) ;
 		RegCleanPuTTY() ;
 		return 1 ;
-		}
-	else if( !strcmp( st, "/copytokitty" ) ) 
-		{ RegCopyTree( HKEY_CURRENT_USER, "Software\\SimonTatham\\PuTTY", PUTTY_REG_POS ) ; return 1 ; }
-	else if( !strcmp( st, "/backgroundimage" ) ) { SetBackgroundImageFlag( abs( GetBackgroundImageFlag() - 1 ) ) ; return 1 ; }
-	else if( !strcmp( st, "/debug" ) ) { debug_flag = abs( debug_flag - 1 ) ; return 1 ; }
+	} else if( !strcmp( st, "/copytokitty" ) ) {
+		RegCopyTree( HKEY_CURRENT_USER, "Software\\SimonTatham\\PuTTY", PUTTY_REG_POS ) ;
+		return 1 ;
+	} else if( !strcmp( st, "/backgroundimage" ) ) { 
+		SetBackgroundImageFlag( abs( GetBackgroundImageFlag() - 1 ) ) ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/debug" ) ) { 
+		debug_flag = abs( debug_flag - 1 ) ; 
+		return 1 ;
 #ifdef MOD_HYPERLINK
-	else if( !strcmp( st, "/hyperlink" ) ) { HyperlinkFlag = abs( HyperlinkFlag - 1 ) ; return 1 ; }
-	else if( !strcmp( st, "/urlregex" ) ) { 
+	} else if( !strcmp( st, "/hyperlink" ) ) { 
+		HyperlinkFlag = abs( HyperlinkFlag - 1 ) ; 
+		return 1 ;
+	} else if( !strcmp( st, "/urlregex" ) ) { 
 		char b[1024] ;
 		sprintf(b,"%d: %s",conf_get_int(term->conf,CONF_url_defregex),conf_get_str(conf,CONF_url_regex));
 		MessageBox( NULL, b, "URL regex", MB_OK ) ; return 1 ; 
-	}
 #endif
-	else if( !strcmp( st, "/save" ) ) { 
+	} else if( !strcmp( st, "/save" ) ) { 
 		SaveCurrentSetting(hwnd);
 		return 1 ; 
-		}
 #ifdef MOD_SAVEDUMP
-	else if( !strcmp( st, "/savedump" ) ) { SaveDump() ; return 1 ; }
+	} else if( !strcmp( st, "/savedump" ) ) { SaveDump() ; return 1 ; 
 #endif
-	else if( !strcmp( st, "/screenshot" ) ) { 
+	} else if( !strcmp( st, "/screenshot" ) ) { 
 		char screenShotFile[1024] ;
 		sprintf( screenShotFile, "%s\\screenshot-%d-%ld.jpg", InitialDirectory, getpid(), time(0) );
 		screenCaptureClientRect( GetParent(hwnd), screenShotFile, 100 ) ;
 		//screenCaptureWinRect( GetParent(hwnd), screenShotFile, 100 ) ;
 		//screenCaptureAll( screenShotFile, 100 ) ;
 		//MakeScreenShot() ; 
-		return 1 ; }
-	else if( !strcmp( st, "/fileassoc" ) ) { CreateFileAssoc() ; return 1 ; }
-	else if( !strcmp( st, "/savereg" ) ) { chdir( InitialDirectory ) ; SaveRegistryKey() ; return 1 ; }
-	else if( !strcmp( st, "/savesessions" ) ) { 
+		return 1 ; 
+	} else if( !strcmp( st, "/fileassoc" ) ) { 
+		CreateFileAssoc() ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/savereg" ) ) {
+		chdir( InitialDirectory ) ; 
+		SaveRegistryKey() ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/savesessions" ) ) { 
 		chdir( InitialDirectory ) ; 
 		sprintf( buffer, "%s\\Sessions", PUTTY_REG_POS ) ;
 		SaveRegistryKeyEx( HKEY_CURRENT_USER, buffer, "kitty.ses" ) ; 
 		return 1 ; 
-		}
-	else if( !strcmp( st, "/loadinitscript" ) ) { ReadInitScript( NULL ) ; return 1 ; }
-	else if( strstr( st, "/loadinitscript " ) == st ) { ReadInitScript( st+16 ) ; return 1 ; }
-	else if( !strcmp( st, "/loadreg" ) ) { chdir( InitialDirectory ) ; LoadRegistryKey(NULL) ; return 1 ; }
-	else if( !strcmp( st, "/delreg" ) ) { RegDelTree (HKEY_CURRENT_USER, TEXT(PUTTY_REG_PARENT)) ; return 1 ; }
-	else if( strstr( st, "/delfolder " ) == st ) { StringList_Del( FolderList, st+11 ) ; return 1 ; }
-	else if( !strcmp( st, "/noshortcuts" ) ) { ShortcutsFlag = 0 ; return 1 ; }
-	else if( !strcmp( st, "/nomouseshortcuts" ) ) { MouseShortcutsFlag = 0 ; return 1 ; }
-	else if( !strcmp( st, "/icon" ) ) { 
+	} else if( !strcmp( st, "/loadinitscript" ) ) { 
+		ReadInitScript( NULL ) ; 
+		return 1 ; 
+	} else if( strstr( st, "/loadinitscript " ) == st ) { 
+		ReadInitScript( st+16 ) ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/loadreg" ) ) { 
+		chdir( InitialDirectory ) ; 
+		LoadRegistryKey(NULL) ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/delreg" ) ) { 
+		RegDelTree (HKEY_CURRENT_USER, TEXT(PUTTY_REG_PARENT)) ; 
+		return 1 ; 
+	} else if( strstr( st, "/delfolder " ) == st ) { 
+		StringList_Del( FolderList, st+11 ) ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/noshortcuts" ) ) { 
+		ShortcutsFlag = 0 ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/nomouseshortcuts" ) ) { 
+		MouseShortcutsFlag = 0 ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/icon" ) ) { 
 		//sprintf( buffer, "%d / %d = %d", IconeNum, NB_ICONES, NumberOfIcons );
 		//MessageBox( hwnd, buffer, "info", MB_OK ) ;
-		IconeFlag = abs( IconeFlag - 1 ) ; conf_set_int(conf,CONF_icone,IconeNum) ; return 1 ; }
-	else if( !strcmp( st, "/savemode" ) ) {
+		IconeFlag = abs( IconeFlag - 1 ) ; conf_set_int(conf,CONF_icone,IconeNum) ; return 1 ; 
+	} else if( !strcmp( st, "/savemode" ) ) {
 		//IniFileFlag = abs( IniFileFlag - 1 ) ;
 		IniFileFlag++ ; if( IniFileFlag>SAVEMODE_DIR ) IniFileFlag = 0 ;
 		if( IniFileFlag == SAVEMODE_REG )  {
 			delINI( KittyIniFile, INIT_SECTION, "savemode" ) ;
 			MessageBox( NULL, "Savemode is \"registry\"", "Info", MB_OK ) ;
-			}
-		else if( IniFileFlag == SAVEMODE_FILE ) {
+		} else if( IniFileFlag == SAVEMODE_FILE ) {
 			if(!NoKittyFileFlag) writeINI( KittyIniFile, INIT_SECTION, "savemode", "file" ) ;
 			MessageBox( NULL, "Savemode is \"file\"", "Info", MB_OK ) ;
-			}
-		else if( IniFileFlag == SAVEMODE_DIR ) {
+		} else if( IniFileFlag == SAVEMODE_DIR ) {
 			delINI( KittyIniFile, INIT_SECTION, "savemode" ) ;
 			MessageBox( NULL, "Savemode is \"dir\"", "Info", MB_OK ) ;
-			}
-		return 1 ;
 		}
-	else if( !strcmp( st, "/capslock" ) ) { CapsLockFlag = abs( CapsLockFlag - 1 ) ; return 1 ; }
-	else if( !strcmp( st, "/init" ) ) { 
+		return 1 ;
+	} else if( !strcmp( st, "/capslock" ) ) { 
+		CapsLockFlag = abs( CapsLockFlag - 1 ) ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/init" ) ) { 
 		char buffer[4096] ;
 		sprintf( buffer,"ConfigDirectory=%s\nIniFileFlag=%d\nDirectoryBrowseFlag=%d\nInitialDirectory=%s\nKittyIniFile=%s\nKittySavFile=%s\nKiTTYClassName=%s\n"
 			,ConfigDirectory,IniFileFlag,DirectoryBrowseFlag,InitialDirectory,KittyIniFile,KittySavFile,KiTTYClassName ) ;
 		MessageBox(hwnd,buffer,"Configuration infomations",MB_OK);
 		return 1 ; 
-		}
-	else if( !strcmp( st, "/capslock" ) ) { 
+	} else if( !strcmp( st, "/capslock" ) ) { 
 		conf_set_int( conf, CONF_xpos, 10 ) ;
 		conf_set_int( conf, CONF_ypos, 10 ) ;
 		SetWindowPos( hwnd, 0, 10, 10, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER|SWP_NOACTIVATE ) ;
 		return 1 ; 
-		}
-	else if( !strcmp( st, "/size" ) ) { SizeFlag = abs( SizeFlag - 1 ) ; set_title( NULL, conf_get_str(conf,CONF_wintitle) ) ; return 1 ; }
-	else if( !strcmp( st, "/transparency" ) ) {
+	} else if( !strcmp( st, "/size" ) ) { 
+		SizeFlag = abs( SizeFlag - 1 ) ; 
+		set_title( NULL, conf_get_str(conf,CONF_wintitle) ) ;
+		return 1 ;
+	} else if( !strcmp( st, "/transparency" ) ) {
 #ifndef MOD_NOTRANSPARENCY
 		if( (conf_get_int(conf,CONF_transparencynumber) == -1) || (TransparencyFlag == 0 ) ) {
 			TransparencyFlag = 1 ;
@@ -3653,54 +3666,54 @@ int InternalCommand( HWND hwnd, char * st ) {
 			if( conf_get_int(conf,CONF_transparencynumber) == -1 ) conf_set_int(conf,CONF_transparencynumber,0) ; 
 			SetTransparency( MainHwnd, 255-conf_get_int(conf,CONF_transparencynumber) ) ;
 			SetForegroundWindow( hwnd ) ;
-			}
-		else {
+		} else {
 			TransparencyFlag = 0 ;
 			SetTransparency( MainHwnd, 255 ) ;
 			SetWindowLongPtr(MainHwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) & ~WS_EX_LAYERED ) ;
 			RedrawWindow(MainHwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
 			SetWindowPos( MainHwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
 			SetForegroundWindow( hwnd ) ;
-			}
+		}
 #endif
 		return 1 ;
-		}
-	else if( !strcmp( st, "/bcdelay" ) ) { between_char_delay=3 ; return 1 ; }
-	else if( strstr( st, "/bcdelay " ) == st ) { between_char_delay=atoi( st+9 ) ; return 1 ; }
-	else if( strstr( st, "/title " ) == st ) { set_title( NULL, st+7 ) ; return 1 ; }
-	else if( !strcmp( st, "/session" ) ) {
+	} else if( !strcmp( st, "/bcdelay" ) ) {
+		between_char_delay=3 ;
+		return 1 ; 
+	} else if( strstr( st, "/bcdelay " ) == st ) { 
+		between_char_delay=atoi( st+9 ) ; 
+		return 1 ; 
+	} else if( strstr( st, "/title " ) == st ) { 
+		set_title( NULL, st+7 ) ; 
+		return 1 ; 
+	} else if( !strcmp( st, "/session" ) ) {
 		if( strlen( conf_get_str(conf,CONF_sessionname) ) > 0 ) {
 			char buffer[1024] ;
 			sprintf( buffer, "Your session name is\n-%s-", conf_get_str(conf,CONF_sessionname) ) ;
 			MessageBox( hwnd, buffer, "Session name", MB_OK|MB_ICONWARNING ) ;
-			}
-		else
+		} else
 			MessageBox( hwnd, "No session name.", "Session name", MB_OK|MB_ICONWARNING ) ;
 		return 1 ;
-		}
-	else if( !strcmp( st, "/passwd" ) && debug_flag ) {
+	} else if( !strcmp( st, "/passwd" ) && debug_flag ) {
 		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
 			char bufpass[4096], buffer[4096] ;
 			strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
 			MASKPASS(GetCryptSaltFlag(),bufpass);
 			sprintf( buffer, "Your password is\n-%s-", bufpass ) ;
+			SetTextToClipboard( bufpass ) ;
 			memset(bufpass,0,strlen(bufpass));
 			MessageBox( hwnd, buffer, "Password", MB_OK|MB_ICONWARNING ) ;
 			memset(buffer,0,strlen(buffer));
-			}
-		else
+		} else
 			MessageBox( hwnd, "No password.", "Password", MB_OK|MB_ICONWARNING ) ;
 		return 1 ;
-		}
-	else if( !strcmp( st, "/configpassword" ) ) {
+	} else if( !strcmp( st, "/configpassword" ) ) {
 		strcpy( PasswordConf, "" ) ;
 		RegDelValue( HKEY_CURRENT_USER, TEXT(PUTTY_REG_POS), "password" ) ;
 		delINI( KittyIniFile, INIT_SECTION, "password" ) ;
 		SaveRegistryKey() ;
 		MessageBox( NULL, "At next launch,\ndon't forget to check your configuration save mode\n(file or registry ?)", "Info", MB_OK );
 		return 1 ;
-		}
-	else if( strstr( st, "/configpassword " ) == st ) {
+	} else if( strstr( st, "/configpassword " ) == st ) {
 		strcpy( PasswordConf, st+16 ) ;
 		if( strlen(PasswordConf) > 0 ) {
 			strcpy( buffer, PasswordConf ) ;
@@ -3711,51 +3724,79 @@ int InternalCommand( HWND hwnd, char * st ) {
 			if(!NoKittyFileFlag) writeINI( KittyIniFile, INIT_SECTION, "savemode", "file" ) ;
 			IniFileFlag = SAVEMODE_FILE ;
 			if(!NoKittyFileFlag) writeINI( KittyIniFile, INIT_SECTION, "password", buffer ) ;
-			}
-		return 1 ;
 		}
-	else if( !strcmp( st, "/-configpassword" ) ) {
+		return 1 ;
+	} else if( !strcmp( st, "/-configpassword" ) ) {
 		if( ReadParameter( INIT_SECTION, "password", buffer ) ) {
 			if( decryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ) {
 				MessageBox( hwnd, buffer, "Your password is ...", MB_OK|MB_ICONWARNING ) ;
 			}
 		}
 		return 1 ;
-	}
-	else if( !strcmp( st, "/shortcuts" ) ) { InitShortcuts() ; return 1 ; }
-	else if( !strcmp( st, "/switchcrypt" ) ) { SwitchCryptFlag() ; return 1 ; }
-	else if( !strcmp( st, "/redraw" ) ) { InvalidateRect( MainHwnd, NULL, TRUE ) ; return 1 ; }
-	else if( !strcmp( st, "/refresh" ) ) { RefreshBackground( MainHwnd ) ; return 1 ; }
-	else if( strstr( st, "/PrintCharSize " ) == st ) { PrintCharSize=atoi( st+15 ) ; return 1 ; }
-	else if( strstr( st, "/PrintMaxLinePerPage " ) == st ) { PrintMaxLinePerPage=atoi( st+21 ) ; return 1 ; }
-	else if( strstr( st, "/PrintMaxCharPerLine " ) == st ) { PrintMaxCharPerLine=atoi( st+21 ) ; return 1 ; }
+	} else if( !strcmp( st, "/shortcuts" ) ) {
+		InitShortcuts() ; 
+		return 1 ;
+	} else if( !strcmp( st, "/switchcrypt" ) ) {
+		SwitchCryptFlag() ;
+		return 1 ;
+	} else if( !strcmp( st, "/redraw" ) ) {
+		InvalidateRect( MainHwnd, NULL, TRUE ) ;
+		return 1 ;
+	} else if( !strcmp( st, "/refresh" ) ) {
+		RefreshBackground( MainHwnd ) ;
+		return 1 ;
+	} else if( strstr( st, "/PrintCharSize " ) == st ) {
+		PrintCharSize=atoi( st+15 ) ;
+		return 1 ;
+	} else if( strstr( st, "/PrintMaxLinePerPage " ) == st ) { 
+		PrintMaxLinePerPage=atoi( st+21 ) ;
+		return 1 ;
+	} else if( strstr( st, "/PrintMaxCharPerLine " ) == st ) {
+		PrintMaxCharPerLine=atoi( st+21 ) ;
+		return 1 ;
 #ifdef MOD_LAUNCHER
-	else if( !strcmp( st, "/initlauncher" ) ) { InitLauncherRegistry() ; return 1 ; }
+	} else if( !strcmp( st, "/initlauncher" ) ) {
+		InitLauncherRegistry() ;
+		return 1 ; 
 #endif
-	else if( !strcmp( st, "/winroll" ) ) { WinrolFlag = abs(WinrolFlag-1) ; return 1 ; }
-	else if( !strcmp( st, "/wintitle" ) ) { TitleBarFlag = abs(TitleBarFlag-1) ; return 1 ; }
-	else if( strstr( st, "/command " ) == st ) { SendCommandAllWindows( hwnd, st+9 ) ; return 1 ; }
-	else if( !strcmp( st, "/sizeall" ) ) { ResizeWinList( hwnd, conf_get_int(conf,CONF_width), conf_get_int(conf,CONF_height) ) ; return 1 ; }
+	} else if( !strcmp( st, "/winroll" ) ) { 
+		WinrolFlag = abs(WinrolFlag-1) ;
+		return 1 ;
+	} else if( !strcmp( st, "/wintitle" ) ) { 
+		TitleBarFlag = abs(TitleBarFlag-1) ; 
+		return 1 ;
+	} else if( strstr( st, "/command " ) == st ) {
+		SendCommandAllWindows( hwnd, st+9 ) ;
+		return 1 ;
+	} else if( !strcmp( st, "/sizeall" ) ) {
+		ResizeWinList( hwnd, conf_get_int(conf,CONF_width), conf_get_int(conf,CONF_height) ) ; 
+		return 1 ;
 #ifdef MOD_ZMODEM
-	else if( !strcmp( st, "/zmodem" ) ) { SetZModemFlag( abs(GetZModemFlag()-1) ) ; }
+	} else if( !strcmp( st, "/zmodem" ) ) {
+		SetZModemFlag( abs(GetZModemFlag()-1) ) ; 
 #endif
-	return 0 ;
 	}
+	return 0 ;
+}
 
 
 // Recherche le chemin vers le programme cthelper.exe
 int SearchCtHelper( void ) {
 	char buffer[4096] ;
-	if( CtHelperPath!=NULL ) { free(CtHelperPath) ; CtHelperPath=NULL ; }
+	if( CtHelperPath!=NULL ) { 
+		free(CtHelperPath) ; 
+		CtHelperPath=NULL ; 
+	}
 	if( ReadParameter( INIT_SECTION, "CtHelperPath", buffer ) != 0 ) {
 		if( existfile( buffer ) ) { 
 			CtHelperPath = (char*) malloc( strlen(buffer) + 1 ) ; 
 			strcpy( CtHelperPath, buffer ) ; 
 			set_env( "CTHELPER_PATH", CtHelperPath ) ;
 			return 1 ;
-			}
-		else { DelParameter( INIT_SECTION, "CtHelperPath" ) ; }
+		} else { 
+			DelParameter( INIT_SECTION, "CtHelperPath" ) ; 
 		}
+	}
 	sprintf( buffer, "%s\\cthelper.exe", InitialDirectory ) ;
 	if( existfile( buffer ) ) { 
 		CtHelperPath = (char*) malloc( strlen(buffer) + 1 ) ; 
@@ -3763,7 +3804,7 @@ int SearchCtHelper( void ) {
 		set_env( "CTHELPER_PATH", CtHelperPath) ;
 		WriteParameter( INIT_SECTION, "CtHelperPath", CtHelperPath ) ;
 		return 1 ;
-		}
+	}
 	return 0 ;
 }
 	
@@ -3810,74 +3851,6 @@ int SearchWinSCP( void ) {
 	}
 	return 0 ;
 }
-
-// Lance une session dupliquee au meme endroit
-/* ALIAS UNIX A DEFINIR POUR DUPLIQUER LA SESSION COURANTE Dans le repertoire courant
-dupsess()
-{
-printf "\033]0;__ds:"`pwd`"\007"
-}
-Il faut ensuite simplement taper: dupsess
-C'est traite dans KiTTY par la fonction ManageLocalCmd
-*/	
-void StartNewSession( HWND hwnd, char * directory, char * host, char * user ) {
-	char cmd[4096], shortpath[1024], buffer[256] ;
-	
-	if( directory == NULL ) { directory = kitty_current_dir(); } 
-	
-	if( GetModuleFileName( NULL, (LPTSTR)cmd, 4096 ) ) {
-		if( !GetShortPathName( cmd, shortpath, 4095 ) ) return ;
-		}
-
-	if( conf_get_int(conf,CONF_protocol) == PROT_SSH ) {
-		sprintf( cmd, "%s -ssh ", shortpath ) ;
-		if( conf_get_int(conf,CONF_sshprot) == 3 ) strcat( cmd, "-2 " ) ;
-		if( user!=NULL ) {
-			strcat( cmd, user ) ;
-		} else {
-			strcat( cmd, conf_get_str(conf,CONF_username) ) ;
-		}
-		strcat( cmd, "@" ) ; 
-		if( host!=NULL ) { 
-			strcat( cmd, host ) ;
-		} else {
-			strcat( cmd, conf_get_str(conf,CONF_host) ) ; 
-		}
-		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
-			char bufpass[1024] ;
-			strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
-			strcat( cmd, " -pw " ) ; 
-			MASKPASS(GetCryptSaltFlag(),bufpass) ; 
-			strcat(cmd,"\"") ; strcat(cmd,bufpass) ; strcat(cmd,"\"") ;
-			memset(bufpass,0,strlen(bufpass));
-			}
-		strcat( cmd, " -P " ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port) ); strcat( cmd, buffer ) ;
-		}
-	else if( conf_get_int(conf,CONF_protocol) == PROT_TELNET ){
-		sprintf( cmd, "%s -telnet %s", shortpath, conf_get_str(conf,CONF_username) ) ;
-		strcat( cmd, "@" ) ; strcat( cmd, conf_get_str(conf,CONF_host) ) ; 
-		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
-			char bufpass[1024] ;
-			strcpy(bufpass,conf_get_str(conf,CONF_password));
-			strcat( cmd, " -pw " ) ; 
-			MASKPASS(GetCryptSaltFlag(),bufpass) ; 
-			strcat(cmd,"\"") ; strcat(cmd,bufpass) ; strcat(cmd,"\"") ;
-			memset(bufpass,0,strlen(bufpass));
-			}
-		strcat( cmd, " -P " ) ; sprintf( buffer, "%d", conf_get_int(conf,CONF_port) ); strcat( cmd, buffer ) ;
-		}
-
-	if( directory!=NULL ) if( strlen(directory)>0 ) {
-		strcat( cmd, " -cmd \"cd " ) ; strcat( cmd, directory ) ; strcat( cmd, "\"" ) ;
-		}
-		
-	// set_debug_text( cmd ) ;
-	//MessageBox( hwnd, cmd, "Command",MB_OK);
-	//debug_log( cmd ) ;
-	if( debug_flag ) { debug_logevent( "Start a new session: %s", cmd ) ; }
-	RunCommand( hwnd, cmd ) ;
-	memset(cmd,0,strlen(cmd));
-	}	
 
 // Lance WinSCP à partir de la sesson courante eventuellement dans le repertoire courant
 /* ALIAS UNIX A DEFINIR POUR DEMARRER WINSCP Dans le repertoire courant
@@ -5032,7 +5005,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 	else if( key == shortcuts_tab.getfile ) 		// Reception d'un fichier par SCP
 		{ GetFile( hwnd ) ; return 1 ; }
 	else if( key == shortcuts_tab.command )			// Execution d'une commande locale
-			{ RunCmd( hwnd ) ; return 1 ; }
+		{ RunCmd( hwnd ) ; return 1 ; }
 	else if( key == shortcuts_tab.tray ) 		// Send to tray
 		{ SendMessage( hwnd, WM_COMMAND, IDM_TOTRAY, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.visible )  		// Always visible 
@@ -5044,7 +5017,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 	else if( key == shortcuts_tab.opennew ) 		// Open new session
 		{ SendMessage( hwnd, WM_COMMAND, IDM_NEWSESS, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.opennewcurrent ) 		// Open new config box with current settings
-		{ ConfigBoxWithCurrentSettings( hwnd ) ; return 1 ; }
+		{ RunSessionWithCurrentSettings( hwnd, conf, NULL, NULL, NULL, 0, NULL ) ; return 1 ; }
 	else if( key == shortcuts_tab.changesettings ) 		// Change settings
 		{ SendMessage( hwnd, WM_COMMAND, IDM_RECONF, 0 ) ; return 1 ; }
 	else if( key == shortcuts_tab.clearscrollback )		// Clear scrollback

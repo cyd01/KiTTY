@@ -13,6 +13,9 @@
 **KiTTY** is also part of package managers:
 
 * [scoop.sh](scoop.md)
+* [chocolatey](https://chocolatey.org/packages/kitty)
+* [liberkey](https://www.liberkey.com/fr/catalogue/parcourir.html)
+* [portableapps](https://portableapps.com/apps/internet/kitty-portable)
 
 ## Virus analysis
 

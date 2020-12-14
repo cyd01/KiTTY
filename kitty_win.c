@@ -324,40 +324,37 @@ void ManagePrint( HWND hwnd ) {
 	char *pst = NULL ;
 	if( OpenClipboard(NULL) ) {
 		HGLOBAL hglb ;
-		
 		if( (hglb = GetClipboardData( CF_TEXT ) ) != NULL ) {
 			if( ( pst = GlobalLock( hglb ) ) != NULL ) {
 				PrintText( pst ) ;
 				GlobalUnlock( hglb ) ;
-				}
 			}
-
-		CloseClipboard();
 		}
+		CloseClipboard();
 	}
+}
 
 // Met un texte dans le press-papier
 int SetTextToClipboard( const char * buf ) {
 	HGLOBAL hglbCopy ;
 	LPTSTR lptstrCopy ;
-	
 	if( !IsClipboardFormatAvailable(CF_TEXT) ) return 0 ;
 	if( !OpenClipboard(NULL) ) return 0 ;
-	
 	EmptyClipboard() ; 
-	if( (hglbCopy= GlobalAlloc(GMEM_MOVEABLE, (strlen(buf)+1) * sizeof(TCHAR)) ) == NULL )
-		{ CloseClipboard() ; return 0 ;	}
-
+	if( (hglbCopy= GlobalAlloc(GMEM_MOVEABLE, (strlen(buf)+1) * sizeof(TCHAR)) ) == NULL ) {
+		CloseClipboard() ; 
+		return 0 ;	
+	}
 	lptstrCopy = GlobalLock( hglbCopy ) ; 
 	memcpy( lptstrCopy, buf, (strlen(buf)+1) * sizeof(TCHAR) ) ;
 	GlobalUnlock( hglbCopy ) ; 
-		
-	if( SetClipboardData(CF_TEXT, hglbCopy) == NULL ) 
-		{ CloseClipboard() ; return 0 ; }
-
+	if( SetClipboardData(CF_TEXT, hglbCopy) == NULL ) {
+		CloseClipboard() ;
+		return 0 ; 
+	}
 	CloseClipboard() ;
 	return 1 ;
-	}
+}
 
 // Execute une commande	
 void RunCommand( HWND hwnd, const char * cmd ) {
@@ -388,13 +385,12 @@ void RunCommand( HWND hwnd, const char * cmd ) {
 
 	if( !CreateProcess(NULL,(CHAR*)cmd,NULL,NULL,FALSE,NORMAL_PRIORITY_CLASS,NULL,NULL,&StartUpInfo,&ProcessInformation) ) {
 		ShellExecute(hwnd, "open", cmd ,0 , 0, SW_SHOWDEFAULT);
-		}
-	else { 
+	} else { 
 		WaitForInputIdle(ProcessInformation.hProcess, INFINITE ); 
 		CloseHandle( &StartUpInfo );
 		CloseHandle( &ProcessInformation );
-		}
 	}
+}
 
 void RunPuttyEd( HWND hwnd, char * filename ) {
 	char buffer[1024]="", shortname[1024]="" ;
