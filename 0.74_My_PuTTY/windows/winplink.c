@@ -54,6 +54,9 @@ void debug_logevent( const char *fmt, ... ) {
 	free(buf);
 }
 #endif
+#ifdef MOD_PROXY
+#include "kitty_proxy.h"
+#endif
 
 #define WM_AGENT_CALLBACK (WM_APP + 4)
 
@@ -489,7 +492,7 @@ int main(int argc, char **argv)
     }
 
     prepare_session(conf);
-
+    
     /*
      * Perform command-line overrides on session configuration.
      */

@@ -328,11 +328,10 @@ void InitLauncherRegistry( void ) {
 					unmungestr( lpData, folder, MAX_VALUE_NAME ) ;
 					if( strlen(folder) > 0 )
 						RegTestOrCreate( HKEY_CURRENT_USER, buffer, folder, folder ) ;
-					}
 				}
+			}
 		RegCloseKey( hKey ) ;
-		}
-	else if( (IniFileFlag == SAVEMODE_DIR)&&(DirectoryBrowseFlag==0) ) {
+	} else if( (IniFileFlag == SAVEMODE_DIR)&&(DirectoryBrowseFlag==0) ) {
 		char fullpath[MAX_VALUE_NAME], folder[MAX_VALUE_NAME] ;
 		DIR * dir ;
 		struct dirent * de ;
@@ -354,26 +353,24 @@ void InitLauncherRegistry( void ) {
 					if( strcmp(folder,"Default") ) {
 						MakeDir( buffer ) ;
 						sprintf( buffer, "%s\\Launcher\\%s\\%s", ConfigDirectory, folder, de->d_name ) ;
-						}
-					else sprintf( buffer, "%s\\Launcher\\%s", ConfigDirectory, de->d_name ) ;
+					} else sprintf( buffer, "%s\\Launcher\\%s", ConfigDirectory, de->d_name ) ;
 					if( (fp=fopen(buffer,"wb")) != NULL ) {
 						unmungestr( de->d_name, buffer, MAX_VALUE_NAME) ;
 						fprintf( fp, "%s\\%s\\", buffer, buffer ) ;
 						fclose( fp ) ; 
-						}
 					}
 				}
-			closedir(dir) ;
 			}
+			closedir(dir) ;
 		}
-	else if( (IniFileFlag == SAVEMODE_DIR)&&DirectoryBrowseFlag ) {
+	} else if( (IniFileFlag == SAVEMODE_DIR)&&DirectoryBrowseFlag ) {
 		char fullpath[MAX_VALUE_NAME] ;
 		sprintf( fullpath, "%s\\Launcher", ConfigDirectory ) ;
 		DelDir( fullpath ) ;
 		if( !MakeDir( fullpath ) ) { MessageBox(NULL,"Unable to create the menu launcher directory","Error",MB_OK|MB_ICONERROR); }
 		InitLauncherDir( "" ) ;
-		}
 	}
+}
 
 void DisplayContextMenu( HWND hwnd, HMENU menu ) {
 	HMENU hMenuPopup = menu ;

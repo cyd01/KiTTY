@@ -66,3 +66,4 @@ void SettingsSave( HSettingsList list, const char * filename ) ;
 int loadPath() ;
 char * GetSessPath( void ) ;
 bool SessPathIsInitial( void ) ;
+bool IsThereDefaultSessionFile( void ) ;

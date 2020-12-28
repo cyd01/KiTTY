@@ -78,6 +78,13 @@ void SetTitleBarFlag( const int flag ) ;
 int GetImageViewerFlag(void) ;
 void SetImageViewerFlag( const int flag ) ;
 
+#ifdef MOD_PROXY
+// Flag pour ajouter la fonction Proxy Selector
+// extern int ProxySelectionFlag ;
+int GetProxySelectionFlag() ;
+void SetProxySelectionFlag( const int flag ) ;
+#endif
+
 // Duree (en secondes) pour switcher l'image de fond d'ecran (<=0 pas de slide)
 extern int ImageSlideDelay ;
 

@@ -62,7 +62,8 @@ extern char BuildVersionTime[256] ;
 void CenterDlgInParent(HWND hDlg) ;
 int get_param( const char * val ) ;
 void CheckVersionFromWebSite( HWND hwnd ) ;
-bool SessPathIsInitial( void );
+bool SessPathIsInitial( void ) ;
+bool IsThereDefaultSessionFile( void ) ;
 
 #ifndef TIMER_SLIDEBG
 //#define TIMER_SLIDEBG 12343
@@ -693,7 +694,9 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 	if( get_param("INIFILE")==SAVEMODE_DIR ) {
 		h = h - 12 ; // il n'y a pas la liste déroulant des folders en mode portable
 	}
-      
+#ifdef MOD_PROXY
+	if( GetProxySelectionFlag() ) { h = h + 12 ; }
+#endif
 	// Initialise la taille de la ConfigBox (en cas de DPI speciaux)
 	double ScaleY = GetDeviceCaps(GetDC(hwnd),LOGPIXELSY)/96.0 ; // La police standard (100%) vaut 96ppp (pixels per pouce)
 	if( ScaleY!=1.0 ) { h = (int)( h*ScaleY ) ; }
@@ -1012,15 +1015,20 @@ bool do_config(void)
 	// On cree la session "Default Settings" si elle n'existe pas
 	if( GetDefaultSettingsFlag() ) if( (IniFileFlag==SAVEMODE_REG) || SessPathIsInitial() ) { 
 		char buffer[1024] ;
-		
-		GetSessionFolderName( "Default Settings", buffer ) ;
-		if( strlen( buffer ) == 0 ) { 
+		if( !IsThereDefaultSessionFile() ) {
+			Conf *defconf = conf_new() ;
+			load_settings(NULL,defconf);
 			if( !strcmp(FileExtension,"") ) {
-				if( save_settings( "Default Settings", conf )!=NULL ) { lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; }	
+				if( save_settings( "Default Settings", defconf ) != NULL ) { 
+					lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; 
+				}	
 			} else {
 				sprintf(buffer,"Default Settings%s", FileExtension);
-				if( save_settings( buffer, conf )!=NULL ) { lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; }
+				if( save_settings( buffer, defconf ) != NULL ) {
+					lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; 
+				}
 			}
+			conf_free( defconf ) ;
 		}
 	}
 #endif

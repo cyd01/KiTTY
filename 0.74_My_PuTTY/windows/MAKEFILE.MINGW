@@ -130,7 +130,7 @@ UTF8MOUSE_OBJS = fromucs.o slookup.o sbcsdat.o sbcs.o utf8.o
 ################################################################################
 CFLAGS += -DWINVER=0x0501 -D_WIN32_WINDOWS=0x0410 -D_WIN32_WINNT=0x0501
 
-# 		-DMOD_PERSO -DMOD_BACKGROUNDIMAGE -DMOD_RECONNECT -DMOD_HYPERLINK -DMOD_ZMODEM -DMOD_STARTBUTTON -DMOD_LAUNCHER -DMOD_SAVEDUMP -DMOD_KEYMAPPING -DMOD_TUTTY -DMOD_PORTKNOCKING -DMOD_PUTTYX -DMOD_WTS -DMOD_PRINTCLIP -DMOD_RUTTY -DMOD_ADB \
+# 		-DMOD_PERSO -DMOD_BACKGROUNDIMAGE -DMOD_RECONNECT -DMOD_HYPERLINK -DMOD_ZMODEM -DMOD_PROXY -DMOD_STARTBUTTON -DMOD_LAUNCHER -DMOD_SAVEDUMP -DMOD_KEYMAPPING -DMOD_TUTTY -DMOD_PORTKNOCKING -DMOD_PUTTYX -DMOD_WTS -DMOD_PRINTCLIP -DMOD_RUTTY -DMOD_ADB \
 
 
 # Flag special FLJ
@@ -166,6 +166,7 @@ CFLAGS += 	 \
 		-DMOD_ADB \
 		-DMOD_BACKGROUNDIMAGE \
 		-DMOD_ZMODEM \
+		-DMOD_PROXY \
 		-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
@@ -385,7 +386,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winprint.o winproxy.o winsecur.o winser.o winshare.o \
 		winstore.o wintime.o winucs.o winutils.o winx11.o x11fwd.o \
 		adb.o \
-		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
+		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
@@ -413,7 +414,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winser.o winshare.o winstore.o wintime.o winucs.o winutils.o \
 		winx11.o x11fwd.o \
 		adb.o \
-		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
+		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
@@ -1892,11 +1893,14 @@ kitty_image.o: ../../kitty_image.c
 kitty_iv.o: ../../kitty_iv.c ../../kitty_iv.h
 	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty_iv.c
 
+kitty_keygen.o: ../../kitty_keygen.c
+	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty_keygen.c
+
 kitty_launcher.o: ../../kitty_launcher.c
 	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty_launcher.c
 
-kitty_keygen.o: ../../kitty_keygen.c
-	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty_keygen.c
+kitty_proxy.o: ../../kitty_proxy.c ../../kitty_proxy.h
+	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty_proxy.c
 
 kitty_regex.o: ../../kitty_regex.c ../../kitty_regex.h
 	$(CC) $(COMPAT) $(XFLAGS) $(CFLAGS) -c ../../kitty_regex.c
@@ -2090,7 +2094,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		winprint.o winproxy.o winsecur.o winser.o winshare.o \
 		winstore.o wintime.o winucs.o winutils.o winx11.o x11fwd.o \
 		adb.o \
-		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
+		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
@@ -2120,7 +2124,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		winser.o winshare.o winstore.o wintime.o winucs.o winutils.o \
 		winx11.o x11fwd.o \
 		adb.o \
-		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_registry.o kitty_ssh.o \
+		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \

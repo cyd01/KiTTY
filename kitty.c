@@ -374,6 +374,10 @@ extern int PrintMaxCharPerLine ;
 
 extern char puttystr[1024] ;
 
+#ifdef MOD_PROXY
+#include "kitty_proxy.h"
+#endif
+
 // Handle sur la fenetre principale
 HWND MainHwnd ;
 
@@ -809,33 +813,29 @@ int GetSessionFolderNameInSubDir( const char * session, const char * subdir, cha
 	char buffer[2048], buf[2048] ;
 	DIR * dir ;
 	struct dirent * de ;
-
 	if( !strcmp(subdir,"") ) sprintf( buffer, "%s\\Sessions", ConfigDirectory ) ;
 	else sprintf(buffer,"%s\\Sessions\\%s",ConfigDirectory, subdir ) ;
-
 	if( (dir=opendir(buffer))!=NULL ) {
 		while( (de=readdir(dir)) != NULL ) 
 			if( strcmp(de->d_name,".") && strcmp(de->d_name,"..") )	{
 				if( !strcmp(subdir,"") ) sprintf(buf,"%s\\Sessions\\%s",ConfigDirectory,de->d_name ) ;
 				else sprintf(buf,"%s\\Sessions\\%s\\%s",ConfigDirectory, subdir,de->d_name ) ;
-				
 				if( existdirectory( buf ) ) {
 					if( !strcmp(subdir,"") ) sprintf( buf, "%s", de->d_name ) ;
 					else sprintf( buf, "%s\\%s", subdir, de->d_name ) ;
 					return_code = GetSessionFolderNameInSubDir( session, buf, folder ) ;
 					if( return_code ) break ;
-					}
-				else if( !strcmp(session,de->d_name) ) {
+				} else if( !strcmp(session,de->d_name) ) {
 					strcpy( folder, subdir ) ;
 					return_code=1;
 					break ;
-					}
-			}			
+				}
+		}			
 		closedir(dir) ;
-		}
+	}
 		
 	return return_code ;
-	}
+}
 
 // Recupere le nom du folder associe à une session
 void GetSessionFolderName( const char * session_in, char * folder ) {
@@ -859,16 +859,14 @@ void GetSessionFolderName( const char * session_in, char * folder ) {
 			DWORD dwDataSize = 1024 ;
 			if( RegQueryValueEx( hKey, "Folder", 0, &lpType, lpData, &dwDataSize ) == ERROR_SUCCESS ) {
 				strcpy( folder, (char*)lpData ) ;
-				}
-			RegCloseKey( hKey ) ;
 			}
+			RegCloseKey( hKey ) ;
 		}
-	else if( IniFileFlag==SAVEMODE_DIR ) {
+	} else if( IniFileFlag==SAVEMODE_DIR ) {
 		mungestr(session_in, session ) ;
 		if( DirectoryBrowseFlag ) {
 			GetSessionFolderNameInSubDir( session, "", folder ) ;
-			}
-		else {
+		} else {
 			sprintf(buffer,"%s\\Sessions\\%s", ConfigDirectory, session );
 			if( (fp=fopen(buffer,"r"))!=NULL ) {
 				while( fgets(buffer,1024,fp)!=NULL ) {
@@ -881,13 +879,13 @@ void GetSessionFolderName( const char * session_in, char * folder ) {
 							unmungestr(folder, buffer, MAX_PATH) ;
 							strcpy( folder, buffer) ;
 							break  ;
-							}
-					}
-				fclose(fp);
+						}
 				}
+				fclose(fp);
 			}
 		}
 	}
+}
 
 // Recupere une entree d'une session ( retourne 1 si existe )
 int GetSessionField( const char * session_in, const char * folder_in, const char * field, char * result ) {
@@ -2664,8 +2662,7 @@ void SaveWindowCoord( Conf * conf ) {
 			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermHeight", conf_get_int(conf,CONF_height) ) ;
 			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "WindowState", conf_get_int(conf,CONF_windowstate) ) ;
 			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TransparencyValue", conf_get_int(conf,CONF_transparencynumber) ) ;
-			}
-		else { 
+		} else { 
 			int xpos=conf_get_int(conf,CONF_xpos)
 				, ypos=conf_get_int(conf,CONF_ypos)
 				, width=conf_get_int(conf,CONF_width)
@@ -2680,9 +2677,9 @@ void SaveWindowCoord( Conf * conf ) {
 			conf_set_int(conf,CONF_windowstate,windowstate) ; 
 			conf_set_int(conf,CONF_transparencynumber,transparency) ; 
 			save_settings( conf_get_str(conf,CONF_sessionname), conf ) ;
-			}
 		}
 	}
+}
 
 // Gestion de la fonction winroll
 void ManageWinrol( HWND hwnd, int resize_action ) {
@@ -4389,10 +4386,15 @@ int Convert2Dir( const char * Directory ) {
 	sprintf( buffer, "%s\\Launcher", Directory ) ; DelDir( buffer) ; MakeDirTree( Directory, "Launcher", "Launcher" ) ;
 	sprintf( buffer, "%s\\Folders", Directory ) ; DelDir( buffer) ; MakeDirTree( Directory, "Folders", "Folders" ) ;
 	
-	sprintf( buffer, "%s\\Sessions", Directory ) ; DelDir( buffer) ; { if(!MakeDir( buffer )) MessageBox(NULL,"Unable to create directory for storing sessions","Error",MB_OK|MB_ICONERROR); }
+	sprintf( buffer, "%s\\Sessions", Directory ) ; DelDir( buffer) ; { 
+		if(!MakeDir( buffer )) MessageBox(NULL,"Unable to create directory for storing sessions","Error",MB_OK|MB_ICONERROR); 
+	}
 	sprintf( buffer, "%s\\Sessions", TEXT(PUTTY_REG_POS) ) ;
 		
-	sprintf( fullpath, "%s\\Sessions_Commands", Directory ) ; DelDir( fullpath ) ; if(!MakeDir( fullpath )) { MessageBox(NULL,"Unable to create directory for storing session commands","Error",MB_OK|MB_ICONERROR); }
+	sprintf( fullpath, "%s\\Sessions_Commands", Directory ) ; DelDir( fullpath ) ; 
+	if(!MakeDir( fullpath )) { 
+		MessageBox(NULL,"Unable to create directory for storing session commands","Error",MB_OK|MB_ICONERROR); 
+	}
 
 	if( RegOpenKeyEx( HKEY_CURRENT_USER, TEXT(buffer), 0, KEY_READ, &hKey) == ERROR_SUCCESS ) {
 		if( RegQueryInfoKey(hKey,achClass,&cchClassName,NULL,&cSubKeys,&cbMaxSubKey
@@ -4411,23 +4413,24 @@ int Convert2Dir( const char * Directory ) {
 					sprintf( fullpath, "%s\\Sessions\\%s", Directory, conf_get_str(conf,CONF_folder)) ;
 					if( !MakeDir( fullpath ) ) { MessageBox(NULL,"Unable to create directory for storing session informations","Error",MB_OK|MB_ICONERROR); }
 					SetSessPath( conf_get_str(conf,CONF_folder) ) ; 
-					}
+				}
 				
 				save_settings( buffer, conf) ;
 
 				sprintf( buffer, "%s\\Sessions\\%s\\Commands", TEXT(PUTTY_REG_POS), achKey ) ;
-				if( RegTestKey( HKEY_CURRENT_USER, buffer ) ){
+				if( RegTestKey( HKEY_CURRENT_USER, buffer ) ) {
 					sprintf( buffer, "Sessions\\%s\\Commands", achKey ) ;
 					sprintf( fullpath, "Sessions_Commands\\%s", achKey ) ;
 					MakeDirTree( Directory, buffer, fullpath ) ;
-					}
 				}
 			}
-		RegCloseKey( hKey ) ;
 		}
+		RegCloseKey( hKey ) ;
+	}
 	
-	
-	sprintf( buffer, "%s\\SshHostKeys", Directory ) ; DelDir( buffer) ; if( !MakeDir( buffer ) ) { MessageBox(NULL,"Unable to create directory for storing ssh host keys","Error",MB_OK|MB_ICONERROR); }
+	sprintf( buffer, "%s\\SshHostKeys", Directory ) ; DelDir( buffer) ; if( !MakeDir( buffer ) ) { 
+		MessageBox(NULL,"Unable to create directory for storing ssh host keys","Error",MB_OK|MB_ICONERROR) ; 
+	}
 	sprintf( buffer, "%s\\SshHostKeys", TEXT(PUTTY_REG_POS) ) ;
 	if( RegOpenKeyEx( HKEY_CURRENT_USER, TEXT(buffer), 0, KEY_READ, &hKey) == ERROR_SUCCESS ) {
 		if( RegQueryInfoKey(hKey,achClass,&cchClassName,NULL,&cSubKeys,&cbMaxSubKey
@@ -4436,7 +4439,7 @@ int Convert2Dir( const char * Directory ) {
 			if(cValues) for (i=0, retCode=ERROR_SUCCESS; i<cValues; i++) {
 				cchValue = MAX_VALUE_NAME; 
 				achValue[0] = '\0'; 
-				if( (retCode = RegEnumValue(hKey, i, achValue, &cchValue, NULL, NULL,NULL,NULL) ) == ERROR_SUCCESS ){
+				if( (retCode = RegEnumValue(hKey, i, achValue, &cchValue, NULL, NULL,NULL,NULL) ) == ERROR_SUCCESS ) {
 					dwDataSize = 1024 ;
 					RegQueryValueEx( hKey, TEXT( achValue ), 0, &lpType, lpData, &dwDataSize ) ;
 					if( (int)lpType == REG_SZ ) {
@@ -4445,19 +4448,19 @@ int Convert2Dir( const char * Directory ) {
 						if( ( fp=fopen( fullpath, "wb") ) != NULL ) {
 							fprintf( fp, "%s",lpData ) ;
 							fclose(fp);
-							}
 						}
 					}
 				}
-				
 			}
-		RegCloseKey( hKey ) ;
+				
 		}
+		RegCloseKey( hKey ) ;
+	}
 		
 	if( delkeyflag ) { RegDelTree (HKEY_CURRENT_USER, TEXT(PUTTY_REG_PARENT) ) ; }
 	
 	return 0;
-	}
+}
 
 // Convertit une sauvegarde en mode savemode=dir vers la base de registre
 	// NE FONCTIONNE PAS
@@ -4482,8 +4485,7 @@ void ConvertDir2Reg( const char * Directory, HKEY hKey, char * path )  {
 				
 //debug_log("Directory=%s|\n",buffer);
 				ConvertDir2Reg( Directory, hKey, buffer ) ;
-				}
-			else {
+			} else {
 				SetSessPath( path ) ;
 				IniFileFlag = SAVEMODE_DIR ;
 //debug_log("Session=%s|\n",de->d_name);
@@ -4499,11 +4501,11 @@ void ConvertDir2Reg( const char * Directory, HKEY hKey, char * path )  {
 //debug_log("	free\n");
 				conf_free( tmpConf ) ;
 //debug_log("	end\n");
-				}
 			}
-		closedir( dir ) ;
 		}
+		closedir( dir ) ;
 	}
+}
  
 int Convert2Reg( const char * Directory ) {
 	char buffer[MAX_VALUE_NAME] ;
@@ -5227,6 +5229,11 @@ void LoadParameters( void ) {
 		}
 	}
 	if( ReadParameter( INIT_SECTION, "wintitle", buffer ) ) {  if( !stricmp( buffer, "NO" ) ) TitleBarFlag = 0 ; }
+#ifdef MOD_PROXY
+	if( ReadParameter( "ConfigBox", "proxyselection", buffer ) ) {
+		if( !stricmp( buffer, "YES" ) ) { SetProxySelectionFlag(1) ; }
+	}
+#endif
 #ifdef MOD_ZMODEM
 	if( ReadParameter( INIT_SECTION, "zmodem", buffer ) ) { 
 		if( !stricmp( buffer, "NO" ) ) SetZModemFlag( 0 ) ; 
@@ -5263,6 +5270,9 @@ void LoadParameters( void ) {
 	}
 	if( readINI( KittyIniFile, "ConfigBox", "height", buffer ) ) {
 		ConfigBoxHeight = atoi( buffer ) ;
+#ifdef MOD_PROXY
+		if( GetProxySelectionFlag() ) { ConfigBoxHeight-=1 ; }
+#endif
 	}
 	if( readINI( KittyIniFile, "ConfigBox", "windowheight", buffer ) ) {
 		ConfigBoxWindowHeight = atoi( buffer ) ;
@@ -5509,18 +5519,22 @@ void InitWinMain( void ) {
 		*/
 	}
 
-	// Creer les cles necessaires au programme
+	// Make mandatory registry keys
 	sprintf( buffer, "%s\\%s", TEXT(PUTTY_REG_POS), "Commands" ) ;
 	if( (IniFileFlag == SAVEMODE_REG)||( IniFileFlag == SAVEMODE_FILE) ) 
 		RegTestOrCreate( HKEY_CURRENT_USER, buffer, NULL, NULL ) ;
-	
+
+#ifdef MOD_PROXY
+	// Initiate proxies list
+	InitProxyList() ;
+#endif
 #ifdef MOD_LAUNCHER
-	// Initialisation du launcher
+	// Initiate launcher
 	sprintf( buffer, "%s\\%s", TEXT(PUTTY_REG_POS), "Launcher" ) ;
 	if( (IniFileFlag == SAVEMODE_REG)||( IniFileFlag == SAVEMODE_FILE) )  
 		if( !RegTestKey( HKEY_CURRENT_USER, buffer ) ) { InitLauncherRegistry() ; }
 #endif
-	// Initialise la liste des folders
+	// Initiate folders list
 	InitFolderList() ;
 
 	// Incremente et ecrit les compteurs

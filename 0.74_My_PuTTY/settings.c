@@ -32,6 +32,10 @@ void MASKPASS( const int mode, char * password ) ;
 int GetBackgroundImageFlag(void) ;
 int GetCryptSaltFlag() ;
 int DebugGetPassword( Conf *conf, const char *pwd ) ;
+void debug_logevent( const char *fmt, ... ) ;
+#endif
+#ifdef MOD_PROXY
+#include "kitty_proxy.h"
 #endif
 
 /* The cipher order given here is the default order. */
@@ -546,7 +550,6 @@ char *save_settings(const char *section, Conf *conf)
 {
     struct settings_w *sesskey;
     char *errmsg;
-
     sesskey = open_settings_w(section, &errmsg);
     if (!sesskey)
 	return errmsg;
@@ -821,6 +824,9 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_b(sesskey, "ConnectionSharingUpstream", conf_get_bool(conf, CONF_ssh_connection_sharing_upstream));
     write_setting_b(sesskey, "ConnectionSharingDownstream", conf_get_bool(conf, CONF_ssh_connection_sharing_downstream));
     wmap(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys, false);
+#ifdef MOD_PROXY
+    write_setting_s(sesskey, "ProxySelection", conf_get_str(conf, CONF_proxyselection));
+#endif
 /* rutty: */
 #ifdef MOD_RUTTY
     write_setting_filename(sesskey, "ScriptFileName", conf_get_filename(conf, CONF_script_filename));
@@ -1601,6 +1607,9 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
 #endif
 #ifdef MOD_DISABLEALTGR
 	gppi(sesskey, "DisableAltGr", 0, conf, CONF_disablealtgr);
+#endif
+#ifdef MOD_PROXY
+	gpps(sesskey, "ProxySelection", "- Session defined proxy -", conf, CONF_proxyselection);
 #endif
 }
 

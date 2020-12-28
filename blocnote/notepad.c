@@ -16,6 +16,8 @@ static int Notepad_modified = 0 ;
 
 static const char Notepad_szFilenameFilter[] = "Text files, (*.txt, *.log, *.ini)\0*.txt;*.log;*.ini\0C/C++ files, (*.c, *.cpp, *.h, *.rc)\0*.c;*.cpp;*.h;*.rc\0Script files, (*.ksh, *.sh)\0*.ksh;*.sh\0SQL files, (*.sql)\0*.sql\0All files, (*.*)\0*.*\0" ;
 
+static int FontSize = 18 ;
+
 #ifdef NOMAIN
 #include "notepad_putty.c"
 static char * IniFile = NULL ;
@@ -112,13 +114,15 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 	hSMApropos = CreateMenu();
 	AppendMenu(hSMApropos, MF_STRING, NOTEPAD_IDM_ABOUT, Notepad_LoadString(NOTEPAD_STR_ABOUT));
 
-	hSMEdition = CreateMenu();
-	AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_CUT, Notepad_LoadString(NOTEPAD_STR_CUT));
-	AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_COPY, Notepad_LoadString(NOTEPAD_STR_COPY));
-	AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_PASTE, Notepad_LoadString(NOTEPAD_STR_PASTE));
-	AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_SELECTALL, Notepad_LoadString(NOTEPAD_STR_SELECTALL));
-	AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_UNDO, Notepad_LoadString(NOTEPAD_STR_UNDO));
-	AppendMenu(hSMEdition, MF_SEPARATOR, 0, NULL );
+	hSMEdition = CreateMenu() ;
+	if( !readonly ) {
+		AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_CUT, Notepad_LoadString(NOTEPAD_STR_CUT));
+		AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_COPY, Notepad_LoadString(NOTEPAD_STR_COPY));
+		AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_PASTE, Notepad_LoadString(NOTEPAD_STR_PASTE));
+		AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_SELECTALL, Notepad_LoadString(NOTEPAD_STR_SELECTALL));
+		AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_UNDO, Notepad_LoadString(NOTEPAD_STR_UNDO));
+		AppendMenu(hSMEdition, MF_SEPARATOR, 0, NULL );
+	}
 	AppendMenu(hSMEdition, MF_STRING, NOTEPAD_IDM_SETFONT, Notepad_LoadString(NOTEPAD_STR_SETFONT));
 
 	hSMFichier = CreateMenu();
@@ -143,8 +147,8 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 
 	hMenu = CreateMenu();
 	AppendMenu(hMenu,MF_POPUP,(UINT)hSMFichier,Notepad_LoadString(NOTEPAD_STR_FILE));
-	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hSMEdition,Notepad_LoadString(NOTEPAD_STR_EDIT)); }
-
+	AppendMenu(hMenu,MF_POPUP,(UINT)hSMEdition,Notepad_LoadString(NOTEPAD_STR_EDIT)); 
+	
 #ifdef NOMAIN
 	HMENU hSMDelim = CreateMenu() ;
 	AppendMenu(hSMDelim, MF_STRING|MF_CHECKED, NOTEPAD_IDM_CRLF, Notepad_LoadString(NOTEPAD_STR_CRLF));
@@ -216,7 +220,7 @@ LRESULT CALLBACK Notepad_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			ZeroMemory(&lf, sizeof(LOGFONT));
 			lstrcpy(lf.lfFaceName,"Courier");
-			lf.lfHeight = 15 ;
+			lf.lfHeight = FontSize ;
 			lf.lfWeight = FW_DONTCARE ;
 			hFont = CreateFontIndirect(&lf);
 
@@ -371,11 +375,12 @@ LRESULT CALLBACK Notepad_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 						SendMessage(hEdit,WM_SETFONT,(UINT)hFont,TRUE);
 						}
 					}
+					break;
 #ifdef NOMAIN
-				case NOTEPAD_IDM_RESIZE_ALL: 	// Redimensionnent toutes les fenêtres KiTTY
+				case NOTEPAD_IDM_RESIZE_ALL: 	// Redimensionnent toutes les fenetres KiTTY
 					ResizeAllWindows( hwnd ) ;
 					break;
-				case NOTEPAD_IDM_CASCADE_ALL: 	// Cascading de toutes les fenêtres KiTTY
+				case NOTEPAD_IDM_CASCADE_ALL: 	// Cascading de toutes les fenetres KiTTY
 					CascadeAllWindows( hwnd ) ;
 					break;
 				case NOTEPAD_IDM_SEND_ALL: 	// Fonction envoi vers toutes les fenetres KiTTY
@@ -483,7 +488,7 @@ LRESULT CALLBACK Notepad_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			SendMessage( hwnd, WM_COMMAND, NOTEPAD_IDM_LOAD, (LPARAM)buffer ) ;
 			break ;
 				
-		default: // Message par défaut
+		default: // Message par dÃ©faut
 			return DefWindowProc(hwnd, uMsg, wParam, lParam ) ;
 		}
 	}

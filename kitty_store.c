@@ -433,6 +433,19 @@ bool SessPathIsInitial( void ) {
 	else { return false ; }
 }
 
+bool IsThereDefaultSessionFile( void ) {
+	bool t=false;
+	char *buf = (char*)malloc(strlen(sesspath)+strlen("Default%%20Settings")+strlen(FileExtension)+2) ;
+	if( !strcmp(FileExtension,"") ) {
+		sprintf(buf,"%s\\Default%%20Settings%s",sesspath,FileExtension) ;
+	} else {
+		sprintf(buf,"%s\\Default%%20Settings",sesspath) ;
+	}
+	t = existfile(buf) ;
+	free(buf) ;
+	return t;
+}
+
 int CreateFolderInPath( const char * d ) {
 	char buf[MAX_PATH] ;
 	int res = 0 ;

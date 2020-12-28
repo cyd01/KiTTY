@@ -90,7 +90,7 @@ int GetBackgroundImageFlag(void) { return BackgroundImageFlag ; }
 void SetBackgroundImageFlag( const int flag ) { BackgroundImageFlag = flag ; }
 
 // Pour supprimer le salt dans la cryptography: issue: https://github.com/cyd01/KiTTY/issues/113
-int RandomActiveFlag = 0 ;
+int RandomActiveFlag = 1 ;
 int GetRandomActiveFlag() { return RandomActiveFlag ; }
 void SetRandomActiveFlag( const int flag ) { RandomActiveFlag = flag ; }
 

@@ -16,7 +16,6 @@ void set_cmd_line( const char * st ) {
 	if( st != NULL ) {
 		if( CmdLine != NULL ) { free( CmdLine ) ; CmdLine = NULL ; }
 		CmdLine = (char*) malloc( strlen(st) + 1 ) ;
-		//if( strlen(st)>0 ) MessageBox(NULL,st,"ici",MB_OK);
 		strcpy( CmdLine, st ) ;
 	}
 }
@@ -591,6 +590,9 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 #ifdef MOD_PRINTCLIP
 	fprintf( fp, "printclip=%d\n",			conf_get_int(conf,CONF_printclip) ) ;
 #endif
+#ifdef MOD_PROXY
+	fprintf( fp, "proxyselection=%s\n",		conf_get_str(conf,CONF_proxyselection) ) ;
+#endif
 #ifdef MOD_RUTTY
 	/* rutty: scripting options */
 	fprintf( fp, "ScriptFileName=%s\n",		conf_get_filename(conf,CONF_script_filename)->path ) ;
@@ -698,6 +700,9 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 #endif
 #ifdef MOD_ADB
 	fprintf( fp,"ADBFlag=%d\n",GetADBFlag() );
+#endif
+#ifdef MOD_PROXY
+	fprintf( fp,"ProxySelectionFlag=%d\n",GetProxySelectionFlag() );
 #endif
 	if( PasswordConf!= NULL ) fprintf( fp, "PasswordConf=%s\n", PasswordConf ) ;
 	fprintf( fp, "SessionFilterFlag=%d\nSessionsInDefaultFlag=%d\nDefaultSettingsFlag=%d\nDblClickFlag=%d\nImageViewerFlag=%d\nImageSlideDelay=%d\nMaxBlinkingTime=%d\nPrintCharSize=%d\nPrintMaxLinePerPage=%d\nPrintMaxCharPerLine=%d\nReadOnlyFlag=%d\nScrumbleKeyFlag=%d\n"

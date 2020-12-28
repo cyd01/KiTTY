@@ -10,6 +10,9 @@
 #include "dialog.h"
 #include "storage.h"
 
+#ifdef MOD_PROXY
+#include "kitty_proxy.h"
+#endif
 #ifdef MOD_RUTTY
 #include "script.h"
 #endif  /* rutty */
@@ -2358,6 +2361,15 @@ void setup_config_box(struct controlbox *b, bool midsession,
 			      NULL);
 	}
     }
+#ifdef MOD_PROXY
+    if( !GetPuttyFlag() && GetProxySelectionFlag() ) {
+    if (!midsession) {
+        ctrl_droplist(s, "Proxy choice", NO_SHORTCUT, 60,
+		  HELPCTX(no_help),
+		  proxy_selection_handler, I(0));
+        }
+    }
+#endif
 
     /*
      * The Load/Save panel is available even in mid-session.

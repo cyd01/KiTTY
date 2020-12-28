@@ -399,7 +399,7 @@ void RunSessionWithCurrentSettings( HWND hwnd, Conf * oldconf, const char * host
 		RunSessionWithConfSettings( newconf ) ;
 	} else {
 		save_settings("__STARTUP",newconf) ;
-		RunSession( hwnd, "", "__STARTUP" ) ;
+		RunSession( hwnd, conf_get_str(conf,CONF_folder), "__STARTUP" ) ;
 		del_settings("__STARTUP");
 	}
 	conf_free( newconf ) ;
@@ -438,7 +438,10 @@ ScriptData scriptdata;
 #include "script_win.c" 
 #include "script.c" 
 
-#endif  /* rutty */   
+#endif  /* rutty */  
+#ifdef MOD_PROXY
+#include "kitty_proxy.h"
+#endif
 
 static int dbltime, lasttime, lastact;
 static Mouse_Button lastbtn;
@@ -1170,6 +1173,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			SetRuttyFlag( 0 ) ;
 			SetDefaultSettingsFlag(1);
 			SetReadOnlyFlag(0);
+#ifdef MOD_PROXY
+			SetProxySelectionFlag(0);
+#endif
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 			SetBackgroundImageFlag(0) ;
 #endif
@@ -1776,6 +1782,11 @@ else {
 
 #endif
 
+#ifdef MOD_PROXY
+if( GetProxySelectionFlag() ) {
+	LoadProxyInfo( conf, conf_get_str(conf,CONF_proxyselection) ) ;
+}
+#endif
 #ifdef MOD_PORTKNOCKING
 ManagePortKnocking(conf_get_str(conf,CONF_host),conf_get_str(conf,CONF_portknockingoptions));
 #endif

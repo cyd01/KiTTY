@@ -327,6 +327,9 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "ConnectionSharingUpstream", conf_get_bool(conf, CONF_ssh_connection_sharing_upstream));
     write_setting_b_forced(sesskey, "ConnectionSharingDownstream", conf_get_bool(conf, CONF_ssh_connection_sharing_downstream));
     wmap_forced(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys, false);
+#ifdef MOD_PROXY
+    write_setting_s_forced(sesskey, "ProxySelection", conf_get_str(conf, CONF_proxyselection));
+#endif
 /* rutty: */
 #ifdef MOD_RUTTY
     write_setting_filename_forced(sesskey, "ScriptFileName", conf_get_filename(conf, CONF_script_filename));
@@ -1072,6 +1075,9 @@ void load_open_settings_forced(char *filename, Conf *conf) {
 #endif
 #ifdef MOD_DISABLEALTGR
 	gppi_forced(sesskey, "DisableAltGr", 0, conf, CONF_disablealtgr);
+#endif
+#ifdef MOD_PROXY
+	gpps_forced(sesskey, "ProxySelection", "- Session defined proxy -", conf, CONF_proxyselection);
 #endif
 // END COPY/PASTE
 	conf_set_str( conf, CONF_folder, "Default") ;
