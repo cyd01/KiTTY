@@ -146,8 +146,8 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 	AppendMenu(hSMFichier, MF_STRING, NOTEPAD_IDM_QUIT, Notepad_LoadString(NOTEPAD_STR_QUIT));
 
 	hMenu = CreateMenu();
-	AppendMenu(hMenu,MF_POPUP,(UINT)hSMFichier,Notepad_LoadString(NOTEPAD_STR_FILE));
-	AppendMenu(hMenu,MF_POPUP,(UINT)hSMEdition,Notepad_LoadString(NOTEPAD_STR_EDIT)); 
+	AppendMenu(hMenu,MF_POPUP,(UINT_PTR)hSMFichier,Notepad_LoadString(NOTEPAD_STR_FILE));
+	AppendMenu(hMenu,MF_POPUP,(UINT_PTR)hSMEdition,Notepad_LoadString(NOTEPAD_STR_EDIT)); 
 	
 #ifdef NOMAIN
 	HMENU hSMDelim = CreateMenu() ;
@@ -155,17 +155,17 @@ int WINAPI Notepad_WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR l
 	AppendMenu(hSMDelim, MF_STRING|MF_CHECKED, NOTEPAD_IDM_SCOLON, Notepad_LoadString(NOTEPAD_STR_SCOLON));
 	AppendMenu(hSMDelim, MF_STRING|MF_UNCHECKED, NOTEPAD_IDM_SLASH, Notepad_LoadString(NOTEPAD_STR_SLASH));
 	AppendMenu(hSMDelim, MF_STRING|MF_UNCHECKED, NOTEPAD_IDM_TILDE, Notepad_LoadString(NOTEPAD_STR_TILDE));
-	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hSMDelim,Notepad_LoadString(NOTEPAD_STR_DELIM)); }
+	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT_PTR)hSMDelim,Notepad_LoadString(NOTEPAD_STR_DELIM)); }
 	
 	HMENU hWindows = CreateMenu() ;
 	AppendMenu(hWindows, MF_STRING, NOTEPAD_IDM_RESIZE_ALL, "&Arrange");
 	AppendMenu(hWindows, MF_STRING, NOTEPAD_IDM_CASCADE_ALL, "&Cascade");
-	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hWindows,"&Windows"); }
+	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT_PTR)hWindows,"&Windows"); }
 	
 	if( !readonly ) { AppendMenu(hMenu,MF_STRING, NOTEPAD_IDM_SEND, Notepad_LoadString(NOTEPAD_STR_SEND)) ; }
 	//AppendMenu(hMenu,MF_STRING, NOTEPAD_IDM_SEND_ALL, Notepad_LoadString(NOTEPAD_STR_SEND_ALL));
 #endif
-	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT)hSMApropos,Notepad_LoadString(NOTEPAD_STR_HELP)); }
+	if( !readonly ) { AppendMenu(hMenu,MF_POPUP,(UINT_PTR)hSMApropos,Notepad_LoadString(NOTEPAD_STR_HELP)); }
 
 	//hwnd = CreateWindow(Notepad_szprogname, Notepad_szprogname, WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, cxScreen, cyScreen, NULL, hMenu, hinstance, NULL);
 	hwnd = CreateWindowEx(WS_EX_ACCEPTFILES,Notepad_szprogname, Notepad_szprogname, WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, (int)cxScreen/2, (int)cyScreen/2, NULL, hMenu, hinstance, NULL);
@@ -224,7 +224,7 @@ LRESULT CALLBACK Notepad_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			lf.lfWeight = FW_DONTCARE ;
 			hFont = CreateFontIndirect(&lf);
 
-			SendMessage(hEdit,WM_SETFONT,(UINT)hFont,TRUE);
+			SendMessage(hEdit,WM_SETFONT,(WPARAM)hFont,TRUE);
 			SendMessage(hEdit, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(5, 5)) ;
 #ifdef NOMAIN
 
@@ -372,7 +372,7 @@ LRESULT CALLBACK Notepad_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 					if (ChooseFont(&cf)) {
 						DeleteObject(hFont);
 						hFont = CreateFontIndirect(&lf);
-						SendMessage(hEdit,WM_SETFONT,(UINT)hFont,TRUE);
+						SendMessage(hEdit,WM_SETFONT,(WPARAM)hFont,TRUE);
 						}
 					}
 					break;
