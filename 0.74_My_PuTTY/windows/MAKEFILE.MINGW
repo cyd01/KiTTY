@@ -241,7 +241,7 @@ plink.exe: agentf.o aqsync.o \
 		winnpc.o winnps.o winpgntc.o winplink.o winproxy.o \
 		winsecur.o winser.o winshare.o winstore.o wintime.o winucs.o \
 		winx11.o x11fwd.o \
-		adb.o kitty_registry.o kitty_commun.o kitty_ssh.o kitty_store.o kitty_tools.o
+		adb.o kitty_registry.o kitty_commun.o kitty_proxy.o kitty_ssh.o kitty_store.o kitty_tools.o
 	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,plink.map agentf.o aqsync.o \
 		be_all_s_plink.o \
 		be_misc.o callback.o cmdline.o conf.o cproxy.o \
@@ -265,7 +265,7 @@ plink.exe: agentf.o aqsync.o \
 		winmiscs.o winnet.o winnohlp.o winnoise.o winnojmp.o \
 		winnpc.o winnps.o winpgntc.o winplink.o winproxy.o \
 		winsecur.o winser.o winshare.o winstore.o wintime.o winucs.o \
-		adb.o kitty_registry.o kitty_commun.o kitty_ssh.o kitty_store.o kitty_tools.o \
+		adb.o kitty_registry.o kitty_commun.o kitty_proxy.o kitty_ssh.o kitty_store.o kitty_tools.o \
 		../../base64/base64.a ../../bcrypt/bcrypt.a ../../mini/mini.a \
 		winx11.o x11fwd.o -ladvapi32 -lcomdlg32 -lgdi32 -limm32 \
 		-lole32 -lshell32 -luser32 \

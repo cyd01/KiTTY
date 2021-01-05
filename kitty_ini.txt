@@ -137,6 +137,9 @@ mouseshortcuts=yes
 ; paste: enable/disable one line at a time feature in paste action (useful on slow servers only)
 paste=no
 
+; pastesize: paste size limit (number of characters). Above the limit a confirmation is requested. (0 means unlimited)
+;pastesize=0
+
 ; PlinkPath: the full path to the plink.exe (or klink.exe) binary
 ;PlinkPath=
 

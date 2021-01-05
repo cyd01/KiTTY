@@ -398,6 +398,10 @@ void del_settings(const char *sessionname)
 		char *p, *p2;
 		if( GetReadOnlyFlag() ) return ;
 		if( (strstr( sessionname, " [" )==sessionname)&&(sessionname[strlen(sessionname)-1]==']') ) {
+			if( !strcmp(sessionname," [..]") ) {
+				MessageBox(NULL,"It is not allowed to delete .. directory","Error",MB_OK|MB_ICONERROR) ;
+				return ; 
+			}
 			// La session a purger est un folder
 			p = snewn(3 * strlen(sessionname) + 1, char);
 			strcpy( p, sessionname+2 ) ;

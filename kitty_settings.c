@@ -434,6 +434,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_i_forced(sesskey, "SCPAutoPwd", conf_get_int(conf, CONF_scp_auto_pwd));
     write_setting_b_forced(sesskey, "NoFocusReporting", conf_get_bool(conf, CONF_no_focus_rep));
     write_setting_i_forced(sesskey, "LinesAtAScroll", conf_get_int(conf, CONF_scrolllines));
+    write_setting_b_forced(sesskey, "SSHTunnelInTitle", conf_get_bool(conf, CONF_ssh_tunnel_print_in_title));
 #endif
 #ifdef MOD_PORTKNOCKING
 	write_setting_s_forced(sesskey, "PortKnocking", conf_get_str(conf, CONF_portknockingoptions) );
@@ -1069,6 +1070,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "SCPAutoPwd", 0, conf, CONF_scp_auto_pwd);
     gppb_forced(sesskey, "NoFocusReporting", true, conf, CONF_no_focus_rep);
     gppi_forced(sesskey, "LinesAtAScroll", 5, conf, CONF_scrolllines);
+    gppb_forced(sesskey, "SSHTunnelInTitle", false, conf, CONF_ssh_tunnel_print_in_title);
 #endif
 #ifdef MOD_PORTKNOCKING
 	gpps_forced(sesskey, "PortKnocking", "", conf, CONF_portknockingoptions );

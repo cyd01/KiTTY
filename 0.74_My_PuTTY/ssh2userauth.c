@@ -26,6 +26,7 @@ typedef struct agent_key {
 #ifdef MOD_PERSO
 #include "kitty.h"
 void SetSSHConnected( int flag );
+void debug_logevent( const char *fmt, ... ) ;
 size_t iso8859_1_to_utf8(char *content, size_t max_size) ; 					// Latin-1 = iso8859-1
 size_t utf8_to_iso8859_15(char *const output, const char *const input, const size_t length) ;   // Latin-9 = iso8859-15
 char bufpass[1024]="";

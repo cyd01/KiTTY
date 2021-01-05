@@ -3,6 +3,7 @@
 #include "kitty_tools.h"
 #include "kitty_registry.h"
 #include "kitty_proxy.h"
+#include "kitty_store.h"
 #include "dialog.h"
 #include "storage.h"
 #include <sys/types.h>
@@ -17,51 +18,8 @@ void SetProxySelectionFlag( const int flag ) { ProxySelectionFlag = flag ; }
 
 void debug_logevent( const char *fmt, ... ) ;
 
-#define MAX_PROXY 100
-struct Proxies {
-	char *name;
-	int val;
-    } proxies[MAX_PROXY] ;
+struct Proxies proxies[MAX_PROXY] ;
     
-void proxy_selection_handler(union control *ctrl, dlgparam *dlg, void *data, int event) {
-    int i, j;
-    Conf *conf = (Conf *)data;
-    if (event == EVENT_REFRESH) {
-	/* Fetching this once at the start of the function ensures we
-	 * remember what the right value is supposed to be when
-	 * operations below cause reentrant calls to this function. */
-	char * oldproxy = conf_get_str(conf, CONF_proxyselection);
-
-	dlg_update_start(ctrl, dlg);
-	dlg_listbox_clear(ctrl, dlg);
-	for (i = 0; i < lenof(proxies); i++)  {
-		if( proxies[i].name==NULL ) break ;
-		dlg_listbox_addwithid(ctrl, dlg, proxies[i].name, proxies[i].val);
-	}
-	for (i = j = 0; i < lenof(proxies); i++) {
-		if( proxies[i].name==NULL ) break ;
-		if ( !strcmp(oldproxy,proxies[i].name) ) {
-		    dlg_listbox_select(ctrl, dlg, i);
-		    break;
-		}
-		j++;
-	}
-	if (i == lenof(proxies)) {    /* an unsupported setting was chosen */
-	    dlg_listbox_select(ctrl, dlg, 0);
-	    oldproxy = NULL;
-	}
-	dlg_update_done(ctrl, dlg);
-	if( oldproxy!=NULL ) conf_set_str(conf, CONF_proxyselection, oldproxy);    /* restore */
-    } else if (event == EVENT_SELCHANGE) {
-	int i = dlg_listbox_index(ctrl, dlg);
-	if (i < 0)
-	    i = 0;
-	else
-	    i = dlg_listbox_getid(ctrl, dlg, i);
-	conf_set_str(conf, CONF_proxyselection, proxies[i].name);
-    }
-}
-
 void InitProxyList(void) {
 	HKEY hKey ;
 	int i,j;
@@ -129,10 +87,16 @@ int LoadProxyInfo( Conf * conf, const char * name ) {
 	debug_logevent( "Load proxy \"%s\" definition", name ) ;
 	if( (IniFileFlag == SAVEMODE_REG)||(IniFileFlag == SAVEMODE_FILE) ) {
 		HKEY hKey ;
-		sprintf( buffer, "%s\\Proxies\\%s", PUTTY_REG_POS, name ) ;
+		sprintf( buffer, "%s\\Proxies\\", PUTTY_REG_POS ) ;
+		char *b = (char*)malloc(4*strlen(name)+1);
+		mungestr(name,b);
+		strcat(buffer,b);
+		free(b);
 		if( RegOpenKeyEx( HKEY_CURRENT_USER, buffer, 0, KEY_READ, &hKey) != ERROR_SUCCESS ) return 0;
 		char lpData[4096] ;
-		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyExcludeList", lpData ) ) { conf_set_str( conf, CONF_proxy_exclude_list, lpData ) ; }
+		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyExcludeList", lpData ) ) { 
+			conf_set_str( conf, CONF_proxy_exclude_list, lpData ) ; 
+		}
 		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyDNS", lpData ) ) {
 			int i=atoi(lpData);
 			conf_set_int(conf, CONF_proxy_dns, (i+1)%3);
@@ -142,30 +106,15 @@ int LoadProxyInfo( Conf * conf, const char * name ) {
 			} else { conf_set_bool( conf, CONF_even_proxy_localhost, true ) ;
 			}			
 		}
-		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyMethod", lpData ) ) { 
-			conf_set_int(conf, CONF_proxy_type, atoi(lpData) ) ;
-			if (conf_get_int(conf, CONF_proxy_type) == -1) {
-				if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyType", lpData ) ) {
-					int i = atoi(lpData) ;
-					if (i == 0)
-						conf_set_int(conf, CONF_proxy_type, PROXY_NONE);
-					else if (i == 1)
-						conf_set_int(conf, CONF_proxy_type, PROXY_HTTP);
-					else if (i == 3)
-						conf_set_int(conf, CONF_proxy_type, PROXY_TELNET);
-					else if (i == 4)
-						conf_set_int(conf, CONF_proxy_type, PROXY_CMD);
-					else {
-						if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxySOCKSVersion", lpData ) ) {
-							i = atoi(lpData);
-							if (i == 5)
-								conf_set_int(conf, CONF_proxy_type, PROXY_SOCKS5);
-							else
-								conf_set_int(conf, CONF_proxy_type, PROXY_SOCKS4);
-						} else { conf_set_int(conf, CONF_proxy_type, PROXY_SOCKS5); }
-					}
-				} else { conf_set_int(conf, CONF_proxy_type, PROXY_NONE); }
-			}
+		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyMethod", lpData ) ) {
+			int i = atoi(lpData) ;
+			if (i == 0) conf_set_int(conf, CONF_proxy_type, PROXY_NONE);
+			else if (i == 1) conf_set_int(conf, CONF_proxy_type, PROXY_SOCKS4) ;
+			else if (i == 2) conf_set_int(conf, CONF_proxy_type, PROXY_SOCKS5) ;
+			else if (i == 3) conf_set_int(conf, CONF_proxy_type, PROXY_HTTP) ;
+			else if (i == 4) conf_set_int(conf, CONF_proxy_type, PROXY_TELNET) ;
+			else if (i == 5) conf_set_int(conf, CONF_proxy_type, PROXY_CMD) ;
+			else conf_set_int(conf, CONF_proxy_type, PROXY_NONE) ; 
 		}
 		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyHost", lpData ) ) { conf_set_str( conf, CONF_proxy_host, lpData ) ; }
 		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyPort", lpData ) ) { conf_set_int( conf, CONF_proxy_port, atoi(lpData) ) ; }
@@ -180,7 +129,44 @@ int LoadProxyInfo( Conf * conf, const char * name ) {
 		mungestr( name, filename ) ;
 		sprintf( fullpath, "%s\\Proxies\\%s", ConfigDirectory, filename ) ;
 		if( existfile(fullpath) ) {
-			
+			FILE *fp;
+			if( (fp=fopen(fullpath,"r")) != NULL ) {
+				char buf2[MAX_VALUE_NAME]="";
+				while( fgets(buffer,MAX_VALUE_NAME,fp)!=NULL ) {
+					if( ReadPortableValue(buffer, "ProxyExcludeList", buf2, MAX_VALUE_NAME) ) {
+						conf_set_str( conf, CONF_proxy_exclude_list, buf2 ) ; 
+					} else if( ReadPortableValue(buffer, "ProxyDNS", buf2, MAX_VALUE_NAME) ) {
+						int i=atoi(buf2);
+						conf_set_int(conf, CONF_proxy_dns, (i+1)%3);
+					} else if( ReadPortableValue(buffer, "ProxyLocalhost", buf2, MAX_VALUE_NAME) ) {
+						if( atoi(buf2) == 0 ) { conf_set_bool( conf, CONF_even_proxy_localhost, false ) ; 
+						} else { conf_set_bool( conf, CONF_even_proxy_localhost, true ) ;
+						}	
+					} else if( ReadPortableValue(buffer, "ProxyMethod", buf2, MAX_VALUE_NAME) ) {
+						int i = atoi(buf2) ;
+						if (i == 0) conf_set_int(conf, CONF_proxy_type, PROXY_NONE);
+						else if (i == 1) conf_set_int(conf, CONF_proxy_type, PROXY_SOCKS4) ;
+						else if (i == 2) conf_set_int(conf, CONF_proxy_type, PROXY_SOCKS5) ;
+						else if (i == 3) conf_set_int(conf, CONF_proxy_type, PROXY_HTTP) ;
+						else if (i == 4) conf_set_int(conf, CONF_proxy_type, PROXY_TELNET) ;
+						else if (i == 5) conf_set_int(conf, CONF_proxy_type, PROXY_CMD) ;
+						else conf_set_int(conf, CONF_proxy_type, PROXY_NONE) ; 
+					} else if( ReadPortableValue(buffer, "ProxyHost", buf2, MAX_VALUE_NAME) ) { 
+						conf_set_str( conf, CONF_proxy_host, buf2 ) ; 
+					} else if( ReadPortableValue(buffer, "ProxyPort", buf2, MAX_VALUE_NAME) ) { 
+						conf_set_int( conf, CONF_proxy_port, atoi(buf2) ) ; 
+					} else if( ReadPortableValue(buffer, "ProxyUsername", buf2, MAX_VALUE_NAME) ) { 
+						conf_set_str( conf, CONF_proxy_username, buf2 ) ; 
+					} else if( ReadPortableValue(buffer, "ProxyPassword", buf2, MAX_VALUE_NAME) ) { 
+						conf_set_str( conf, CONF_proxy_password, buf2 ) ; 
+					} else if( ReadPortableValue(buffer, "ProxyTelnetCommand", buf2, MAX_VALUE_NAME) ) {
+						conf_set_str( conf, CONF_proxy_telnet_command, buf2 ) ; 
+					} else if( ReadPortableValue(buffer, "ProxyLogToTerm", buf2, MAX_VALUE_NAME) ) { 
+						conf_set_int( conf, CONF_proxy_log_to_term, atoi(buf2) ) ; 
+					}
+				}
+				fclose(fp);
+			}
 		}
 		free( filename ) ;
 	}

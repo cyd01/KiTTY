@@ -10,9 +10,7 @@
 #include "dialog.h"
 #include "storage.h"
 
-#ifdef MOD_PROXY
-#include "kitty_proxy.h"
-#endif
+
 #ifdef MOD_RUTTY
 #include "script.h"
 #endif  /* rutty */
@@ -26,6 +24,47 @@ int GetReadOnlyFlag(void) ;
 #endif
 #ifdef MOD_ZMODEM
 #define ATOFFSET(data, offset) ( (void *) ( (char *)(data) + (offset) ) )
+#endif
+#ifdef MOD_PROXY
+#include "kitty_proxy.h"
+void proxy_selection_handler(union control *ctrl, dlgparam *dlg, void *data, int event) {
+    int i, j;
+    Conf *conf = (Conf *)data;
+    if (event == EVENT_REFRESH) {
+	/* Fetching this once at the start of the function ensures we
+	 * remember what the right value is supposed to be when
+	 * operations below cause reentrant calls to this function. */
+	char * oldproxy = conf_get_str(conf, CONF_proxyselection);
+
+	dlg_update_start(ctrl, dlg);
+	dlg_listbox_clear(ctrl, dlg);
+	for (i = 0; i < lenof(proxies); i++)  {
+		if( proxies[i].name==NULL ) break ;
+		dlg_listbox_addwithid(ctrl, dlg, proxies[i].name, proxies[i].val);
+	}
+	for (i = j = 0; i < lenof(proxies); i++) {
+		if( proxies[i].name==NULL ) break ;
+		if ( !strcmp(oldproxy,proxies[i].name) ) {
+		    dlg_listbox_select(ctrl, dlg, i);
+		    break;
+		}
+		j++;
+	}
+	if (i == lenof(proxies)) {    /* an unsupported setting was chosen */
+	    dlg_listbox_select(ctrl, dlg, 0);
+	    oldproxy = NULL;
+	}
+	dlg_update_done(ctrl, dlg);
+	if( oldproxy!=NULL ) conf_set_str(conf, CONF_proxyselection, oldproxy);    /* restore */
+    } else if (event == EVENT_SELCHANGE) {
+	int i = dlg_listbox_index(ctrl, dlg);
+	if (i < 0)
+	    i = 0;
+	else
+	    i = dlg_listbox_getid(ctrl, dlg, i);
+	conf_set_str(conf, CONF_proxyselection, proxies[i].name);
+    }
+}
 #endif
 
 #define PRINTER_DISABLED_STRING "None (printing disabled)"
@@ -3434,7 +3473,7 @@ if( !GetPuttyFlag() ) {
 
     }
 
-    if (!midsession) {
+    if (!midsession /*||midsession*/ ) {
 	/*
 	 * The Connection/Proxy panel.
 	 */
@@ -4018,6 +4057,13 @@ if( !GetPuttyFlag() ) {
 			      "IPv4", '4', I(ADDRTYPE_IPV4),
 			      "IPv6", '6', I(ADDRTYPE_IPV6),
 			      NULL);
+#endif
+
+#ifdef MOD_PERSO
+	ctrl_checkbox(s, "Print Dynamic ports in window title",NO_SHORTCUT,
+		      HELPCTX(no_help),
+		      conf_checkbox_handler,
+		      I(CONF_ssh_tunnel_print_in_title));
 #endif
 	ctrl_tabdelay(s, pfd->addbutton);
 	ctrl_columns(s, 1, 100);

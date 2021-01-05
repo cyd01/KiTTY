@@ -67,3 +67,5 @@ int loadPath() ;
 char * GetSessPath( void ) ;
 bool SessPathIsInitial( void ) ;
 bool IsThereDefaultSessionFile( void ) ;
+
+bool ReadPortableValue(const char *buffer, const char * name, char * value, const int maxlen) ;

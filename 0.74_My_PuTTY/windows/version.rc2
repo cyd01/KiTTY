@@ -63,7 +63,7 @@ BEGIN
 	    VALUE "FileVersion",	TEXTVER
 #endif
 #if (defined MOD_PERSO) && (!defined FLJ)
-		VALUE "ProductVersion",	TEXTVER " - Additional features on KiTTY That's all folks! by 9bis.com, 2005-2020"
+		VALUE "ProductVersion",	TEXTVER " - Additional features on KiTTY That's all folks! by 9bis.com, 2005-2021"
 #else
 	    VALUE "ProductVersion",	TEXTVER
 #endif

@@ -7514,6 +7514,7 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	}
 	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) { strcat( buffer, " (PROTECTED)" ) ; }
 	if( conf_get_bool(conf, CONF_alwaysontop) ) if( strstr(buffer, " (ONTOP)")==NULL ) { strcat( buffer, " (ONTOP)" ) ; }
+	if( conf_get_bool(conf, CONF_ssh_tunnel_print_in_title) ) if( strstr(buffer, " (SOCKS: ")==NULL ) { make_title( fmt, " (SOCKS: %s)", "%%d") ; strcat( buffer, fmt ) ; }
 	set_title_internal( tw, buffer ) ;
 	free(title);
 	free(buffer);
@@ -8148,6 +8149,9 @@ static void process_clipdata(HGLOBAL clipdata, bool unicode)
 	    clipboard_contents = snewn(clipboard_length + 1, wchar_t);
 	    memcpy(clipboard_contents, p, clipboard_length * sizeof(wchar_t));
 	    clipboard_contents[clipboard_length] = L'\0';
+#ifdef MOD_PERSO
+		if( (GetPasteSize()==0) || (clipboard_length<=GetPasteSize()) || MessageBox(NULL,"Clipboard content is very large.\nAre you sure ?","Confirmation",MB_YESNO|MB_ICONWARNING)==IDYES )
+#endif
 	    term_do_paste(term, clipboard_contents, clipboard_length);
 	}
     } else {
@@ -8161,6 +8165,9 @@ static void process_clipdata(HGLOBAL clipdata, bool unicode)
 				clipboard_contents, i);
 	    clipboard_length = i - 1;
 	    clipboard_contents[clipboard_length] = L'\0';
+#ifdef MOD_PERSO
+		if( (GetPasteSize()==0) || (clipboard_length<=GetPasteSize()) || MessageBox(NULL,"Clipboard content is very large.\nAre you sure ?","Confirmation",MB_YESNO|MB_ICONWARNING)==IDYES )
+#endif
 	    term_do_paste(term, clipboard_contents, clipboard_length);
 	}
     }

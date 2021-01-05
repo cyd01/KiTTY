@@ -726,3 +726,25 @@ void SettingTest( void ) {
 
 }
 */
+
+bool ReadPortableValue(const char *buffer, const char * name, char * value, const int maxlen) {
+	bool test = false ;
+	if( (buffer==NULL) || (name==NULL) ) { return false ; }
+	if( (strlen(buffer)==0) || (strlen(name)==0) ) { return false ; }
+	if( maxlen<=0 ) { return false ; }
+	char *b = (char*)malloc(strlen(name)+2), *pst ;
+	sprintf(b,"%s\\",name) ;
+	if( strstr(buffer,b)==buffer ) {
+		pst = (char*)buffer + strlen(b) ;
+		test = true ;
+		value[0]='\0';
+		if( strlen(pst)>1 )
+		if( (strlen(pst)<=maxlen) && (pst[strlen(pst)-2]=='\\') ) {
+			memcpy( value, pst, strlen(pst)-2 ) ;
+			value[strlen(pst)-2] = '\0' ;
+		}
+		unmungestr( value, value, MAX_VALUE_NAME ) ;
+	}
+	free(b) ;
+	return test ;
+}

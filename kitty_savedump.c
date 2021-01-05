@@ -586,6 +586,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "scp_auto_pwd=%d\n", 		conf_get_int(conf, CONF_scp_auto_pwd));
 	fprintf( fp, "no_focus_rep=%d\n",		conf_get_bool(conf,CONF_no_focus_rep) ) ;
 	fprintf( fp, "scrolllines=%d\n",		conf_get_int(conf,CONF_scrolllines) ) ;
+	fprintf( fp, "ssh_tunnel_print_in_title=%d\n",	conf_get_bool(conf,CONF_ssh_tunnel_print_in_title) ) ;
 #endif
 #ifdef MOD_PRINTCLIP
 	fprintf( fp, "printclip=%d\n",			conf_get_int(conf,CONF_printclip) ) ;
@@ -677,7 +678,8 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	if( AutoCommand!= NULL ) fprintf( fp, "AutoCommand=%s\n", AutoCommand ) ;
 	if( ScriptCommand!= NULL ) fprintf( fp, "ScriptCommand=%s\n", ScriptCommand ) ;
 	if( PasteCommand!= NULL ) fprintf( fp, "PasteCommand=%s\n", PasteCommand ) ;
-	fprintf( fp, "PasteCommandFlag=%d\n", PasteCommandFlag );
+	fprintf( fp, "PasteCommandFlag=%d\n", PasteCommandFlag ) ;
+	fprintf( fp, "PasteSize=%d\n", GetPasteSize() ) ;
 	if( ScriptFileContent!= NULL ) {
 		char * pst = ScriptFileContent ;
 		fprintf( fp, "ScriptFileContent=" ) ;

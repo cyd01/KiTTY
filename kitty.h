@@ -136,6 +136,10 @@ extern char * ScriptCommand ;
 extern char * PasteCommand ;
 int GetPasteCommandFlag(void) ;
 
+// paste size limit (number of characters). Above the limit a confirmation is requested. (0 means unlimited)
+int GetPasteSize(void) ;
+void SetPasteSize( const int size ) ;
+
 // Flag de gestion de la fonction hyperlink
 extern int HyperlinkFlag ;
 int GetHyperlinkFlag(void) ;

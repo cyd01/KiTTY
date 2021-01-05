@@ -93,6 +93,11 @@ char * PasteCommand = NULL ;
 static int PasteCommandFlag = 0 ;
 int GetPasteCommandFlag(void) { return PasteCommandFlag ; }
 
+// paste size limit (number of characters). Above the limit a confirmation is requested. (0 means unlimited)
+static int PasteSize = 0 ;
+int GetPasteSize(void) { return PasteSize ; }
+void SetPasteSize( const int size ) { PasteSize = size ; }
+
 // Flag de gestion de la fonction hyperlink
 #ifdef FLJ
 int HyperlinkFlag = 1 ;
@@ -4385,6 +4390,7 @@ int Convert2Dir( const char * Directory ) {
 	sprintf( buffer, "%s\\Commands", Directory ) ; DelDir( buffer) ; MakeDirTree( Directory, "Commands", "Commands" ) ;
 	sprintf( buffer, "%s\\Launcher", Directory ) ; DelDir( buffer) ; MakeDirTree( Directory, "Launcher", "Launcher" ) ;
 	sprintf( buffer, "%s\\Folders", Directory ) ; DelDir( buffer) ; MakeDirTree( Directory, "Folders", "Folders" ) ;
+	sprintf( buffer, "%s\\Commands", Directory ) ; DelDir( buffer) ; MakeDirTree( Directory, "Commands", "Commands" ) ;
 	
 	sprintf( buffer, "%s\\Sessions", Directory ) ; DelDir( buffer) ; { 
 		if(!MakeDir( buffer )) MessageBox(NULL,"Unable to create directory for storing sessions","Error",MB_OK|MB_ICONERROR); 
@@ -4456,7 +4462,21 @@ int Convert2Dir( const char * Directory ) {
 		}
 		RegCloseKey( hKey ) ;
 	}
-		
+#ifdef MOD_PROXY
+	sprintf( buffer, "%s\\Proxies", Directory ) ; DelDir( buffer) ; if( !MakeDir( buffer ) ) { 
+		MessageBox(NULL,"Unable to create directory for storing proxies definition","Error",MB_OK|MB_ICONERROR) ; 
+	}
+	sprintf( buffer, "%s\\Proxies", TEXT(PUTTY_REG_POS) ) ;
+		if( RegOpenKeyEx( HKEY_CURRENT_USER, TEXT(buffer), 0, KEY_READ, &hKey) == ERROR_SUCCESS ) {
+		if( RegQueryInfoKey(hKey,achClass,&cchClassName,NULL,&cSubKeys,&cbMaxSubKey
+			,&cchMaxClass,&cValues,&cchMaxValue,&cbMaxValueData,&cbSecurityDescriptor,&ftLastWriteTime) == ERROR_SUCCESS ) {
+			if (cSubKeys) for (i=0; i<cSubKeys; i++) {
+			}
+		}
+		RegCloseKey( hKey ) ;
+	}
+#endif
+	
 	if( delkeyflag ) { RegDelTree (HKEY_CURRENT_USER, TEXT(PUTTY_REG_PARENT) ) ; }
 	
 	return 0;
@@ -5192,7 +5212,8 @@ void LoadParameters( void ) {
 		if( !stricmp( buffer, "NO" ) ) MouseShortcutsFlag = 0 ; 
 		if( !stricmp( buffer, "YES" ) ) MouseShortcutsFlag = 1 ; 
 	}
-	if( ReadParameter( INIT_SECTION, "paste", buffer ) ) {  if( !stricmp( buffer, "YES" ) ) PasteCommandFlag = 1 ; }
+	if( ReadParameter( INIT_SECTION, "paste", buffer ) ) { if( !stricmp( buffer, "YES" ) ) PasteCommandFlag = 1 ; }
+	if( ReadParameter( INIT_SECTION, "pastesize", buffer ) ) { if( atoi(buffer)>0 ) SetPasteSize( atoi(buffer) ) ; }
 	if( ReadParameter( INIT_SECTION, "PSCPPath", buffer ) ) {
 		if( existfile( buffer ) ) { 
 			if( PSCPPath!=NULL) { free(PSCPPath) ; PSCPPath = NULL ; }

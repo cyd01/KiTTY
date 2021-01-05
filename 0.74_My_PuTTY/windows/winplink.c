@@ -551,6 +551,11 @@ int main(int argc, char **argv)
         else
             return 1;
     }
+#ifdef MOD_PROXY
+if( GetProxySelectionFlag() ) {
+	LoadProxyInfo( conf, conf_get_str(conf,CONF_proxyselection) ) ;
+}
+#endif
 #ifdef MOD_PORTKNOCKING
     ManagePortKnocking(conf_get_str(conf,CONF_host),conf_get_str(conf,CONF_portknockingoptions));
 #endif
