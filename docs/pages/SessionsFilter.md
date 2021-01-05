@@ -10,7 +10,7 @@ In the main configuration box you will find a new dropdown box. By selecting a s
 For more information about folders management, consult the [manual](../doc/kitty-folders_list_feature.pdf "Kitty folder list feature").
 
 ### Pattern
-It is also possible to filter on session name or session hostname by writing characters into '''Saved Session/New Folder''' field.
+It is also possible to filter on session name or session hostname by writing characters into **Saved Session/New Folder** field.
 
 This feature can be turned on/off by adding these lines in your **%APPDATA%/KiTTY/Kitty.ini** configuration file.
 

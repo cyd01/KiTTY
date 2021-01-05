@@ -10,7 +10,6 @@ In **KiTTY** some new command-line options are available:
 * **-cmd**: to define a startup auto-command
 * **-codepage**: to select a new remote character set (use in combination with [-localproxy](cygtermd.md) option)
 * **-convert-dir**: convert registry settings to [savemode=dir mode](Portability.md)
-* **-convert-reg**: backup session settings from [savemode=dir mode](Portability.md) to registry
 * **-defini**: create a default configuration kitty.template.ini
 * **-edit**: edit the settings of a session
 * **-fileassoc**: associate **.ktx** files with **KiTTY**. See [Portability feature](Portability.md) to define file extention
