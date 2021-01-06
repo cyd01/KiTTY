@@ -3175,7 +3175,7 @@ void routine_inputbox_password( void * phwnd ) {
 	GetAndSendLinePassword( MainHwnd ) ;
 	}
 
-// Demarre le timer d'autocommand a  la connexion
+// Demarre le timer d'autocommand a la connexion
 void CreateTimerInit( void ) {
 	SetTimer(MainHwnd, TIMER_INIT, init_delay, NULL) ; 
 	}
@@ -3183,27 +3183,29 @@ void CreateTimerInit( void ) {
 // Positionne le repertoire ou se trouve la configuration 
 void SetConfigDirectory( const char * Directory ) {
 	char *buf ;
-	if( ConfigDirectory != NULL ) { free( ConfigDirectory ) ; ConfigDirectory = NULL ; }
-	if( (Directory!=NULL)&&(strlen(Directory)>0) ) { 
-		if( existdirectory(Directory) ) {
-			ConfigDirectory = (char*)malloc( strlen(Directory)+1 ) ; 
-			strcpy( ConfigDirectory, Directory ) ; 
-			}
-		else {
-			buf=(char*)malloc(strlen(InitialDirectory)+strlen(Directory)+10) ;
-			sprintf(buf,"%s\\%s",InitialDirectory,Directory) ;
-			if( existdirectory(buf) ) {
-				ConfigDirectory = (char*)malloc( strlen(buf)+1 ) ; 
-				strcpy( ConfigDirectory, buf ) ; 
-				}
-			free(buf);
-			}
+	if( ConfigDirectory != NULL ) { 
+		free( ConfigDirectory ) ; 
+		ConfigDirectory = NULL ; 
+	}
+	if( (Directory!=NULL)&&(strlen(Directory)>0) ) {
+		if( IsPathAbsolute(Directory) ) {
+			buf = (char*) malloc(strlen(Directory)+1) ;
+			strcpy( buf, Directory ) ;
+		} else {
+			buf = (char*)malloc(strlen(InitialDirectory)+strlen(Directory)+2) ;
+			sprintf( buf, "%s\\%s", InitialDirectory, Directory ) ;
 		}
+		if( existdirectory(buf) ) {
+			ConfigDirectory = (char*)malloc( strlen(buf)+1 ) ; 
+			strcpy( ConfigDirectory, buf ) ; 
+		}
+		free( buf ) ;
+	}
 	if( ConfigDirectory==NULL ) { 
 		ConfigDirectory = (char*)malloc( strlen(InitialDirectory)+1 ) ; 
 		strcpy( ConfigDirectory, InitialDirectory ) ; 
-		}
 	}
+}
 	
 void GetInitialDirectory( char * InitialDirectory ) {
 	int i ;
@@ -3213,14 +3215,14 @@ void GetInitialDirectory( char * InitialDirectory ) {
 			do {
 				if( InitialDirectory[i] == '\\' ) { InitialDirectory[i]='\0' ; i = 0 ; }
 				i-- ;
-				}
-			while( i >= 0 ) ;
-			}
+			} while( i >= 0 ) ;
 		}
-	else { strcpy( InitialDirectory, "" ) ; }
+	} else { 
+		strcpy( InitialDirectory, "" ) ; 
+	}
 	
 	SetConfigDirectory( InitialDirectory ) ;
-	}
+}
 	
 void GotoInitialDirectory( void ) { chdir( InitialDirectory ) ; }
 void GotoConfigDirectory( void ) { if( ConfigDirectory!=NULL ) chdir( ConfigDirectory ) ; }
@@ -4471,6 +4473,9 @@ int Convert2Dir( const char * Directory ) {
 		if( RegQueryInfoKey(hKey,achClass,&cchClassName,NULL,&cSubKeys,&cbMaxSubKey
 			,&cchMaxClass,&cValues,&cchMaxValue,&cbMaxValueData,&cbSecurityDescriptor,&ftLastWriteTime) == ERROR_SUCCESS ) {
 			if (cSubKeys) for (i=0; i<cSubKeys; i++) {
+				cbName = MAX_KEY_LENGTH;
+				retCode = RegEnumKeyEx(hKey, i, achKey, &cbName, NULL, NULL, NULL, &ftLastWriteTime) ;
+				ExportSubKeyToFile( HKEY_CURRENT_USER, buffer, achKey, ConfigDirectory, "Proxies" ) ;
 			}
 		}
 		RegCloseKey( hKey ) ;

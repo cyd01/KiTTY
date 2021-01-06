@@ -303,6 +303,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 
 	/* Basic options */
 	fprintf( fp, "host=%s\n", 			conf_get_str(conf,CONF_host) ) ;
+	fprintf( fp, "host_alt=%s\n", 			conf_get_str(conf,CONF_host_alt) ) ;
 	fprintf( fp, "port=%d\n", 			conf_get_int(conf,CONF_port) ) ;
 	fprintf( fp, "protocol=%d\n", 			conf_get_int(conf,CONF_protocol) ) ;
 	fprintf( fp, "addressfamily=%d\n",		conf_get_int(conf,CONF_addressfamily) ) ;

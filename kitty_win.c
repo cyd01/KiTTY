@@ -429,6 +429,17 @@ void debug_logevent( const char *fmt, ... ) {
 	free(buf);
 }
 
+// Test si un chemin est absolu
+bool IsPathAbsolute( const char * path ) {
+	bool test = false ;
+	if( path == NULL ) { return false ; }
+	if( strlen( path ) < 3 ) { return false ; }
+	if( ((path[0]>='a') && (path[0]<='z')) || ((path[0]>='A') && (path[0]<='Z')) ) 
+		if( path[1]==':' )
+			if( (path[2]=='/') || (path[2]=='\\') ) test = true ;
+	return test ;
+}
+
 void PopUpSystemMenu( HWND hwnd, int npos ) {
 	RECT rc ;
 	GetWindowRect( hwnd, &rc ) ;

@@ -481,6 +481,7 @@ return 1 ;
 					RegDeleteValue( hSubKey, "WinSCPProtocol" ) ;
 					RegDeleteValue( hSubKey, "SFTPConnect" ) ;
     					RegDeleteValue( hSubKey, "PSCPOptions" ) ;
+					RegDeleteValue( hSubKey, "PSCPShell" ) ;
 					RegDeleteValue( hSubKey, "PSCPRemoteDir" ) ;
 					RegDeleteValue( hSubKey, "WinSCPOptions" ) ;
 					RegDeleteValue( hSubKey, "WinSCPRawSettings" ) ;
@@ -499,6 +500,7 @@ return 1 ;
 					RegDeleteValue( hSubKey, "FailureReconnect" ) ;
 					RegDeleteValue( hSubKey, "Scriptfile" ) ;
 					RegDeleteValue( hSubKey, "ScriptfileContent" ) ;
+					RegDeleteValue( hSubKey, "HostAlt" ) ;
 					RegDeleteValue( hSubKey, "TransparencyValue" ) ;
 					RegDeleteValue( hSubKey, "TermXPos" ) ;
 					RegDeleteValue( hSubKey, "TermYPos" ) ;
@@ -545,6 +547,12 @@ return 1 ;
 					RegDeleteValue( hSubKey, "ScriptTimeout" ) ;
 					RegDeleteValue( hSubKey, "ScriptWait" ) ;
 					RegDeleteValue( hSubKey, "ScriptHalt" ) ;
+					RegDeleteValue( hSubKey, "SSHTunnelInTitle" ) ;
+					RegDeleteValue( hSubKey, "SCPAutoPwd" ) ;
+					RegDeleteValue( hSubKey, "NoFocusReporting" ) ;
+					RegDeleteValue( hSubKey, "LinesAtAScroll" ) ;
+					RegDeleteValue( hSubKey, "DisableAltGr" ) ;
+					RegDeleteValue( hSubKey, "ProxySelection" ) ;
 					//RegDeleteValue( hSubKey, "" ) ;
  					RegCloseKey(hSubKey) ;
 					}
@@ -645,6 +653,94 @@ void TestRegKeyOrCopyFromPuTTY( HKEY hMainKey, char * KeyName ) {
 	}
 }
 
+// Exporte une clé de registre dans un fichier au format PuTTY (  name\value\ )
+int ExportSubKeyToFile( HKEY hkey, const char *subkey, const char *keyname, const char *maindir, const char *subdir ) {
+	char *fullkey, *fullpath ;
+	FILE *fp;
+	HKEY hKey;
+	
+	int retCode, i;
+	unsigned char lpData[1024], unlpData[1024] ;
+	TCHAR achClass[MAX_PATH] = TEXT(""), achValue[MAX_VALUE_NAME] ; 
+	DWORD cchClassName = MAX_PATH, cSubKeys=0, cbMaxSubKey, cchMaxClass, cValues, cchMaxValue, cbMaxValueData, cbSecurityDescriptor, cchValue = MAX_VALUE_NAME , dwDataSize, lpType;
+	FILETIME ftLastWriteTime; 
+	
+	if( subkey!=NULL ) {
+		if( keyname!=NULL ) {
+			fullkey = (char*) malloc( strlen(subkey)+strlen(keyname)+2 ) ;
+			sprintf( fullkey, "%s\\%s", subkey, keyname ) ;
+		} else {
+			fullkey = (char*) malloc( strlen(subkey)+1 ) ;
+			sprintf( fullkey, "%s", subkey ) ;
+		}
+	} else {
+		fullkey = (char*) malloc( strlen(keyname)+1 ) ;
+		sprintf( fullkey, "%s", keyname ) ;
+	}
+	
+	if( maindir!=NULL ) {
+		if( subdir!=NULL ) {
+			fullpath = (char*) malloc( strlen(maindir)+strlen(subdir)+strlen(keyname)+3 ) ;
+			sprintf( fullpath, "%s\\%s\\%s", maindir, subdir, keyname ) ;
+		} else {
+			fullpath = (char*) malloc( strlen(maindir)+strlen(keyname)+2 ) ;
+			sprintf( fullpath, "%s\\%s", maindir, keyname ) ;
+		}
+	} else {
+		fullpath = (char*) malloc( strlen(subdir)+strlen(keyname)+2 ) ;
+		sprintf( fullpath, "%s\\%s", subdir, keyname ) ;
+	}
+	if( (fp=fopen(fullpath,"wb"))==NULL ) { free( fullpath ) ; free( fullkey ) ; return 1 ; }
+	if( RegOpenKeyEx( HKEY_CURRENT_USER, TEXT(fullkey), 0, KEY_READ, &hKey) != ERROR_SUCCESS ) { free( fullpath ) ; free( fullkey ) ; return 2 ; }
+	
+	if( RegQueryInfoKey(hKey,achClass,&cchClassName,NULL,&cSubKeys,&cbMaxSubKey
+		,&cchMaxClass,&cValues,&cchMaxValue,&cbMaxValueData,&cbSecurityDescriptor,&ftLastWriteTime) == ERROR_SUCCESS ) {
+		retCode = ERROR_SUCCESS ;
+		if(cValues) for (i=0, retCode=ERROR_SUCCESS; i<cValues; i++) {
+			cchValue = MAX_VALUE_NAME; 
+			achValue[0] = '\0';
+			if( (retCode = RegEnumValue(hKey, i, achValue, &cchValue, NULL, NULL,NULL,NULL) ) == ERROR_SUCCESS ) {
+				char *buffer=NULL;
+				dwDataSize = 1024 ;
+				RegQueryValueEx( hKey, TEXT( achValue ), 0, &lpType, lpData, &dwDataSize ) ;
+				switch ((int)lpType) {
+					case REG_BINARY:
+						buffer = (char*) malloc( strlen( achValue ) + 50 ) ;
+						sprintf( buffer, "%s\\", achValue ) ;
+						itoa((u_int)(lpData[0]),buffer+strlen(buffer), 10);
+						strcat(buffer,".");
+						itoa((u_int)(lpData[1]),buffer+strlen(buffer),10);
+						strcat(buffer,".");
+						itoa((u_int)(lpData[2]),buffer+strlen(buffer),10);
+						strcat(buffer,".");
+						itoa((u_int)(lpData[3]),buffer+strlen(buffer),10);
+						strcat( buffer, "\\" ) ;
+						break;
+  
+					case REG_DWORD:
+						buffer = (char*) malloc( strlen( achValue ) + 13 ) ;
+						sprintf( buffer, "%s\\", achValue ) ;
+						itoa(*(int*)(lpData),buffer+strlen(buffer),10) ;
+						strcat( buffer, "\\" ) ;
+						break;
+					
+					case REG_EXPAND_SZ:
+					case REG_MULTI_SZ:
+					case REG_SZ:
+						mungestr( (const char*)lpData, (char*)unlpData ) ;
+						buffer = (char*) malloc( strlen( achValue ) + strlen( (char*)unlpData ) + 3 ) ;
+						sprintf( buffer, "%s\\%s\\", achValue, unlpData ) ;
+						break;
+				}
+				if( buffer!=NULL ) { fprintf(fp,"%s\r\n",buffer) ; free( buffer ) ; }
+			}
+		}
+	}
+	fclose( fp );
+	free( fullpath ) ;
+	free( fullkey ) ;
+	return 0 ;
+}
 
 	
 /******

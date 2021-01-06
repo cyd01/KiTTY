@@ -2333,6 +2333,12 @@ void setup_config_box(struct controlbox *b, bool midsession,
 					sessionsaver_handler, P(ssd));
     ssd->cancelbutton->button.iscancel = true;
 #ifdef MOD_PERSO
+    if( strlen(conf_get_str(conf,CONF_host))==0 ) {
+	if( strlen(conf_get_str(conf,CONF_host_alt))>0 ) {
+		conf_set_str( conf, CONF_host, conf_get_str( conf, CONF_host_alt ) ) ;
+		conf_set_str( conf, CONF_host_alt, "" ) ;
+	}
+    }
     if( GetConfigBoxHeight() > 7 ) ssd->cancelbutton->generic.column = 0 ; else
 #endif
     ssd->cancelbutton->generic.column = 4;
@@ -4001,6 +4007,12 @@ if( !GetPuttyFlag() ) {
 		      HELPCTX(ssh_tunnels_portfwd_localhost),
 		      conf_checkbox_handler,
 		      I(CONF_rport_acceptall));
+#ifdef MOD_PERSO
+	ctrl_checkbox(s, "Print Dynamic ports in window title",NO_SHORTCUT,
+		      HELPCTX(no_help),
+		      conf_checkbox_handler,
+		      I(CONF_ssh_tunnel_print_in_title));
+#endif
 
 	ctrl_columns(s, 3, 55, 20, 25);
 	c = ctrl_text(s, "Forwarded ports:", HELPCTX(ssh_tunnels_portfwd));
@@ -4057,13 +4069,6 @@ if( !GetPuttyFlag() ) {
 			      "IPv4", '4', I(ADDRTYPE_IPV4),
 			      "IPv6", '6', I(ADDRTYPE_IPV6),
 			      NULL);
-#endif
-
-#ifdef MOD_PERSO
-	ctrl_checkbox(s, "Print Dynamic ports in window title",NO_SHORTCUT,
-		      HELPCTX(no_help),
-		      conf_checkbox_handler,
-		      I(CONF_ssh_tunnel_print_in_title));
 #endif
 	ctrl_tabdelay(s, pfd->addbutton);
 	ctrl_columns(s, 1, 100);

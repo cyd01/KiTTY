@@ -1536,6 +1536,7 @@ NORETURN void cleanup_exit(int);
     X(BOOL, NONE, crhaslf) \
     X(STR, NONE, winclass) \
 /* #ifdef MOD_PERSO */ \
+	X(STR, NONE, host_alt) \
 	X(INT, NONE, bcdelay) \
 	X(INT, NONE, initdelay) \
 	X(INT, NONE, transparencynumber) \

@@ -887,6 +887,7 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
 #ifdef MOD_PERSO
     if( conf_get_int(conf, CONF_transparencynumber)<-1 ) conf_set_int(conf, CONF_transparencynumber,-1) ;
     if( conf_get_int(conf, CONF_transparencynumber)>255 ) conf_set_int(conf, CONF_transparencynumber,255) ;
+    write_setting_s(sesskey, "HostAlt", conf_get_str(conf, CONF_host_alt) );
     write_setting_i(sesskey, "TransparencyValue", conf_get_int(conf, CONF_transparencynumber) ) ;
     write_setting_i(sesskey, "SendToTray", conf_get_int(conf, CONF_sendtotray) );
     write_setting_i(sesskey, "Maximize", conf_get_int(conf, CONF_maximize) );
@@ -1549,6 +1550,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gpps(sesskey, "zDownloadDir", "C:\\", conf, CONF_zdownloaddir );
 #endif
 #ifdef MOD_PERSO
+    gpps(sesskey, "HostAlt", "", conf, CONF_host_alt );
     gppi(sesskey, "TransparencyValue", 0, conf, CONF_transparencynumber ) ;
     if( conf_get_int( conf, CONF_transparencynumber) < -1 ) conf_set_int( conf,CONF_transparencynumber,-1) ;
     if( conf_get_int( conf, CONF_transparencynumber) > 255 ) conf_set_int( conf,CONF_transparencynumber,255) ;

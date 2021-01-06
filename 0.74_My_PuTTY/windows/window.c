@@ -388,6 +388,20 @@ void RunSessionWithCurrentSettings( HWND hwnd, Conf * oldconf, const char * host
 	if( host != NULL ) { conf_set_str(newconf,CONF_host,host) ; }
 	if( user != NULL ) { conf_set_str(newconf,CONF_username,user) ; }
 	if( pass != NULL ) { conf_set_str(newconf,CONF_password,pass) ; }
+	
+#ifndef MOD_NOPASSWORD
+	char pst[4096] ;
+	strcpy( pst, conf_get_str(newconf, CONF_password ) ) ;
+	MASKPASS(GetCryptSaltFlag(), pst);
+	if( pass != NULL ) { strcpy( pst, pass ) ; }
+	conf_set_str( newconf, CONF_password, pst ) ;
+	memset(pst,0,strlen(pst));
+#else
+	conf_set_str( newconf, CONF_password, "" ) ;
+#endif
+	
+	
+	
 	if( remotepath != NULL ) {
 		char *buf=(char*)malloc(strlen(remotepath)+5);
 		sprintf(buf,"cd %s",remotepath);
@@ -4231,6 +4245,7 @@ free(cmd);
 #endif  /* rutty */
 #ifdef MOD_PERSO
 	  case IDM_NEWDUPSESS:
+		conf_set_str( conf, CONF_host_alt, conf_get_str( conf, CONF_host ) ) ;
 	        RunSessionWithCurrentSettings( hwnd, conf, "", NULL, NULL, 0, NULL ) ;
 		break;
 	  /*case IDM_USERCMD:  

@@ -37,6 +37,9 @@ void CheckVersionFromWebSite( HWND hwnd ) ;
 // Affichage d'un message dans l'event log
 void debug_logevent( const char *fmt, ... ) ;
 
+// Test si un chemin est absolu
+bool IsPathAbsolute( const char * path ) ;
+
 // Affiche le menu system de l'application
 void PopUpSystemMenu( HWND hwnd, int npos  ) ;
 
