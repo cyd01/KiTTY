@@ -3485,9 +3485,9 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 		val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
 		char *p;
 		
-		if( key[0]=='R' ) {
+		if (( key[0]=='R' ) || ( key[1]=='R' )) {
 			p = dupprintf("[-] %s \t\t<-- \t%s\n", key+1,val);
-		} else if ( key[0]=='L' ) {
+		} else if (( key[0]=='L' ) || ( key[1]=='L' )) {
 			if( pGetExtendedTcpTable && (dwResult == NO_ERROR) ) {
 				int found=0 ;
 				if( pTCPInfo->dwNumEntries > 0 ) {
@@ -3507,7 +3507,7 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 			} else {
 				p = dupprintf("[-] %s \t\t--> \t%s\n", key+1,val);
 			}
-		} else if ( key[0]=='D' ) {
+		} else if (( key[0]=='D' ) || ( key[1]=='D' )) {
 			p = dupprintf("D%s\t\n", key+1) ;
 		} else {
 			p = dupprintf("%s\t%s\n", key, val) ;
