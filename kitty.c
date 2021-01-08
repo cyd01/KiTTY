@@ -3485,29 +3485,30 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 		val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
 		char *p;
 		
-		if( key[0]=='R' ) {
-			p = dupprintf("[-] %s \t\t<-- \t%s\n", key+1,val);
-		} else if ( key[0]=='L' ) {
+		if (( key[0]=='R' ) || ( key[1]=='R' )) {
+			p = dupprintf("[-] %s \t\t<-- \t%s\n", (key[1]=='R')? key+2 : key+1,val);
+		} else if (( key[0]=='L' ) || ( key[1]=='L' )) {
+			char *key_pos = (key[1]=='L')? key+2 : key+1;
 			if( pGetExtendedTcpTable && (dwResult == NO_ERROR) ) {
 				int found=0 ;
 				if( pTCPInfo->dwNumEntries > 0 ) {
 					for (dwLoop = 0; dwLoop < pTCPInfo->dwNumEntries; dwLoop++) {
 						owner = &pTCPInfo->table[dwLoop];
 						if ( owner->dwState == MIB_TCP_STATE_LISTEN ) {
-							if( ntohs(owner->dwLocalPort) == atoi(key+1) ) {
-								if( GetCurrentProcessId() == owner->dwOwningPid ) p = dupprintf("[C] %s \t\t--> \t%s\n", key+1,val);
-								else p = dupprintf("[X] %s(%u)\t--> \t%s\n", key+1,(unsigned int)owner->dwOwningPid,val) ;
+							if( ntohs(owner->dwLocalPort) == atoi(key_pos) ) {
+								if( GetCurrentProcessId() == owner->dwOwningPid ) p = dupprintf("[C] %s \t\t--> \t%s\n", key_pos,val);
+								else p = dupprintf("[X] %s(%u)\t--> \t%s\n", key_pos,(unsigned int)owner->dwOwningPid,val) ;
 								found=1;
 								break;
 							}
 						}
 					}
 				}
-				if( !found ) { p = dupprintf("[-] %s \t\t--> \t%s\n", key+1,val); }
+				if( !found ) { p = dupprintf("[-] %s \t\t--> \t%s\n", key_pos,val); }
 			} else {
-				p = dupprintf("[-] %s \t\t--> \t%s\n", key+1,val);
+				p = dupprintf("[-] %s \t\t--> \t%s\n", key_pos,val);
 			}
-		} else if ( key[0]=='D' ) {
+		} else if (( key[0]=='D' ) || ( key[1]=='D' )) {
 			p = dupprintf("D%s\t\n", key+1) ;
 		} else {
 			p = dupprintf("%s\t%s\n", key, val) ;
