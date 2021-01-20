@@ -381,6 +381,7 @@ void SendFile( HWND hwnd ) ;
 void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) ;
 void StartNewSession( HWND hwnd, char * directory, char * host, char * user ) ;
 void urlhack_launch_url(const char* app, const char *url) ;
+int GetPortFwdState( const int port, const DWORD pid ) ;
 int ShowPortfwd( HWND hwnd, Conf * conf ) ;
 void OnDropFiles(HWND hwnd, HDROP hDropInfo) ;
 // Affiche un menu dans le systeme Tray

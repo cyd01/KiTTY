@@ -1161,6 +1161,22 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 				if( conf_get_int( conf, CONF_xpos)<0) conf_set_int( conf, CONF_xpos,0);
 				conf_set_bool( conf, CONF_save_windowpos, true ) ;
 				}
+		} else if( !strcmp(p, "-mungestr") ) {
+			i++ ;
+			char *b = (char*)malloc(4*strlen(argv[i])+1);
+			mungestr(argv[i],b);
+			MessageBox(NULL,b,"mungestr",MB_OK);
+			SetTextToClipboard(b);
+			free(b) ;
+			return 0;
+		} else if( !strcmp(p, "-unmungestr") ) {
+			i++ ;
+			char *b = (char*)malloc(4*strlen(argv[i])+1);
+			unmungestr(argv[i],b,MAX_VALUE_NAME) ;
+			MessageBox(NULL,b,"unmungestr",MB_OK);
+			SetTextToClipboard(b);
+			free(b);
+			return 0;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 		} else if( !strcmp(p, "-nobgimage") ) {
 			SetBackgroundImageFlag(0) ;
@@ -1226,9 +1242,21 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			}
 			exit(0);
 		} else if( !strcmp(p, "-help") || !strcmp(p, "-h") ) {
-			SetTextToClipboard(GetHelpMessage()) ;
+			char *hmsg ;
+			if( debug_flag ) {
+				hmsg=(char*)malloc(strlen(GetHelpMessage())+1024);
+				sprintf(hmsg,"%s",GetHelpMessage());
+				strcat(hmsg,"\r\nDebug Mode\r\n\r\n");
+				strcat(hmsg,"* -mungestr\r\n");
+				strcat(hmsg,"* -unmungestr\r\n");
+				
+			} else {
+				hmsg = GetHelpMessage() ;
+			}
+			SetTextToClipboard(hmsg) ;
 			char buffer[1024];
 			sprintf(buffer, "%s|%s|1|1", (char*)get_param_str("INI"), (char*)get_param_str("SAV") ) ;
+			if( hmsg!=GetHelpMessage()) { free(hmsg); }
 			return Notepad_WinMain(inst, prev, buffer, show) ;
 #ifdef MOD_LAUNCHER
 		} else if( !strcmp(p, "-launcher") ) {
@@ -4387,7 +4415,11 @@ free(cmd);
 #endif
 #ifdef MOD_RECONNECT
 	case IDM_RESTARTSESSION: // Redemarre une session en cours
-		RestartSession() ;
+		if(!is_backend_connected) {
+			PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ;
+		} else {
+			RestartSession() ;
+		}
 		break ;
 #endif
 
@@ -7462,6 +7494,15 @@ void make_title( char * res, char * fmt, const char * title ) {
 			if( (k[0]=='L') && (!strcmp(val,"D")) ) {
 				if(nb!=0) {strcat(b,"|");}
 				strcat(b,k+1);
+				switch( GetPortFwdState( atoi(k+1), GetCurrentProcessId() ) ) {
+					case -1: 
+						break ;
+					case 0: 
+						strcat(b,"+");
+						break ;
+					default:
+						strcat(b,"~");
+				}
 				nb++;
 			}
 		}
@@ -7529,7 +7570,10 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	}
 	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) { strcat( buffer, " (PROTECTED)" ) ; }
 	if( conf_get_bool(conf, CONF_alwaysontop) ) if( strstr(buffer, " (ONTOP)")==NULL ) { strcat( buffer, " (ONTOP)" ) ; }
-	if( conf_get_bool(conf, CONF_ssh_tunnel_print_in_title) ) if( strstr(buffer, " (SOCKS: ")==NULL ) { make_title( fmt, " (SOCKS: %s)", "%%d") ; strcat( buffer, fmt ) ; }
+	if( conf_get_bool(conf, CONF_ssh_tunnel_print_in_title) ) if( strstr(buffer, " (SOCKS: ")==NULL ) { 
+		make_title( fmt, " (SOCKS: %s)", "%%d") ; 
+		strcat( buffer, fmt ) ;
+	}
 	set_title_internal( tw, buffer ) ;
 	free(title);
 	free(buffer);

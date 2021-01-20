@@ -3458,12 +3458,79 @@ DWORD (WINAPI *pGetExtendedTcpTable)(
   ULONG ulAf,
   TCP_TABLE_CLASS TableClass,
   ULONG Reserved
-);
+) ;
+
+int GetPortFwdState( const int port, const DWORD pid ) {
+	int result = -1 ;
+	MIB_TCPTABLE_OWNER_PID *pTCPInfo ;
+	MIB_TCPROW_OWNER_PID *owner ;
+	DWORD size ;
+	DWORD dwResult ;
+	DWORD dwLoop ;
+	
+	HMODULE hLib = LoadLibrary( "iphlpapi.dll" );
+
+	if( hLib ) {
+		pGetExtendedTcpTable = (DWORD (WINAPI *)(PVOID,PDWORD,BOOL,ULONG,TCP_TABLE_CLASS,ULONG)) 
+		GetProcAddress(hLib, "GetExtendedTcpTable") ;
+		dwResult = pGetExtendedTcpTable(NULL, &size, 0, AF_INET, TCP_TABLE_OWNER_PID_LISTENER, 0) ;
+		pTCPInfo = (MIB_TCPTABLE_OWNER_PID*)malloc(size) ;
+		dwResult = pGetExtendedTcpTable(pTCPInfo, &size, 0, AF_INET, TCP_TABLE_OWNER_PID_LISTENER, 0) ;
+		if( pGetExtendedTcpTable && (dwResult == NO_ERROR) ) {
+			if( pTCPInfo->dwNumEntries > 0 ) {
+				for (dwLoop = 0; dwLoop < pTCPInfo->dwNumEntries; dwLoop++) {
+					owner = &pTCPInfo->table[dwLoop];
+					if ( owner->dwState == MIB_TCP_STATE_LISTEN ) {
+						if( ntohs(owner->dwLocalPort) == port ) {
+							if( pid == owner->dwOwningPid ) { 
+								result = 0 ; 
+							} else { 
+								result = owner->dwOwningPid ; 
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		free(pTCPInfo) ;
+		FreeLibrary( hLib ) ;
+	}
+	return result ;
+}
 
 int ShowPortfwd( HWND hwnd, Conf * conf ) {
 	char pf[2048]="" ;
 	char *key, *val;
-	
+	for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key) ;
+		val != NULL;
+		val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
+		char *p;
+		if (( key[0]=='R' ) || ( key[1]=='R' )) {
+			p = dupprintf("[-] %s \t\t<-- \t%s\n", (key[1]=='R')? key+2 : key+1,val) ;
+		} else if (( key[0]=='L' ) || ( key[1]=='L' )) {
+			char *key_pos = (key[1]=='L')? key+2 : key+1 ;
+			int res ;
+			switch( res=GetPortFwdState( atoi(key_pos), GetCurrentProcessId() ) ) {
+				case -1:
+					p = dupprintf("[-] %s \t\t--> \t%s\n", key_pos,val) ;
+					break ;
+				case 0:
+					p = dupprintf("[C] %s \t\t--> \t%s\n", key_pos,val) ;
+					break ;
+				default:
+					p = dupprintf("[X] %s(%u)\t--> \t%s\n", key_pos,(unsigned int)res,val) ;
+			}
+		} else if (( key[0]=='D' ) || ( key[1]=='D' )) {
+			p = dupprintf("D%s\t\n", key+1) ;
+		} else {
+			p = dupprintf("%s\t%s\n", key, val) ;
+		}
+		strcat( pf, p ) ;
+		sfree(p);
+	}
+	/*
 	MIB_TCPTABLE_OWNER_PID *pTCPInfo;
 	MIB_TCPROW_OWNER_PID *owner;
 	DWORD size;
@@ -3519,7 +3586,7 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 	}
 	
 	if( hLib ) { FreeLibrary( hLib ) ; }
-		
+	*/
 	strcat( pf, "\n[C] Listening in the current process\n[X] Listening in another process\n[-] No Listening\n" );
 	MessageBox( NULL, pf, "Port forwarding", MB_OK ) ;
 	return SetTextToClipboard( pf ) ;

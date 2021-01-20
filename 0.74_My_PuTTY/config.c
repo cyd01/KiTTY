@@ -3479,7 +3479,11 @@ if( !GetPuttyFlag() ) {
 
     }
 
-    if (!midsession /*||midsession*/ ) {
+#ifdef MOD_PROXY
+    if (!midsession || debug_flag ) {
+#else
+    if (!midsession) {
+#endif
 	/*
 	 * The Connection/Proxy panel.
 	 */
