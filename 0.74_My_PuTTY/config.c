@@ -25,47 +25,6 @@ int GetReadOnlyFlag(void) ;
 #ifdef MOD_ZMODEM
 #define ATOFFSET(data, offset) ( (void *) ( (char *)(data) + (offset) ) )
 #endif
-#ifdef MOD_PROXY
-#include "kitty_proxy.h"
-void proxy_selection_handler(union control *ctrl, dlgparam *dlg, void *data, int event) {
-    int i, j;
-    Conf *conf = (Conf *)data;
-    if (event == EVENT_REFRESH) {
-	/* Fetching this once at the start of the function ensures we
-	 * remember what the right value is supposed to be when
-	 * operations below cause reentrant calls to this function. */
-	char * oldproxy = conf_get_str(conf, CONF_proxyselection);
-
-	dlg_update_start(ctrl, dlg);
-	dlg_listbox_clear(ctrl, dlg);
-	for (i = 0; i < lenof(proxies); i++)  {
-		if( proxies[i].name==NULL ) break ;
-		dlg_listbox_addwithid(ctrl, dlg, proxies[i].name, proxies[i].val);
-	}
-	for (i = j = 0; i < lenof(proxies); i++) {
-		if( proxies[i].name==NULL ) break ;
-		if ( !strcmp(oldproxy,proxies[i].name) ) {
-		    dlg_listbox_select(ctrl, dlg, i);
-		    break;
-		}
-		j++;
-	}
-	if (i == lenof(proxies)) {    /* an unsupported setting was chosen */
-	    dlg_listbox_select(ctrl, dlg, 0);
-	    oldproxy = NULL;
-	}
-	dlg_update_done(ctrl, dlg);
-	if( oldproxy!=NULL ) conf_set_str(conf, CONF_proxyselection, oldproxy);    /* restore */
-    } else if (event == EVENT_SELCHANGE) {
-	int i = dlg_listbox_index(ctrl, dlg);
-	if (i < 0)
-	    i = 0;
-	else
-	    i = dlg_listbox_getid(ctrl, dlg, i);
-	conf_set_str(conf, CONF_proxyselection, proxies[i].name);
-    }
-}
-#endif
 
 #define PRINTER_DISABLED_STRING "None (printing disabled)"
 
@@ -787,6 +746,7 @@ extern char CurrentFolder[1024] ;
 union control * ctrlSessionList = NULL ;
 union control * ctrlSessionEdit = NULL ;
 union control * ctrlFolderList = NULL ;
+union control * ctrlProxyList = NULL ;
 
 int get_param( const char * val ) ;
 #ifndef SAVEMODE_REG
@@ -853,6 +813,48 @@ static void folder_handler(union control *ctrl, dlgparam *dlg,
 		}
 	conf_free( conf ) ;
 	}
+#endif
+#ifdef MOD_PROXY
+#include "kitty_proxy.h"
+void proxy_selection_handler(union control *ctrl, dlgparam *dlg, void *data, int event) {
+    int i, j;
+    Conf *conf = (Conf *)data;
+    ctrlProxyList = ctrl ;
+    if (event == EVENT_REFRESH) {
+	/* Fetching this once at the start of the function ensures we
+	 * remember what the right value is supposed to be when
+	 * operations below cause reentrant calls to this function. */
+	char * oldproxy = conf_get_str(conf, CONF_proxyselection);
+
+	dlg_update_start(ctrl, dlg);
+	dlg_listbox_clear(ctrl, dlg);
+	for (i = 0; i < lenof(proxies); i++)  {
+		if( proxies[i].name==NULL ) break ;
+		dlg_listbox_addwithid(ctrl, dlg, proxies[i].name, proxies[i].val);
+	}
+	for (i = j = 0; i < lenof(proxies); i++) {
+		if( proxies[i].name==NULL ) break ;
+		if ( !strcmp(oldproxy,proxies[i].name) ) {
+		    dlg_listbox_select(ctrl, dlg, i);
+		    break;
+		}
+		j++;
+	}
+	if (i == lenof(proxies)) {    /* an unsupported setting was chosen */
+	    dlg_listbox_select(ctrl, dlg, 0);
+	    oldproxy = NULL;
+	}
+	dlg_update_done(ctrl, dlg);
+	if( oldproxy!=NULL ) conf_set_str(conf, CONF_proxyselection, oldproxy);    /* restore */
+    } else if (event == EVENT_SELCHANGE) {
+	int i = dlg_listbox_index(ctrl, dlg);
+	if (i < 0)
+	    i = 0;
+	else
+	    i = dlg_listbox_getid(ctrl, dlg, i);
+	conf_set_str(conf, CONF_proxyselection, proxies[i].name);
+    }
+}
 #endif
 
 struct sessionsaver_data {
@@ -1404,7 +1406,12 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 			char sessionname[1024];
 			strcpy(sessionname,"Default Settings");
 			if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
+			if(selectedsession!=NULL) { free(selectedsession) ; }
+			selectedsession = (char*)malloc(strlen(sessionname)+1) ;
+			strcpy(selectedsession,sessionname);
 			do_defaults(sessionname, conf) ;
+			conf_set_str(conf,CONF_proxyselection,"- Session defined proxy -");
+			proxy_selection_handler(ctrlProxyList, dlg, data, EVENT_REFRESH ) ;
 			conf_set_str(conf,CONF_host,"");
 			dlg_editbox_set(ctrlHostnameEdit, dlg,"");
 			if( strlen(ssd->savedsession) > 0 ) {

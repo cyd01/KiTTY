@@ -695,7 +695,7 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 		h = h - 12 ; // il n'y a pas la liste déroulant des folders en mode portable
 	}
 #ifdef MOD_PROXY
-	if( GetProxySelectionFlag() ) { h = h + 12 ; }
+	if( GetProxySelectionFlag() ) { h = h + 20 ; }
 #endif
 	// Initialise la taille de la ConfigBox (en cas de DPI speciaux)
 	double ScaleY = GetDeviceCaps(GetDC(hwnd),LOGPIXELSY)/96.0 ; // La police standard (100%) vaut 96ppp (pixels per pouce)

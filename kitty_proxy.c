@@ -80,7 +80,7 @@ int LoadProxyInfo( Conf * conf, const char * name ) {
 	char buffer[MAX_VALUE_NAME] ;
 	if( !strcmp(name,"- Session defined proxy -") ) { return 0 ; }
 	if( !strcmp(name,"- No proxy -") ) { 
-		debug_logevent( "Remove proxy definition") ;
+		debug_logevent( "Remove proxy definition" ) ;
 		conf_set_int(conf, CONF_proxy_type, PROXY_NONE) ; 
 		return 1 ;
 	}
@@ -92,7 +92,10 @@ int LoadProxyInfo( Conf * conf, const char * name ) {
 		mungestr(name,b);
 		strcat(buffer,b);
 		free(b);
-		if( RegOpenKeyEx( HKEY_CURRENT_USER, buffer, 0, KEY_READ, &hKey) != ERROR_SUCCESS ) return 0;
+		if( RegOpenKeyEx( HKEY_CURRENT_USER, buffer, 0, KEY_READ, &hKey) != ERROR_SUCCESS ) {
+			debug_logevent( "Unable to load proxy definition" ) ;
+			return 0;
+		}
 		char lpData[4096] ;
 		if( GetValueData(HKEY_CURRENT_USER, buffer, "ProxyExcludeList", lpData ) ) { 
 			conf_set_str( conf, CONF_proxy_exclude_list, lpData ) ; 
