@@ -15,6 +15,7 @@
   * [Automatic password](pages/AutomaticPassword.md)
   * [Private key usage confirmation](pages/KeyConfirmation.md)
   * [Port knocking](pages/PortKnock.md)
+  * [Proxy choice](pages/ProxyChoice.md)
   * [SSH Handler: Internet Explorer integration](pages/SSHHandler.md)
 
 [Technical]()
