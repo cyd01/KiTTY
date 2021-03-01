@@ -1266,8 +1266,13 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 		if ( (fp = fopen(b, "r")) != NULL) {
 			putty_path = dupstr(b);
 			fclose(fp);
-		} else
-		putty_path = NULL;
+		} else {
+			strcpy(r, "kitty_portable.exe");
+			if ( (fp = fopen(b, "r")) != NULL) {
+				putty_path = dupstr(b);
+				fclose(fp);
+			} else putty_path = NULL;
+		}
 	}
 #else
         } else

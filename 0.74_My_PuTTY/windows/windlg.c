@@ -283,7 +283,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 			GetObject(hFontTitle,sizeof(LOGFONT),&lf);
 			lf.lfWeight = FW_BOLD;
 			hFontTitle = CreateFontIndirect(&lf);
-			}
+		}
 		//  Font setup
 		if (NULL == (hFontHover = (HFONT)SendDlgItemMessage(hwnd,IDC_EMAIL,WM_GETFONT,0,0)))
 			hFontHover = GetStockObject(DEFAULT_GUI_FONT);
@@ -977,8 +977,11 @@ void modal_about_box(HWND hwnd)
 {
     EnableWindow(hwnd, 0);
 #if (defined MOD_PERSO) && (!defined FLJ)
-	if( get_param("PUTTY") ) DialogBox(hinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, AboutProcOrig);
-	else DialogBox(hinst, MAKEINTRESOURCE(IDD_KITTYABOUT), hwnd, AboutProc);
+	if( GetPuttyFlag() ) {
+		DialogBox(hinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, AboutProcOrig) ;
+	} else {
+		DialogBox(hinst, MAKEINTRESOURCE(IDD_KITTYABOUT), hwnd, AboutProc) ;
+	}
 #else
     DialogBox(hinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, AboutProc);
 #endif

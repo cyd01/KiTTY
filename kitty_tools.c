@@ -11,7 +11,7 @@ char *stristr (const char *meule_de_foin, const char *aiguille) {
 	free( c2 ) ;
 	free( c1 ) ;
 	return res ;
-	}
+}
 
 /* Fonction permettant d'inserer une chaine dans une autre */
 int insert( char * ch, const char * c, const int ipos ) {
@@ -21,9 +21,9 @@ int insert( char * ch, const char * c, const int ipos ) {
 		if( (size_t) i > ( strlen( ch ) + 1 ) ) i = strlen( ch ) + 1 ;
 		for( k = strlen( ch ) ; k >= ( i - 1 ) ; k-- ) ch[k + len] = ch[k] ;
 		for( k = 0 ; k < len ; k++ ) ch[k + i - 1] = c[k] ; 
-		}
-	return strlen( ch ) ; 
 	}
+	return strlen( ch ) ; 
+}
 
 /* Fonction permettant de supprimer une partie d'une chaine de caracteres */
 int del( char * ch, const int start, const int length ) {
@@ -32,15 +32,18 @@ int del( char * ch, const int start, const int length ) {
 	if( ( start == 1 ) && ( length >= len ) ) { ch[0] = '\0' ; len = 0 ; }
 	if( ( start > 0 ) && ( start <= len ) && ( length > 0 ) ) {
 		for( k = start - 1 ; k < ( len - length ) ; k++ ) {
-			if( k < ( len - length ) ) ch[k] = ch[ k + length ] ;
-			else ch = '\0' ; 
+			if( k < ( len - length ) ) {
+				ch[k] = ch[ k + length ] ;
+			} else  {
+				ch[k] = '\0' ;
 			}
+		}
 		k = len - length ;
 		if( ( start + length ) > len ) k = start - 1 ;
 		ch[k] = '\0' ; 
-		}
-	return strlen( ch ) ; 
 	}
+	return strlen( ch ) ; 
+}
 
 /* Fonction permettant de retrouver la position d'une chaine dans une autre chaine */
 int poss( const char * c, const char * ch ) {
@@ -57,7 +60,7 @@ int poss( const char * c, const char * ch ) {
 	free( ch1 ) ;
 	free( c1 ) ;
 	return res ; 
-	}
+}
 	
 /* Fonction permettant de retrouver la position d'une chaîne de caracteres dans une chaine a partir d'une position donnee */
 int posi( const char * c, const char * ch, const int ipos ) {
@@ -67,7 +70,7 @@ int posi( const char * c, const char * ch, const int ipos ) {
 	res = poss( c, ch + ( ipos - 1 ) ) ;
 	if( res > 0 ) return res + ( ipos -1 ) ;
 	else return 0 ;
-	}
+}
 
 // Teste l'existance d'un fichier
 int existfile( const char * filename ) {
@@ -79,7 +82,7 @@ int existfile( const char * filename ) {
 	
 	if( ( statBuf.st_mode & _S_IFMT ) == _S_IFREG ) { return 1 ; }
 	else { return 0 ; }
-	}
+}
 	
 // Teste l'existance d'un repertoire
 int existdirectory( const char * filename ) {
@@ -91,7 +94,7 @@ int existdirectory( const char * filename ) {
 	
 	if( ( statBuf.st_mode & _S_IFMT ) == _S_IFDIR ) { return 1 ; }
 	else { return 0 ; }
-	}
+}
 
 /* Donne la taille d'un fichier */
 long filesize( const char * filename ) {
@@ -108,7 +111,7 @@ long filesize( const char * filename ) {
 	
 	fclose( fp ) ;
 	return length ;
-	}
+}
 
 // Supprime les double anti-slash
 void DelDoubleBackSlash( char * st ) {
@@ -116,10 +119,10 @@ void DelDoubleBackSlash( char * st ) {
 	while( st[i] != '\0' ) {
 		if( (st[i] == '\\' )&&(st[i+1]=='\\' ) ) {
 			for( j=i+1 ; j<strlen( st ) ; j++ ) st[j]=st[j+1] ;
-			}
-		else i++ ;
 		}
+		else i++ ;
 	}
+}
 
 // Ajoute une chaine dans une liste de chaines
 int StringList_Add( char **list, const char * name ) {
@@ -128,12 +131,12 @@ int StringList_Add( char **list, const char * name ) {
 	while( list[i] != NULL ) {
 		if( !stricmp( name, list[i] ) ) return 1 ;
 		i++ ;
-		}
+	}
 	if( ( list[i] = (char*) malloc( strlen( name ) + 1 ) ) == NULL ) return 0 ;
 	strcpy( list[i], name ) ;
 	list[i+1] = NULL ;
 	return 1 ;
-	}
+}
 
 // Test si une chaine existe dans une liste de chaines
 int StringList_Exist( const char **list, const char * name ) {
@@ -142,9 +145,9 @@ int StringList_Exist( const char **list, const char * name ) {
 		if( strlen( list[i] ) > 0 )
 			if( !strcmp( list[i], name ) ) return 1 ;
 		i++ ;
-		}
-	return 0 ;
 	}
+	return 0 ;
+}
 	
 // Supprime une chaine d'une liste de chaines
 void StringList_Del( char **list, const char * name ) {
@@ -153,10 +156,10 @@ void StringList_Del( char **list, const char * name ) {
 		if( strlen( list[i] ) > 0 )
 			if( !strcmp( list[i], name ) ) {
 				strcpy( list[i], "" ) ;
-				}
+			}
 		i++;
-		}
 	}
+}
 
 // Reorganise l'ordre d'une liste de chaines en montant la chaine selectionnee d'un cran
 void StringList_Up( char **list, const char * name ) {
@@ -174,12 +177,12 @@ void StringList_Up( char **list, const char * name ) {
 				list[i] = (char*) malloc( strlen( buffer ) +1 ) ;
 				strcpy( list[i], buffer );
 				free( buffer );
-				}
-			return ;
 			}
-		i++ ;
+			return ;
 		}
+		i++ ;
 	}
+}
 
 // Positionne l'environnement
 int putenv (const char *string) ;
@@ -191,19 +194,21 @@ int set_env( char * name, char * value ) {
 	res = putenv( (const char *) buffer ) ;
 	free( buffer ) ;
 	return res ;
-	}
+}
+
 int add_env( char * name, char * value ) {
 	int res = 0 ;
 	char * npst = getenv( name ), * vpst = NULL ;
-	if( npst==NULL ) { res = set_env( name, value ) ; }
-	else {
+	if( npst==NULL ) { 
+		res = set_env( name, value ) ; 
+	} else {
 		vpst = (char*) malloc( strlen(npst)+strlen(value)+20 ) ; 
 		sprintf( vpst, "%s=%s;%s", name, npst, value ) ;
 		res = set_env( name, vpst ) ;
 		free( vpst ) ;
-		}
-	return res ;
 	}
+	return res ;
+}
 
 // Creer un repertoire recurssif (rep1 / rep2 / ...)
 int _mkdir (const char*);
@@ -218,9 +223,9 @@ int MakeDir( const char * directory ) {
 		if( (directory[i]=='\\')||(directory[i]=='/') ) {
 			fullpath[j]='\\' ;
 			while( (directory[i+1]==' ')||(directory[i+1]=='	') ) i++ ;
-			}
-		else fullpath[j]=directory[i] ;
-		}
+		} else 
+			fullpath[j]=directory[i] ;
+	}
 	fullpath[j+1]='\0' ;
 		
 	// On supprime les espaces, les / et les \\ à la fin
@@ -230,9 +235,9 @@ int MakeDir( const char * directory ) {
 		if( fullpath[i] == '\\' ) {
 			buffer[j]='\\' ;
 			while( (i>0)&&((fullpath[i-1]==' ')||(fullpath[i-1]=='	')) ) i-- ;
-			}
-		else buffer[j]=fullpath[i] ;
-		}
+		} else
+			buffer[j]=fullpath[i] ;
+	}
 	j++;
 		
 	// On supprime les espace au début
@@ -247,10 +252,9 @@ int MakeDir( const char * directory ) {
 			_mkdir( fullpath ) ;
 			p[0]='\\' ;
 			pst=p+1;
-			}
+		}
 		_mkdir( fullpath ) ;
 	}
 		
 	return existdirectory(fullpath) ;
 }
-

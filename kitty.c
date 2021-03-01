@@ -1260,6 +1260,11 @@ char * GetHelpMessage(void) {
 void CreateIniFile( const char * filename ) {
 	FILE *fp;
 	if( (fp=fopen(filename,"w")) != NULL ) {
+		if( IniFileFlag == SAVEMODE_DIR ) {
+			int p = poss( ";savemode=registry", default_init_file_content );
+			del( default_init_file_content, p, 18 );
+			insert( default_init_file_content, "savemode=dir", p );
+		}
 		fputs(default_init_file_content,fp);
 		fclose(fp);
 	}

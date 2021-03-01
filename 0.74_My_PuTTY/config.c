@@ -825,14 +825,13 @@ void proxy_selection_handler(union control *ctrl, dlgparam *dlg, void *data, int
 	 * remember what the right value is supposed to be when
 	 * operations below cause reentrant calls to this function. */
 	char * oldproxy = conf_get_str(conf, CONF_proxyselection);
-
 	dlg_update_start(ctrl, dlg);
 	dlg_listbox_clear(ctrl, dlg);
 	for (i = 0; i < lenof(proxies); i++)  {
 		if( proxies[i].name==NULL ) break ;
 		dlg_listbox_addwithid(ctrl, dlg, proxies[i].name, proxies[i].val);
 	}
-	for (i = j = 0; i < lenof(proxies); i++) {
+	for (i =0, j = 0 ; i < lenof(proxies); i++) {
 		if( proxies[i].name==NULL ) break ;
 		if ( !strcmp(oldproxy,proxies[i].name) ) {
 		    dlg_listbox_select(ctrl, dlg, i);
@@ -1410,16 +1409,18 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 			selectedsession = (char*)malloc(strlen(sessionname)+1) ;
 			strcpy(selectedsession,sessionname);
 			do_defaults(sessionname, conf) ;
-			conf_set_str(conf,CONF_proxyselection,"- Session defined proxy -");
-			proxy_selection_handler(ctrlProxyList, dlg, data, EVENT_REFRESH ) ;
+			if( !GetPuttyFlag() && GetProxySelectionFlag() ) {
+				conf_set_str(conf,CONF_proxyselection,"- Session defined proxy -");
+				proxy_selection_handler(ctrlProxyList, dlg, data, EVENT_REFRESH ) ;
+			}
 			conf_set_str(conf,CONF_host,"");
 			dlg_editbox_set(ctrlHostnameEdit, dlg,"");
 			if( strlen(ssd->savedsession) > 0 ) {
 				ssd->savedsession[0]='\0' ;
 				dlg_refresh(ssd->editbox, dlg) ;
-				}
-			sessionsaver_handler( ctrlSessionList, dlg, data, EVENT_REFRESH ) ;
 			}
+			sessionsaver_handler( ctrlSessionList, dlg, data, EVENT_REFRESH ) ;
+		}
 	else if (!ssd->midsession && // creer un nouveau folder
 		   ssd->createbutton && ctrl == ssd->createbutton) {
 			if( strlen(ssd->savedsession) > 0 ) {

@@ -1984,7 +1984,7 @@ kitty.dll: ../../kitty_dll.c kitty_dll.res.o
 	upx --best --compress-icons=2 kitty.dll
 
 ../../kitty_ini.h: ../../kitty_ini.txt
-	( printf 'static char *default_init_file_content = "' ; sed 's/\\/\\\\/g' ../../kitty_ini.txt | sed 's/$$/\\n\\/' ; printf '" ;\n' ) > ../../kitty_ini.h
+	( printf 'char default_init_file_content[] = "' ; sed 's/\\/\\\\/g' ../../kitty_ini.txt | sed 's/$$/\\n\\/' ; printf '" ;\n' ) > ../../kitty_ini.h
 
 ../../kitty_help.h: ../../docs/pages/CommandLine.md
 	( printf 'static char *default_help_file_content = "' ; sed -n '/CmdLineOptions_begin/,/CmdLineOptions_end/p' ../../docs/pages/CommandLine.md|sed 's/<!--.*-->//'|sed 's/\*\*//g'|sed 's/$$/\\r\\n\\/' ; printf '" ;\n' ) > ../../kitty_help.h

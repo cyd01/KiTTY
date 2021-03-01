@@ -272,7 +272,13 @@ int LoadParametersLight( void ) {
 		}
 #endif
 	}
-	
+	if( ReadParameterLight( INIT_SECTION, "fileextension", buffer ) ) {
+		if( strlen(buffer) > 0 ) {
+			if( buffer[0] != '.' ) { strcpy( FileExtension, "." ) ; } else { strcpy( FileExtension, "" ) ; }
+			strcat( FileExtension, buffer ) ;
+			while( FileExtension[strlen(FileExtension)-1]==' ' ) { FileExtension[strlen(FileExtension)-1] = '\0' ; }
+		}				
+	}
 	if( ReadParameterLight( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
 	if( ReadParameterLight( "Agent", "messageonkeyusage", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetShowBalloonOnKeyUsage() ; }
 	if( ReadParameterLight( "Agent", "askconfirmation", buffer ) ) { 
@@ -283,7 +289,7 @@ int LoadParametersLight( void ) {
 	if( ReadParameterLight( "Agent", "scrumble", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetScrumbleKeyFlag(1) ; }
 
 	return ret ;
-	}
+}
 
 // Positionne un flag permettant de determiner si on est connecte
 int is_backend_connected = 0 ;
