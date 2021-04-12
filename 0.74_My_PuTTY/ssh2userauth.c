@@ -264,7 +264,7 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
     PktIn *pktin;
 
 #ifdef MOD_RECONNECT
-	SetSSHConnected(0);
+	//SetSSHConnected(0);
 #endif
 
     ssh2_userauth_filter_queue(s);     /* no matter why we were called */

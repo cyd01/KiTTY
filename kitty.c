@@ -385,6 +385,7 @@ extern char puttystr[1024] ;
 
 // Handle sur la fenetre principale
 HWND MainHwnd ;
+HWND GetMainHwnd(void) { return MainHwnd ; }
 
 // Decompte du nombre de fenetres en cours de KiTTY
 static int NbWindows = 0 ;

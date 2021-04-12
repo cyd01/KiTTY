@@ -776,7 +776,10 @@ static void close_session(void *ignored_context)
 
 #ifdef MOD_RECONNECT
 void RestartSession( void ) {
-	if( backend ) { SetSSHConnected(0) ; queue_toplevel_callback(close_session, NULL) ; backend = NULL ; }
+	if( backend ) { 
+		SetSSHConnected(0) ; 
+		queue_toplevel_callback(close_session, NULL) ; backend = NULL ; 
+	}
 	if( GetAutoreconnectFlag() ) {
 		lp_eventlog(default_logpolicy, "User request session restart..." ) ;
 	} else {

@@ -7,7 +7,7 @@
 
 // Handle sur la fenetre principale
 extern HWND MainHwnd ;
-
+HWND GetMainHwnd(void) ;
 
 
 /*****************************************************

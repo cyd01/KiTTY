@@ -1209,7 +1209,9 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		     memset( buffer, 0, strlen(buffer) ) ;
 		}
 		if( GetDblClickFlag()==1 ) {
+#if (!defined FLJ) && (defined MOD_STARTBUTTON)
 		    sessionsaver_handler( ssd->startbutton, dlg, data, EVENT_ACTION ) ;
+#endif
 		    sessionsaver_handler( ssd->clearbutton, dlg, data, EVENT_ACTION ) ;
 		    sessionsaver_handler( ctrlSessionList, dlg, data, EVENT_REFRESH ) ;
 		} else
