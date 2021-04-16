@@ -1252,7 +1252,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
-		     }
+		}
 		char sessionname[1024];
 		strcpy(sessionname,ssd->savedsession);
 		if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
@@ -1264,7 +1264,7 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 		     MASKPASS( GetCryptSaltFlag(), buffer ) ;
 		     conf_set_str( conf, CONF_password, buffer ) ;
 		     memset( buffer, 0, strlen(buffer) ) ;
-	            }
+		}
 #else
                 char *errmsg = save_settings(ssd->savedsession, conf);
 #endif

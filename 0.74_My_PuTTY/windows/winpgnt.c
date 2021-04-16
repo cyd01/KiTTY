@@ -31,6 +31,8 @@ extern int DirectoryBrowseFlag ;
 
 #include "../../kitty_crypt.h"
 #include "../../kitty_commun.h"
+#include "../../kitty_store.h"
+#include "../storage.h"
 
 static char pphrase[2048]="";
 #endif
@@ -713,6 +715,40 @@ static void update_sessions(void)
     if (!putty_path)
 	return;
 
+#ifdef MOD_PERSO
+    if( IniFileFlag==2 ) {
+      SetInitialSessPath();
+      for(num_entries = GetMenuItemCount(session_menu);
+	num_entries > initial_menuitems_count;
+	num_entries--)
+	RemoveMenu(session_menu, 0, MF_BYPOSITION);
+
+      index_key = 0;
+      index_menu = 0;
+
+      settings_e *handle;
+      sb = strbuf_new();
+      if ((handle = enum_settings_start()) != NULL) {
+        while (enum_settings_next(handle, sb)) {
+		
+	    if( !strcmp(FileExtension,"") || !strcmp(FileExtension,sb->s+strlen(sb->s)-strlen(FileExtension)) ) {
+		
+            memset(&mii, 0, sizeof(mii));
+	    mii.cbSize = sizeof(mii);
+	    mii.fMask = MIIM_TYPE | MIIM_STATE | MIIM_ID;
+	    mii.fType = MFT_STRING;
+	    mii.fState = MFS_ENABLED;
+	    mii.wID = (index_menu * 16) + IDM_SESSIONS_BASE;
+	    mii.dwTypeData = sb->s;
+	    InsertMenuItem(session_menu, index_menu, true, &mii);
+	    index_menu++;
+	    }
+	    strbuf_clear(sb);
+	}
+      enum_settings_finish(handle);
+      }
+    } else {
+#endif
     if(ERROR_SUCCESS != RegOpenKey(HKEY_CURRENT_USER, PUTTY_REGKEY, &hkey))
 	return;
 
@@ -743,8 +779,11 @@ static void update_sessions(void)
 	index_key++;
     }
     strbuf_free(sb);
-
     RegCloseKey(hkey);
+
+#ifdef MOD_PERSO
+    }
+#endif
 
     if(index_menu == 0) {
 	mii.cbSize = sizeof(mii);
@@ -1207,6 +1246,7 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 #ifdef MOD_PERSO
 	IniFileFlag = 0 ;
 	DirectoryBrowseFlag = 0 ;
+	loadPath() ;
 	LoadParametersLight() ;
 #endif
 

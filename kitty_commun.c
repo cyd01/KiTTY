@@ -182,22 +182,20 @@ int LoadParametersLight( void ) {
 			if( !stricmp( buffer, "registry" ) ) IniFileFlag = SAVEMODE_REG ;
 			else if( !stricmp( buffer, "file" ) ) IniFileFlag = SAVEMODE_FILE ;
 			else if( !stricmp( buffer, "dir" ) ) { IniFileFlag = SAVEMODE_DIR ; ret = 1 ; }
-			}
+		}
 		if(  IniFileFlag == SAVEMODE_DIR ) {
 			if( readINI( IniFile, "KiTTY", "browsedirectory", buffer ) ) { 
 				if( !stricmp( buffer, "NO" )&&(IniFileFlag==SAVEMODE_DIR) ) DirectoryBrowseFlag = 0 ; 
 				else DirectoryBrowseFlag = 1 ;
-				}
+			}
 			if( readINI( IniFile, "KiTTY", "configdir", buffer ) ) {
 				if( strlen( buffer ) > 0 ) { 
 					ConfigDirectory = (char*)malloc( strlen(buffer) + 1 ) ;
 					strcpy( ConfigDirectory, buffer ) ;
-					}
 				}
 			}
-		else  DirectoryBrowseFlag = 0 ;
-	}
-	else if( (fp = fopen( "kitty.ini", "r" )) != NULL ) {
+		} else  DirectoryBrowseFlag = 0 ;
+	} else if( (fp = fopen( "kitty.ini", "r" )) != NULL ) {
 		IniFile = (char*)malloc(11) ; strcpy(IniFile,"kitty.ini");
 		strcpy(INIT_SECTION,"KiTTY");
 		fclose(fp ) ;
@@ -208,22 +206,20 @@ int LoadParametersLight( void ) {
 			if( !stricmp( buffer, "registry" ) ) IniFileFlag = SAVEMODE_REG ;
 			else if( !stricmp( buffer, "file" ) ) IniFileFlag = SAVEMODE_FILE ;
 			else if( !stricmp( buffer, "dir" ) ) { IniFileFlag = SAVEMODE_DIR ; ret = 1 ; }
-			}
+		}
 		if(  IniFileFlag == SAVEMODE_DIR ) {
 			if( readINI( "kitty.ini", "KiTTY", "browsedirectory", buffer ) ) { 
 				if( !stricmp( buffer, "NO" )&&(IniFileFlag==SAVEMODE_DIR) ) DirectoryBrowseFlag = 0 ; 
 				else DirectoryBrowseFlag = 1 ;
-				}
+			}
 			if( readINI( "kitty.ini", "KiTTY", "configdir", buffer ) ) { 
 				if( strlen( buffer ) > 0 ) { 
 					ConfigDirectory = (char*)malloc( strlen(buffer) + 1 ) ;
 					strcpy( ConfigDirectory, buffer ) ;
-					}
 				}
 			}
-		else  DirectoryBrowseFlag = 0 ;
-		}
-	else 
+		} else  DirectoryBrowseFlag = 0 ;
+	} else 
 #endif
 	if( (fp = fopen( "putty.ini", "r" )) != NULL ) {
 		IniFile = (char*)malloc(11) ; strcpy(IniFile,"putty.ini");
@@ -236,22 +232,20 @@ int LoadParametersLight( void ) {
 			if( !stricmp( buffer, "registry" ) ) IniFileFlag = SAVEMODE_REG ;
 			else if( !stricmp( buffer, "file" ) ) IniFileFlag = SAVEMODE_FILE ;
 			else if( !stricmp( buffer, "dir" ) ) { IniFileFlag = SAVEMODE_DIR ; DirectoryBrowseFlag = 1 ; ret = 1 ; }
-			}
+		}
 		if(  IniFileFlag == SAVEMODE_DIR ) {
 			if( readINI( "putty.ini", "PuTTY", "browsedirectory", buffer ) ) {
 				if( !stricmp( buffer, "NO" )&&(IniFileFlag==SAVEMODE_DIR) ) DirectoryBrowseFlag = 0 ; 
 				else DirectoryBrowseFlag = 1 ;
-				}
+			}
 			if( readINI( "putty.ini", "PuTTY", "configdir", buffer ) ) { 
 				if( strlen( buffer ) > 0 ) { 
 					ConfigDirectory = (char*)malloc( strlen(buffer) + 1 ) ;
 					strcpy( ConfigDirectory, buffer ) ;
-					}
 				}
 			}
-		else  DirectoryBrowseFlag = 0 ;
-		}
-	else {
+		} else  DirectoryBrowseFlag = 0 ;
+	} else {
 #ifndef FLJ
 		sprintf( buffer, "%s/KiTTY/kitty.ini", getenv("APPDATA") );
 		if( (fp = fopen( buffer, "r" )) != NULL ) {
@@ -261,13 +255,13 @@ int LoadParametersLight( void ) {
 			fclose(fp);
 		} else {
 #endif
-		sprintf( buffer, "%s/PuTTY/putty.ini", getenv("APPDATA") );
-		if( (fp = fopen( buffer, "r" )) != NULL ) {
-			IniFile = (char*)malloc(strlen(buffer)+1) ; 
-			strcpy(IniFile,buffer);
-			strcpy(INIT_SECTION,"PuTTY");
-			fclose(fp);
-		} 
+			sprintf( buffer, "%s/PuTTY/putty.ini", getenv("APPDATA") );
+			if( (fp = fopen( buffer, "r" )) != NULL ) {
+				IniFile = (char*)malloc(strlen(buffer)+1) ; 
+				strcpy(IniFile,buffer);
+				strcpy(INIT_SECTION,"PuTTY");
+				fclose(fp);
+			} 
 #ifndef FLJ
 		}
 #endif

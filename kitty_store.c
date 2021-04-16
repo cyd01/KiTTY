@@ -410,17 +410,16 @@ char * SetSessPath( const char * dec ) {
 			i=strlen(sesspath)-1 ;
 			while( (sesspath[i]!='\\') && (i>0) ) i--;
 			sesspath[i]='\0';
-			}
 		}
-	else {
+	} else {
 		strcat( sesspath, "\\" ) ;
 		strcat( sesspath, dec ) ;
-		}
+	}
 	CleanFolderName( sesspath ) ;
 	pst = sesspath+strlen(initialsesspath ) ;
 	while( pst[0]=='\\' ) pst++ ;
 	return pst ;
-	}
+}
 	
 char * SetInitialSessPath( void ) { return strcpy( sesspath, initialsesspath ) ; }
 

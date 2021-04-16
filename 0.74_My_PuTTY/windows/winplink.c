@@ -345,18 +345,17 @@ int main(int argc, char **argv) {
 			printf( "Switching folder to %s\n", argv[i] ) ;
 			printf( "%s\n",SetSessPath( argv[i] ) );
 			SetSessPath( argv[i] ) ;
-			}
-		else {
+		} else {
 			arv[arc]=(char*)malloc( strlen(argv[i]) +1 ) ;
 			strcpy(arv[arc],argv[i]) ;
 			arc++ ;
-			}
 		}
+	}
 	ret = plink_main( arc, arv ) ;
 	for( i=0 ; i<arc ; i++ )  free( arv[i] ) ;
 	free( arv ) ;
 	return ret ;
-	}
+}
 #endif
 
 #ifdef MOD_PERSO
