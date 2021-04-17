@@ -1236,7 +1236,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			return Notepad_WinMain(inst, prev, buffer, show) ;
 		} else if( !strcmp(p, "-edb") ) {
 			i++;
-			if( existfile(argv[i]) ) {
+			if( existfile(argv[i]) || !strcmp(argv[i],"1") ) {
 				char buffer[1024];
 				sprintf(buffer, "%s|%s|%s|0", (char*)get_param_str("INI"), (char*)get_param_str("SAV"), argv[i] ) ;
 				return Notepad_WinMain(inst, prev, buffer, show) ;
