@@ -701,6 +701,73 @@ static BOOL AddTrayIcon(HWND hwnd)
     return res;
 }
 
+#ifdef MOD_PERSO
+#include <sys/types.h>
+#include <dirent.h>
+#ifndef MOD_INTEGRATED_AGENT
+// Teste l'existance d'un repertoire
+int existdirectory( const char * filename ) {
+	struct _stat statBuf ;
+	
+	if( filename == NULL ) return 0 ;
+	if( strlen(filename)==0 ) return 0 ;
+	if( _stat( filename, &statBuf ) == -1 ) return 0 ;
+	
+	if( ( statBuf.st_mode & _S_IFMT ) == _S_IFDIR ) { return 1 ; }
+	else { return 0 ; }
+}
+#endif
+int MakeSessionMenu( HMENU session_menu, const int start_menuitem, const char * directory ) {
+	int index_menu = start_menuitem ;
+	MENUITEMINFO mii;
+		char buffer[MAX_PATH],fList[MAX_PATH];
+		DIR * dir ;
+		struct dirent * de ;
+		if( strlen(directory)>0 ) {
+			sprintf( buffer, ".\\Sessions\\%s", directory ) ;
+		} else {
+			sprintf( buffer, ".\\Sessions" ) ;
+		}
+		if( (dir=opendir(buffer)) != NULL ) {
+			while( (de=readdir(dir)) != NULL ) 
+			if( strcmp(de->d_name, ".")&&strcmp(de->d_name, "..") ) {
+				unmungestr( de->d_name, fList, MAX_PATH ) ;
+				char *newpath;
+				newpath = (char*)malloc( strlen(buffer)+strlen(de->d_name)+2 );
+				sprintf(newpath,"%s\\%s",buffer,de->d_name);
+				if( existdirectory(newpath) ) {
+					HMENU sub = CreateMenu();
+					if( strlen(directory)>0 ) {
+						sprintf(newpath,"%s/%s",directory,de->d_name);
+					} else {
+						sprintf(newpath,"%s",de->d_name);
+					}
+					index_menu=MakeSessionMenu(sub,index_menu,newpath);
+					AppendMenu( session_menu, MF_POPUP, (UINT_PTR)sub, fList ) ;
+					index_menu++;
+				} else if( !strcmp(FileExtension,"") || !strcmp(FileExtension,fList+strlen(fList)-strlen(FileExtension)) ) {
+					memset(&mii, 0, sizeof(mii));
+					mii.cbSize = sizeof(mii);
+					mii.fMask = MIIM_TYPE | MIIM_STATE | MIIM_ID;
+					mii.fType = MFT_STRING;
+					mii.fState = MFS_ENABLED;
+					mii.wID = (index_menu * 16) + IDM_SESSIONS_BASE;
+					if( strlen(directory)>0 ) {
+						sprintf(newpath,"%s/%s",directory,fList);
+					} else {
+						sprintf(newpath,"%s",fList);
+					}
+					mii.dwTypeData = newpath;
+					InsertMenuItem(session_menu, index_menu, true, &mii);
+					index_menu++;
+				}
+				free(newpath);
+			}
+		}
+	return index_menu ;
+}
+#endif
+
 /* Update the saved-sessions menu. */
 static void update_sessions(void)
 {
@@ -717,36 +784,16 @@ static void update_sessions(void)
 
 #ifdef MOD_PERSO
     if( IniFileFlag==2 ) {
-      SetInitialSessPath();
+
       for(num_entries = GetMenuItemCount(session_menu);
 	num_entries > initial_menuitems_count;
 	num_entries--)
 	RemoveMenu(session_menu, 0, MF_BYPOSITION);
+    
+	index_menu = 0;
+        index_menu = MakeSessionMenu( session_menu, index_menu, "" ) ;
 
-      index_key = 0;
-      index_menu = 0;
 
-      settings_e *handle;
-      sb = strbuf_new();
-      if ((handle = enum_settings_start()) != NULL) {
-        while (enum_settings_next(handle, sb)) {
-		
-	    if( !strcmp(FileExtension,"") || !strcmp(FileExtension,sb->s+strlen(sb->s)-strlen(FileExtension)) ) {
-		
-            memset(&mii, 0, sizeof(mii));
-	    mii.cbSize = sizeof(mii);
-	    mii.fMask = MIIM_TYPE | MIIM_STATE | MIIM_ID;
-	    mii.fType = MFT_STRING;
-	    mii.fState = MFS_ENABLED;
-	    mii.wID = (index_menu * 16) + IDM_SESSIONS_BASE;
-	    mii.dwTypeData = sb->s;
-	    InsertMenuItem(session_menu, index_menu, true, &mii);
-	    index_menu++;
-	    }
-	    strbuf_clear(sb);
-	}
-      enum_settings_finish(handle);
-      }
     } else {
 #endif
     if(ERROR_SUCCESS != RegOpenKey(HKEY_CURRENT_USER, PUTTY_REGKEY, &hkey))
@@ -1153,6 +1200,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
                         strcat(param, "&R");
 		    strcat(param, "@");
 		    strcat(param, mii.dwTypeData);
+//MessageBox(NULL,param,"Launching",MB_OK) ;
 		    if((INT_PTR)ShellExecute(hwnd, NULL, putty_path, param,
 					 _T(""), SW_SHOW) <= 32) {
 			MessageBox(NULL, "Unable to execute PuTTY!", "Error",
@@ -1246,7 +1294,6 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 #ifdef MOD_PERSO
 	IniFileFlag = 0 ;
 	DirectoryBrowseFlag = 0 ;
-	loadPath() ;
 	LoadParametersLight() ;
 #endif
 

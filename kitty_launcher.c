@@ -151,10 +151,9 @@ HMENU InitLauncherMenu( char * Key ) {
 	if( (IniFileFlag == SAVEMODE_REG)||(IniFileFlag == SAVEMODE_FILE) ) {
 		sprintf( KeyName, "%s\\%s", TEXT(PUTTY_REG_POS), Key ) ;
 		ReadSpecialMenu( menu, KeyName, &nbitem, 0 ) ;
-		}
-	else if( IniFileFlag == SAVEMODE_DIR ) {
+	} else if( IniFileFlag == SAVEMODE_DIR ) {
 		ReadSpecialMenu( menu, Key, &nbitem, 0 ) ;
-		}
+	}
 
 	if( GetMenuItemCount( menu ) > 0 )
 		AppendMenu( menu, MF_SEPARATOR, 0, 0 ) ;
@@ -168,11 +167,10 @@ HMENU InitLauncherMenu( char * Key ) {
 		//AppendMenu( HideMenu, MF_ENABLED, IDM_LAUNCHER+5, "&Refresh list" ) ;
 		AppendMenu( HideMenu, MF_ENABLED, IDM_LAUNCHER+6, "&Window unique" ) ;
 		CheckMenuItem( HideMenu, IDM_LAUNCHER+6, MF_BYCOMMAND | MF_UNCHECKED) ;
-		}	
-	else {
+	} else {
 		AppendMenu( HideMenu, MF_ENABLED, IDM_LAUNCHER+6, "&Window unique" ) ;
 		CheckMenuItem( HideMenu, IDM_LAUNCHER+6, MF_BYCOMMAND | MF_CHECKED) ;
-		}
+	}
 	//AppendMenu( HideMenu, MF_ENABLED, IDM_GONEXT, "&Next" ) ;
 	//AppendMenu( HideMenu, MF_ENABLED, IDM_GOPREVIOUS, "&Previous" ) ;
 	if( RefreshWinList( MainHwnd ) > 0 ) {
@@ -184,8 +182,8 @@ HMENU InitLauncherMenu( char * Key ) {
 				CheckMenuItem( HideMenu, IDM_GOHIDE+i, MF_BYCOMMAND | MF_CHECKED) ;
 			else 
 				CheckMenuItem( HideMenu, IDM_GOHIDE+i, MF_BYCOMMAND | MF_UNCHECKED) ;
-			}
 		}
+	}
 	AppendMenu( HideMenu, MF_SEPARATOR, 0, 0 ) ;
 	AppendMenu( HideMenu, MF_ENABLED, IDM_ABOUT, "&About" ) ;
 	AppendMenu( HideMenu, MF_ENABLED, IDM_QUIT, "&Quit" ) ;
@@ -202,13 +200,13 @@ HMENU InitLauncherMenu( char * Key ) {
 	AppendMenu( menu, MF_ENABLED, IDM_QUIT, "&Quit" ) ;
 
 	return menu ;
-	}
+}
 
 void RefreshMenuLauncher( void ) {
 	DestroyMenu( MenuLauncher ) ; 
 	MenuLauncher = NULL ;
 	MenuLauncher = InitLauncherMenu( "Launcher" ) ;
-	}
+}
 	
 // Nettoie les noms de folder en remplaçant les "/" par des "\" et les " \ " par des " \"
 // Deplace dans kitty_commun.c
@@ -379,7 +377,7 @@ void DisplayContextMenu( HWND hwnd, HMENU menu ) {
 	SetForegroundWindow( hwnd ) ;
 	GetCursorPos (&pt);
 	TrackPopupMenu (hMenuPopup, TPM_LEFTALIGN, pt.x, pt.y, 0, hwnd, NULL);
-	}
+}
 	
 // Gestion Hide/UnHide all
 static int CurrentVisibleWin = -1 ; /* -1 = toutes visibles */
@@ -396,16 +394,16 @@ BOOL CALLBACK RefreshWinListProc( HWND hwnd, LPARAM lParam ) {
 		TabWin[NbWin].hwnd=hwnd ;
 		GetWindowText( hwnd, TabWin[NbWin].name, 127 ) ;
 		NbWin++ ;
-		}
+	}
 
 	return TRUE ;
-	}
+}
 
 int RefreshWinList( HWND hwnd ) {
 	NbWin=0 ;
 	EnumWindows( RefreshWinListProc, 0 ) ;
 	return NbWin ;
-	}
+}
 	
 void GoNext( HWND hwnd ) {
 	int i ;
@@ -416,15 +414,14 @@ void GoNext( HWND hwnd ) {
 			if( i == (NbWin-1) ) {
 				ManageUnHideOne( TabWin[0].hwnd ) ;
 				SetFocus( TabWin[0].hwnd ) ;
-				}
-			else {
+			} else {
 				ManageUnHideOne( TabWin[i+1].hwnd ) ;
 				SetFocus( TabWin[i+1].hwnd ) ;
-				}
-			break ;
 			}
+			break ;
 		}
 	}
+}
 
 void GoPrevious( HWND hwnd ) {
 	int i ;
@@ -435,33 +432,32 @@ void GoPrevious( HWND hwnd ) {
 			if( i == 0 ) {
 				ManageUnHideOne( TabWin[NbWin-1].hwnd ) ;
 				SetFocus( TabWin[NbWin-1].hwnd ) ;
-				}
-			else {
+			} else {
 				ManageUnHideOne( TabWin[i-1].hwnd ) ;
 				SetFocus( TabWin[i-1].hwnd ) ;
-				}
-			break ;
 			}
+			break ;
 		}
 	}
+}
 
 void ManageHideAll( HWND hwnd ) {
 	int i ;
 	if( RefreshWinList( hwnd ) > 0 ) {
 		for( i=0 ; i<NbWin ; i++ ) {
 			ManageHideOne( TabWin[i].hwnd ) ;
-			}
 		}
-	CurrentVisibleWin = 0 ;
 	}
+	CurrentVisibleWin = 0 ;
+}
 
 void ManageUnHideAll( HWND hwnd ) {
 	int i ;
 	if( RefreshWinList( hwnd ) > 0 ) {
 		for( i=0 ; i<NbWin ; i++ ) ManageUnHideOne( TabWin[i].hwnd ) ;
-		}
-	CurrentVisibleWin = -1 ;
 	}
+	CurrentVisibleWin = -1 ;
+}
 	
 void ManageGoNext( HWND hwnd ) {
 	if( CurrentVisibleWin == -1 ) return ;
@@ -469,7 +465,7 @@ void ManageGoNext( HWND hwnd ) {
 	CurrentVisibleWin++ ;
 	if( CurrentVisibleWin>=NbWin ) CurrentVisibleWin=0 ;
 	ManageUnHideOne( TabWin[CurrentVisibleWin].hwnd ) ;
-	}
+}
 
 void ManageGoPrevious( HWND hwnd ) {
 	if( CurrentVisibleWin == -1 ) return ;
@@ -477,7 +473,7 @@ void ManageGoPrevious( HWND hwnd ) {
 	CurrentVisibleWin-- ;
 	if( CurrentVisibleWin<0 ) CurrentVisibleWin=NbWin-1 ;
 	ManageUnHideOne( TabWin[CurrentVisibleWin].hwnd ) ;
-	}
+}
 	
 void ManageGo( const int n ) {
 	if( CurrentVisibleWin == -1 ) return ;
@@ -485,13 +481,13 @@ void ManageGo( const int n ) {
 	ManageHideOne( TabWin[CurrentVisibleWin].hwnd ) ;
 	CurrentVisibleWin = n ;
 	ManageUnHideOne( TabWin[CurrentVisibleWin].hwnd ) ;
-	}
+}
 	
 void ManageSwitch( const int n ) { 
 	SendMessage( TabWin[n].hwnd, WM_COMMAND, IDM_SWITCH_HIDE, 0 ) ; 
 	SetForegroundWindow( TabWin[n].hwnd ) ;
 	SetFocus( TabWin[n].hwnd ) ;
-	}
+}
 	
 // Procedures principales du launcher
 LRESULT CALLBACK Launcher_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -533,8 +529,8 @@ LRESULT CALLBACK Launcher_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 		if (IsWindowVisible(hwnd)) ShowWindow(hwnd, SW_HIDE);
 		//SendMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
 		return 1 ;
-		}
-	else return 0 ;
+	} else 
+		return 0 ;
 			break ;
 	
 		case KLWM_NOTIFYICON :
@@ -660,9 +656,9 @@ LRESULT CALLBACK Launcher_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 				Shell_NotifyIcon(NIM_MODIFY, &TrayIcone);
 			}
 			return DefWindowProc(hwnd, uMsg, wParam, lParam);
-		}
-	return -1 ;
 	}
+	return -1 ;
+}
 	
 int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show) {
 	hinst = inst ;
@@ -681,8 +677,9 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 	if( FindWindow(className,className) ) {
 		if( ReadParameter( "Launcher", "alreadyRunCheck", buffer ) ) {
 			if( !stricmp( buffer, "yes" ) ) return 0 ;
+		} else { 
+			return 0 ; 
 		}
-		else { return 0 ; }
 	}
 
 	if( strstr( cmdline, "-putty" ) != NULL ) PuttyFlag=1 ;
@@ -704,7 +701,7 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 
 	if( ReadParameter( "Launcher", "reload", buffer ) ) {
 		if( !stricmp( buffer, "NO" ) ) LauncherConfReload = 0 ;
-		}
+	}
 	if( LauncherConfReload ) InitLauncherRegistry() ;
 		
 	hwnd = CreateWindowEx(0, className, "KiTTYLauncher",
@@ -720,86 +717,85 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		//	}
-		}
-	return msg.wParam;
 	}
+	return msg.wParam;
+}
 
 #endif
 void RunConfig( Conf * conf ) {
+	char b[2048];
+	//char c[180];
+	//int freecl = FALSE;
+	char *cl;
+	const char *argprefix;
+	BOOL inherit_handles;
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	HANDLE filemap = NULL;
 	
-		char b[2048];
-		//char c[180];
-		//int freecl = FALSE;
-		char *cl;
-		const char *argprefix;
-		BOOL inherit_handles;
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
-		HANDLE filemap = NULL;
+	char bufpass[1024] ;
+	strcpy( bufpass, conf_get_str(conf,CONF_password)) ;
+	MASKPASS(GetCryptSaltFlag(),bufpass) ;
+	conf_set_str(conf,CONF_password,bufpass) ;
 	
-		char bufpass[1024] ;
-		strcpy( bufpass, conf_get_str(conf,CONF_password)) ;
-		MASKPASS(GetCryptSaltFlag(),bufpass) ;
-		conf_set_str(conf,CONF_password,bufpass) ;
-	
-                if (restricted_acl) {
-                    argprefix = "&R";
-                } else {
-                    argprefix = "";
-		}
-		    /*
-		     * Allocate a file-mapping memory chunk for the
-		     * config structure.
-		     */
-		    SECURITY_ATTRIBUTES sa;
-		    strbuf *serbuf;
-		    void *p;
-		    int size;
-
-		    serbuf = strbuf_new();
-		    conf_serialise(BinarySink_UPCAST(serbuf), conf);
-		    size = serbuf->len;
-
-		    sa.nLength = sizeof(sa);
-		    sa.lpSecurityDescriptor = NULL;
-		    sa.bInheritHandle = TRUE;
-		    filemap = CreateFileMapping(INVALID_HANDLE_VALUE,
-						&sa,
-						PAGE_READWRITE,
-						0, size, NULL);
-		    if (filemap && filemap != INVALID_HANDLE_VALUE) {
-			p = MapViewOfFile(filemap, FILE_MAP_WRITE, 0, 0, size);
-			if (p) {
-			    memcpy(p, serbuf->s, size);
-			    UnmapViewOfFile(p);
-			}
-		    }
-		    strbuf_free(serbuf);
-		    inherit_handles = true;
-		    cl = dupprintf("putty %s&%p:%u", argprefix,
-                                   filemap, (unsigned)size);
-		    
-		MASKPASS(GetCryptSaltFlag(),bufpass);
-		conf_set_str(conf,CONF_password,bufpass);
-		memset(bufpass,0,strlen(bufpass));
-		    
-		GetModuleFileName(NULL, b, sizeof(b) - 1);
-		si.cb = sizeof(si);
-		si.lpReserved = NULL;
-		si.lpDesktop = NULL;
-		si.lpTitle = NULL;
-		si.dwFlags = 0;
-		si.cbReserved2 = 0;
-		si.lpReserved2 = NULL;
-		CreateProcess(b, cl, NULL, NULL, inherit_handles,
-			      NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
-                CloseHandle(pi.hProcess);
-                CloseHandle(pi.hThread);
-
-		if (filemap)
-		    CloseHandle(filemap);
-		sfree(cl);
+	if (restricted_acl) {
+		argprefix = "&R";
+	} else {
+		argprefix = "";
 	}
+	/*
+	 * Allocate a file-mapping memory chunk for the
+	 * config structure.
+	 */
+	SECURITY_ATTRIBUTES sa;
+	strbuf *serbuf;
+	void *p;
+	int size;
+
+	serbuf = strbuf_new();
+	conf_serialise(BinarySink_UPCAST(serbuf), conf);
+	size = serbuf->len;
+
+	sa.nLength = sizeof(sa);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = TRUE;
+	filemap = CreateFileMapping(INVALID_HANDLE_VALUE,
+		&sa,
+		PAGE_READWRITE,
+		0, size, NULL);
+	if (filemap && filemap != INVALID_HANDLE_VALUE) {
+		p = MapViewOfFile(filemap, FILE_MAP_WRITE, 0, 0, size);
+		if (p) {
+			memcpy(p, serbuf->s, size);
+			UnmapViewOfFile(p);
+		}
+	}
+	strbuf_free(serbuf);
+	inherit_handles = true;
+	cl = dupprintf("putty %s&%p:%u", argprefix,
+		filemap, (unsigned)size);
+		    
+	MASKPASS(GetCryptSaltFlag(),bufpass);
+	conf_set_str(conf,CONF_password,bufpass);
+	memset(bufpass,0,strlen(bufpass));
+		    
+	GetModuleFileName(NULL, b, sizeof(b) - 1);
+	si.cb = sizeof(si);
+	si.lpReserved = NULL;
+	si.lpDesktop = NULL;
+	si.lpTitle = NULL;
+	si.dwFlags = 0;
+	si.cbReserved2 = 0;
+	si.lpReserved2 = NULL;
+	CreateProcess(b, cl, NULL, NULL, inherit_handles,
+		NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+	CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+
+	if (filemap)
+		CloseHandle(filemap);
+	sfree(cl);
+}
 
 void RunPuTTY( HWND hwnd, char * param ) {
 	char buffer[4096]="",shortname[1024]="" ; ;
@@ -810,8 +806,8 @@ void RunPuTTY( HWND hwnd, char * param ) {
 			else 
 				strcpy( buffer, shortname ) ;
 			RunCommand( hwnd, buffer ) ;
-			}
-	}
+		}
+}
 
 int RunSession( HWND hwnd, const char * folder_in, char * session_in ) {
 	char buffer[4096]="", shortname[1024]="" ;
@@ -836,37 +832,34 @@ int RunSession( HWND hwnd, const char * folder_in, char * session_in ) {
 				while( (session[strlen(session)-1]==' ')||(session[strlen(session)-1]=='\t') ) session[strlen(session)-1]='\0' ;
 				if( PuttyFlag )	sprintf( buffer, "%s -putty -load \"%s\" -send-to-tray", shortname, session ) ;
 				else sprintf( buffer, "%s -load \"%s\" -send-to-tray", shortname, session ) ;
-				}
-			else {
+			} else {
 				if( PuttyFlag )	sprintf( buffer, "%s -putty -load \"%s\"", shortname, session ) ;
 				else sprintf( buffer, "%s -load \"%s\"", shortname, session ) ;
-				}
+			}
 			RunCommand( hwnd, buffer ) ;
 			return_code = 1 ;
-			}
-		else { RunCommand( hwnd, session_in ) ; }
+		} else { 
+			RunCommand( hwnd, session_in ) ; 
 		}
-	else if( IniFileFlag==SAVEMODE_DIR ) {
+	} else if( IniFileFlag==SAVEMODE_DIR ) {
 		if( DirectoryBrowseFlag ) {
 			if( (folder_in!=NULL)&&strcmp(folder_in,"")&&strcmp(folder_in,"Default") ) {
 				strcat( shortname, " -folder \"" ) ;
 				strcat( shortname, folder_in ) ;
 				strcat( shortname, "\"" ) ;
-				}
 			}
-
+		}
 		strcpy( session, session_in ) ;
 		if( session[strlen(session)-1] == '&' ) {
 			session[strlen(session)-1]='\0' ;
 			while( (session[strlen(session)-1]==' ')||(session[strlen(session)-1]=='\t') ) session[strlen(session)-1]='\0' ;
 			if( PuttyFlag )	sprintf( buffer, "%s -putty -load \"%s\" -send-to-tray", shortname, session ) ;
 			else sprintf( buffer, "%s -load \"%s\" -send-to-tray", shortname, session ) ;
-			}
-		else {
+		} else {
 			if( PuttyFlag )	sprintf( buffer, "%s -putty -load \"%s\"", shortname, session ) ;
 			else sprintf( buffer, "%s -load \"%s\"", shortname, session ) ;
 			//else sprintf( buffer, "%s @%s", shortname, session ) ;
-			}
+		}
 /*		if( DirectoryBrowseFlag ) {
 			if( strcmp(folder_in,"")&&strcmp(folder_in,"Default") ) {
 				strcat( buffer, " -folder \"" ) ;
@@ -877,8 +870,8 @@ int RunSession( HWND hwnd, const char * folder_in, char * session_in ) {
 //MessageBox( hwnd, buffer, "Info", MB_OK ) ;
 		RunCommand( hwnd, buffer ) ;
 		return_code = 1 ;
-		}
+	}
 
 	free( session ) ;
 	return return_code ;
-	}
+}

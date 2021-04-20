@@ -5076,7 +5076,8 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 	}
 	if( key == (shortcuts_tab.editorclipboard ) ) {		// Lancement d'un putty-ed qui charge le contenu du presse-papier
 		if( debug_flag ) { debug_logevent( "Start internal editor fullfiled with clipboard" ) ; }
-		term_copyall(term,clips_system,lenof(clips_system)) ; RunPuttyEd( hwnd, "1" ) ; 
+		//term_copyall(term,clips_system,lenof(clips_system)) /* Full term clipboard */
+		RunPuttyEd( hwnd, "1" ) ; 
 		return 1 ; 
 	} else if( key == shortcuts_tab.winscp ) {			// Lancement de WinSCP
 		SendMessage( hwnd, WM_COMMAND, IDM_WINSCP, 0 ) ; return 1 ;

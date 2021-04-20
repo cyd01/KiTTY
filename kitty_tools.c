@@ -83,7 +83,7 @@ int existfile( const char * filename ) {
 	if( ( statBuf.st_mode & _S_IFMT ) == _S_IFREG ) { return 1 ; }
 	else { return 0 ; }
 }
-	
+
 // Teste l'existance d'un repertoire
 int existdirectory( const char * filename ) {
 	struct _stat statBuf ;
