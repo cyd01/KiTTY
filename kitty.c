@@ -1439,7 +1439,6 @@ int DelParameter( const char * key, const char * name ) {
 	
 // Test la configuration (mode file ou registry) et charge le fichier kitty.sav si besoin
 void GetSaveMode( void ) {
-#ifndef MOD_PORTABLE
 	char buffer[256] ;
 	if( readINI( KittyIniFile, INIT_SECTION, "savemode", buffer ) ) {
 		while( (buffer[strlen(buffer)-1]=='\n')||(buffer[strlen(buffer)-1]=='\r')||(buffer[strlen(buffer)-1]==' ')||(buffer[strlen(buffer)-1]=='\t') ) buffer[strlen(buffer)-1]='\0';
@@ -1447,7 +1446,6 @@ void GetSaveMode( void ) {
 		else if( !stricmp( buffer, "file" ) ) IniFileFlag = SAVEMODE_FILE ;
 		else if( !stricmp( buffer, "dir" ) ) { IniFileFlag = SAVEMODE_DIR ; DirectoryBrowseFlag = 1 ; }
 	}
-#endif
 	if( IniFileFlag!=SAVEMODE_DIR ) DirectoryBrowseFlag = 0 ;
 }
 
@@ -5441,12 +5439,6 @@ void InitNameConfigFile( void ) {
 	if( getenv("KITTY_INI_FILE") != NULL ) { strcpy( buffer, getenv("KITTY_INI_FILE") ) ; }
 	if( !existfile( buffer ) ) {
 		sprintf( buffer, "%s\\%s", InitialDirectory, DEFAULT_INIT_FILE ) ;
-#ifdef MOD_PORTABLE
-		if( !existfile( buffer ) ) {
-			sprintf( buffer, "%s\\putty.ini", InitialDirectory ) ;
-			if( !existfile( buffer ) ) {
-				sprintf( buffer, "%s\\%s", InitialDirectory, DEFAULT_INIT_FILE ) ;
-#else
 		if( !existfile( buffer ) ) {
 			sprintf( buffer, "%s\\putty.ini", InitialDirectory ) ;
 			if( !existfile( buffer ) ) {
@@ -5456,7 +5448,6 @@ void InitNameConfigFile( void ) {
 					CreateDirectory( buffer, NULL ) ;
 					sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_INIT_FILE ) ;
 					}
-#endif
 				}
 			}
 		}
@@ -5466,7 +5457,6 @@ void InitNameConfigFile( void ) {
 	if( KittySavFile != NULL ) { free( KittySavFile ) ; } 
 	KittySavFile=NULL ;
 	sprintf( buffer, "%s\\%s", InitialDirectory, DEFAULT_SAV_FILE ) ;
-#ifndef MOD_PORTABLE
 	if( !existfile( buffer ) ) {
 		sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE ) ;
 		if( !existfile( buffer ) ) {
@@ -5475,7 +5465,6 @@ void InitNameConfigFile( void ) {
 			sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE ) ;
 			}
 		}
-#endif
 	KittySavFile=(char*)malloc( strlen( buffer)+2 ) ; strcpy( KittySavFile, buffer) ;
 	
 	sprintf( buffer, "%s\\kitty.dft", InitialDirectory ) ;
