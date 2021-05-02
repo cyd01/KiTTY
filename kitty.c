@@ -5442,29 +5442,34 @@ void InitNameConfigFile( void ) {
 		if( !existfile( buffer ) ) {
 			sprintf( buffer, "%s\\putty.ini", InitialDirectory ) ;
 			if( !existfile( buffer ) ) {
-				sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_INIT_FILE ) ;
-				if( !existfile( buffer ) ) {
-					sprintf( buffer, "%s\\%s", getenv("APPDATA"), INIT_SECTION ) ;
-					CreateDirectory( buffer, NULL ) ;
+				if( IniFileFlag != SAVEMODE_DIR ) {
 					sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_INIT_FILE ) ;
+					if( !existfile( buffer ) ) {
+						sprintf( buffer, "%s\\%s", getenv("APPDATA"), INIT_SECTION ) ;
+						CreateDirectory( buffer, NULL ) ;
+						sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_INIT_FILE ) ;
 					}
+				} else {
+					sprintf( buffer, "%s\\%s", InitialDirectory, DEFAULT_INIT_FILE ) ;
 				}
 			}
 		}
-
+	}
 	KittyIniFile=(char*)malloc( strlen( buffer)+2 ) ; strcpy( KittyIniFile, buffer) ;
 
 	if( KittySavFile != NULL ) { free( KittySavFile ) ; } 
 	KittySavFile=NULL ;
 	sprintf( buffer, "%s\\%s", InitialDirectory, DEFAULT_SAV_FILE ) ;
 	if( !existfile( buffer ) ) {
-		sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE ) ;
-		if( !existfile( buffer ) ) {
-			sprintf( buffer, "%s\\%s", getenv("APPDATA"), INIT_SECTION ) ;
-			CreateDirectory( buffer, NULL ) ;
+		if( IniFileFlag != SAVEMODE_DIR ) {
 			sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE ) ;
+			if( !existfile( buffer ) ) {
+				sprintf( buffer, "%s\\%s", getenv("APPDATA"), INIT_SECTION ) ;
+				CreateDirectory( buffer, NULL ) ;
+				sprintf( buffer, "%s\\%s\\%s", getenv("APPDATA"), INIT_SECTION, DEFAULT_SAV_FILE ) ;
 			}
 		}
+	}
 	KittySavFile=(char*)malloc( strlen( buffer)+2 ) ; strcpy( KittySavFile, buffer) ;
 	
 	sprintf( buffer, "%s\\kitty.dft", InitialDirectory ) ;
