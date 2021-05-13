@@ -36,6 +36,10 @@ On UNIX system it is possible to start a WinSCP session directly into the curren
 ```bash
 winscp() { printf "\033]0;__ws:"`pwd`"\007" ; printf "\033]0;__ti\007" ; }
 ```
+or if you use TMUX:
+```
+winscp() { printf "\033Ptmux;\033\033]0;__ws:"`pwd`"\007\033\\" ; }
+```
 or this bash function:
 ```bash
 winscp() { echo -ne "\033];__ws:${PWD}\007" ; }
