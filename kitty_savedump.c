@@ -533,6 +533,13 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "shadowboldoffset=%d\n",		conf_get_int(conf,CONF_shadowboldoffset) ) ;
 	fprintf( fp, "crhaslf=%d\n",			conf_get_bool(conf,CONF_crhaslf) ) ;
 	fprintf( fp, "winclass=%s\n",			conf_get_str(conf,CONF_winclass) ) ;
+	
+	/* PuTTY 0.75 
+	fprintf( fp, "supdup_location=%s\n",		conf_get_str(conf,CONF_supdup_location) ) ;
+	fprintf( fp, "supdup_ascii_set=%d\n",		conf_get_int(conf,CONF_supdup_ascii_set) ) ;
+	fprintf( fp, "supdup_more=%d\n",		conf_get_bool(conf,CONF_supdup_more) ) ;
+	fprintf( fp, "supdup_scroll=%d\n",		conf_get_bool(conf,CONF_supdup_scroll) ) ;
+*/
 
 #ifdef MOD_PERSO
 	/* MOD_PERSO Options */
@@ -959,7 +966,7 @@ void SaveDumpFile( char * filename ) {
 
 		sprintf( buffer, "%s\\%s", InitialDirectory, filename ) ;
 		sprintf( buffer2, "%s\\%s", InitialDirectory, "kitty.dmp.bcr" ) ;
-		bcrypt_file_base64( buffer, buffer2, "9bis", 80 ) ; unlink( buffer ) ; rename( buffer2, buffer ) ;
+		bcrypt_file_base64( buffer, buffer2, MASTER_PASSWORD, 80 ) ; unlink( buffer ) ; rename( buffer2, buffer ) ;
 		}
 	}
 void SaveDump(void) {

@@ -327,6 +327,15 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_b_forced(sesskey, "ConnectionSharingUpstream", conf_get_bool(conf, CONF_ssh_connection_sharing_upstream));
     write_setting_b_forced(sesskey, "ConnectionSharingDownstream", conf_get_bool(conf, CONF_ssh_connection_sharing_downstream));
     wmap_forced(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys, false);
+    
+    /*
+     * PuTTY 0.75 SUPDUP settings
+
+    write_setting_s_forced(sesskey, "SUPDUPLocation", conf_get_str(conf, CONF_supdup_location));
+    write_setting_i_forced(sesskey, "SUPDUPCharset", conf_get_int(conf, CONF_supdup_ascii_set));
+    write_setting_b_forced(sesskey, "SUPDUPMoreProcessing", conf_get_bool(conf, CONF_supdup_more));
+    write_setting_b_forced(sesskey, "SUPDUPScrolling", conf_get_bool(conf, CONF_supdup_scroll));
+     */
 #ifdef MOD_PROXY
     write_setting_s_forced(sesskey, "ProxySelection", conf_get_str(conf, CONF_proxyselection));
 #endif
@@ -966,6 +975,15 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "ConnectionSharingDownstream", true,
          conf, CONF_ssh_connection_sharing_downstream);
     gppmap_forced(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys);
+    
+    /*
+     * PuTTY 0.75 SUPDUP settings
+    gpps_forced(sesskey, "SUPDUPLocation", "The Internet", conf, CONF_supdup_location);
+    gppi_forced(sesskey, "SUPDUPCharset", false, conf, CONF_supdup_ascii_set);
+    gppb_forced(sesskey, "SUPDUPMoreProcessing", false, conf, CONF_supdup_more);
+    gppb_forced(sesskey, "SUPDUPScrolling", false, conf, CONF_supdup_scroll);
+     */
+
 /* rutty: */
 #ifdef MOD_RUTTY
 	gppfile_forced(sesskey, "ScriptFileName", conf, CONF_script_filename);
@@ -1269,14 +1287,13 @@ static void write_clip_setting_forced(void *sesskey, const char *savekey, Conf *
       case CLIPUI_EXPLICIT:
         write_setting_s(sesskey, savekey, "explicit");
         break;
-      case CLIPUI_CUSTOM:
-        {
+      case CLIPUI_CUSTOM: {
             char *sval = dupcat("custom:", conf_get_str(conf, strconfkey),
                                 (const char *)NULL);
             write_setting_s_forced(sesskey, savekey, sval);
             sfree(sval);
-        }
         break;
+      }
     }
 }
 
