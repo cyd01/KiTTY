@@ -1887,7 +1887,6 @@ static void palette_reset(Terminal *term, bool overrides_only)
     if (!overrides_only) {
         for (unsigned i = 0; i < OSC4_NCOLOURS; i++)
             term->subpalettes[SUBPAL_CONF].present[i] = true;
-
         /*
          * Copy all the palette information out of the Conf.
          */
@@ -1898,7 +1897,6 @@ static void palette_reset(Terminal *term, bool overrides_only)
             col->g = conf_get_int_int(term->conf, CONF_colours, i*3+1);
             col->b = conf_get_int_int(term->conf, CONF_colours, i*3+2);
         }
-
         /*
          * Directly invent the rest of the xterm-256 colours.
          */
@@ -1914,21 +1912,18 @@ static void palette_reset(Terminal *term, bool overrides_only)
             int shade = i * 10 + 8;
             col->r = col->g = col->b = shade;
         }
-
         /*
          * Get rid of all escape-sequence configuration.
          */
         for (unsigned i = 0; i < OSC4_NCOLOURS; i++)
             term->subpalettes[SUBPAL_SESSION].present[i] = false;
     }
-
     /*
      * Re-fetch any OS-local overrides.
      */
     for (unsigned i = 0; i < OSC4_NCOLOURS; i++)
         term->subpalettes[SUBPAL_PLATFORM].present[i] = false;
     win_palette_get_overrides(term->win);
-
     /*
      * Rebuild the composite palette.
      */

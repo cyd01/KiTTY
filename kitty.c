@@ -492,7 +492,7 @@ void debug_log( const char *fmt, ... ) {
 	if( (InitialDirectory!=NULL) && (strlen(InitialDirectory)>0) )
 		sprintf(filename,"%s\\kitty.log",InitialDirectory);
 	else strcpy(filename,"kitty.log");
- 
+
 	va_start( ap, fmt ) ;
 	//vfprintf( stdout, fmt, ap ) ; // Ecriture a l'ecran
 	if( ( fp = fopen( filename, "ab" ) ) != NULL ) {
@@ -3114,7 +3114,7 @@ static LRESULT CALLBACK InputMultilineCallBack (HWND hwnd, UINT message, WPARAM 
 
 char * InputBox( HINSTANCE hInstance, HWND hwnd ) {
 	if( InputBoxResult != NULL ) { free( InputBoxResult ) ; InputBoxResult = NULL ; }
-	DialogBox(hInstance, (LPCTSTR)114, hwnd, (DLGPROC)InputCallBack) ;
+	DialogBox(hInstance, (LPCTSTR)117, hwnd, (DLGPROC)InputCallBack) ;
 	return InputBoxResult ;
 	}
 
@@ -3136,13 +3136,13 @@ char * InputBoxMultiline( HINSTANCE hInstance, HWND hwnd ) {
 			}
 		}
 
-	DialogBox(hInstance, (LPCTSTR)115, NULL, (DLGPROC)InputMultilineCallBack) ;
+	DialogBox(hInstance, (LPCTSTR)118, NULL, (DLGPROC)InputMultilineCallBack) ;
 	return InputBoxResult ;
 	}
 	
 char * InputBoxPassword( HINSTANCE hInstance, HWND hwnd ) {
 	if( InputBoxResult != NULL ) { free( InputBoxResult ) ; InputBoxResult = NULL ; }
-	DialogBox(hInstance, (LPCTSTR)116, hwnd, (DLGPROC)InputCallBackPassword) ;
+	DialogBox(hInstance, (LPCTSTR)119, hwnd, (DLGPROC)InputCallBackPassword) ;
 	return InputBoxResult ;
 	}
 

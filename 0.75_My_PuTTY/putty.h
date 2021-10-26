@@ -109,11 +109,12 @@ enum {
 #ifdef MOD_TUTTY
 #define CONF_NCOLOURS 26               /* 16 + 6 special ones */
 #define OSCP_NCOLOURS 26               /* same as CONF, but different order */
+#define OSC4_NCOLOURS 326              /* 256 + the same 6 special ones */
 #else
 #define CONF_NCOLOURS 22               /* 16 + 6 special ones */
 #define OSCP_NCOLOURS 22               /* same as CONF, but different order */
-#endif
 #define OSC4_NCOLOURS 262              /* 256 + the same 6 special ones */
+#endif
 
 /* The list macro for the conf colours also gives the textual names
  * used in the GUI configurer */

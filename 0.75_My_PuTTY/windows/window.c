@@ -793,7 +793,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     MSG msg;
     HRESULT hr;
     int guess_width, guess_height;
-
+	
     dll_hijacking_protection();
 #ifdef MOD_ZMODEM
 	struct netscheduler_tag *netsc = NULL ;
@@ -1418,6 +1418,7 @@ if( conf_get_int(conf,CONF_icone) == 0 ) {
 	    
 	RegisterClassW(&wndclass);
     }
+
 #ifdef MOD_PERSO
 // Initialisation de la structure NOTIFYICONDATA
 TrayIcone.cbSize = sizeof(TrayIcone);					// On alloue la taille necessaire pour la structure
