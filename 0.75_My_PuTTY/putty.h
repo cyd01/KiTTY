@@ -106,10 +106,10 @@ enum {
  * terminal.c itself.
  */
 
-#ifdef MOD_TUTTY
-#define CONF_NCOLOURS 26               /* 16 + 6 special ones */
-#define OSCP_NCOLOURS 26               /* same as CONF, but different order */
-#define OSC4_NCOLOURS 326              /* 256 + the same 6 special ones */
+#ifdef MOD_TUTTY		       /* 4+8 more special TUTTY colors */
+#define CONF_NCOLOURS 34               /* 16 + 18 (6+4+8) special ones */
+#define OSCP_NCOLOURS 34               /* same as CONF, but different order */
+#define OSC4_NCOLOURS 274              /* 256 + the same 18 (6+4+8) special ones */
 #else
 #define CONF_NCOLOURS 22               /* 16 + 6 special ones */
 #define OSCP_NCOLOURS 22               /* same as CONF, but different order */
@@ -132,20 +132,28 @@ enum {
     X(sel_bg,"Selected Text Background")        \
     X(black, "ANSI Black")                      \
     X(black_bold, "ANSI Black Bold")            \
+    X(black_underline,"ANSI Black Underlined")  \
     X(red, "ANSI Red")                          \
     X(red_bold, "ANSI Red Bold")                \
+    X(red_underline,"ANSI Red Underlined")  \
     X(green, "ANSI Green")                      \
     X(green_bold, "ANSI Green Bold")            \
+    X(green_underline,"ANSI Green Underlined")  \
     X(yellow, "ANSI Yellow")                    \
     X(yellow_bold, "ANSI Yellow Bold")          \
+    X(yellow_underline,"ANSI Yellow Underlined")  \
     X(blue, "ANSI Blue")                        \
     X(blue_bold, "ANSI Blue Bold")              \
+    X(blue_underline,"ANSI Blue Underlined")  \
     X(magenta, "ANSI Magenta")                  \
     X(magenta_bold, "ANSI Magenta Bold")        \
+    X(magenta_underline,"ANSI Magenta Underlined")  \
     X(cyan, "ANSI Cyan")                        \
     X(cyan_bold, "ANSI Cyan Bold")              \
+    X(cyan_underline,"ANSI Cyan Underlined")  \
     X(white, "ANSI White")                      \
     X(white_bold, "ANSI White Bold")            \
+    X(white_underline,"ANSI White Underlined")  \
     /* end of list */
     
 #define OSCP_COLOUR_LIST(X)                     \
@@ -188,10 +196,18 @@ enum {
     X(bg_bold)                                  \
     X(cursor_fg)                                \
     X(cursor_bg)                                \
-    X(fg_underline)                             \
-    X(bg_underline)                             \
-    X(sel_fg)                                   \
-    X(sel_bg)                                   \
+      X(fg_underline)                             \
+      X(bg_underline)                             \
+      X(sel_fg)                                   \
+      X(sel_bg)                                   \
+      X(black_underline)                                    \
+      X(red_underline)                                      \
+      X(green_underline)                                    \
+      X(yellow_underline)                                   \
+      X(blue_underline)                                     \
+      X(magenta_underline)                                  \
+      X(cyan_underline)                                     \
+      X(white_underline)                                    \
     /* end of list */
 #else
 #define CONF_COLOUR_LIST(X)                     \

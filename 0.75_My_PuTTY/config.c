@@ -1646,8 +1646,10 @@ static const char *const colours[] = {
 #ifdef MOD_TUTTY
 void dlg_control_enable(union control *ctrl, void *dlg, int enable);
 static const int itemcolour[] = {
-    0, 1, 2, 0, 1, 2, 0, 0, 3, 3, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2,
-    0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2
+    0, 1, 2, 0, 1, 2, 0, 0, 3, 3,
+    0, 1, 2, 0, 1, 2, 0, 1, 2, 0,
+    1, 2, 0, 1, 2, 0, 1, 2, 0, 1,
+    2, 0, 1, 2
 };
 
 static const int idxcolour[2][2][2][34] = {
@@ -1747,6 +1749,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 	    int i;
 	    dlg_update_start(ctrl, dlg);
 	    dlg_listbox_clear(ctrl, dlg);
+
 	    for (i = 0; i < lenof(colours); i++)
 #ifdef MOD_TUTTY
 		/* This allows us to hide list items we don't need to
@@ -1843,7 +1846,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 	     * pick up the results.
 	     */
 #ifdef MOD_TUTTY
- i = idxcolour[conf_get_int(conf,CONF_bold_colour)][conf_get_int(conf,CONF_under_colour)][conf_get_int(conf,CONF_sel_colour)][i];
+	i = idxcolour[conf_get_int(conf,CONF_bold_colour)][conf_get_int(conf,CONF_under_colour)][conf_get_int(conf,CONF_sel_colour)][i];
 #endif
 	    dlg_coloursel_start(ctrl, dlg,
 				conf_get_int_int(conf, CONF_colours, i*3+0),
@@ -1859,7 +1862,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 	     * selector did nothing (user hit Cancel, for example).
 	     */
 #ifdef MOD_TUTTY
- i = idxcolour[conf_get_int(conf,CONF_bold_colour)][conf_get_int(conf,CONF_under_colour)][conf_get_int(conf,CONF_sel_colour)][i];
+	i = idxcolour[conf_get_int(conf,CONF_bold_colour)][conf_get_int(conf,CONF_under_colour)][conf_get_int(conf,CONF_sel_colour)][i];
 #endif
 	    if (dlg_coloursel_results(ctrl, dlg, &r, &g, &b)) {
 		conf_set_int_int(conf, CONF_colours, i*3+0, r);
