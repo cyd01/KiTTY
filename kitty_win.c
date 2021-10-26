@@ -425,7 +425,7 @@ void debug_logevent( const char *fmt, ... ) {
 	va_start(ap, fmt);
 	buf = dupvprintf(fmt, ap) ;
 	va_end(ap);
-	lp_eventlog(default_logpolicy,buf) ;
+	do_eventlog(buf) ;
 	free(buf);
 }
 
@@ -506,7 +506,7 @@ HWND CreateToolTip(int toolID, HWND hDlg, PTSTR pszText)
 
     return hwndTip;
 }
-
+/*
 HWND CreateToolTip2(int toolID, HWND hDlg, PTSTR pszText) {
     HWND hwndToolTips = CreateWindow(TOOLTIPS_CLASS, NULL, 
                             WS_POPUP | TTS_NOPREFIX | TTS_BALLOON, 
@@ -529,3 +529,4 @@ HWND CreateToolTip2(int toolID, HWND hDlg, PTSTR pszText) {
 }
 return hwndToolTips ;
 }
+*/

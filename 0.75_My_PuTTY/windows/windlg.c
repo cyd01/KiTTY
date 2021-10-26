@@ -78,6 +78,8 @@ int print_event_log( FILE * fp, int i ) {
 	fprintf( fp, "%s\n", pst ) ;
 	return 1 ;
 	}
+void do_eventlog( const char * st ) ;
+
 #endif
 #ifdef MOD_PRINTCLIP
 #define PRINT_TO_CLIPBOARD_STRING "Windows clipboard"
@@ -1023,12 +1025,12 @@ bool do_config(Conf *conf)
 			load_settings(NULL,defconf);
 			if( !strcmp(FileExtension,"") ) {
 				if( save_settings( "Default Settings", defconf ) != NULL ) { 
-					lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; 
+					do_eventlog( "Can not create Default Settings file" ) ; 
 				}	
 			} else {
 				sprintf(buffer,"Default Settings%s", FileExtension);
 				if( save_settings( buffer, defconf ) != NULL ) {
-					lp_eventlog(default_logpolicy, "Can not create Default Settings file" ) ; 
+					do_eventlog("Can not create Default Settings file" ) ; 
 				}
 			}
 			conf_free( defconf ) ;

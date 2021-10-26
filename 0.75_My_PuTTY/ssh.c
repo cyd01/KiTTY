@@ -1201,6 +1201,30 @@ void ssh_got_fallback_cmd(Ssh *ssh)
     ssh->fallback_cmd = true;
 }
 
+const BackendVtable ssh_backend = {
+    .init = ssh_init,
+    .free = ssh_free,
+    .reconfig = ssh_reconfig,
+    .send = ssh_send,
+    .sendbuffer = ssh_sendbuffer,
+    .size = ssh_size,
+    .special = ssh_special,
+    .get_specials = ssh_get_specials,
+    .connected = ssh_connected,
+    .exitcode = ssh_return_exitcode,
+    .sendok = ssh_sendok,
+    .ldisc_option_state = ssh_ldisc,
+    .provide_ldisc = ssh_provide_ldisc,
+    .unthrottle = ssh_unthrottle,
+    .cfg_info = ssh_cfg_info,
+    .test_for_upstream = ssh_test_for_upstream,
+    .close_warn_text = ssh_close_warn_text,
+    .id = "ssh",
+    .displayname = "SSH",
+    .protocol = PROT_SSH,
+    .default_port = 22,
+};
+
 const BackendVtable sshconn_backend = {
     .init = ssh_init,
     .free = ssh_free,

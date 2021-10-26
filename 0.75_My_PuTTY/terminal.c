@@ -19,6 +19,8 @@ int get_param( const char * val ) ;
 int frontend_is_utf8(void *frontend) ;
 int GetPuttyFlag(void) ;
 int GetHyperlinkFlag(void) ;
+int GetCursorType() ;
+void SetCursorType( const int ct ) ;
 #endif
 #ifdef MOD_HYPERLINK
 /*
@@ -3738,9 +3740,6 @@ unsigned long term_translate(
     return c;
 }
 
-#ifdef MOD_PERSO
-extern int cursor_type;
-#endif
 /*
  * Remove everything currently in `inbuf' and stick it up on the
  * in-memory display. There's a big state machine in here to
@@ -4295,7 +4294,7 @@ static void term_out(Terminal *term)
 		    // cursor shape type (DECSCUSR)
 		    int cursor_shape = def(term->esc_args[0], 1);
 		    // set cursor_type from shape (cursor_type: 0=block, 1=underline, 2=beam)
-		    cursor_type = (cursor_shape - 1) >> 1;
+		    SetCursorType( (cursor_shape - 1) >> 1 );
 		    // set term->blink_cur from shape (odd numbers indicate blinking in DECSCUSR)
 		    if (term->blink_cur != (cursor_shape & 1))
 		    {
@@ -7844,7 +7843,7 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
       default: unreachable("bad small keypad key enum value");
     }
 #ifdef MOD_KEYMAPPING
-    int home_end_type = conf_get_int(conf, CONF_rxvt_homeend);  // standard(0), rxvt, urxvt, xterm(3), bsd1, bsd2
+    int home_end_type = conf_get_int(term->conf, CONF_rxvt_homeend);  // standard(0), rxvt, urxvt, xterm(3), bsd1, bsd2
     bool shift = modifier & 1;
     bool ctrl = modifier & 2;
     if (term->funky_type == FUNKY_XTERM && !term->vt52_mode && (home_end_type == 0 || home_end_type == 3))
@@ -7895,7 +7894,7 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
             p += sprintf(p, "\x1B[%c", codes[code-1]);
         }
 #ifdef MOD_PERSO
-    } else if ((code == 1 || code == 4) && (conf_get_int(conf, CONF_rxvt_homeend) == 1) ) {
+    } else if ((code == 1 || code == 4) && (conf_get_int(term->conf, CONF_rxvt_homeend) == 1) ) {
 #else
     } else if ((code == 1 || code == 4) && term->rxvt_homeend) {
 #endif
@@ -7903,19 +7902,19 @@ int format_small_keypad_key(char *buf, Terminal *term, SmallKeypadKey key)
     } else {
 #ifdef MOD_PERSO
 	if ((code == 1 || code == 4) &&
-	    conf_get_int(conf, CONF_rxvt_homeend) == 2) {
+	    conf_get_int(term->conf, CONF_rxvt_homeend) == 2) {
 	    // urxvt
 	    p += sprintf((char *) p, code == 1 ? "\x1B[7~" : "\x1B[8~");
 	} else if ((code == 1 || code == 4) &&
-	    conf_get_int(conf, CONF_rxvt_homeend) == 3) {
+	    conf_get_int(term->conf, CONF_rxvt_homeend) == 3) {
 	    // xterm
 	    p += sprintf((char *) p, code == 1 ? "\x1BOH" : "\x1BOF");
 	} else if ((code == 1 || code == 4) &&
-	    conf_get_int(conf, CONF_rxvt_homeend) == 4) {
+	    conf_get_int(term->conf, CONF_rxvt_homeend) == 4) {
 	    // FreeBSD1
 	    p += sprintf((char *) p, code == 1 ? "\x1B[H" : "\x1B[H");
 	} else if ((code == 1 || code == 4) &&
-	    conf_get_int(conf, CONF_rxvt_homeend) == 5) {
+	    conf_get_int(term->conf, CONF_rxvt_homeend) == 5) {
 	    // FreeBSD2
 	    p += sprintf((char *) p, code == 1 ? "\x1BOH" : "\x1B[?1l\x1B>");
 	} else

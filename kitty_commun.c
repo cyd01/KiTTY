@@ -382,6 +382,7 @@ void unmungestr( const char *in, char *out, int outlen ) {
 }
 
 // Fonctions de gestion du mot de passe
+extern Conf *conf;
 void GetPasswordInConfig( char * p ) {
 	if( strlen(conf_get_str(conf,CONF_password)) == 0 ) return ;
 	/* On decrypte le password */

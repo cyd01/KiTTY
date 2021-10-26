@@ -330,7 +330,7 @@ struct hostport {
  * serial backend.
  */
 static void config_protocols_handler(union control *ctrl, dlgparam *dlg,
-				    void *data, int event)
+                                     void *data, int event)
 {
     Conf *conf = (Conf *)data;
     int curproto = conf_get_int(conf, CONF_protocol);
@@ -363,7 +363,7 @@ static void config_protocols_handler(union control *ctrl, dlgparam *dlg,
                 if (curproto == ctrl->radio.buttondata[button].i ||
                     button == ctrl->radio.nbuttons-1) {
                     dlg_radiobutton_set(ctrl, dlg, button);
-		break;
+                    break;
                 }
         } else if (ctrl == hp->protlist) {
             int curentry = -1;
@@ -419,7 +419,7 @@ static void config_protocols_handler(union control *ctrl, dlgparam *dlg,
 
         if (event == EVENT_VALCHANGE && ctrl == hp->protradio) {
             int button = dlg_radiobutton_get(ctrl, dlg);
-	    assert(button >= 0 && button < ctrl->radio.nbuttons);
+            assert(button >= 0 && button < ctrl->radio.nbuttons);
             if (ctrl->radio.buttondata[button].i == -1) {
                 /*
                  * The 'Other' radio button was selected, which means we
@@ -439,7 +439,7 @@ static void config_protocols_handler(union control *ctrl, dlgparam *dlg,
                 if (i >= 0)
                     newproto = dlg_listbox_getid(hp->protlist, dlg, i);
             } else {
-	    newproto = ctrl->radio.buttondata[button].i;
+                newproto = ctrl->radio.buttondata[button].i;
             }
         } else if (event == EVENT_SELCHANGE && ctrl == hp->protlist) {
             int i = dlg_listbox_index(ctrl, dlg);
@@ -451,10 +451,10 @@ static void config_protocols_handler(union control *ctrl, dlgparam *dlg,
             }
         }
 
-            const struct BackendVtable *cvt = backend_vt_from_proto(curproto);
+        if (newproto != curproto) {
+            conf_set_int(conf, CONF_protocol, newproto);
 
-	if (oldproto != newproto) {
-            const struct BackendVtable *ovt = backend_vt_from_proto(oldproto);
+            const struct BackendVtable *cvt = backend_vt_from_proto(curproto);
             const struct BackendVtable *nvt = backend_vt_from_proto(newproto);
             assert(cvt);
             assert(nvt);
@@ -467,16 +467,17 @@ static void config_protocols_handler(union control *ctrl, dlgparam *dlg,
              * no sensible default for that protocol; in this case
              * it's displayed as a blank.)
              *
-	     * This helps with the common case of tabbing through the
-	     * controls in order and setting a non-default port before
-	     * getting to the protocol; we want that non-default port
+             * This helps with the common case of tabbing through the
+             * controls in order and setting a non-default port before
+             * getting to the protocol; we want that non-default port
              * to be preserved.
              */
             int port = conf_get_int(conf, CONF_port);
             if (port == cvt->default_port)
                 conf_set_int(conf, CONF_port, nvt->default_port);
-	    dlg_refresh(hp->host, dlg);
-	    dlg_refresh(hp->port, dlg);
+
+            dlg_refresh(hp->host, dlg);
+            dlg_refresh(hp->port, dlg);
         }
     }
 }
@@ -1477,7 +1478,8 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	} else if( (strlen(ssd->savedsession)>0) && isSessionExist(ssd,ssd->savedsession) ) {
 		strcpy( sessionname, ssd->savedsession ) ;
 		if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
-		if( !RunSession( hwnd, CurrentFolder, sessionname ) ) {  dlg_beep(dlg) ; } 
+		//if( !RunSession( hwnd, CurrentFolder, sessionname ) ) {  dlg_beep(dlg) ; } 
+		if( !RunSession( GetMainHwnd(), CurrentFolder, sessionname ) ) {  dlg_beep(dlg) ; } 
 	} else if( dlg_last_focused(ctrl, dlg) == ssd->listbox ) { 
 		Conf *conf2 = conf_new() ; 
 		bool mbl = false;
@@ -1493,7 +1495,8 @@ static void sessionsaver_handler(union control *ctrl, dlgparam *dlg,
 	    
 		strcpy( sessionname, ssd->savedsession ) ;
 		if( strcmp(FileExtension,"") ) { strcat(sessionname,FileExtension); }
-		if (conf_launchable(conf)) { RunSession( hwnd, CurrentFolder, sessionname ) ; }
+		//if (conf_launchable(conf)) { RunSession( hwnd, CurrentFolder, sessionname ) ; }
+		if (conf_launchable(conf)) { RunSession( GetMainHwnd(), CurrentFolder, sessionname ) ; }
 		strcpy(ssd->savedsession,oldsavedsession); 
 		free(oldsavedsession);
 		conf_free(conf2);	
@@ -2531,12 +2534,14 @@ void setup_config_box(struct controlbox *b, bool midsession,
 					sessionsaver_handler, P(ssd));
     ssd->cancelbutton->button.iscancel = true;
 #ifdef MOD_PERSO
+/*
     if( strlen(conf_get_str(conf,CONF_host))==0 ) {
 	if( strlen(conf_get_str(conf,CONF_host_alt))>0 ) {
 		conf_set_str( conf, CONF_host, conf_get_str( conf, CONF_host_alt ) ) ;
 		conf_set_str( conf, CONF_host_alt, "" ) ;
 	}
     }
+*/
     if( GetConfigBoxHeight() > 7 ) ssd->cancelbutton->generic.column = 0 ; else
 #endif
     ssd->cancelbutton->generic.column = 4;

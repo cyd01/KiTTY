@@ -105,13 +105,13 @@ void ManageConnectString( Conf *cf, char * hostname ) {
 	if( strlen(cm)>0 ) {
 		if( cm[0] == '#' ) {
 			decryptstring( GetCryptSaltFlag(), (char*)cm+1, MASTER_PASSWORD ) ;
-			conf_set_str( conf, CONF_autocommand, cm+1 ) ;
+			conf_set_str( cf, CONF_autocommand, cm+1 ) ;
 		} else {
 			char *s = (char*)malloc( strlen(cm)+1 ) ;
 			strcpy( s, cm ) ;
 			int i = decode64(s) ;
 			s[i] = '\0' ;
-			conf_set_str( conf,CONF_autocommand,s ) ;
+			conf_set_str( cf,CONF_autocommand,s ) ;
 			free(s) ;
 		}
 	}
@@ -573,6 +573,7 @@ int cmdline_process_param(const char *p, char *value,
                              conf_get_str(conf, CONF_host));
             }
 	    return 1;
+	}
     }
 #ifdef MOD_PERSO
     if (!strcmp(p, "-kload")) {
@@ -581,7 +582,7 @@ int cmdline_process_param(const char *p, char *value,
 	 * saved. */
 	load_open_settings_forced( value, conf ) ;
 	loaded_session = true;
-	cmdline_session_name = dupstr(value);
+	//cmdline_session_name = dupstr(value);
 	return 2;
     }
     if (!strcmp(p, "-knock")) {
@@ -598,8 +599,8 @@ int cmdline_process_param(const char *p, char *value,
         RETURN(1);
         UNAVAILABLE_IN(TOOLTYPE_FILETRANSFER | TOOLTYPE_NONNETWORK);
         SAVEABLE(0);
-        default_protocol = PROT_ADB;
-        conf_set_int(conf, CONF_protocol, default_protocol);
+        //default_protocol = PROT_ADB;
+        conf_set_int(conf, CONF_protocol, PROT_ADB);
     }    
 #endif
     if (!strcmp(p, "-v")) {

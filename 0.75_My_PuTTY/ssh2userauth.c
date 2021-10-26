@@ -1471,8 +1471,9 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 			char *userlog = dupprintf("Send automatic password (Using keyboard-interactive authentication)" );
 			ppl_logevent(userlog); // Affichage dans l'event log
 			// Affichage à l'écran
-			if (flags & FLAG_INTERACTIVE &&
-			(flags & FLAG_VERBOSE)) {
+			//if (flags & FLAG_INTERACTIVE &&
+			//(flags & FLAG_VERBOSE)) {
+			if(seat_verbose(s->ppl.seat) && seat_interactive(s->ppl.seat)) {
 				ppl_printf("%s\r\n",userlog);
 			}
 	
@@ -1656,8 +1657,9 @@ static void ssh2_userauth_process_queue(PacketProtocolLayer *ppl)
 			char *userlog = dupprintf("Send automatic password" );
 			ppl_logevent(userlog); // Affichage dans l'event log
 			// Affichage à l'écran
-			if (flags & FLAG_INTERACTIVE &&
-			(flags & FLAG_VERBOSE)) {
+			//if (flags & FLAG_INTERACTIVE &&
+			//(flags & FLAG_VERBOSE)) {
+			if(seat_verbose(s->ppl.seat) && seat_interactive(s->ppl.seat)) {
 				ppl_printf("\r\n%s\r\n",userlog);
 			}
 			sfree(userlog);

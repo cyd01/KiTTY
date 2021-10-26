@@ -5,7 +5,7 @@
 */
 
 extern Ldisc *ldisc;  /* defined in window.c */
-extern HWND hwnd;    /* in winstuff.h */
+extern HWND MainHwnd;    /* in winstuff.h */
 
 
 /* sort of copy of prompt_keyfile in winpgen.c
@@ -32,7 +32,7 @@ int prompt_scriptfile(HWND hwnd, char * filename)
 */
 void script_fail(char * message)
 {
-    MessageBox(hwnd,message,appname,MB_OK | MB_ICONEXCLAMATION); //
+    MessageBox(MainHwnd,message,appname,MB_OK | MB_ICONEXCLAMATION); //
 }
 
 

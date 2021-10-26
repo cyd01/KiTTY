@@ -29,3 +29,12 @@ bool got_crypt(void);
 char *capi_obfuscate_string(const char *realname);
 
 #endif
+
+
+#ifndef CRYPTPROTECTMEMORY_CROSS_PROCESS 
+#define CRYPTPROTECTMEMORY_CROSS_PROCESS 0x1
+#endif
+#ifndef CRYPTPROTECTMEMORY_BLOCK_SIZE 
+#define CRYPTPROTECTMEMORY_BLOCK_SIZE 16
+#endif
+

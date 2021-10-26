@@ -268,11 +268,12 @@ void SaveDumpListConf( FILE *fp, const char *directory ) {
 		}
 	}
 
+Terminal* GetTerminal() ;
 void kitty_term_copyall(Terminal *term) ;
 void SaveDumpClipBoard( FILE *fp ) {
 	char *pst = NULL ;
-	if( term==NULL ) return ;
-	kitty_term_copyall(term) ;
+	if( GetTerminal()==NULL ) return ;
+	kitty_term_copyall(GetTerminal()) ;
 	if( OpenClipboard(NULL) ) {
 		HGLOBAL hglb ;
 		if( (hglb = GetClipboardData( CF_TEXT ) ) != NULL ) {

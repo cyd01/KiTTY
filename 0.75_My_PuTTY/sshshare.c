@@ -135,6 +135,8 @@
 #include <limits.h>
 #include <errno.h>
 
+#include <winerror.h>
+
 #include "putty.h"
 #include "tree234.h"
 #include "ssh.h"

@@ -20,7 +20,7 @@
 #include <string.h>
 #include <windows.h>
 const char ver[] = "Custom build" ;
-char sshver[] = "PuTTY-KiTTY\0                           " ;
+const char sshver[] = "PuTTY-KiTTY\0                           " ;
 void set_sshver( char * vers ) { 
 	if(strlen(vers)<40 ) {
 		strcpy( sshver, vers ) ; 

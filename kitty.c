@@ -673,7 +673,7 @@ char * get_param_str( const char * val ) {
 #ifdef MOD_ZMODEM
 void xyz_updateMenuItems(Terminal *term) {
 	if( !GetZModemFlag() ) return ;
-	HMENU m = GetSystemMenu(hwnd, FALSE);
+	HMENU m = GetSystemMenu(MainHwnd, FALSE);
 //	EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
 	EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_DISABLED);
 	EnableMenuItem(m, IDM_XYZUPLOAD, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
@@ -683,28 +683,29 @@ void xyz_updateMenuItems(Terminal *term) {
 #endif
 
 char * kitty_current_dir() { 
-	static char cdir[1024]; 
+	
 
 return NULL ;  /* Ce code est tres specifique et ne marche pas partout */
-	
+	/*
+	static char cdir[1024]; 
 	char * dir = strstr(term->osc_string, ":") ; 
 	if(dir) { 
 		if( strlen(dir) > 1 ) {
 			dir = dir + 1 ;
-			if(*dir == '~') { 
+			if(*dir == '~') {
 				if(strlen(conf_get_str(conf,CONF_username))>0) { 
-				snprintf(cdir, 1024, "\"/home/%s/%s\"", conf_get_str(conf,CONF_username), dir + 1); 
-				return cdir; 
-				} 
-			} 
-			else if(*dir == '/') { 
+					snprintf(cdir, 1024, "\"/home/%s/%s\"", conf_get_str(conf,CONF_username), dir + 1); 
+					return cdir; 
+				}
+			} else if(*dir == '/') { 
 				snprintf(cdir, 1024, "\"%s\"", dir); 
 				return cdir; 
-				} 
 			} 
-		}
+		} 
+	}
 	return NULL; 
-	} 
+	*/
+} 
 
 // Liste des folder
 char **FolderList=NULL ;
@@ -1968,7 +1969,7 @@ void SetNewIcon( HWND hwnd, char * iconefile, int icone, const int mode ) {
 }
 
 // Modification de l'icone pour mettre l'icone de perte de connexion
-void SetConnBreakIcon( void ) {
+void SetConnBreakIcon( HWND hwnd ) {
 #ifdef MOD_PERSO
 	HICON hIcon = NULL ;
 	hIcon = LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_NOCON) ) ;
@@ -3646,7 +3647,7 @@ int InternalCommand( HWND hwnd, char * st ) {
 		return 1 ;
 	} else if( !strcmp( st, "/urlregex" ) ) { 
 		char b[1024] ;
-		sprintf(b,"%d: %s",conf_get_int(term->conf,CONF_url_defregex),conf_get_str(conf,CONF_url_regex));
+		sprintf(b,"%d: %s",conf_get_int(conf,CONF_url_defregex),conf_get_str(conf,CONF_url_regex));
 		MessageBox( NULL, b, "URL regex", MB_OK ) ; return 1 ; 
 #endif
 	} else if( !strcmp( st, "/save" ) ) { 
@@ -4665,7 +4666,7 @@ void ResetWindow(int reinit) ;
 void NegativeColours(HWND hwnd) {
 	int i ;
 #ifdef MOD_TUTTY
-    for (i = 0; i < NCFGCOLOURS; i++) {
+    for (i = 0; i < 34; i++) {
 #else
     for (i = 0; i < 22; i++) {
 #endif
@@ -4715,7 +4716,7 @@ void BlackOnWhiteColours(HWND hwnd) {
 }
 
 static int original_fontsize = -1 ;
-void ChangeFontSize(HWND hwnd, int dec) {
+void ChangeFontSize(Terminal *term, Conf *conf,HWND hwnd, int dec) {
 	FontSpec *fontspec = conf_get_fontspec(conf, CONF_font);
 	if( original_fontsize<0 ) original_fontsize = fontspec->height ;
 	if( dec == 0 ) { fontspec->height = original_fontsize ; }
@@ -5014,7 +5015,7 @@ void InitShortcuts( void ) {
 }
 
 int SwitchLogMode(void) ;
-int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) {
+int ManageShortcuts( Terminal *term, Conf *conf, HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) {
 	int key, i ;
 	key = key_num ;
 	if( alt_flag ) key = key + ALTKEY ;
@@ -5167,7 +5168,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 
 		if (key_num == VK_ADD) { SendMessage( hwnd, WM_COMMAND, IDM_FONTUP, 0 ) ; return 1 ; }
 		if (key_num == VK_SUBTRACT) { SendMessage( hwnd, WM_COMMAND, IDM_FONTDOWN, 0 ) ; return 1 ; }
-		if (key_num == VK_NUMPAD0) { ChangeFontSize(hwnd,0) ; return 1 ; }
+		if (key_num == VK_NUMPAD0) { ChangeFontSize(term,conf,hwnd,0) ; return 1 ; }
 #ifdef MOD_LAUNCHER
 		/*    ====> Ne fonctionne pas !!!
 		if (key_num == VK_LEFT ) //Fenetre KiTTY precedente
@@ -5182,7 +5183,7 @@ int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_
 
 // shift+bouton droit => paste ameliore pour serveur "lent"
 // Le paste utilise la methode "autocommand"
-void SetPasteCommand( void ) {
+void SetPasteCommand( HWND hwnd ) {
 	if( !PasteCommandFlag ) return ;
 	if( PasteCommand != NULL ) { free( PasteCommand ) ; PasteCommand = NULL ; }
 	char *pst = NULL ;
@@ -5225,7 +5226,7 @@ void LoadParameters( void ) {
 		{ AntiIdleCountMax = (int)floor(atoi(buffer)/10.0) ; if( AntiIdleCountMax<=0 ) AntiIdleCountMax =1 ; }
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
-	if( debug_flag )
+	//if( debug_flag )
 	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) {	
 		if( !stricmp( buffer, "NO" ) ) SetBackgroundImageFlag( 0 ) ; 
 		if( !stricmp( buffer, "YES" ) ) SetBackgroundImageFlag( 1 ) ;  // Broken en 0.71 ==> on desactive
@@ -5703,7 +5704,7 @@ void InitWinMain( void ) ;
 int ManageLocalCmd( HWND hwnd, const char * cmd ) ;
 
 // Gestion des raccourcis
-int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
+int ManageShortcuts( Terminal *term, Conf *conf, HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
 
 // Nettoie la clé de PuTTY pour enlever les clés et valeurs spécifique à KiTTY
 // Se trouve dans le fichier kitty_registry.c

@@ -106,8 +106,13 @@ enum {
  * terminal.c itself.
  */
 
+#ifdef MOD_TUTTY
+#define CONF_NCOLOURS 26               /* 16 + 6 special ones */
+#define OSCP_NCOLOURS 26               /* same as CONF, but different order */
+#else
 #define CONF_NCOLOURS 22               /* 16 + 6 special ones */
 #define OSCP_NCOLOURS 22               /* same as CONF, but different order */
+#endif
 #define OSC4_NCOLOURS 262              /* 256 + the same 6 special ones */
 
 /* The list macro for the conf colours also gives the textual names
@@ -141,6 +146,52 @@ enum {
     X(white, "ANSI White")                      \
     X(white_bold, "ANSI White Bold")            \
     /* end of list */
+    
+#define OSCP_COLOUR_LIST(X)                     \
+    X(black)                                    \
+    X(red)                                      \
+    X(green)                                    \
+    X(yellow)                                   \
+    X(blue)                                     \
+    X(magenta)                                  \
+    X(cyan)                                     \
+    X(white)                                    \
+    X(black_bold)                               \
+    X(red_bold)                                 \
+    X(green_bold)                               \
+    X(yellow_bold)                              \
+    X(blue_bold)                                \
+    X(magenta_bold)                             \
+    X(cyan_bold)                                \
+    X(white_bold)                               \
+    /*
+     * In the OSC 4 indexing, this is where the extra 240 colours go.
+     * They consist of:
+     *
+     *  - 216 colours forming a 6x6x6 cube, with R the most
+     *    significant colour and G the least. In other words, these
+     *    occupy the space of indices 16 <= i < 232, with each
+     *    individual colour found as i = 16 + 36*r + 6*g + b, for all
+     *    0 <= r,g,b <= 5.
+     *
+     *  - The remaining indices, 232 <= i < 256, consist of a uniform
+     *    series of grey shades running between black and white (but
+     *    not including either, since actual black and white are
+     *    already provided in the previous colour cube).
+     *
+     * After that, we have the remaining 6 special colours:
+     */                                         \
+    X(fg)                                       \
+    X(fg_bold)                                  \
+    X(bg)                                       \
+    X(bg_bold)                                  \
+    X(cursor_fg)                                \
+    X(cursor_bg)                                \
+    X(fg_underline)                             \
+    X(bg_underline)                             \
+    X(sel_fg)                                   \
+    X(sel_bg)                                   \
+    /* end of list */
 #else
 #define CONF_COLOUR_LIST(X)                     \
     X(fg, "Default Foreground")                 \
@@ -166,7 +217,6 @@ enum {
     X(white, "ANSI White")                      \
     X(white_bold, "ANSI White Bold")            \
     /* end of list */
-#endif
 
 #define OSCP_COLOUR_LIST(X)                     \
     X(black)                                    \
@@ -209,6 +259,7 @@ enum {
     X(cursor_fg)                                \
     X(cursor_bg)                                \
     /* end of list */
+#endif
 
 /* Enumerations of the colour lists. These are available everywhere in
  * the code. The OSC P encoding shouldn't be used outside terminal.c,

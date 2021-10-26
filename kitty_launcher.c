@@ -704,7 +704,7 @@ int WINAPI Launcher_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int s
 	}
 	if( LauncherConfReload ) InitLauncherRegistry() ;
 		
-	hwnd = CreateWindowEx(0, className, "KiTTYLauncher",
+	MainHwnd = CreateWindowEx(0, className, "KiTTYLauncher",
 				0,//WS_OVERLAPPEDWINDOW,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				CW_USEDEFAULT, CW_USEDEFAULT,

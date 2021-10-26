@@ -29,11 +29,11 @@ int random_byte(void)
     exit(0);
     return 0;                 /* unreachable, but placate optimiser */
 }
-#endif
 void random_read(void *buf, size_t size)
 {
     modalfatalbox("Internal error: attempt to use random numbers in Pageant");
 }
+#endif
 
 static bool pageant_local = false;
 
@@ -842,8 +842,8 @@ static PageantAsyncOp *pageant_make_op(
             goto challenge1_cleanup;
         }
 #ifdef MOD_PERSO
-		fingerprint = rsa_ssh1_fingerprint(key);
-		if (! confirm_key_usage(fingerprint, key->comment)) {
+		fingerprint = rsa_ssh1_fingerprint(pk->rkey);
+		if (! confirm_key_usage(fingerprint, pk->rkey->comment)) {
 	      goto challenge1_cleanup;
 	    }
 #endif
@@ -916,8 +916,8 @@ static PageantAsyncOp *pageant_make_op(
             goto responded;
         }
 #ifdef MOD_PERSO
-		confirm_fingerprint = ssh2_fingerprint_blob(keyblob);
-		if (! confirm_key_usage( confirm_fingerprint , key->comment)) {
+		confirm_fingerprint = ssh2_fingerprint_blob(keyblob, SSH_FPTYPE_DEFAULT);
+		if (! confirm_key_usage( confirm_fingerprint, pk->rkey->comment)) {
 			sfree(confirm_fingerprint);
 			return;
 	    }

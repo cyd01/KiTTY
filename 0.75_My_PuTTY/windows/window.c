@@ -159,7 +159,11 @@ static struct {
 enum { SYSMENU, CTXMENU };
 static HMENU savedsess_menu;
 
+#ifdef MOD_PERSO
+Conf *conf;
+#else
 static Conf *conf;
+#endif
 static LogContext *logctx;
 static Terminal *term;
 
@@ -259,6 +263,8 @@ void SaveDump( void ) ;
 #include "../../kitty_tools.h"
 #include "../../kitty_win.h"
 extern int PuttyFlag ;
+int GetCursorType() { return cursor_type ; }
+void SetCursorType( const int ct ) { cursor_type = ct ; }
 extern char BuildVersionTime[256] ;
 void SendStrToTerminal( const char * str, const int len ) {
 	char c ;
@@ -438,7 +444,7 @@ typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } W
 #endif
 #ifdef MOD_RECONNECT
 static time_t last_reconnect = 0;
-void SetConnBreakIcon( void ) ;
+void SetConnBreakIcon( HWND hwnd ) ;
 static void close_session(void *ignored_context);
 #endif
 /* rutty: */
@@ -522,8 +528,7 @@ static const TermWinVtable windows_termwin_vt = {
     .set_cursor_pos = wintw_set_cursor_pos,
     .set_raw_mouse_mode = wintw_set_raw_mouse_mode,
 #ifdef MOD_PERSO
-    //wintw_set_focus_reporting_mode,
-    .set_focus_reporting_mode,
+    .set_focus_reporting_mode = wintw_set_focus_reporting_mode,
 #endif
     .set_raw_mouse_mode_pointer = wintw_set_raw_mouse_mode_pointer,
     .set_scrollbar = wintw_set_scrollbar,
@@ -610,6 +615,11 @@ static const SeatVtable win_seat_vt = {
 static WinGuiSeat wgs = { .seat.vt = &win_seat_vt,
                           .logpolicy.vt = &win_gui_logpolicy_vt };
 
+#ifdef MOD_PERSO
+Terminal* GetTerminal() { return term ; }
+void do_eventlog( const char * st ) { lp_eventlog(&wgs.logpolicy,st); }
+#endif
+			  
 static void start_backend(void)
 {
     const struct BackendVtable *vt;
@@ -643,7 +653,7 @@ static void start_backend(void)
                               conf_dest(conf), error);
         sfree(error);
 	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
-	    lp_eventlog(default_logpolicy, msg) ; 
+	    lp_eventlog(&wgs.logpolicy, msg) ; 
         } else {
 	    if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) ) {
 		if( MessageBox(NULL, msg, str, MB_ICONERROR | MB_RETRYCANCEL | MB_DEFBUTTON2) == IDCANCEL ) {
@@ -661,12 +671,12 @@ static void start_backend(void)
 	sfree(str);
 	sfree(msg);
 	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
-	    SetConnBreakIcon() ;
+	    SetConnBreakIcon(wgs.term_hwnd) ;
 	    SetSSHConnected(0) ;
 	    queue_toplevel_callback(close_session, NULL);
 	    session_closed = true;
-	    lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
-	    SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
+	    lp_eventlog(&wgs.logpolicy, "Unable to connect, trying to reconnect...") ; 
+	    SetTimer(wgs.term_hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 	    return ;
 	}
 	else
@@ -760,14 +770,14 @@ void RestartSession( void ) {
 		queue_toplevel_callback(close_session, NULL) ; backend = NULL ; 
 	}
 	if( GetAutoreconnectFlag() ) {
-		lp_eventlog(default_logpolicy, "User request session restart..." ) ;
+		lp_eventlog(&wgs.logpolicy, "User request session restart..." ) ;
 	} else {
-		win_seat_connection_fatal( win_seat, "User request session restart..." ) ;
-		SetTimer(hwnd, TIMER_RECONNECT, 10, NULL) ;
+		win_seat_connection_fatal(  &wgs.seat, "User request session restart..." ) ;
+		SetTimer(wgs.term_hwnd, TIMER_RECONNECT, 10, NULL) ;
 	}
 	
-	PostMessage(hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
-	PostMessage(hwnd,WM_KEYUP,VK_RETURN ,1) ;
+	PostMessage(wgs.term_hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
+	PostMessage(wgs.term_hwnd,WM_KEYUP,VK_RETURN ,1) ;
 }
 #endif
 
@@ -1048,10 +1058,10 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if( existfile(argv[i]) ) {
 				LoadFile = (char*) malloc( strlen(argv[i])+1 ) ;
 				strcpy( LoadFile, argv[i] ) ;
-				RunPuttyEd( hwnd, LoadFile ) ; 
+				RunPuttyEd( wgs.term_hwnd, LoadFile ) ; 
 				free( LoadFile ) ;
 			} else {
-				MessageBox(hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
+				MessageBox(wgs.term_hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
 			}
 			exit( 0 ) ;
 		} else if( !strcmp(p, "-folder") ) {
@@ -1086,7 +1096,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			}
 
 		} else if( !strcmp(p, "-version") || !strcmp(p, "-about") ) {
-			showabout(hwnd) ; exit( 0 ) ;
+			showabout(wgs.term_hwnd) ; exit( 0 ) ;
 		} else if( !strcmp(p, "-noctrltab") ) {
 			SetCtrlTabFlag( 0 ) ;
 		} else if( !strcmp(p, "-noicon") ) {
@@ -1223,7 +1233,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 				sprintf(buffer, "%s|%s|%s|0", (char*)get_param_str("INI"), (char*)get_param_str("SAV"), argv[i] ) ;
 				return Notepad_WinMain(inst, prev, buffer, show) ;
 			} else {
-				MessageBox(hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
+				MessageBox(wgs.term_hwnd,"Unable to find requested file","Error",MB_OK|MB_ICONERROR) ;
 			}
 			exit(0);
 		} else if( !strcmp(p, "-help") || !strcmp(p, "-h") ) {
@@ -1282,7 +1292,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if( !strcmp(p, "-sendcmd") ) {
 			i++ ;
 			if( strlen(argv[i])>0 )
-				SendCommandAllWindows( hwnd, argv[i] ) ;
+				SendCommandAllWindows( wgs.term_hwnd, argv[i] ) ;
 			exit(0);
 		} else if( !strcmp(p, "-kload") ) {
 			i++ ;
@@ -1418,7 +1428,7 @@ TrayIcone.uCallbackMessage = MYWM_NOTIFYICON;
 TrayIcone.hIcon = LoadIcon(NULL, NULL);					// On ne load aucune icone pour le moment
 //TrayIcone.szTip[1024] = "PuTTY That\'s all folks!\0" ;			// Le tooltip par defaut, soit rien
 strcpy( TrayIcone.szTip, "PuTTY That\'s all folks!\0") ;			// Le tooltip par defaut, soit rien
-TrayIcone.hWnd = hwnd ;
+TrayIcone.hWnd = wgs.term_hwnd ;
 #endif
 
     memset(&ucsdata, 0, sizeof(ucsdata));
@@ -1579,7 +1589,7 @@ TrayIcone.hWnd = hwnd ;
     if( !PuttyFlag )
     if( (conf_get_bool(conf,CONF_saveonexit)||conf_get_bool(conf,CONF_save_windowpos)) 
 	/*&& (xpos_init>=0) && (ypos_init>=0)*/ ) {
-	MoveWindow(hwnd, xpos_init, ypos_init, guess_width, guess_height, TRUE );
+	MoveWindow(wgs.term_hwnd, xpos_init, ypos_init, guess_width, guess_height, TRUE );
 	}
 #endif
 
@@ -1775,13 +1785,13 @@ TrayIcone.hWnd = hwnd ;
 #ifndef MOD_NOTRANSPARENCY
 		if( GetTransparencyFlag() && conf_get_int(conf,CONF_transparencynumber) != -1 ) {
 			if( conf_get_int(conf,CONF_transparencynumber) > 0 ) { 
-				SetTransparency( hwnd, 255-conf_get_int(conf,CONF_transparencynumber) ) ;
+				SetTransparency( wgs.term_hwnd, 255-conf_get_int(conf,CONF_transparencynumber) ) ;
 				}
 			}
 #endif
 		// Lancement du timer auto-command pour les connexions non SSH
 		if(conf_get_int(conf,CONF_protocol) != PROT_SSH) { is_backend_connected = 1 ; }
-		SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
+		SetTimer(wgs.term_hwnd, TIMER_INIT, init_delay, NULL) ;
 
 		if( IniFileFlag == SAVEMODE_REG ) {
 			sprintf( reg_buffer, "%s@%s:%d (prot=%d) name=%s", conf_get_str(conf,CONF_username), conf_get_str(conf,CONF_host), conf_get_int(conf,CONF_port), conf_get_int(conf,CONF_protocol), conf_get_str(conf,CONF_sessionname)) ;
@@ -1794,19 +1804,19 @@ TrayIcone.hWnd = hwnd ;
 		if( (!GetBackgroundImageFlag()) || GetPuttyFlag() ) conf_set_int(conf,CONF_bg_type,0); 
 		if( conf_get_int(conf,CONF_bg_type)!=0 ) {
 			if(conf_get_int(conf,CONF_bg_slideshow)>0)
-			SetTimer(hwnd, TIMER_SLIDEBG, (int)(conf_get_int(conf,CONF_bg_slideshow)*1000), NULL) ;
+			SetTimer(wgs.term_hwnd, TIMER_SLIDEBG, (int)(conf_get_int(conf,CONF_bg_slideshow)*1000), NULL) ;
 			else 
 			if(ImageSlideDelay>0)
-			SetTimer(hwnd, TIMER_SLIDEBG, (int)(ImageSlideDelay*1000), NULL) ;
+			SetTimer(wgs.term_hwnd, TIMER_SLIDEBG, (int)(ImageSlideDelay*1000), NULL) ;
 			}
 
 		// Lancement du rafraichissement toutes les 10 minutes (pour l'image de fond, pour pallier bug d'affichage)
 		if( GetBackgroundImageFlag() && ReadParameter( INIT_SECTION, "redraw", reg_buffer ) ) {
-			if( stricmp( reg_buffer, "NO" ) ) SetTimer(hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
-		} else SetTimer(hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
+			if( stricmp( reg_buffer, "NO" ) ) SetTimer(wgs.term_hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
+		} else SetTimer(wgs.term_hwnd, TIMER_REDRAW, (int)(600*1000), NULL) ;
 #endif
 		// Lancement du timer d'anti-idle
-		SetTimer(hwnd, TIMER_ANTIIDLE, (int)(30*1000), NULL) ;
+		SetTimer(wgs.term_hwnd, TIMER_ANTIIDLE, (int)(30*1000), NULL) ;
 
 		} // fin de if( !PuttyFlag )
 #ifdef MOD_HYPERLINK
@@ -2222,7 +2232,7 @@ static void wintw_set_focus_reporting_mode(TermWin *tw, bool activate)
 		//send first activation notification message
 		if (activate)
 		{
-			SendKeyboard(hwnd, "\033[I");
+			SendKeyboard(wgs.term_hwnd, "\033[I");
 		}
 	}
 }
@@ -2235,7 +2245,7 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 {
 #ifdef MOD_RECONNECT
 	if( GetAutoreconnectFlag() && is_backend_first_connected ) {
-		SetConnBreakIcon() ;
+		SetConnBreakIcon(wgs.term_hwnd) ;
 		SetSSHConnected(0);
 		queue_toplevel_callback(close_session, NULL);
 		session_closed = true;
@@ -2247,13 +2257,13 @@ static void win_seat_connection_fatal(Seat *seat, const char *msg)
 		if( conf_get_int(conf,CONF_failure_reconnect) ) {
 			queue_toplevel_callback(close_session, NULL);
 			session_closed = true;
-			lp_eventlog(default_logpolicy, "Lost connection, trying to reconnect...") ;
-			SetTimer(wgs.hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ;
+			lp_eventlog(&wgs.logpolicy, "Lost connection, trying to reconnect...") ;
+			SetTimer(wgs.term_hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ;
 		}
 	} else {
     char *title = dupprintf("%s Fatal Error", appname);
     show_mouseptr(true);
-    MessageBox(wgs.hwnd, msg, title, MB_ICONERROR | MB_OK);
+    MessageBox(wgs.term_hwnd, msg, title, MB_ICONERROR | MB_OK);
     sfree(title);
 
     if (conf_get_int(conf, CONF_close_on_exit) == FORCE_ON)
@@ -3320,13 +3330,13 @@ static void win_seat_notify_remote_exit(Seat *seat)
 	     * we should not generate this informational one. */
 #ifdef MOD_RECONNECT
 	if( GetAutoreconnectFlag() && is_backend_first_connected ) {
-		SetConnBreakIcon() ;
+		SetConnBreakIcon(wgs.term_hwnd) ;
 		SetSSHConnected(0);
 		queue_toplevel_callback(close_session, NULL);
 		session_closed = true;
 		ReadInitScript(NULL);
                 show_mouseptr(true);
-		lp_eventlog(default_logpolicy, "Connection closed by remote host");
+		lp_eventlog(&wgs.logpolicy, "Connection closed by remote host");
 	} else
 #endif
             if (exitcode != INT_MAX) {
@@ -3509,12 +3519,12 @@ else if((UINT_PTR)wParam == TIMER_INIT) {  // Initialisation
 
 	// On envoie l'autocommand
 	if( strlen( conf_get_str(conf,CONF_autocommand) ) > 0 ) {
-		lp_eventlog(default_logpolicy, "Start autocommand timer" );
+		lp_eventlog(&wgs.logpolicy, "Start autocommand timer" );
 		SetTimer(hwnd, TIMER_AUTOCOMMAND, autocommand_delay, NULL) ;
 	}
 	if( conf_get_int(conf,CONF_logtimerotation) > 0 ) {
 		SetTimer(hwnd, TIMER_LOGROTATION, (int)( conf_get_int(conf,CONF_logtimerotation)*1000), NULL) ;
-		lp_eventlog(default_logpolicy, "Start log rotation" );
+		lp_eventlog(&wgs.logpolicy, "Start log rotation" );
 	}
 
 	RefreshBackground( hwnd ) ;
@@ -3609,7 +3619,7 @@ else if((UINT_PTR)wParam == TIMER_ANTIIDLE) {  // Envoi de l'anti-idle
 #ifdef MOD_RECONNECT
 	if(!backend||!is_backend_connected) { // On essaie de se reconnecter en cas de problème de connexion
 		if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
-			lp_eventlog(default_logpolicy, "No connection, trying to reconnect...") ; 
+			lp_eventlog(&wgs.logpolicy, "No connection, trying to reconnect...") ; 
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
 			}
 			break;
@@ -3640,7 +3650,7 @@ else if((UINT_PTR)wParam == TIMER_BLINKTRAYICON) {  // Clignotement de l'icone d
 #ifdef MOD_RECONNECT
 else if((UINT_PTR)wParam == TIMER_RECONNECT) {
 	if( !backend ) { 
-		lp_eventlog(default_logpolicy, "No backend connection, reconnecting...") ;
+		lp_eventlog(&wgs.logpolicy, "No backend connection, reconnecting...") ;
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
 	}
 	KillTimer( hwnd, TIMER_RECONNECT ) ;
@@ -3656,7 +3666,7 @@ else if((UINT_PTR)wParam == TIMER_LOGROTATION) {  // log rotation
 	      {
 		// Initialiation
 		MainHwnd = hwnd ;
-		if( debug_flag ) { lp_eventlog(default_logpolicy,"Starting window creation") ; }
+		if( debug_flag ) { lp_eventlog(&wgs.logpolicy,"Starting window creation") ; }
       		if( GetIconeFlag() != -1 )
 			SetNewIcon( hwnd, conf_get_filename(conf,CONF_iconefile)->path, conf_get_int(conf,CONF_icone), SI_INIT ) ;
 
@@ -3934,7 +3944,7 @@ free(cmd);
 		if( !backend ) {
 		    if ( conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 			SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
-			lp_eventlog(default_logpolicy, "Unable to connect, trying to reconnect...") ; 
+			lp_eventlog(&wgs.logpolicy, "Unable to connect, trying to reconnect...") ; 
 		    }
 		    break;
 		}
@@ -3969,7 +3979,7 @@ free(cmd);
 #ifdef MOD_PERSO
 	if( force_reconf++ ) {
 		reconfig_result =
-                    do_reconfig(hwnd, backend ? backend_cfg_info(backend) : 0);
+                    do_reconfig(hwnd, conf,  backend ? backend_cfg_info(backend) : 0);
 		reconfiguring = false;
 		if (!reconfig_result) {
                     conf_free(prev_conf);
@@ -4241,7 +4251,7 @@ free(cmd);
 #ifdef MOD_RUTTY
 	  case IDM_SCRIPTHALT:
 		script_close(&scriptdata);
-		lp_eventlog(default_logpolicy, "script stopped");
+		lp_eventlog(&wgs.logpolicy, "script stopped");
 		break;
 	  case IDM_SCRIPTSEND:
     {
@@ -4336,10 +4346,10 @@ free(cmd);
 		ManagePrint( hwnd ) ;
 		break ;
 	  case IDM_FONTUP:
-		ChangeFontSize(hwnd,1) ;
+		ChangeFontSize(term,conf,hwnd,1) ;
 		break ;
 	  case IDM_FONTDOWN:
-		ChangeFontSize(hwnd,-1) ;
+		ChangeFontSize(term,conf,hwnd,-1) ;
 		break ;
 	  case IDM_FONTBLACKANDWHITE:
 		BlackOnWhiteColours(hwnd) ;
@@ -4543,7 +4553,7 @@ free(cmd);
 #ifdef MOD_RECONNECT
 	if( ((!backend) || (!is_backend_connected)) && GetAutoreconnectFlag() && is_backend_first_connected ) { // trying to reconnect
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
-		lp_eventlog(default_logpolicy, "No connection on mouse click, trying to reconnect...") ;
+		lp_eventlog(&wgs.logpolicy, "No connection on mouse click, trying to reconnect...") ;
 		break ; 
 	} 
 #endif
@@ -4555,14 +4565,14 @@ free(cmd);
         if(!PuttyFlag && GetMouseShortcutsFlag() ) {
 	if( (message == WM_LBUTTONUP) && ((wParam & MK_SHIFT) && (wParam & MK_CONTROL) ) ) { // shift + CTRL + left button => duplicate session
 		if( backend && is_backend_connected ) {
-			lp_eventlog(default_logpolicy, "Duplicate session") ;
+			lp_eventlog(&wgs.logpolicy, "Duplicate session") ;
 			SendMessage( hwnd, WM_COMMAND, IDM_DUPSESS, 0 ) ;
 		}
 #ifdef MOD_RECONNECT
 		else { 
 			if( is_backend_first_connected && GetAutoreconnectFlag() ) {
 				SendMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ; 
-				lp_eventlog(default_logpolicy, "No connection on mouse click, trying to reconnect...") ;
+				lp_eventlog(&wgs.logpolicy, "No connection on mouse click, trying to reconnect...") ;
 			} 
 		}
 #endif
@@ -4591,7 +4601,7 @@ free(cmd);
 		}
 
 	else if ( GetPasteCommandFlag() && (message == WM_RBUTTONDOWN) && ((wParam & MK_SHIFT) ) ) {// shift+bouton droit => coller (paste) ameliore (pour serveur lent, on utilise la methode autocommand par TIMER)
-		SetPasteCommand() ;
+		SetPasteCommand(wgs.term_hwnd) ;
 		break ;
 		}
 	}
@@ -4920,7 +4930,7 @@ free(cmd);
         }
         
         // Last paint edges
-        paint_term_edges(hdccod, p.rcPaint.left, p.rcPaint.top, p.rcPaint.right, p.rcPaint.bottom);
+        paint_term_edges(term,hdccod, p.rcPaint.left, p.rcPaint.top, p.rcPaint.right, p.rcPaint.bottom);
 	
         EndPaint(hwnd, &p);
         ShowCaret(hwnd);
@@ -5498,7 +5508,7 @@ free(cmd);
 #ifdef MOD_RECONNECT
 	//if( !back && GetAutoreconnectFlag() && is_backend_first_connected && (WM_COMMAND==WM_KEYDOWN) && !(GetKeyState(VK_CONTROL)&0x8000) && !(GetKeyState(VK_SHIFT)&0x8000) && !(GetKeyState(VK_MENU)&0x8000) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
         if( (!backend || !is_backend_connected) && (message==WM_KEYDOWN) && GetAutoreconnectFlag() && is_backend_first_connected && (wParam!=VK_CONTROL) && (wParam!=VK_SHIFT) && (wParam!=VK_MENU) && (wParam!=VK_TAB) && (wParam!=VK_LEFT) && (wParam!=VK_UP) && (wParam!=VK_RIGHT) && (wParam!=VK_DOWN) && !((wParam>=VK_F1)&&(wParam<=VK_F16)) ) { 
- 		lp_eventlog(default_logpolicy, "No connection on key pressed, trying to reconnect...") ; 
+ 		lp_eventlog(&wgs.logpolicy, "No connection on key pressed, trying to reconnect...") ; 
 		PostMessage( hwnd, WM_COMMAND, IDM_RESTART, 0 ) ;  
 		break ;
 	}
@@ -5543,7 +5553,7 @@ free(cmd);
 		if( GetShortcutsFlag() ) { 
 			if ( (message==WM_KEYDOWN)||(message==WM_SYSKEYDOWN) ) {
 
-				if( ManageShortcuts( hwnd, clips_system, wParam
+				if( ManageShortcuts(term, conf, hwnd, clips_system, wParam
 					, GetKeyState(VK_SHIFT)&0x8000
 					, GetKeyState(VK_CONTROL)&0x8000
 					, (GetKeyState(VK_MENU)&0x8000)||(GetKeyState(VK_LMENU)&0x8000)
@@ -5754,13 +5764,13 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 					start_backend();
 					SetTimer(hwnd, TIMER_INIT, init_delay, NULL) ;
 					*/
-					lp_eventlog(default_logpolicy, "Unable to connect on wakeup, trying to reconnect...") ; 
+					lp_eventlog(&wgs.logpolicy, "Unable to connect on wakeup, trying to reconnect...") ; 
 					SetTimer(hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ;
 				}
 				break;
 			case PBT_APMSUSPEND:
 				if(!session_closed && backend) {
-					lp_eventlog(default_logpolicy, "Suspend detected, disconnecting cleanly...");
+					lp_eventlog(&wgs.logpolicy, "Suspend detected, disconnecting cleanly...");
 					queue_toplevel_callback(close_session, NULL); // close_session();
 					session_closed = true;
 				}
@@ -5830,7 +5840,7 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 		    // endregion
 		    */
 		    } else if (control_pressed) {
-			ChangeFontSize(hwnd, MBT_WHEEL_UP == b ? 1 : -1);
+			ChangeFontSize(term,conf,hwnd, MBT_WHEEL_UP == b ? 1 : -1);
 		} else {
 				/*
 				 * PuttyFeatures: Scroll Lines
@@ -6197,7 +6207,7 @@ static void do_text_internal(
 		COLORREF backgroundcolor = colours[258]; // Default Background
         
 		if(!bBgRelToTerm)
-			ClientToScreen(hwnd, &bgloc);
+			ClientToScreen(wgs.term_hwnd, &bgloc);
         
 		if(bg == backgroundcolor) {
 		// Use fast screen fill for default background.
@@ -7460,8 +7470,8 @@ void set_title_internal(TermWin *tw, const char *title) {
     sfree(window_name);
     window_name = snewn(1 + strlen(title), char);
     strcpy(window_name, title);
-    if (conf_get_bool(conf, CONF_win_name_always) || !IsIconic(hwnd))
-	SetWindowText(hwnd, title);
+    if (conf_get_bool(conf, CONF_win_name_always) || !IsIconic(wgs.term_hwnd))
+	SetWindowText(wgs.term_hwnd, title);
 }
 
 /* Creer un titre de fenetre a partir d'un schema donne
@@ -8477,12 +8487,12 @@ static void wintw_bell(TermWin *tw, int mode)
 #ifdef MOD_PERSO
 	if( GetVisibleFlag()!=VISIBLE_TRAY ) {
 		if(conf_get_bool(conf,CONF_foreground_on_bell) ) {		// Tester avec   sleep 4 ; echo -e '\a'
-			if( IsIconic(hwnd) ) SwitchToThisWindow( hwnd, TRUE ) ; 
-			else SetForegroundWindow( MainHwnd ) ;
+			if( IsIconic(wgs.term_hwnd) ) SwitchToThisWindow( wgs.term_hwnd, TRUE ) ; 
+			else SetForegroundWindow( wgs.term_hwnd ) ;
 		} else { 
 			if( mode == BELL_VISUAL ) {
-				if( IsIconic(hwnd) ) 
-					FlashWindow(hwnd, TRUE) ;
+				if( IsIconic(wgs.term_hwnd) ) 
+					FlashWindow(wgs.term_hwnd, TRUE) ;
 				else 
 					flash_window(2) ; 
 			} else { 
@@ -8491,9 +8501,9 @@ static void wintw_bell(TermWin *tw, int mode)
 		}
 	} else if( GetVisibleFlag()==VISIBLE_TRAY ) {
 		if( conf_get_bool(conf,CONF_foreground_on_bell) ) {
-			SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 ) ;
+			SendMessage( wgs.term_hwnd, WM_COMMAND, IDM_FROMTRAY, 0 ) ;
 		} else if(mode == BELL_VISUAL)
-			SetTimer(hwnd, TIMER_BLINKTRAYICON, (int)500, NULL) ;
+			SetTimer(wgs.term_hwnd, TIMER_BLINKTRAYICON, (int)500, NULL) ;
 		//SendMessage( MainHwnd, WM_COMMAND, IDM_FROMTRAY, 0 );
 		//flash_window(2);	       /* start */
 	    	//ShowWindow( MainHwnd, SW_MINIMIZE);
@@ -8692,7 +8702,7 @@ static void flip_full_screen()
         ShowWindow(wgs.term_hwnd, SW_MAXIMIZE);
     }
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
-	if( GetBackgroundImageFlag()&&(!PuttyFlag)&&(conf_get_int(conf,CONF_bg_image_abs_fixed)==1)&&(conf_get_int(conf,CONF_bg_type)!=0) ) RefreshBackground( hwnd ) ;
+	if( GetBackgroundImageFlag()&&(!PuttyFlag)&&(conf_get_int(conf,CONF_bg_image_abs_fixed)==1)&&(conf_get_int(conf,CONF_bg_type)!=0) ) RefreshBackground( wgs.term_hwnd ) ;
 #endif
 }
 

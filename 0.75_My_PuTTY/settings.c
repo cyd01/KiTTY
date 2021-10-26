@@ -737,7 +737,7 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_i(sesskey, "BoldAsColourTest", conf_get_int(conf, CONF_bold_colour) );
     write_setting_i(sesskey, "UnderlinedAsColour", conf_get_int(conf, CONF_under_colour) );
     write_setting_i(sesskey, "SelectedAsColour", conf_get_int(conf, CONF_sel_colour) );
-    for (i = 0; i < NCFGCOLOURS; i++) {
+    for (i = 0; i < 34; i++) {
 #else
     for (i = 0; i < 22; i++) {
 #endif
@@ -1365,8 +1365,8 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppi(sesskey, "BoldAsColourTest", 1, conf, CONF_bold_colour);
     gppi(sesskey, "UnderlinedAsColour", 0, conf, CONF_under_colour);
     gppi(sesskey, "SelectedAsColour", 0, conf, CONF_sel_colour);
-    for (i = 0; i < NCFGCOLOURS; i++) {
-	static const char *const defaults[NCFGCOLOURS] = {
+    for (i = 0; i < 34; i++) {
+	static const char *const defaults[34] = {
 	    "187,187,187", "255,255,255", "0,0,0", "85,85,85", "0,0,0",
 	    "0,255,0", "0,0,0", "85,85,85", "187,0,0", "255,85,85",
 	    "0,187,0", "85,255,85", "187,187,0", "255,255,85", "0,0,187",

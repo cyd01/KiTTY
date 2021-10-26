@@ -6,7 +6,7 @@
 #include <time.h>
 
 // Handle sur la fenetre principale
-extern HWND MainHwnd ;
+//extern HWND MainHwnd ;
 HWND GetMainHwnd(void) ;
 
 
@@ -320,7 +320,7 @@ int WriteParameter( const char * key, const char * name, char * value ) ;
 int DelParameter( const char * key, const char * name ) ;
 void GetSessionFolderName( const char * session_in, char * folder ) ;
 int MakeDirTree( const char * Directory, const char * s, const char * sd ) ;
-int ManageShortcuts( HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
+int ManageShortcuts( Terminal *term, Conf *conf, HWND hwnd, const int* clips_system, int key_num, int shift_flag, int control_flag, int alt_flag, int altgr_flag, int win_flag ) ;
 void print_log( const char *fmt, ...) ;
 char * SetInitialSessPath( void ) ;
 char * SetSessPath( const char * dec ) ;
@@ -388,7 +388,7 @@ void OnDropFiles(HWND hwnd, HDROP hDropInfo) ;
 void DisplaySystemTrayMenu( HWND hwnd ) ;
 // shift+bouton droit => paste ameliore pour serveur "lent"
 // Le paste utilise la methode "autocommand"
-void SetPasteCommand( void ) ;
+void SetPasteCommand( HWND hwnd ) ;
 // Recupere les coordonnees de la fenetre
 void GetWindowCoord( HWND hwnd ) ;
 int ManageLocalCmd( HWND hwnd, const char * cmd ) ;
@@ -409,7 +409,7 @@ void unmungestr( const char *in, char *out, int outlen ) ;
 	
 void NegativeColours(HWND hwnd) ;
 void BlackOnWhiteColours(HWND hwnd) ;
-void ChangeFontSize(HWND hwnd, int dec) ;
+void ChangeFontSize(Terminal *term, Conf *conf,HWND hwnd, int dec) ;
 
 void create_settings( const char * name ) ;
 void SetHostKeyExtension( const char* ext ) ;

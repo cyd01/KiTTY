@@ -626,7 +626,7 @@ void init_dc_blend(void) {
         pAlphaBlend = GetProcAddress(msimg32_dll, "AlphaBlend");
     
     if(pAlphaBlend) {
-    	HDC hdc = GetDC(hwnd);
+    	HDC hdc = GetDC(MainHwnd);
     	
     	// Create one pixel size bitmap for use in color_blend.
         if( colorinpixeldc !=NULL ) { DeleteDC(colorinpixeldc ) ; } colorinpixeldc = CreateCompatibleDC(hdc);
@@ -635,7 +635,7 @@ void init_dc_blend(void) {
         colorinpixel = 0;
         SetPixelV(colorinpixeldc, 0, 0, colorinpixel);
         
-        ReleaseDC(hwnd, hdc);
+        ReleaseDC(MainHwnd, hdc);
     }
 }
 
@@ -851,7 +851,7 @@ void CreateBlankBitmap( HBITMAP * rawImage, const int width, const int height ) 
 	*rawImage = CreateDIBSection( dc,&bi,DIB_RGB_COLORS,&pvBits,NULL,0 );
 	ReleaseDC(NULL, dc) ;
 
-	HDC hDC = GetDC(hwnd);
+	HDC hDC = GetDC(MainHwnd);
 	HDC hDCDst = CreateCompatibleDC(hDC); // memory device context for dest	bitmap
 	ReleaseDC(NULL, hDC);
 
@@ -938,7 +938,7 @@ BOOL load_bg_bmp()
 	}
     }
 
-    hdcPrimary = GetDC(hwnd);
+    hdcPrimary = GetDC(MainHwnd);
     deskWidth = GetDeviceCaps(hdcPrimary, HORZRES);
     deskHeight = GetDeviceCaps(hdcPrimary, VERTRES);
 
@@ -1043,7 +1043,7 @@ BOOL load_bg_bmp()
 			//if( (newhbmpBMP = ResizeBmp( rawImage,clientWidth,clientHeight)) != NULL ) {
 				DeleteDC(bmpdc) ;
 				bmpdc = CreateCompatibleDC(0) ;
-				DeleteDC(backgrounddc); backgrounddc = GetDC(hwnd);
+				DeleteDC(backgrounddc); backgrounddc = GetDC(MainHwnd);
 				SelectObject(bmpdc, newhbmpBMP ) ;
 				BitBlt(backgrounddc, 0, 0,clientWidth,clientHeight, bmpdc, 0, 0, SRCCOPY ) ;
 				DeleteObject(newhbmpBMP);
@@ -1085,13 +1085,13 @@ BOOL load_bg_bmp()
 		}
     }
 
-    ReleaseDC(hwnd, hdcPrimary);
+    ReleaseDC(MainHwnd, hdcPrimary);
 
 //DeleteDC(hdcPrimary);
     return TRUE;
 }
 
-void paint_term_edges(HDC hdc, LONG paint_left, LONG paint_top, LONG paint_right, LONG paint_bottom) 
+void paint_term_edges(Terminal*term, HDC hdc, LONG paint_left, LONG paint_top, LONG paint_right, LONG paint_bottom) 
 {
     if(backgrounddc == 0)
         load_bg_bmp();
@@ -1109,14 +1109,14 @@ void paint_term_edges(HDC hdc, LONG paint_left, LONG paint_top, LONG paint_right
         srcTopLeft.y = topLeftY;
 		
         if(!bBgRelToTerm)
-            ClientToScreen(hwnd, &srcTopLeft);
+            ClientToScreen(MainHwnd, &srcTopLeft);
 
         if(!srcdc)
             srcdc = backgrounddc;
 
 	if(resizing)
 	{
-	    GetClientRect(hwnd, &size_now);
+	    GetClientRect(MainHwnd, &size_now);
 	    if(size_now.bottom > size_before.bottom || size_now.right > size_before.right)
 	    {
 	    	// Draw on full area on resize.

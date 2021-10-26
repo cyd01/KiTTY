@@ -82,7 +82,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
         const struct BackendVtable *vt =
             backend_vt_from_proto(conf_get_int(conf, CONF_protocol));
         if (vt)
-            p = vt->name;
+            p = vt->id;
     }
     write_setting_s_forced(sesskey, "Protocol", p);
     write_setting_i_forced(sesskey, "PortNumber", conf_get_int(conf, CONF_port));
@@ -234,7 +234,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
     write_setting_i_forced(sesskey, "BoldAsColourTest", conf_get_int(conf, CONF_bold_colour) );
     write_setting_i_forced(sesskey, "UnderlinedAsColour", conf_get_int(conf, CONF_under_colour) );
     write_setting_i_forced(sesskey, "SelectedAsColour", conf_get_int(conf, CONF_sel_colour) );
-    for (i = 0; i < NCFGCOLOURS; i++) {
+    for (i = 0; i < 34; i++) {
 #else
     for (i = 0; i < 22; i++) {
 #endif
@@ -829,8 +829,8 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppi_forced(sesskey, "BoldAsColourTest", 1, conf, CONF_bold_colour);
     gppi_forced(sesskey, "UnderlinedAsColour", 0, conf, CONF_under_colour);
     gppi_forced(sesskey, "SelectedAsColour", 0, conf, CONF_sel_colour);
-    for (i = 0; i < NCFGCOLOURS; i++) {
-	static const char *const defaults[NCFGCOLOURS] = {
+    for (i = 0; i < 34; i++) {
+	static const char *const defaults[34] = {
 	    "187,187,187", "255,255,255", "0,0,0", "85,85,85", "0,0,0",
 	    "0,255,0", "0,0,0", "85,85,85", "187,0,0", "255,85,85",
 	    "0,187,0", "85,255,85", "187,187,0", "255,255,85", "0,0,187",
