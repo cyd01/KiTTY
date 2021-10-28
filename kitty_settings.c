@@ -134,6 +134,7 @@ void save_open_settings_forced(char *filename, Conf *conf) {
 #endif
     write_setting_s_forced(sesskey, "RekeyBytes", conf_get_str(conf, CONF_ssh_rekey_data));
     write_setting_b_forced(sesskey, "SshNoAuth", conf_get_bool(conf, CONF_ssh_no_userauth));
+    write_setting_b_forced(sesskey, "SshNoTrivialAuth", conf_get_bool(conf, CONF_ssh_no_trivial_userauth));
     write_setting_b_forced(sesskey, "SshBanner", conf_get_bool(conf, CONF_ssh_show_banner));
     write_setting_b_forced(sesskey, "AuthTIS", conf_get_bool(conf, CONF_try_tis_auth));
     write_setting_b_forced(sesskey, "AuthKI", conf_get_bool(conf, CONF_try_ki_auth));
@@ -691,6 +692,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gpps_forced(sesskey, "LogHost", "", conf, CONF_loghost);
     gppb_forced(sesskey, "SSH2DES", false, conf, CONF_ssh2_des_cbc);
     gppb_forced(sesskey, "SshNoAuth", false, conf, CONF_ssh_no_userauth);
+    gppb_forced(sesskey, "SshNoTrivialAuth", false, conf, CONF_ssh_no_trivial_userauth);
     gppb_forced(sesskey, "SshBanner", true, conf, CONF_ssh_show_banner);
     gppb_forced(sesskey, "AuthTIS", false, conf, CONF_try_tis_auth);
     gppb_forced(sesskey, "AuthKI", true, conf, CONF_try_ki_auth);

@@ -11,6 +11,10 @@
 // Flag permettant d'activer l'acces a du code particulier permettant d'avoir plus d'info dans le kitty.dmp
 extern int debug_flag ;
 
+// Flag pour repasser en mode Putty basic
+int GetPuttyFlag(void) ;
+void SetPuttyFlag( const int flag ) ;
+
 // Flag pour le fonctionnement en mode "portable" (gestion par fichiers)
 int GetIniFileFlag(void) ;
 void SetIniFileFlag( const int flag ) ;

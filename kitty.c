@@ -296,11 +296,6 @@ static int CtrlTabFlag = 1 ;
 int GetCtrlTabFlag(void) { return CtrlTabFlag  ; }
 void SetCtrlTabFlag( const int flag ) { CtrlTabFlag  = flag ; }
 
-// Flag pour repasser en mode Putty basic
-int PuttyFlag = 0 ;
-int GetPuttyFlag(void) { return PuttyFlag ; }
-void SetPuttyFlag( const int flag ) { PuttyFlag = flag ; }
-
 #ifdef MOD_RECONNECT
 // Flag pour inhiber le mécanisme de reconnexion automatique
 static int AutoreconnectFlag = 1 ;
@@ -632,7 +627,7 @@ char *dupvprintf(const char *fmt, va_list ap) ;
 	
 // Procedure de recuperation de la valeur d'un flag
 int get_param( const char * val ) {
-	if( !stricmp( val, "PUTTY" ) ) return PuttyFlag ;
+	if( !stricmp( val, "PUTTY" ) ) return GetPuttyFlag() ;
 	else if( !stricmp( val, "INIFILE" ) ) return IniFileFlag ;
 	else if( !stricmp( val, "DIRECTORYBROWSE" ) ) return DirectoryBrowseFlag ;
 	else if( !stricmp( val, "HYPERLINK" ) ) return HyperlinkFlag ;
@@ -5640,7 +5635,7 @@ void InitWinMain( void ) {
 	}
 
 	// Initialise la gestion des icones depuis la librairie kitty.dll si elle existe
-	if( !PuttyFlag ) {
+	if( !GetPuttyFlag() ) {
 		if( IconFile != NULL )
 		if( existfile( IconFile ) ) 
 			{ HMODULE hDll ; if( ( hDll = LoadLibrary( TEXT(IconFile) ) ) != NULL ) hInstIcons = hDll ; }

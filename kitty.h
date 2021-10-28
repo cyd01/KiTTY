@@ -14,11 +14,6 @@ HWND GetMainHwnd(void) ;
 ** DEFINITION DES VARIABLES STATIQUE DE kitty.c
 ** ET DE LEUR FONCTIONS D'ACCES ET DE MODIFICATION
 *****************************************************/
-// Flag pour repasser en mode Putty basic
-//extern int PuttyFlag ;
-int GetPuttyFlag(void) ;
-void SetPuttyFlag( const int flag ) ;
-
 // Flag pour retourner à la Config Box en fin d'execution
 // extern int ConfigBoxNoExitFlag ;
 int GetConfigBoxNoExitFlag(void) ;

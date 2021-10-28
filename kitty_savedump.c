@@ -345,6 +345,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
   	fprintf( fp, "sshprot=%d\n",			conf_get_int(conf,CONF_sshprot) ) ;
 	fprintf( fp, "ssh2_des_cbc=%d\n",		conf_get_bool(conf,CONF_ssh2_des_cbc) ) ;
 	fprintf( fp, "ssh_no_userauth=%d\n",		conf_get_bool(conf,CONF_ssh_no_userauth) ) ;
+	fprintf( fp, "ssh_no_trivial_userauth=%d\n",	conf_get_bool(conf,CONF_ssh_no_trivial_userauth) ) ;
 	fprintf( fp, "ssh_show_banner=%d\n",		conf_get_bool(conf,CONF_ssh_show_banner) ) ;
 	fprintf( fp, "try_tis_auth=%d\n",		conf_get_bool(conf,CONF_try_tis_auth) ) ;
 	fprintf( fp, "try_ki_auth=%d\n",		conf_get_bool(conf,CONF_try_ki_auth) ) ;
@@ -701,7 +702,7 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "AutoStoreSSHKeyFlag=%d\nDirectoryBrowseFlag=%d\nVisibleFlag=%d\nShortcutsFlag=%d\nMouseShortcutsFlag=%d\nIconeFlag=%d\nNumberOfIcons=%d\nSizeFlag=%d\nCapsLockFlag=%d\nTitleBarFlag=%d\nCtrlTabFlag=%d\nRuTTYFlag=%d\n"
 	,GetAutoStoreSSHKeyFlag(),DirectoryBrowseFlag,VisibleFlag,ShortcutsFlag,MouseShortcutsFlag,IconeFlag,NumberOfIcons,SizeFlag,CapsLockFlag,TitleBarFlag,CtrlTabFlag,RuttyFlag);
 	//static HINSTANCE hInstIcons =  NULL ;
-	fprintf( fp, "WinHeight=%d\nWinrolFlag=%d\nAutoSendToTray=%d\nNoKittyFileFlag=%d\nConfigBoxHeight=%d\nConfigBoxWindowHeight=%d\nConfigBoxNoExitFlag=%d\nUserPassSSHNoSave=%d\nPuttyFlag=%d\n",WinHeight,WinrolFlag,AutoSendToTray,NoKittyFileFlag,ConfigBoxHeight,ConfigBoxWindowHeight,ConfigBoxNoExitFlag,GetUserPassSSHNoSave(),PuttyFlag);
+	fprintf( fp, "WinHeight=%d\nWinrolFlag=%d\nAutoSendToTray=%d\nNoKittyFileFlag=%d\nConfigBoxHeight=%d\nConfigBoxWindowHeight=%d\nConfigBoxNoExitFlag=%d\nUserPassSSHNoSave=%d\nPuttyFlag=%d\n",WinHeight,WinrolFlag,AutoSendToTray,NoKittyFileFlag,ConfigBoxHeight,ConfigBoxWindowHeight,ConfigBoxNoExitFlag,GetUserPassSSHNoSave(),GetPuttyFlag());
 
 	fprintf( fp,"BackgroundImageFlag=%d\n",GetBackgroundImageFlag() );
 	fprintf( fp,"RandomActiveFlag=%d\n",GetRandomActiveFlag() );
