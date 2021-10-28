@@ -419,25 +419,26 @@ static int adb_cfg_info(void *handle)
 }
 
 const struct BackendVtable adb_backend = {
-    adb_init,
-    adb_free,
-    adb_reconfig,
-    adb_send,
-    adb_sendbuffer,
-    adb_size,
-    adb_special,
-    adb_get_specials,
-    adb_connected,
-    adb_exitcode,
-    adb_sendok,
-    adb_ldisc,
-    adb_provide_logctx,
-    adb_unthrottle,
-    adb_cfg_info,
-    NULL /* test_for_upstream */,
-    "adb",
-    PROT_ADB,
-    5037
+    .init = adb_init,
+    .free = adb_free,
+    .reconfig = adb_reconfig,
+    .send = adb_send,
+    .sendbuffer = adb_sendbuffer,
+    .size = adb_size,
+    .special = adb_special,
+    .get_specials = adb_get_specials,
+    .connected = adb_connected,
+    .exitcode = adb_exitcode,
+    .sendok = adb_sendok,
+    .ldisc_option_state = adb_ldisc,
+    .provide_ldisc = adb_provide_logctx,
+    .unthrottle = adb_unthrottle,
+    .cfg_info = adb_cfg_info,
+    .id = "adb",
+    .displayname = "ADB",
+    .protocol = PROT_ADB,
+    .default_port = 5037,
 };
+
 
 #endif

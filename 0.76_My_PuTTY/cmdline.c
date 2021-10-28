@@ -556,37 +556,6 @@ int cmdline_process_param(const char *p, char *value,
 #endif
 	return 2;
     }
-#ifdef MOD_PERSO
-    if( true 
-#ifdef MOD_INTEGRATED_KEYGEN
-    && ( strcmp(p, "-keygen") )
-#endif
-#ifdef MOD_INTEGRATED_AGENT
-    && ( strcmp(p, "-runagent") )
-#endif
-#ifdef MOD_LAUNCHER
-    && ( strcmp(p, "-launcher") )
-#endif
-    )
-#endif
-    for (size_t i = 0; backends[i]; i++) {
-        if (p[0] == '-' && !strcmp(p+1, backends[i]->id)) {
-	    RETURN(1);
-            UNAVAILABLE_IN(TOOLTYPE_NONNETWORK);
-	    SAVEABLE(0);
-            set_protocol(conf, backends[i]->protocol);
-            if (backends[i]->default_port)
-                set_port(conf, backends[i]->default_port);
-            if (backends[i]->protocol == PROT_SERIAL) {
-                /* Special handling: the 'where to connect to' argument will
-                 * have been placed into CONF_host, but for this protocol, it
-                 * needs to be in CONF_serline */
-                conf_set_str(conf, CONF_serline,
-                             conf_get_str(conf, CONF_host));
-            }
-	    return 1;
-	}
-    }
 
 #ifdef MOD_PERSO
     if (!strcmp(p, "-kload")) {
@@ -616,6 +585,24 @@ int cmdline_process_param(const char *p, char *value,
         conf_set_int(conf, CONF_protocol, PROT_ADB);
     }    
 #endif
+    for (size_t i = 0; backends[i]; i++) {
+        if (p[0] == '-' && !strcmp(p+1, backends[i]->id)) {
+            RETURN(1);
+            UNAVAILABLE_IN(TOOLTYPE_NONNETWORK);
+            SAVEABLE(0);
+            set_protocol(conf, backends[i]->protocol);
+            if (backends[i]->default_port)
+                set_port(conf, backends[i]->default_port);
+            if (backends[i]->protocol == PROT_SERIAL) {
+                /* Special handling: the 'where to connect to' argument will
+                 * have been placed into CONF_host, but for this protocol, it
+                 * needs to be in CONF_serline */
+                conf_set_str(conf, CONF_serline,
+                             conf_get_str(conf, CONF_host));
+            }
+            return 1;
+        }
+    }
     if (!strcmp(p, "-v")) {
 	RETURN(1);
         UNAVAILABLE_IN(TOOLTYPE_NO_VERBOSE_OPTION);
