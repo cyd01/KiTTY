@@ -13,7 +13,7 @@ KiTTY has all the features from the original software, and adds many others as d
 
 ![Current version](version1.php "Version")
 
-> Some informations about [KiTTY 0.71](pages/0.71.md) version.
+> Some informations about KiTTY [0.71](pages/0.71.md) and [0.75](pages/0.75.md) versions.
  
  **Cyd**
 
