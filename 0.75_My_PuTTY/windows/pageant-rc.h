@@ -6,7 +6,7 @@
 #define IDI_MAINICON 200
 #define IDI_TRAYICON 201
 #else
-#define IDI_MAINICON 900
+#define IDI_MAINICON_AGENT 900
 #define IDI_TRAYICON 901
 #endif
 

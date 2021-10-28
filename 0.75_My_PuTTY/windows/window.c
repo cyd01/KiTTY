@@ -978,6 +978,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    for (i = 0; i < argc; i++) {
 		char *p = argv[i];
 		int ret;
+
 		ret = cmdline_process_param(p, i+1<argc?argv[i+1]:NULL,
 					    1, conf);
 		if (ret == -2) {

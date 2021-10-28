@@ -1760,7 +1760,11 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
         memset(&wndclass, 0, sizeof(wndclass));
         wndclass.lpfnWndProc = TrayWndProc;
 	wndclass.hInstance = inst;
+#ifdef MOD_INTEGRATED_AGENT
+	wndclass.hIcon = LoadIcon(inst, MAKEINTRESOURCE(IDI_MAINICON_AGENT));
+#else
 	wndclass.hIcon = LoadIcon(inst, MAKEINTRESOURCE(IDI_MAINICON));
+#endif
         wndclass.lpszClassName = TRAYCLASSNAME;
 
         RegisterClass(&wndclass);

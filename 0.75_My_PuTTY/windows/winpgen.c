@@ -2005,7 +2005,7 @@ int WINAPI KeyGen_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int sho
     int argc, i;
     char **argv;
     int ret;
-
+	
     dll_hijacking_protection();
 
     init_common_controls();
@@ -2039,6 +2039,7 @@ int WINAPI KeyGen_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int sho
     save_params = ppk_save_default_parameters;
 
     random_setup_special();
+
     ret = DialogBox(hinst, MAKEINTRESOURCE(201), NULL, MainDlgProc) != IDOK;
 
     cleanup_exit(ret);

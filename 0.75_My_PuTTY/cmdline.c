@@ -273,7 +273,6 @@ int cmdline_process_param(const char *p, char *value,
          * hostname specification appears as part of a more
          * complicated scheme.
          */
-
         if ((cmdline_tooltype & TOOLTYPE_HOST_ARG) &&
             !seen_hostname_argument &&
             (!(cmdline_tooltype & TOOLTYPE_HOST_ARG_FROM_LAUNCHABLE_LOAD) ||
@@ -557,6 +556,16 @@ int cmdline_process_param(const char *p, char *value,
 #endif
 	return 2;
     }
+#ifdef MOD_PERSO
+    if( true 
+#ifdef MOD_INTEGRATED_KEYGEN
+    && ( strcmp(p, "-keygen") )
+#endif
+#ifdef MOD_INTEGRATED_AGENT
+    && ( strcmp(p, "-runagent") )
+#endif
+    )
+#endif
     for (size_t i = 0; backends[i]; i++) {
         if (p[0] == '-' && !strcmp(p+1, backends[i]->id)) {
 	    RETURN(1);
@@ -575,6 +584,7 @@ int cmdline_process_param(const char *p, char *value,
 	    return 1;
 	}
     }
+
 #ifdef MOD_PERSO
     if (!strcmp(p, "-kload")) {
 	RETURN(2);
