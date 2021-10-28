@@ -3970,7 +3970,7 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 	}
 	
 	if( conf_get_int(conf,CONF_protocol) == PROT_SSH ) {
-		sprintf( cmd, "%s %s://", shortpath, proto ) ;
+		sprintf( cmd, "\"%s\" %s://", shortpath, proto ) ;
 			
 		if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
 			strcat( cmd, conf_get_str(conf, CONF_sftpconnect) ) ;
@@ -4003,12 +4003,13 @@ void StartWinSCP( HWND hwnd, char * directory, char * host, char * user ) {
 		}
 		if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
 			if( GetShortPathName( conf_get_filename(conf,CONF_keyfile)->path, shortpath, 4095 ) ) {
-				strcat( cmd, " /privatekey=" ) ;
+				strcat( cmd, " \"/privatekey=" ) ;
 				strcat( cmd, shortpath ) ;
+				strcat( cmd, "\"" ) ;
 			}
 		}
 	} else {
-		sprintf( cmd, "%s %s://%s", shortpath, proto, conf_get_str(conf,CONF_username) ) ;
+		sprintf( cmd, "\"%s\" %s://%s", shortpath, proto, conf_get_str(conf,CONF_username) ) ;
 		if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
 			char bufpass[1024] ;
 			strcat( cmd, ":" ); 
@@ -4195,7 +4196,7 @@ void recupNomFichierDragDrop(HWND hwnd, HDROP* leDrop ) {
 			char buffer[1024]="", shortname[1024]="" ;
 			if( GetModuleFileName( NULL, (LPTSTR)buffer, 1023 ) ) 
 				if( GetShortPathName( buffer, shortname, 1023 ) ) {
-					sprintf( buffer, "%s -ed %s", shortname, fic ) ;
+					sprintf( buffer, "\"%s\" -ed %s", shortname, fic ) ;
 					RunCommand( hwnd, buffer ) ;
 				}
 		} else { 

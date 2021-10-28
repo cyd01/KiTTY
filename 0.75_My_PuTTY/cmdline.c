@@ -564,6 +564,9 @@ int cmdline_process_param(const char *p, char *value,
 #ifdef MOD_INTEGRATED_AGENT
     && ( strcmp(p, "-runagent") )
 #endif
+#ifdef MOD_LAUNCHER
+    && ( strcmp(p, "-launcher") )
+#endif
     )
 #endif
     for (size_t i = 0; backends[i]; i++) {
