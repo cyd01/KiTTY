@@ -4666,7 +4666,7 @@ void ResetWindow(int reinit) ;
 
 void NegativeColours(HWND hwnd) {
 	int i ;
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
     for (i = 0; i < 34; i++) {
 #else
     for (i = 0; i < 22; i++) {

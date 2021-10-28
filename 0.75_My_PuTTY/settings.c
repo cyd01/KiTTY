@@ -734,6 +734,8 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_i(sesskey, "WindowMaximizable", conf_get_int(conf, CONF_window_maximizable) );
     write_setting_i(sesskey, "WindowHasSysMenu", conf_get_int(conf, CONF_window_has_sysmenu) );
     write_setting_i(sesskey, "DisableBottomButtons", conf_get_int(conf, CONF_bottom_buttons) );
+#endif
+#ifdef MOD_TUTTYCOLOR
     write_setting_i(sesskey, "BoldAsColourTest", conf_get_int(conf, CONF_bold_colour) );
     write_setting_i(sesskey, "UnderlinedAsColour", conf_get_int(conf, CONF_under_colour) );
     write_setting_i(sesskey, "SelectedAsColour", conf_get_int(conf, CONF_sel_colour) );
@@ -1362,6 +1364,8 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppi(sesskey, "WindowMaximizable", 1, conf, CONF_window_maximizable);
     gppi(sesskey, "WindowHasSysMenu", 1, conf, CONF_window_has_sysmenu);
     gppi(sesskey, "DisableBottomButtons", 1, conf, CONF_bottom_buttons);
+#endif
+#ifdef MOD_TUTTYCOLOR
     gppi(sesskey, "BoldAsColourTest", 1, conf, CONF_bold_colour);
     gppi(sesskey, "UnderlinedAsColour", 0, conf, CONF_under_colour);
     gppi(sesskey, "SelectedAsColour", 0, conf, CONF_sel_colour);

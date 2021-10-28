@@ -1628,7 +1628,7 @@ static void charclass_handler(union control *ctrl, dlgparam *dlg,
 }
 
 struct colour_data {
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 	    union control *listbox, *redit, *gedit, *bedit, *button,
 	*bold_checkbox, *underline_checkbox, *selected_checkbox;
 #else
@@ -1643,7 +1643,7 @@ static const char *const colours[] = {
 #undef CONF_COLOUR_NAME_DECL
 };
 
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 void dlg_control_enable(union control *ctrl, void *dlg, int enable);
 static const int itemcolour[] = {
     0, 1, 2, 0, 1, 2, 0, 0, 3, 3,
@@ -1708,7 +1708,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
     bool update = false, clear = false;
     int r, g, b;
 
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
     if (ctrl == cd->bold_checkbox) {
 	    	conf_set_int(conf,CONF_bold_colour,1);
 		dlg_control_enable(cd->bold_checkbox, dlg,0);
@@ -1751,7 +1751,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 	    dlg_listbox_clear(ctrl, dlg);
 
 	    for (i = 0; i < lenof(colours); i++)
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 		/* This allows us to hide list items we don't need to
 		 * see: if bold-as-colour (or underline) turned off, we just hide those bold
 		 * choices to decrease user confusion. And, of course, it looks
@@ -1790,7 +1790,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 		clear = true;
 	    } else {
 		clear = false;
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 	    /* I know this looks a bit weird, but I just had no
 	     * other choice. Other way it would break existing code and
 	     * worse yet, existing saved session structure.
@@ -1821,7 +1821,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 
 	    i = dlg_listbox_index(cd->listbox, dlg);
 	    if (i >= 0) {
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
     		i = idxcolour[conf_get_int(conf,CONF_bold_colour)][conf_get_int(conf,CONF_under_colour)][conf_get_int(conf,CONF_sel_colour)][i];
 
 #endif
@@ -1845,7 +1845,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 	     * EVENT_CALLBACK when it's finished and allow us to
 	     * pick up the results.
 	     */
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 	i = idxcolour[conf_get_int(conf,CONF_bold_colour)][conf_get_int(conf,CONF_under_colour)][conf_get_int(conf,CONF_sel_colour)][i];
 #endif
 	    dlg_coloursel_start(ctrl, dlg,
@@ -1861,7 +1861,7 @@ static void colour_handler(union control *ctrl, dlgparam *dlg,
 	     * return nonzero on success, or zero if the colour
 	     * selector did nothing (user hit Cancel, for example).
 	     */
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 	i = idxcolour[conf_get_int(conf,CONF_bold_colour)][conf_get_int(conf,CONF_under_colour)][conf_get_int(conf,CONF_sel_colour)][i];
 #endif
 	    if (dlg_coloursel_results(ctrl, dlg, &r, &g, &b)) {
@@ -3485,7 +3485,7 @@ if( !GetPuttyFlag() ) {
                       "Both", I(3),
                       NULL);
 
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
     cd = (struct colour_data *) ctrl_alloc(b, sizeof(struct colour_data));
     memset(cd , 0, sizeof(*cd ));
     cd->bold_checkbox =
@@ -3506,8 +3506,7 @@ if( !GetPuttyFlag() ) {
 	      " Modify button to change its appearance.",
 	      HELPCTX(colours_config));
     ctrl_columns(s, 2, 67, 33);
-    cd = (struct colour_data *)ctrl_alloc(b, sizeof(struct colour_data));
-#ifndef MOD_TUTTY
+#ifndef MOD_TUTTYCOLOR
     cd = (struct colour_data *)ctrl_alloc(b, sizeof(struct colour_data));
 #endif
     cd->listbox = ctrl_listbox(s, "Select a colour to adjust:", 'u',

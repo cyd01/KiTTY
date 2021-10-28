@@ -106,7 +106,7 @@ enum {
  * terminal.c itself.
  */
 
-#ifdef MOD_TUTTY		       /* 4+8 more special TUTTY colors */
+#ifdef MOD_TUTTYCOLOR		       /* 4+8 more special TUTTY colors */
 #define CONF_NCOLOURS 34               /* 16 + 18 (6+4+8) special ones */
 #define OSCP_NCOLOURS 34               /* same as CONF, but different order */
 #define OSC4_NCOLOURS 274              /* 256 + the same 18 (6+4+8) special ones */
@@ -118,7 +118,7 @@ enum {
 
 /* The list macro for the conf colours also gives the textual names
  * used in the GUI configurer */
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 #define CONF_COLOUR_LIST(X)                     \
     X(fg, "Default Foreground")                 \
     X(fg_bold, "Default Bold Foreground")       \

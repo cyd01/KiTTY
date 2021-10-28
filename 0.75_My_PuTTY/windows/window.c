@@ -6023,7 +6023,7 @@ static void do_text_internal(
 	attr |= (260 << ATTR_FGSHIFT) | (261 << ATTR_BGSHIFT);
         is_cursor = true;
     }
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
     if (!conf_get_int(conf,CONF_sel_colour) && (attr & ATTR_SELECTED)) {
 	attr &= ~ATTR_SELECTED;
 	attr |= ATTR_REVERSE;
@@ -6127,7 +6127,7 @@ static void do_text_internal(
 	if (nbg < 16) nbg |= 8;
 	else if (nbg >= 256) nbg |= 1;
     }
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
     /*
      * quick & dirty hack: underlined text has colour preference over bold & normal
      * another one: selected text have absolute preference over all other attributes

@@ -6167,7 +6167,7 @@ static void do_paint(Terminal *term)
                                 posPle_left(scrpos, term->selend));
 	    } else
 		selected = false;
-#ifdef MOD_TUTTY
+#ifdef MOD_TUTTYCOLOR
 	    tattr = (tattr ^ rv ^ (selected ? ATTR_SELECTED : 0));
 #else
 	    tattr = (tattr ^ rv

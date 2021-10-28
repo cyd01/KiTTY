@@ -652,6 +652,8 @@ void SaveDumpConfig( FILE *fp, Conf * conf ) {
 	fprintf( fp, "window_maximizable=%d\n",		conf_get_int(conf,CONF_window_maximizable) ) ; 
 	fprintf( fp, "window_has_sysmenu=%d\n",		conf_get_int(conf,CONF_window_has_sysmenu) ) ; 
 	fprintf( fp, "bottom_buttons=%d\n",		conf_get_int(conf,CONF_bottom_buttons) ) ; 
+#endif
+#ifdef MOD_TUTTYCOLOR
 	fprintf( fp, "bold_colour=%d\n",		conf_get_int(conf,CONF_bold_colour) ) ; 
 	fprintf( fp, "under_colour=%d\n",		conf_get_int(conf,CONF_under_colour) ) ; 
 	fprintf( fp, "sel_colour=%d\n",			conf_get_int(conf,CONF_sel_colour) ) ;
