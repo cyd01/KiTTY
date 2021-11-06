@@ -1,8 +1,0 @@
-#include "win_res.h"
-
-#ifdef EMBED_CHM
-ID_CUSTOM_CHMFILE TYPE_CUSTOM_CHMFILE "../doc/putty.chm"
-#define HELPVER " (with embedded help)"
-#else
-#define HELPVER " (without embedded help)"
-#endif

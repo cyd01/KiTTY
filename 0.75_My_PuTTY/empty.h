@@ -1,1 +1,0 @@
-/* Empty file touched by automake makefile to force rebuild of version.o */

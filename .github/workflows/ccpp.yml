@@ -13,7 +13,7 @@ on:
       - v*
 
 env:
-  VERSION: 0.75
+  VERSION: 0.76
 
 jobs:
   # Build for Win 32bits
