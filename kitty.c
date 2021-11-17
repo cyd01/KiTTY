@@ -1301,7 +1301,7 @@ void CreateDefaultIniFile_old( void ) {
 			writeINI( KittyIniFile, INIT_SECTION, "#antiidledelay", "60" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "#autostoresshkey", "no" ) ;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
-			writeINI( KittyIniFile, INIT_SECTION, "backgroundimage", "no" ) ;
+			writeINI( KittyIniFile, INIT_SECTION, "bgimage", "no" ) ;
 #endif
 			writeINI( KittyIniFile, INIT_SECTION, "#bcdelay", "0" ) ;
 			writeINI( KittyIniFile, INIT_SECTION, "capslock", "no" ) ;
@@ -5223,7 +5223,7 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "autostoresshkey", buffer ) ) { if( !stricmp( buffer, "YES" ) ) SetAutoStoreSSHKeyFlag( 1 ) ; }
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	//if( debug_flag )
-	if( ReadParameter( INIT_SECTION, "backgroundimage", buffer ) ) {	
+	if( ReadParameter( INIT_SECTION, "bgimage", buffer ) ) {	
 		if( !stricmp( buffer, "NO" ) ) SetBackgroundImageFlag( 0 ) ; 
 		if( !stricmp( buffer, "YES" ) ) SetBackgroundImageFlag( 1 ) ;  // Broken en 0.71 ==> on desactive
 	}

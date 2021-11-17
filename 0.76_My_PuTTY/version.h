@@ -1,5 +1,5 @@
 #define RELEASE 0.76
 #define TEXTVER "Release 0.76"
 #define SSHVER "-Release-0.76"
-#define BINARY_VERSION 0,76,0,1
+#define BINARY_VERSION 0,76,0,2
 #define SOURCE_COMMIT "unavailable"

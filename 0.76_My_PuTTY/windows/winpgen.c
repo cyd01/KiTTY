@@ -1034,7 +1034,9 @@ void load_key_file(HWND hwnd, struct MainDlgState *state,
 		ret = -2;
 		break;
 	    }
+#ifndef MOD_PERSO
             assert(passphrase != NULL);
+#endif
 	} else
 	    passphrase = dupstr("");
 	if (type == SSH_KEYTYPE_SSH1) {

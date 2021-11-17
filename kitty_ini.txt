@@ -67,7 +67,7 @@ autoreconnect=yes
 ;autostoresshkey=no
 
 ; backgroundimage: enable/disable the background image feature
-backgroundimage=no
+bgimage=no
 
 ; bcdelay: time delay between each character in automatic features (autocommand, login script, user function ...)
 ;bcdelay=0

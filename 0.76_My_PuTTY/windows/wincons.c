@@ -72,6 +72,9 @@ int console_verify_ssh_host_key(
         ssh2_pick_default_fingerprint(fingerprints);
 
     fprintf(stderr, common_fmt, keytype, fingerprints[fptype_default]);
+ #ifdef MOD_PERSO
+	if( !GetAutoStoreSSHKeyFlag() ) 
+#endif
     if (console_batch_mode) {
         fputs(console_abandoned_msg, stderr);
         return 0;
@@ -84,7 +87,7 @@ int console_verify_ssh_host_key(
 
     line[0] = '\0';         /* fail safe if ReadFile returns no data */
 
- #ifdef MOD_PERSO
+#ifdef MOD_PERSO
 	if( GetAutoStoreSSHKeyFlag() ) { 
 		fprintf( stderr, "\nAutostore key is on\n" );
 		strcpy(line,"y\r\n"); 

@@ -534,8 +534,10 @@ void *findrelpos234(tree234 * t, void *e, cmpfn234 cmp,
     void *toret;
 
     /* Only LT / GT relations are permitted with a null query element. */
+#ifndef MOD_PERSO
     assert(!(equal_permitted && !e));
-
+#endif
+	
     if (cmp == NULL)
         cmp = t->cmp;
 
