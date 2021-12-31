@@ -7465,15 +7465,6 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 }
 
 #ifdef MOD_PERSO
-
-void set_title_internal(TermWin *tw, const char *title) {
-    sfree(window_name);
-    window_name = snewn(1 + strlen(title), char);
-    strcpy(window_name, title);
-    if (conf_get_bool(conf, CONF_win_name_always) || !IsIconic(wgs.term_hwnd))
-	SetWindowText(wgs.term_hwnd, title);
-}
-
 /* Creer un titre de fenetre a partir d'un schema donne
 	%%f: le folder auquel apprtient le session
 	%%h: le hostname
@@ -7495,7 +7486,14 @@ void make_title( char * res, char * fmt, const char * title ) {
 	sprintf( res, fmt, title ) ;
 
 	while( (p=poss( "%%s", res)) > 0 ) { del(res,p,3); if(strlen(conf_get_str(conf,CONF_sessionname))>0) insert(res,conf_get_str(conf,CONF_sessionname),p); }
-	while( (p=poss( "%%h", res)) > 0 ) { del(res,p,3); insert(res,conf_get_str(conf,CONF_host),p); }
+	while( (p=poss( "%%h", res)) > 0 ) { 
+		del(res,p,3);
+		if( conf_get_int(conf,CONF_protocol) == PROT_SERIAL ) {
+			insert(res,conf_get_str(conf,CONF_serline),p);
+		} else {
+			insert(res,conf_get_str(conf,CONF_host),p);
+		}
+	}
 	while( (p=poss( "%%u", res)) > 0 ) { del(res,p,3); insert(res,conf_get_str(conf,CONF_username),p); }
 	while( (p=poss( "%%f", res)) > 0 ) { del(res,p,3); if(strlen(conf_get_str(conf,CONF_folder))>0) insert(res,conf_get_str(conf,CONF_folder),p); }
 	
@@ -7557,6 +7555,14 @@ void make_title( char * res, char * fmt, const char * title ) {
 		}
 		insert(res,b,p) ;
 	}
+}
+
+
+void set_title_internal(TermWin *tw, const char *title) {
+    sfree(window_name);
+    window_name = dupstr(title);
+    if (conf_get_bool(conf, CONF_win_name_always) || !IsIconic(wgs.term_hwnd))
+        SetWindowText(wgs.term_hwnd, title);
 }
 
 static void wintw_set_title(TermWin *tw, const char *title_in) {

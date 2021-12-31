@@ -912,11 +912,24 @@ static PageantAsyncOp *pageant_make_op(
 	char* confirm_fingerprint;
 	confirm_fingerprint = ssh2_fingerprint_blob(keyblob, SSH_FPTYPE_DEFAULT);
 	if( confirm_fingerprint!=NULL ) {
-		if (! confirm_key_usage( confirm_fingerprint, pk->rkey->comment)) {
-			sfree(confirm_fingerprint);
-			return NULL;
+		if( pk->rkey->comment != NULL ) {
+			if (! confirm_key_usage( confirm_fingerprint, pk->rkey->comment)) {
+				if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
+				fail("unconfirmed key");
+				pk=NULL;
+				goto responded;
+				//return NULL;
+			}
+		} else if( pk->comment != NULL ) {
+			if (! confirm_key_usage( confirm_fingerprint, pk->comment)) {
+				if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
+				fail("unconfirmed key");
+				pk=NULL;
+				goto responded;
+				//return NULL;
+			}
 		}
-		sfree(confirm_fingerprint);
+		if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
 	}
 #endif
 	
