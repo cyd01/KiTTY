@@ -500,7 +500,6 @@ static void win_add_keyfile(Filename *filename, bool encrypted)
 	if( strlen(pphrase)>0 ) {
 	    pps.passphrase=(char*)malloc(strlen(pphrase)+1);
 	    strcpy(pps.passphrase,pphrase);
-	    
         } 
 	else
 #endif

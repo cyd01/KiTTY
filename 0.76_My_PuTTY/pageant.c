@@ -367,6 +367,7 @@ void scrumble_int(void) {
 	}
 }
 int get_scrumble_int( int i ) {
+	//return i ;  // Ne marche pas
 	if( (tab_int == NULL) || !GetScrumbleKeyFlag() ) { return i ; }
 	else { return tab_int[i] ; }
 }
@@ -376,17 +377,15 @@ static int confirm_key_usage(char* fingerprint, char* comment) {
 	int result = IDYES; // successful result is the default
 
 	message = dupprintf("Allow authentication with key with fingerprint\n%s\ncomment: %s", fingerprint, comment);
-	
-	if( (GetAskConfirmationFlag()==1) 
+	if(comment!=NULL) if( ( GetAskConfirmationFlag()==1 ) 
 		||
 		( (GetAskConfirmationFlag()==2) && (
-		(NULL != strstr(comment, "needs confirm"))||(NULL != strstr(comment, "need confirm"))||(NULL != strstr(comment, "confirmation"))
+		   (NULL != strstr(comment, "needs confirm"))||(NULL != strstr(comment, "need confirm"))||(NULL != strstr(comment, "confirmation"))
 		)
-		) )
-	{
+		) ) {
 		result = MessageBox(NULL, message, title, MB_ICONQUESTION | MB_YESNO | MB_SYSTEMMODAL);
 	}
-
+	
 	if (result != IDYES) {
 		sfree(message);
 		return 0;
@@ -806,9 +805,6 @@ static PageantAsyncOp *pageant_make_op(
         unsigned response_type;
         unsigned char response_md5[16];
         int i;
-#ifdef MOD_PERSO
-		char *fingerprint;
-#endif
 	
         pageant_client_log(pc, reqid, "request: SSH1_AGENTC_RSA_CHALLENGE");
 
@@ -842,6 +838,7 @@ static PageantAsyncOp *pageant_make_op(
             goto challenge1_cleanup;
         }
 #ifdef MOD_PERSO
+	char *fingerprint;
 		fingerprint = rsa_ssh1_fingerprint(pk->rkey);
 		if (! confirm_key_usage(fingerprint, pk->rkey->comment)) {
 	      goto challenge1_cleanup;
@@ -878,10 +875,6 @@ static PageantAsyncOp *pageant_make_op(
         PageantKey *pk;
         ptrlen keyblob, sigdata;
         uint32_t flags;
-#ifdef MOD_PERSO
-		char* confirm_fingerprint;
-#endif
-
         pageant_client_log(pc, reqid, "request: SSH2_AGENTC_SIGN_REQUEST");
 
         keyblob = get_string(msg);
@@ -916,12 +909,15 @@ static PageantAsyncOp *pageant_make_op(
             goto responded;
         }
 #ifdef MOD_PERSO
-		confirm_fingerprint = ssh2_fingerprint_blob(keyblob, SSH_FPTYPE_DEFAULT);
+	char* confirm_fingerprint;
+	confirm_fingerprint = ssh2_fingerprint_blob(keyblob, SSH_FPTYPE_DEFAULT);
+	if( confirm_fingerprint!=NULL ) {
 		if (! confirm_key_usage( confirm_fingerprint, pk->rkey->comment)) {
 			sfree(confirm_fingerprint);
-			return;
-	    }
+			return NULL;
+		}
 		sfree(confirm_fingerprint);
+	}
 #endif
 	
         if (have_flags)
