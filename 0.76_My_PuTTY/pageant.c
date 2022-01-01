@@ -375,23 +375,25 @@ static int confirm_key_usage(char* fingerprint, char* comment) {
 	const char* title = "Confirm SSH Key usage";
 	char* message = NULL;
 	int result = IDYES; // successful result is the default
-
-	message = dupprintf("Allow authentication with key with fingerprint\n%s\ncomment: %s", fingerprint, comment);
-	if(comment!=NULL) if( ( GetAskConfirmationFlag()==1 ) 
-		||
-		( (GetAskConfirmationFlag()==2) && (
-		   (NULL != strstr(comment, "needs confirm"))||(NULL != strstr(comment, "need confirm"))||(NULL != strstr(comment, "confirmation"))
-		)
-		) ) {
-		result = MessageBox(NULL, message, title, MB_ICONQUESTION | MB_YESNO | MB_SYSTEMMODAL);
+	if(comment!=NULL) {
+		if( ( GetAskConfirmationFlag()==1 ) 
+			||
+			( (GetAskConfirmationFlag()==2) && (
+			(NULL != strstr(comment, "needs confirm"))||(NULL != strstr(comment, "need confirm"))||(NULL != strstr(comment, "confirmation"))
+			)
+			) ) {
+			message = dupprintf("Allow authentication with key with fingerprint\n%s\ncomment: %s", fingerprint, comment);
+			result = MessageBox(NULL, message, title, MB_ICONQUESTION | MB_YESNO | MB_SYSTEMMODAL);
+		}
 	}
 	
 	if (result != IDYES) {
-		sfree(message);
+		if(message!=NULL) sfree(message);
 		return 0;
 	} else {
+		message = dupprintf("Allow authentication with key with fingerprint\n%s\ncomment: %s", fingerprint, comment);
 		if( GetShowBalloonOnKeyUsage()==1 ) ShowBalloonTip( trayIcone, "SSH private key usage", message ) ;
-		sfree(message);
+		if(message!=NULL) sfree(message);
 		return 1;
 	}
 }
@@ -909,18 +911,26 @@ static PageantAsyncOp *pageant_make_op(
             goto responded;
         }
 #ifdef MOD_PERSO
+void debug_log( const char *fmt, ... ) {
+	char filename[4096]="" ;
+	va_list ap;
+	FILE *fp ;
+	strcpy(filename,"kitty.log");
+
+	va_start( ap, fmt ) ;
+	//vfprintf( stdout, fmt, ap ) ; // Ecriture a l'ecran
+	if( ( fp = fopen( filename, "ab" ) ) != NULL ) {
+		vfprintf( fp, fmt, ap ) ; // ecriture dans un fichier
+		fclose( fp ) ;
+	}
+ 
+	va_end( ap ) ;
+}
+
 	char* confirm_fingerprint;
 	confirm_fingerprint = ssh2_fingerprint_blob(keyblob, SSH_FPTYPE_DEFAULT);
 	if( confirm_fingerprint!=NULL ) {
-		if( pk->rkey->comment != NULL ) {
-			if (! confirm_key_usage( confirm_fingerprint, pk->rkey->comment)) {
-				if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
-				fail("unconfirmed key");
-				pk=NULL;
-				goto responded;
-				//return NULL;
-			}
-		} else if( pk->comment != NULL ) {
+		if( pk->comment != NULL ) {
 			if (! confirm_key_usage( confirm_fingerprint, pk->comment)) {
 				if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
 				fail("unconfirmed key");
@@ -928,9 +938,17 @@ static PageantAsyncOp *pageant_make_op(
 				goto responded;
 				//return NULL;
 			}
-		}
-		if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
+		} /*else if( pk->rkey->comment != NULL ) {
+			if (! confirm_key_usage( confirm_fingerprint, pk->rkey->comment)) {
+				if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
+				fail("unconfirmed key");
+				pk=NULL;
+				goto responded;
+				//return NULL;
+			}
+		}*/
 	}
+	if( confirm_fingerprint!=NULL ) sfree(confirm_fingerprint);
 #endif
 	
         if (have_flags)
