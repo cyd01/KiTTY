@@ -9,6 +9,9 @@
 #include <time.h>
 #include <limits.h>
 #include <assert.h>
+/* far2l base64 */
+#include <cencode.h>
+#include <cdecode.h>
 
 #ifdef __WINE__
 #define NO_MULTIMON                    /* winelib doesn't have this */
@@ -436,7 +439,7 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 
 #endif
 #ifdef MOD_WTS
-typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS n'est pas défini dans le fichier wtsapi32.h !!!
+//typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS n'est pas défini dans le fichier wtsapi32.h !!!
 #include <wtsapi32.h>
 #endif
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
@@ -4827,10 +4830,19 @@ free(cmd);
 	ignore_clip = wParam;	       /* don't panic on DESTROYCLIPBOARD */
 	break;
       case WM_DESTROYCLIPBOARD:
-	if (!ignore_clip)
-	    term_lost_clipboard_ownership(term, CLIP_SYSTEM);
-	ignore_clip = false;
-	return 0;
+//	if (!ignore_clip)
+//	    term_lost_clipboard_ownership(term, CLIP_SYSTEM);
+//	ignore_clip = false;
+        /* far2l */
+        // In far2l extensions mode we should not do anything here,
+        // clipboard is handled by far2l extensions.
+        if (!(term->far2l_ext == 1) || (!term->clip_allowed)) {
+            if (!ignore_clip)
+                term_lost_clipboard_ownership(term, CLIP_SYSTEM);
+            ignore_clip = false;
+        }
+
+return 0;
       case WM_PAINT: {
 	    PAINTSTRUCT p;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
@@ -5590,14 +5602,143 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 	 * number noise.
 	 */
 	noise_ultralight(NOISE_SOURCE_KEY, lParam);
+    /* far2l */
+    if (term->far2l_ext) {
 
-	/*
-	 * We don't do TranslateMessage since it disassociates the
-	 * resulting CHAR message from the KEYDOWN that sparked it,
-	 * which we occasionally don't want. Instead, we process
-	 * KEYDOWN, and call the Win32 translator functions so that
-	 * we get the translations under _our_ control.
-	 */
+        // far2l_ext keyboard input event structure
+        WORD repeat;      // 2
+        WORD vkc;         // 2
+        WORD vsc;         // 2
+        DWORD ctrl;       // 4
+        DWORD uchar;      // 4
+        CHAR type;        // 1
+
+        // set repeat, virtual keycode, virtual scancode
+        repeat = LOWORD(lParam);
+        vsc = HIWORD(lParam) & 0xFF;
+        vkc = LOWORD(wParam);
+
+        // this fixes far2l's "editor autocomplete" plugin behavior
+        if ((vkc == VK_TAB) || (vkc == VK_BACK) || (vkc == VK_ESCAPE) || (vkc == VK_DELETE)) {
+        vsc = 0;
+        }
+
+        // fixes strange alt+arrows behavior
+        if ((vkc == VK_LEFT) || (vkc == VK_RIGHT) || (vkc == VK_UP) || (vkc == VK_DOWN)) {
+        vsc = 0;
+        }
+
+        // set control keys state
+        ctrl = 0;
+        if (GetAsyncKeyState(VK_LCONTROL)) { ctrl |= LEFT_CTRL_PRESSED; }
+        if (GetAsyncKeyState(VK_RCONTROL)) { ctrl |= RIGHT_CTRL_PRESSED; }
+        if (GetAsyncKeyState(VK_LMENU)) { ctrl |= LEFT_ALT_PRESSED; }
+        if (GetAsyncKeyState(VK_RMENU)) { ctrl |= RIGHT_ALT_PRESSED; }
+        if (GetAsyncKeyState(VK_SHIFT)) { ctrl |= SHIFT_PRESSED; }
+        // begin: reserved for future usage
+        // Console WinAPI does not allow us to distinguish between left and right
+        // shift keys. But PuTTY is not a console app, so why not to send
+        // all information about control keys state that we actually have here?
+        // Using bits not used by any other status for backward compatibility.
+        #define RIGHT_SHIFT_PRESSED 0x1000
+        #define LEFT_SHIFT_PRESSED 0x2000
+        if (GetAsyncKeyState(VK_LSHIFT)) { ctrl |= RIGHT_SHIFT_PRESSED; }
+        if (GetAsyncKeyState(VK_RSHIFT)) { ctrl |= LEFT_SHIFT_PRESSED; }
+        // end
+        if ((lParam & ( 1 << 24 )) >> 24) { ctrl |= ENHANCED_KEY; }
+        if ((((u_short)GetKeyState(VK_NUMLOCK)) & 0xffff) != 0) { ctrl |= NUMLOCK_ON; }
+        if ((((u_short)GetKeyState(VK_SCROLL)) & 0xffff) != 0) { ctrl |= SCROLLLOCK_ON; }
+        if ((((u_short)GetKeyState(VK_CAPITAL)) & 0xffff) != 0) { ctrl |= CAPSLOCK_ON; }
+
+        // set unicode character
+        BYTE kb[256];
+        GetKeyboardState(kb);
+        WCHAR uc[5] = {};
+        ToUnicode(wParam, MapVirtualKey(wParam, MAPVK_VK_TO_VSC), kb, uc, 4, 0);
+        // todo: check result
+        //int result = ToUnicode(wParam, MapVirtualKey(wParam, MAPVK_VK_TO_VSC), kb, uc, 4, 0);
+        uchar = uc[0];
+
+        // set event type
+        if ((message == WM_KEYDOWN) || (message == WM_SYSKEYDOWN)) {
+        type = 'K';
+        } else {
+        type = 'k';
+        }
+
+        char* kev = malloc(15); // keyboard event structure length
+        memcpy(kev, &repeat, sizeof(repeat));
+        memcpy(kev + 2, &vkc, sizeof(vkc));
+        memcpy(kev + 4, &vsc, sizeof(vsc));
+        memcpy(kev + 6, &ctrl, sizeof(ctrl));
+        memcpy(kev + 10, &uchar, sizeof(uchar));
+        memcpy(kev + 14, &type, sizeof(type));
+
+        /*
+        FILE *f; f = fopen("putty.log", "a");
+        fprintf(f, "r: %d, vkc: %c, vsc: %c, ctrl: %ld, uchar: %ld, type: %lc\n",
+            repeat, vkc, vsc, ctrl, uchar, type);
+        fprintf(f, "r: %d, vkc: %d, vsc: %d, ctrl: %ld, uchar: %ld, type: %d\n",
+            repeat, vkc, vsc, ctrl, uchar, type);
+        fclose(f);
+        */
+
+        // base64-encode kev
+        // result in null-terminated char* out
+        base64_encodestate _state;
+        base64_init_encodestate(&_state);
+        char* out = malloc(15*2);
+        int count = base64_encode_block(kev, 15, out, &_state);
+        // finishing '=' characters
+        char* next_char = out + count;
+        switch (_state.step)
+        {
+        case step_B:
+        *next_char++ = base64_encode_value(_state.result);
+        *next_char++ = '=';
+        *next_char++ = '=';
+        break;
+        case step_C:
+        *next_char++ = base64_encode_value(_state.result);
+        *next_char++ = '=';
+        break;
+        case step_A:
+        break;
+        }
+        count = next_char - out;
+        out[count] = 0;
+
+        /*
+        f = fopen("putty.log", "a");
+        fprintf(f, "count: %d, b64: %s\n", count, out);
+        fclose(f);
+        */
+
+        // send escape seq
+
+        char* str = "\x1b_f2l";
+        backend_send(backend, str, strlen(str));
+
+        backend_send(backend, out, count);
+
+        char* str2 = "\x07";
+        backend_send(backend, str2, strlen(str2));
+
+        // don't forget to free memory :)
+        free(out);
+
+        // we should not do any other key processing in this mode
+        return 0;
+    }
+
+
+/*
+ * We don't do TranslateMessage since it disassociates the
+ * resulting CHAR message from the KEYDOWN that sparked it,
+ * which we occasionally don't want. Instead, we process
+ * KEYDOWN, and call the Win32 translator functions so that
+ * we get the translations under _our_ control.
+ */
 	{
 	    unsigned char buf[20];
 	    int len;

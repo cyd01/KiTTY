@@ -185,10 +185,17 @@ struct terminal_tag {
 #define ANSI(x,y)	((x)+((y)*256))
 #define ANSI_QUE(x)	ANSI(x,1)
 
-#define OSC_STR_MAX 2048
+/* far2l */
+//#define OSC_STR_MAX 2048
+#define OSC_STR_MAX 1048576
     int osc_strlen;
     char osc_string[OSC_STR_MAX + 1];
     bool osc_w;
+
+    /* far2l */
+    int far2l_ext;
+    bool is_apc;
+    int clip_allowed;
 
     char id_string[1024];
 
@@ -205,7 +212,9 @@ struct terminal_tag {
 
 	SEEN_OSC_P,
 	OSC_STRING, OSC_MAYBE_ST,
-	VT52_ESC,
+    /* far2l */
+    SEEN_APC,
+    VT52_ESC,
 	VT52_Y1,
 	VT52_Y2,
 	VT52_FG,
