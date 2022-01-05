@@ -6,6 +6,9 @@
  * but for the moment, this will do.
  */
 
+#include <windows/winseat.h>
+extern WinGuiSeat wgs;
+
 #ifndef PUTTY_TERMINAL_H
 #define PUTTY_TERMINAL_H
 

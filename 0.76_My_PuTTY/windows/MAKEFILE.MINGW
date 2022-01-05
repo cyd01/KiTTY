@@ -67,11 +67,6 @@
 #      Disables PuTTY's use of SecureZeroMemory(), which is missing
 #      from some environments' header files.
 #
-#  - XFLAGS=-DTELNET_DEFAULT
-#      Causes PuTTY to default to the Telnet protocol (in the absence
-#      of Default Settings and so on to the contrary). Normally PuTTY
-#      will default to SSH.
-#
 #  - XFLAGS=-DDEBUG
 #      Causes PuTTY to enable internal debugging.
 #
@@ -423,8 +418,8 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
 		winselgui.o winser.o winshare.o winstore.o wintime.o \
 		winucs.o winutils.o winx11.o x11fwd.o \
+        cencode.o cdecode.o \
 		adb.o \
-		cencode.o cdecode.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
@@ -451,18 +446,34 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		windlg.o window.o wingss.o winhandl.o winhelp.o winhsock.o \
 		winjump.o winmisc.o winmiscs.o winnet.o winnoise.o winnpc.o \
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
-		winser.o winshare.o winstore.o wintime.o winucs.o winutils.o \
-		winx11.o cencode.o cdecode.o x11fwd.o -ladvapi32 -lcomdlg32 -lgdi32 -limm32 \
-		-lole32 -lshell32 -luser32
-
-puttygen.exe: conf.o ecc.o import.o marshal.o memory.o misc.o mpint.o \
-		notiming.o puttygen.res.o sshaes.o sshauxcrypt.o sshbcrypt.o \
-		sshblowf.o sshdes.o sshdss.o sshdssg.o sshecc.o sshecdsag.o \
-		sshhmac.o sshmd5.o sshprime.o sshprng.o sshpubk.o sshrand.o \
-		sshrsa.o sshrsag.o sshsh256.o sshsh512.o sshsha.o \
-		stripctrl.o tree234.o utils.o version.o wcwidth.o winctrls.o \
-		winhelp.o winmisc.o winmiscs.o winnoise.o winnojmp.o \
-		winpgen.o winsecur.o winstore.o wintime.o winutils.o
+		winselgui.o winser.o winshare.o winstore.o wintime.o \
+		winucs.o winutils.o winx11.o x11fwd.o \
+        cencode.o cdecode.o \
+		adb.o \
+		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
+		kitty_store.o kitty_tools.o kitty_win.o \
+		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
+		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o pockle.o primecandidate.o millerrabin.o mpunsafe.o \
+		void.o $(UTF8MOUSE_OBJS) \
+		../../base64/base64.a ../../bcrypt/bcrypt.a ../../blocnote/notepad.a ../../jpeg/libjpeg.a \
+		../../md5/MD5check.a ../../mini/mini.a ../../regex/libregex.a \
+		-ladvapi32 -lcomdlg32 -lgdi32 -limm32 -lpsapi -lole32 -lshell32 \
+		-luser32 -lwsock32  -lwtsapi32 \
+		#-lcrypt32 \
+		#/c/Windows/system32/crypt32.dll /c/windows/system32/ncrypt.dll \
+		# -lcomctl32 -lwinmm -lwinspool -lole32 
+		
+puttygen.exe: conf.o ecc.o import.o marshal.o memory.o millerrabin.o misc.o \
+		mpint.o mpunsafe.o notiming.o pockle.o primecandidate.o \
+		puttygen.res.o smallprimes.o sshaes.o sshargon2.o \
+		sshauxcrypt.o sshbcrypt.o sshblake2.o sshblowf.o sshdes.o \
+		sshdss.o sshdssg.o sshecc.o sshecdsag.o sshhmac.o sshmd5.o \
+		sshprime.o sshprng.o sshpubk.o sshrand.o sshrsa.o sshrsag.o \
+		sshsh256.o sshsh512.o sshsha.o sshsha3.o stripctrl.o \
+		tree234.o utils.o version.o wcwidth.o winctrls.o winhelp.o \
+		winmisc.o winmiscs.o winnoise.o winnojmp.o winpgen.o \
+		winsecur.o winstore.o wintime.o winutils.o \
+		kitty_commun.o kitty_crypt.o kitty_registry.o kitty_keygen.o kitty_store.o kitty_tools.o
 	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,puttygen.map conf.o ecc.o \
 		import.o marshal.o memory.o millerrabin.o misc.o mpint.o \
 		mpunsafe.o notiming.o pockle.o primecandidate.o \

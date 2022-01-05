@@ -615,7 +615,8 @@ static const SeatVtable win_seat_vt = {
     .interactive = nullseat_interactive_yes,
     .get_cursor_position = win_seat_get_cursor_position,
 };
-static WinGuiSeat wgs = { .seat.vt = &win_seat_vt,
+//static 
+WinGuiSeat wgs = { .seat.vt = &win_seat_vt,
                           .logpolicy.vt = &win_gui_logpolicy_vt };
 
 #ifdef MOD_PERSO
