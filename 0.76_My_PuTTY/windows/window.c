@@ -9,7 +9,8 @@
 #include <time.h>
 #include <limits.h>
 #include <assert.h>
-/* far2l base64 */
+
+/* far2l extensions support - base64 encode/decode libs */
 #include <cencode.h>
 #include <cdecode.h>
 
@@ -615,7 +616,8 @@ static const SeatVtable win_seat_vt = {
     .interactive = nullseat_interactive_yes,
     .get_cursor_position = win_seat_get_cursor_position,
 };
-//static 
+// "static" removed by far2l extensions support patch
+// we need to access wgs from terminal.c to open dialog boxes, etc
 WinGuiSeat wgs = { .seat.vt = &win_seat_vt,
                           .logpolicy.vt = &win_gui_logpolicy_vt };
 
@@ -4831,10 +4833,8 @@ free(cmd);
 	ignore_clip = wParam;	       /* don't panic on DESTROYCLIPBOARD */
 	break;
       case WM_DESTROYCLIPBOARD:
-//	if (!ignore_clip)
-//	    term_lost_clipboard_ownership(term, CLIP_SYSTEM);
-//	ignore_clip = false;
-        /* far2l */
+        /* far2l extensions support */
+
         // In far2l extensions mode we should not do anything here,
         // clipboard is handled by far2l extensions.
         if (!(term->far2l_ext == 1) || (!term->clip_allowed)) {
@@ -4843,7 +4843,7 @@ free(cmd);
             ignore_clip = false;
         }
 
-return 0;
+        return 0;
       case WM_PAINT: {
 	    PAINTSTRUCT p;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
@@ -5603,16 +5603,19 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 	 * number noise.
 	 */
 	noise_ultralight(NOISE_SOURCE_KEY, lParam);
-    /* far2l */
+
+    /* far2l extensions support */
     if (term->far2l_ext) {
 
+        // extensions mode enabled
+
         // far2l_ext keyboard input event structure
-        WORD repeat;      // 2
-        WORD vkc;         // 2
-        WORD vsc;         // 2
-        DWORD ctrl;       // 4
-        DWORD uchar;      // 4
-        CHAR type;        // 1
+        WORD repeat;      // 2 bytes
+        WORD vkc;         // 2 bytes
+        WORD vsc;         // 2 bytes
+        DWORD ctrl;       // 4 bytes
+        DWORD uchar;      // 4 bytes
+        CHAR type;        // 1 byte
 
         // set repeat, virtual keycode, virtual scancode
         repeat = LOWORD(lParam);
@@ -5621,12 +5624,12 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 
         // this fixes far2l's "editor autocomplete" plugin behavior
         if ((vkc == VK_TAB) || (vkc == VK_BACK) || (vkc == VK_ESCAPE) || (vkc == VK_DELETE)) {
-        vsc = 0;
+            vsc = 0;
         }
 
         // fixes strange alt+arrows behavior
         if ((vkc == VK_LEFT) || (vkc == VK_RIGHT) || (vkc == VK_UP) || (vkc == VK_DOWN)) {
-        vsc = 0;
+            vsc = 0;
         }
 
         // set control keys state
@@ -5662,9 +5665,9 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 
         // set event type
         if ((message == WM_KEYDOWN) || (message == WM_SYSKEYDOWN)) {
-        type = 'K';
+            type = 'K';
         } else {
-        type = 'k';
+            type = 'k';
         }
 
         char* kev = malloc(15); // keyboard event structure length
@@ -5674,15 +5677,6 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
         memcpy(kev + 6, &ctrl, sizeof(ctrl));
         memcpy(kev + 10, &uchar, sizeof(uchar));
         memcpy(kev + 14, &type, sizeof(type));
-
-        /*
-        FILE *f; f = fopen("putty.log", "a");
-        fprintf(f, "r: %d, vkc: %c, vsc: %c, ctrl: %ld, uchar: %ld, type: %lc\n",
-            repeat, vkc, vsc, ctrl, uchar, type);
-        fprintf(f, "r: %d, vkc: %d, vsc: %d, ctrl: %ld, uchar: %ld, type: %d\n",
-            repeat, vkc, vsc, ctrl, uchar, type);
-        fclose(f);
-        */
 
         // base64-encode kev
         // result in null-terminated char* out
@@ -5694,26 +5688,20 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
         char* next_char = out + count;
         switch (_state.step)
         {
-        case step_B:
-        *next_char++ = base64_encode_value(_state.result);
-        *next_char++ = '=';
-        *next_char++ = '=';
-        break;
-        case step_C:
-        *next_char++ = base64_encode_value(_state.result);
-        *next_char++ = '=';
-        break;
-        case step_A:
-        break;
+            case step_B:
+                *next_char++ = base64_encode_value(_state.result);
+                *next_char++ = '=';
+                *next_char++ = '=';
+                break;
+            case step_C:
+                *next_char++ = base64_encode_value(_state.result);
+                *next_char++ = '=';
+                break;
+            case step_A:
+                break;
         }
         count = next_char - out;
         out[count] = 0;
-
-        /*
-        f = fopen("putty.log", "a");
-        fprintf(f, "count: %d, b64: %s\n", count, out);
-        fclose(f);
-        */
 
         // send escape seq
 
