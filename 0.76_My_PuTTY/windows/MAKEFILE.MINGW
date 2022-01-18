@@ -418,6 +418,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
 		winselgui.o winser.o winshare.o winstore.o wintime.o \
 		winucs.o winutils.o winx11.o x11fwd.o \
+        cencode.o cdecode.o \
 		adb.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
@@ -447,6 +448,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		winnps.o winpgntc.o winprint.o winproxy.o winsecur.o \
 		winselgui.o winser.o winshare.o winstore.o wintime.o \
 		winucs.o winutils.o winx11.o x11fwd.o \
+        cencode.o cdecode.o \
 		adb.o \
 		kitty.o kitty_commun.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
@@ -528,6 +530,11 @@ testcrypt.exe: ecc.o marshal.o memory.o millerrabin.o mpint.o mpunsafe.o \
 		sshpubk.o sshrsa.o sshrsag.o sshsh256.o sshsh512.o sshsha.o \
 		sshsha3.o testcrypt.o tree234.o utils.o winmiscs.o 
 
+cencode.o: ../windows/cencode.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../windows/cencode.c
+
+cdecode.o: ../windows/cencode.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../windows/cdecode.c
 
 agentf.o: ../agentf.c ../putty.h ../ssh.h ../pageant.h ../sshchan.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \

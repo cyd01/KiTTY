@@ -3,6 +3,8 @@
  * and windlg.c.
  */
 
+#pragma once
+
 typedef struct WinGuiSeat WinGuiSeat;
 
 struct WinGuiSeat {
