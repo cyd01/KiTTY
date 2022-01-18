@@ -3,8 +3,9 @@
  * and windlg.c.
  */
 
+#ifdef DMOD_FAR2L
 #pragma once
-
+#endif
 typedef struct WinGuiSeat WinGuiSeat;
 
 struct WinGuiSeat {

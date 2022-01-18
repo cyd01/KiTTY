@@ -10,9 +10,11 @@
 #include <limits.h>
 #include <assert.h>
 
+#ifdef DMOD_FAR2L
 /* far2l extensions support - base64 encode/decode libs */
 #include <cencode.h>
 #include <cdecode.h>
+#endif
 
 #ifdef __WINE__
 #define NO_MULTIMON                    /* winelib doesn't have this */
@@ -440,7 +442,7 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 
 #endif
 #ifdef MOD_WTS
-//typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS n'est pas défini dans le fichier wtsapi32.h !!!
+typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS is not definned in file wtsapi32.h !!!
 #include <wtsapi32.h>
 #endif
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
@@ -616,9 +618,13 @@ static const SeatVtable win_seat_vt = {
     .interactive = nullseat_interactive_yes,
     .get_cursor_position = win_seat_get_cursor_position,
 };
+#ifdef DMOD_FAR2L
 // "static" removed by far2l extensions support patch
 // we need to access wgs from terminal.c to open dialog boxes, etc
 WinGuiSeat wgs = { .seat.vt = &win_seat_vt,
+#else
+static WinGuiSeat wgs = { .seat.vt = &win_seat_vt,
+#endif
                           .logpolicy.vt = &win_gui_logpolicy_vt };
 
 #ifdef MOD_PERSO
@@ -4833,6 +4839,7 @@ free(cmd);
 	ignore_clip = wParam;	       /* don't panic on DESTROYCLIPBOARD */
 	break;
       case WM_DESTROYCLIPBOARD:
+#ifdef DMOD_FAR2L
         /* far2l extensions support */
 
         // In far2l extensions mode we should not do anything here,
@@ -4844,6 +4851,12 @@ free(cmd);
         }
 
         return 0;
+#else
+	if (!ignore_clip)
+	    term_lost_clipboard_ownership(term, CLIP_SYSTEM);
+	ignore_clip = false;
+	return 0;
+#endif
       case WM_PAINT: {
 	    PAINTSTRUCT p;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
@@ -5603,8 +5616,8 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 	 * number noise.
 	 */
 	noise_ultralight(NOISE_SOURCE_KEY, lParam);
-
-    /* far2l extensions support */
+#ifdef DMOD_FAR2L
+  /* far2l extensions support */
     if (term->far2l_ext) {
 
         // extensions mode enabled
@@ -5728,6 +5741,15 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
  * KEYDOWN, and call the Win32 translator functions so that
  * we get the translations under _our_ control.
  */
+#else
+	/*
+	 * We don't do TranslateMessage since it disassociates the
+	 * resulting CHAR message from the KEYDOWN that sparked it,
+	 * which we occasionally don't want. Instead, we process
+	 * KEYDOWN, and call the Win32 translator functions so that
+	 * we get the translations under _our_ control.
+	 */
+#endif
 	{
 	    unsigned char buf[20];
 	    int len;

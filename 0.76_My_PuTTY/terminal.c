@@ -13,10 +13,11 @@
 #include "putty.h"
 #include "terminal.h"
 
+#ifdef DMOD_FAR2L
 /* base64 library - needed for far2l extensions support */
 #include <windows/cencode.h>
 #include <windows/cdecode.h>
-
+#endif
 #ifdef MOD_PERSO
 #include "charset.h"
 int get_param( const char * val ) ;
@@ -2004,10 +2005,12 @@ Terminal *term_init(Conf *myconf, struct unicode_data *ucsdata, TermWin *win)
      * that need it.
      */
     term = snew(Terminal);
+#ifdef DMOD_FAR2L
     /* far2l */
     term->far2l_ext = 0; // far2l extensions mode is enabled?
     term->is_apc = 0; // currently processing incoming APC sequence?
     term->clip_allowed = -1; // remote clipboard access is enabled?
+#endif
     term->win = win;
     term->ucsdata = ucsdata;
     term->conf = conf_copy(myconf);
@@ -3212,6 +3215,7 @@ static void toggle_mode(Terminal *term, int mode, int query, bool state)
  */
 static void do_osc(Terminal *term)
 {
+#ifdef DMOD_FAR2L
     /* far2l extensions support */
     if (term->is_apc) {
 
@@ -3307,49 +3311,38 @@ static void do_osc(Terminal *term)
                     case 'n':; // FARTTY_INTERRACT_DESKTOP_NOTIFICATION
 
                         /* // not ready yet
-
                         // todo: generate some reply
                         // todo: show notification only if window is out of focus
                         // todo: remove icon after notification timeout or by mouse click
-
                         // title length, source, utf8, no zero-terminate, bytes
                         DWORD len1;
                         memcpy(&len1, d_out+d_count-6, sizeof(len1));
-
                         // text length, source, utf8, no zero-terminate, bytes
                         DWORD len2;
                         memcpy(&len2, d_out+d_count-6-4-len1, sizeof(len2));
-
                         // destination (wide char)
                         LPWSTR text_wc, title_wc;
                         int textsz_wc, titlesz_wc;
-
                         // notification may contain file names in non-latin
                         // or may have localized title
                         // so we can not assume ascii here and should do
                         // full utf8->multibyte conversion
-
                         titlesz_wc = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(d_out+len2+4), len1, 0, 0);
                         textsz_wc = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, len2, 0, 0);
-
                         if (titlesz_wc && textsz_wc) {
                             title_wc = malloc((titlesz_wc+1)*sizeof(wchar_t));
                             MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(d_out+len2+4), len1, title_wc, titlesz_wc);
                             text_wc = malloc((textsz_wc+1)*sizeof(wchar_t));
                             MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, len2, text_wc, textsz_wc);
-
                             title_wc[titlesz_wc] = 0;
                             text_wc[textsz_wc] = 0;
-
                             NOTIFYICONDATAW pnid;
-
                             // todo: do this on window focus also
                             pnid.cbSize = sizeof(pnid);
                             pnid.hWnd = wgs.term_hwnd;
                             pnid.hIcon = LoadIcon(0, IDI_APPLICATION);
                             pnid.uID = 200;
                             Shell_NotifyIconW(NIM_DELETE, &pnid);
-
                             // todo: use putty icon
                             pnid.cbSize = sizeof(pnid);
                             pnid.hWnd = wgs.term_hwnd;
@@ -3361,11 +3354,9 @@ static void do_osc(Terminal *term)
                             memcpy(pnid.szInfoTitle, title_wc, (titlesz_wc+1)*sizeof(wchar_t));
                             memcpy(pnid.szInfo, text_wc, (textsz_wc+1)*sizeof(wchar_t));
                             Shell_NotifyIconW(NIM_ADD, &pnid);
-
                             free(text_wc);
                             free(title_wc);
                         }
-
                         */
 
                         break;
@@ -3782,7 +3773,7 @@ static void do_osc(Terminal *term)
         term->is_apc = 0;
 
     } else
-
+#endif
     if (term->osc_w) {
 	while (term->osc_strlen--)
 	    term->wordness[(unsigned char)
@@ -4698,7 +4689,8 @@ static void term_out(Terminal *term)
 		    term->esc_args[0] = ARG_DEFAULT;
 		    term->esc_query = 0;
 		    break;
-          case '_': /* far2l: processing APC is almost the same as processing OSC */
+#ifdef DMOD_FAR2L
+		case '_': /* far2l: processing APC is almost the same as processing OSC */
              term->is_apc = 1;
              //break;
           //case SEEN_APC:
@@ -4707,6 +4699,9 @@ static void term_out(Terminal *term)
              // if (!WriteStr2TC(fdout, enable ? "\x1b_far2l1\x1b\\\x1b[5n" : "\x1b_far2l0\x07\x1b[5n"))
              //break;
           case ']':		/* OSC: xterm escape sequences */
+#else
+		  case ']':		/* OSC: xterm escape sequences */
+#endif
 		    /* Compatibility is nasty here, xterm, linux, decterm yuk! */
 		    compatibility(OTHER);
 		    term->termstate = SEEN_OSC;
@@ -5927,10 +5922,12 @@ static void term_out(Terminal *term)
                     } else {
                         term->termstate = OSC_STRING;
                         term->osc_strlen = 0;
+#ifdef DMOD_FAR2L
                         /* far2l */
                         if (term->is_apc) {
                             term->osc_string[term->osc_strlen++] = (char)c;
                         }
+#endif
                     }
 		}
 		break;

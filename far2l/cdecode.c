@@ -1,6 +1,6 @@
+#ifdef DMOD_FAR2L
 /*
 cdecoder.c - c source to a base64 decoding algorithm implementation
-
 This is part of the libb64 project, and has been placed in the public domain.
 For details, see http://sourceforge.net/projects/libb64
 */
@@ -27,9 +27,9 @@ int base64_decode_block(const char* code_in, const int length_in, char* plaintex
 	const char* codechar = code_in;
 	char* plainchar = plaintext_out;
 	char fragment;
-	
+
 	*plainchar = state_in->plainchar;
-	
+
 	switch (state_in->step)
 	{
 		while (1)
@@ -85,4 +85,4 @@ int base64_decode_block(const char* code_in, const int length_in, char* plaintex
 	/* control should not reach here */
 	return plainchar - plaintext_out;
 }
-
+#endif
