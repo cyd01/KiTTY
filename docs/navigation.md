@@ -60,7 +60,7 @@
 
 [Download](pages/download.md)
 [Chanlog](pages/chanlog.md)
-[Donation](pages/donation.md)
+[DONATION](pages/donation.md)
 [Contact](pages/contact.md)
 
 [comment]: # [gimmick:theme](united)
