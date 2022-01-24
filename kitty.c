@@ -3501,7 +3501,7 @@ int GetPortFwdState( const int port, const DWORD pid ) {
 }
 
 int ShowPortfwd( HWND hwnd, Conf * conf ) {
-	char pf[2048]="" ;
+	char pf[2100]="" ;
 	char *key, *val;
 	for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key) ;
 		val != NULL;
@@ -3527,8 +3527,13 @@ int ShowPortfwd( HWND hwnd, Conf * conf ) {
 		} else {
 			p = dupprintf("%s\t%s\n", key, val) ;
 		}
-		strcat( pf, p ) ;
-		sfree(p);
+		if( (strlen(pf)+strlen(p))<2000 ) {
+			strcat( pf, p ) ;
+			sfree(p) ;
+		} else {
+			strcat( pf, "...\n" ) ;
+			break ;
+		}
 	}
 	/*
 	MIB_TCPTABLE_OWNER_PID *pTCPInfo;

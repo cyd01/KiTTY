@@ -610,15 +610,22 @@ int SettingsKey_int( HSettingsList list, const char * key, const int defvalue ) 
 
 void SettingsLoad( HSettingsList list, const char * filename ) {
 	FILE * fp ;
-	char buffer[4096] ;
+	char *buffer;
 	int p ;
 	
 //debug_log("filename=%s|\n",filename); int i=0;
 	
 	if( (fp=fopen(filename,"rb")) != NULL ) {
 		list->filename = (char*) malloc( strlen(filename)+1 ) ; strcpy( list->filename, filename ) ;
+		buffer = (char*)malloc(4096*sizeof(char)) ;
 		while( fgets(buffer,4096,fp) != NULL ) {
 //debug_log("\nline %05d[%d]: %s|\n",++i,strlen(buffer),buffer);
+			while( buffer[strlen(buffer)-1]!='\n' ) {
+				buffer = realloc( buffer, strlen(buffer) + 4096 ) ;
+				if( fgets( buffer+strlen(buffer), 4096, fp ) == NULL ) { break ; }
+//debug_log("\nline %05d[%d]: %s|\n",++i,strlen(buffer),buffer);
+			}
+
 			char *name, *value, *value2 ;
 			while( (buffer[strlen(buffer)-1]=='\n') || (buffer[strlen(buffer)-1]=='\r') ) buffer[strlen(buffer)-1] = '\0' ;
 //debug_log("line %05d[%d]: %s|\n",i,strlen(buffer),buffer);
@@ -627,7 +634,7 @@ void SettingsLoad( HSettingsList list, const char * filename ) {
 //debug_log("ici\n");
 				while( buffer[strlen(buffer)-1]=='\r' ) { buffer[strlen(buffer)+1]='\0' ; buffer[strlen(buffer)-1]='\\' ; buffer[strlen(buffer)] = 'r' ; }
 				while( buffer[strlen(buffer)-1]=='\n' ) { buffer[strlen(buffer)+1]='\0' ; buffer[strlen(buffer)-1]='\\' ; buffer[strlen(buffer)] = 'n' ; }
-				if( fgets( buffer+strlen(buffer), 4096, fp ) == NULL ) break ;
+				if( fgets( buffer+strlen(buffer), 4096, fp ) == NULL ) { break ; }
 				while( (buffer[strlen(buffer)-1]=='\n') || (buffer[strlen(buffer)-1]=='\r') ) buffer[strlen(buffer)-1] = '\0' ;
 			}
 //debug_log("line %05d[%d]: %s|\n",i,strlen(buffer),buffer);
@@ -651,8 +658,8 @@ void SettingsLoad( HSettingsList list, const char * filename ) {
 				free( value ) ;
 				free( name ) ;
 			}
-
 		}
+		free(buffer) ;
 		fclose(fp );
 	} else {
 		//if( strcmp(filename,"Default%20Settings") ) MessageBox(NULL,"Unable to open session file", "Error", MB_OK);

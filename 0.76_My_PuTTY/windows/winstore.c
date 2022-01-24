@@ -178,6 +178,7 @@ settings_r *open_settings_r(const char *sessionname)
 	//MessageBox(NULL,sessionname,sesspath,MB_OK);
 	loadPath() ;
 	if( get_param("INIFILE")==SAVEMODE_DIR ) {
+
 		HANDLE hFile;
 		char *p;
 		p = snewn(3 * strlen(sessionname) + 1 + 16, char);
@@ -186,7 +187,7 @@ settings_r *open_settings_r(const char *sessionname)
     		settings_r *toret = snew(settings_r) ;
 		toret->list = SettingsInit() ;
 		GetCurrentDirectory( (MAX_PATH*2), oldpath);
-
+    
 		if (SetCurrentDirectory(sesspath)) {
 			hFile = CreateFile(p, GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 		} else {

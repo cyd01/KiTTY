@@ -1373,6 +1373,10 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     }
 
 #ifdef MOD_PERSO
+    /* Generate a dump file just after load the configuration to be able to analyse crashes */
+    //SaveDump() ;
+#endif
+#ifdef MOD_PERSO
     if( debug_flag ) {
       if( strlen(conf_get_str(conf,CONF_sessionname))>0 ) {
         debug_logevent( "Session name: %s", conf_get_str(conf,CONF_sessionname) ) ;
