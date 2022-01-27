@@ -12,8 +12,8 @@
 
 #ifdef MOD_FAR2L
 /* far2l extensions support - base64 encode/decode libs */
-#include <cencode.h>
-#include <cdecode.h>
+#include <../../far2l/cencode.h>
+#include <../../far2l/cdecode.h>
 #endif
 
 #ifdef __WINE__
@@ -442,7 +442,7 @@ int WINAPI Agent_WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show
 
 #endif
 #ifdef MOD_WTS
-typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS is not definned in file wtsapi32.h !!!
+//typedef enum _WTS_VIRTUAL_CLASS { WTSVirtualClientData, WTSVirtualFileHandle } WTS_VIRTUAL_CLASS; 		// WTS_VIRTUAL_CLASS is not definned in file wtsapi32.h !!!
 #include <wtsapi32.h>
 #endif
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
