@@ -5696,29 +5696,11 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
         memcpy(kev + 14, &type, sizeof(type));
 
         // base64-encode kev
-        // result in null-terminated char* out
-        base64_encodestate _state;
+    	base64_encodestate _state;
         base64_init_encodestate(&_state);
         char* out = malloc(15*2);
         int count = base64_encode_block(kev, 15, out, &_state);
-        // finishing '=' characters
-        char* next_char = out + count;
-        switch (_state.step)
-        {
-            case step_B:
-                *next_char++ = base64_encode_value(_state.result);
-                *next_char++ = '=';
-                *next_char++ = '=';
-                break;
-            case step_C:
-                *next_char++ = base64_encode_value(_state.result);
-                *next_char++ = '=';
-                break;
-            case step_A:
-                break;
-        }
-        count = next_char - out;
-        out[count] = 0;
+	    count += base64_encode_blockend(out + count, &_state);
 
         // send escape seq
 
