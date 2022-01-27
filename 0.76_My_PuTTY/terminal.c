@@ -13,7 +13,7 @@
 #include "putty.h"
 #include "terminal.h"
 
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
 /* base64 library - needed for far2l extensions support */
 #include <windows/cencode.h>
 #include <windows/cdecode.h>
@@ -2005,7 +2005,7 @@ Terminal *term_init(Conf *myconf, struct unicode_data *ucsdata, TermWin *win)
      * that need it.
      */
     term = snew(Terminal);
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
     /* far2l */
     term->far2l_ext = 0; // far2l extensions mode is enabled?
     term->is_apc = 0; // currently processing incoming APC sequence?
@@ -3215,7 +3215,7 @@ static void toggle_mode(Terminal *term, int mode, int query, bool state)
  */
 static void do_osc(Terminal *term)
 {
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
     /* far2l extensions support */
     if (term->is_apc) {
 
@@ -4689,7 +4689,7 @@ static void term_out(Terminal *term)
 		    term->esc_args[0] = ARG_DEFAULT;
 		    term->esc_query = 0;
 		    break;
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
 		case '_': /* far2l: processing APC is almost the same as processing OSC */
              term->is_apc = 1;
              //break;
@@ -5922,7 +5922,7 @@ static void term_out(Terminal *term)
                     } else {
                         term->termstate = OSC_STRING;
                         term->osc_strlen = 0;
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
                         /* far2l */
                         if (term->is_apc) {
                             term->osc_string[term->osc_strlen++] = (char)c;
