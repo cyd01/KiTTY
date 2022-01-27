@@ -15,8 +15,8 @@
 
 #ifdef MOD_FAR2L
 /* base64 library - needed for far2l extensions support */
-#include <windows/cencode.h>
-#include <windows/cdecode.h>
+#include <../far2l/cencode.h>
+#include <../far2l/cdecode.h>
 #endif
 #ifdef MOD_PERSO
 #include "charset.h"
@@ -3280,7 +3280,7 @@ static void do_osc(Terminal *term)
                     // until implementing dynamic osc_string allocation
 
                     #ifdef _WINDOWS
-                    MessageBox(wgs.term_hwnd, "Too large clipboard :(", "Error", MB_OK);
+                    MessageBox(NULL, "Too large clipboard :(", "Error", MB_OK);
                     #endif
 
                     // correct request id is lost forever
@@ -3339,13 +3339,13 @@ static void do_osc(Terminal *term)
                             NOTIFYICONDATAW pnid;
                             // todo: do this on window focus also
                             pnid.cbSize = sizeof(pnid);
-                            pnid.hWnd = wgs.term_hwnd;
+                            pnid.hWnd = NULL;
                             pnid.hIcon = LoadIcon(0, IDI_APPLICATION);
                             pnid.uID = 200;
                             Shell_NotifyIconW(NIM_DELETE, &pnid);
                             // todo: use putty icon
                             pnid.cbSize = sizeof(pnid);
-                            pnid.hWnd = wgs.term_hwnd;
+                            pnid.hWnd = NULL;
                             pnid.hIcon = LoadIcon(0, IDI_APPLICATION);
                             pnid.uID = 200;
                             pnid.uFlags = NIF_ICON | NIF_INFO | NIF_MESSAGE;
@@ -3413,7 +3413,7 @@ static void do_osc(Terminal *term)
                                 #ifdef _WINDOWS
                                 char ec_status = 0;
                                 if (term->clip_allowed == 1) {
-                                    OpenClipboard(wgs.term_hwnd);
+                                    OpenClipboard(NULL);
                                     ec_status = EmptyClipboard() ? 1 : 0;
                                     CloseClipboard();
                                 }
@@ -3464,7 +3464,7 @@ static void do_osc(Terminal *term)
 
                                 #ifdef _WINDOWS
                                 if (term->clip_allowed == -1) {
-                                    int status = MessageBox(wgs.term_hwnd,
+                                    int status = MessageBox(NULL,
                                         "Allow far2l clipboard sync?", "PyTTY", MB_OKCANCEL);
                                     if (status == IDOK) {
                                         term->clip_allowed = 1;
@@ -3546,7 +3546,7 @@ static void do_osc(Terminal *term)
                                             memcpy(GData,buffer,BufferSize);
                                             GlobalUnlock(hData);
 
-                                            if (OpenClipboard(wgs.term_hwnd)) {
+                                            if (OpenClipboard(NULL)) {
 
                                                 if (!SetClipboardData(fmt, (HANDLE)hData)) {
                                                     GlobalFree(hData);
@@ -3605,7 +3605,7 @@ static void do_osc(Terminal *term)
                                     int32_t ClipTextSize = 0;
 
                                     if ((gfmt == CF_TEXT || gfmt == CF_UNICODETEXT || gfmt >= 0xC000) &&
-                                        OpenClipboard(wgs.term_hwnd))
+                                        OpenClipboard(NULL))
                                     {
                                         HANDLE hClipData = GetClipboardData((gfmt == CF_TEXT) ? CF_UNICODETEXT : gfmt);
 
