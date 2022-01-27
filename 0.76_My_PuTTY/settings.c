@@ -1295,7 +1295,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppb(sesskey, "HideMousePtr", false, conf, CONF_hide_mouseptr);
     gppb(sesskey, "SunkenEdge", false, conf, CONF_sunken_edge);
     gppi(sesskey, "WindowBorder", 1, conf, CONF_window_border);
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
     gppi(sesskey, "CurType", 1, conf, CONF_cursor_type);
     gppb(sesskey, "BlinkCur", true, conf, CONF_blink_cur);
 #else

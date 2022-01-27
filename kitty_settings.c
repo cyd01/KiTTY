@@ -759,7 +759,7 @@ void load_open_settings_forced(char *filename, Conf *conf) {
     gppb_forced(sesskey, "HideMousePtr", false, conf, CONF_hide_mouseptr);
     gppb_forced(sesskey, "SunkenEdge", false, conf, CONF_sunken_edge);
     gppi_forced(sesskey, "WindowBorder", 1, conf, CONF_window_border);
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
     gppi_forced(sesskey, "CurType", 1, conf, CONF_cursor_type);
     gppb_forced(sesskey, "BlinkCur", true, conf, CONF_blink_cur);
 #else

@@ -185,7 +185,7 @@ struct terminal_tag {
 #define ANSI(x,y)	((x)+((y)*256))
 #define ANSI_QUE(x)	ANSI(x,1)
 
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
 /* far2l extensions support */
 //#define OSC_STR_MAX 2048
 // todo: allocate osc_string dynamically
@@ -197,7 +197,7 @@ struct terminal_tag {
     char osc_string[OSC_STR_MAX + 1];
     bool osc_w;
 
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
     /* far2l */
     int far2l_ext; // extensions mode on
     bool is_apc; // currently processing APC sequence
@@ -219,7 +219,7 @@ struct terminal_tag {
 
 	SEEN_OSC_P,
 	OSC_STRING, OSC_MAYBE_ST,
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
     /* far2l extensions support */ SEEN_APC,
     VT52_ESC,
 #else

@@ -10,10 +10,10 @@
 #include <limits.h>
 #include <assert.h>
 
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
 /* far2l extensions support - base64 encode/decode libs */
-#include <cencode.h>
-#include <cdecode.h>
+#include <../../far2l/cencode.h>
+#include <../../far2l/cdecode.h>
 #endif
 
 #ifdef __WINE__
@@ -618,7 +618,7 @@ static const SeatVtable win_seat_vt = {
     .interactive = nullseat_interactive_yes,
     .get_cursor_position = win_seat_get_cursor_position,
 };
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
 // "static" removed by far2l extensions support patch
 // we need to access wgs from terminal.c to open dialog boxes, etc
 WinGuiSeat wgs = { .seat.vt = &win_seat_vt,
@@ -4843,7 +4843,7 @@ free(cmd);
 	ignore_clip = wParam;	       /* don't panic on DESTROYCLIPBOARD */
 	break;
       case WM_DESTROYCLIPBOARD:
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
         /* far2l extensions support */
 
         // In far2l extensions mode we should not do anything here,
@@ -5620,7 +5620,7 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 	 * number noise.
 	 */
 	noise_ultralight(NOISE_SOURCE_KEY, lParam);
-#ifdef DMOD_FAR2L
+#ifdef MOD_FAR2L
   /* far2l extensions support */
     if (term->far2l_ext) {
 
