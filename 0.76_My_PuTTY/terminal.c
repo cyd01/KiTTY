@@ -3726,30 +3726,11 @@ static void do_osc(Terminal *term)
                     // ok, let us try to answer something
 
                     // base64-encode
-                    // result in null-terminated char* out
                     base64_encodestate _state;
                     base64_init_encodestate(&_state);
-
                     char* out = malloc(reply_size*2);
                     int count = base64_encode_block((char*)reply, reply_size, out, &_state);
-                    // finishing '=' characters
-                    char* next_char = out + count;
-                    switch (_state.step)
-                    {
-                        case step_B:
-                            *next_char++ = base64_encode_value(_state.result);
-                            *next_char++ = '=';
-                            *next_char++ = '=';
-                            break;
-                        case step_C:
-                            *next_char++ = base64_encode_value(_state.result);
-                            *next_char++ = '=';
-                            break;
-                        case step_A:
-                            break;
-                    }
-                    count = next_char - out;
-                    out[count] = 0;
+                    count += base64_encode_blockend(out + count, &_state);
 
                     // send escape seq
 
