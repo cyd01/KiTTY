@@ -63,7 +63,7 @@ adb=yes
 ; autoreconnect: enable/disable the automatic reconnection feature
 autoreconnect=yes
 
-; autostoresshkey: enable/disable the automatic ssh key store freature (no confirmation window)
+; autostoresshkey: enable/disable the automatic ssh key store feature (no confirmation window)
 ;autostoresshkey=no
 
 ; backgroundimage: enable/disable the background image feature
@@ -78,12 +78,12 @@ capslock=no
 ; commanddelay: delay in milliseconds between two lines of the automatic start command script (Connection/Data/Command setting)
 ;commanddelay=0.05
 
-; conf: enable/disable the automatic creation of default configuration file
+; conf: enable/disable the automatic creation of the default configuration file
 conf=yes
 
 ; configdir: set the configuration directory
-;    In portable mode it the place where to find settings files directories: Sessions, SshHostKeys, ...
-;    Usually it the same directory where kitty.exe is
+;    In portable mode it is the place where to find settings files directories: Sessions, SshHostKeys, ...
+;    Usually it is the same directory where kitty.exe is
 ;configdir=
 
 ; cryptsalt: set salt mode for password encryption 
@@ -95,7 +95,7 @@ conf=yes
 ; ctrltab: switch between PuTTY windows with CTRL+Tab
 ctrltab=yes
 
-; cygterm: enable/disable then cygterm feature
+; cygterm: enable/disable the cygterm feature
 cygterm=no
 
 ; debug: for debug purpose only
@@ -113,10 +113,10 @@ cygterm=no
 ; hyperlink: enable/disable the hyperlink feature
 hyperlink=yes
 
-; icon: enable/disable the icon managment feature (a particular icon for specific session)
+; icon: enable/disable the icon management feature (a particular icon for specific session)
 icon=yes
 
-; iconfile: point a file where internal icons are located
+; iconfile: point to a file where internal icons are located
 ;iconfile=kitty.exe
 
 ; initdelay: initial delay in seconds before automatic sending of password, or auto command
@@ -149,24 +149,24 @@ paste=no
 ; ReconnectDelay: the delay before trying to reconnect automatically (in seconds)
 ReconnectDelay=5
 
-; sav: path to the save file of the KiTTY registry. In most case it is located here %APPDATA%/KiTTY/kitty.sav
+; sav: path to the save file of the KiTTY registry. In most cases it is located here %APPDATA%/KiTTY/kitty.sav
 ;
 
 ; savemode: specify the save mode for sessions settings
 ;    Allowed values are:
-;    - registry : to save sessions into windows regitry
+;    - registry : to save sessions into windows registry
 ;    - file : to save sessions into one unique file (currently not maintained)
 ;    - dir : to save sessions into files in the directory structure
 ;savemode=registry
 
-; scriptfilefilter: specify the the local script files extension
+; scriptfilefilter: specify the local script files extension
 ;    Default value is (*.ksh,*.sh)|*.ksh;*.sh|SQL files (*.sql)|*.sql|All files (*.*)|*.*|
 ;scriptfilefilter=All files (*.*)|*.*|
 
 ; scriptmode: enable/disable RuTTY scripting mode
 ;scriptmode=yes
 
-; shortcuts: enable/disable keybord shortcuts
+; shortcuts: enable/disable keyboard shortcuts
 shortcuts=yes
 
 ; size: enable/disable window size in the window title
@@ -178,14 +178,14 @@ size=no
 
 ; sshversion: Force the SSH version title. 
 ;    Default value: PuTTY-KiTTY
-;    KiTTY claims it is PuTTY-KiTTY. But sometimes there are servers that does not allow non standard values.
+;    KiTTY claims it is PuTTY-KiTTY. But sometimes there are servers that do not allow non standard values.
 ;    So it is possible to redefine it
 ;sshversion=OpenSSH_5.5
 
 ; transparency: enable/disable the transparency feature
 transparency=yes
 
-; userpasssshnosave: if yes, SSH password will not be save internaly (and can't be reuse automatically) 
+; userpasssshnosave: if yes, SSH password will not be saved internally (and can't be reused automatically) 
 userpasssshnosave=no
 
 ; winrol: enable/disable the rolling feature (rolling into the title bar)
@@ -221,7 +221,7 @@ zmodem=yes
 ; run a local command (default is CONTROL+F5)
 ;command=
 
-; Copy all window buffer to clipboard
+; Copy all window buffers to clipboard
 ;copyall=
 
 ; Open a duplicate window (with same session settings)
@@ -245,7 +245,7 @@ zmodem=yes
 ; Switch font to negative colors
 ;fontnegative=
 
-; Increase fonr size
+; Increase font size
 ;fontup=
 
 ; Switch to full screen

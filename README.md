@@ -41,7 +41,7 @@ KiTTY has all the features from the original software, and adds many others as d
 * pscp.exe and WinSCP integration
 * Binary compression
 * Clipboard printing
-* Cygwin and cmd.exe intégration
+* Cygwin and cmd.exe integration
 * File association
 * Other settings
 * New command-line options
