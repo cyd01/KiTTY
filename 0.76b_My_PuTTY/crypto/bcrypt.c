@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <string.h>
 #include "ssh.h"
-#include "sshblowf.h"
+#include "blowfish.h"
 
 BlowfishContext *bcrypt_setup(const unsigned char *key, int keybytes,
                               const unsigned char *salt, int saltbytes)

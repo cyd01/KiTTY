@@ -21,8 +21,8 @@ header("content-Type: image/jpeg");
    fclose($lefichier);
   } 
 
-$font = "VeraSe.ttf"; // it's a Bitstream font check www.gnome.org for more
-$font_size = 10;
+$font = "Ubuntu.ttf"; // it's a Bitstream font check www.gnome.org for more
+$font_size = 12;
 $angle = 0;
 $box = imagettfbbox($font_size, $angle, $font, $str);
 $x = (int)(148 - $box[4]) / 2;

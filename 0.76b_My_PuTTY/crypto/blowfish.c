@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "ssh.h"
-#include "sshblowf.h"
+#include "blowfish.h"
 
 struct BlowfishContext {
     uint32_t S0[256], S1[256], S2[256], S3[256], P[18];
