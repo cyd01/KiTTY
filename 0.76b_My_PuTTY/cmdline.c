@@ -35,6 +35,7 @@ int decode64(char *buffer) ;
 void SetAutoStoreSSHKey( void ) ;
 void load_open_settings_forced(char *filename, Conf *conf) ;
 void SetPasswordInConfig( const char * password ) ;
+void SetAutoStoreSSHKeyFlag( const int flag ) ;
 int GetCryptSaltFlag() ;
 extern char CurrentFolder[1024] ;
 // Manage connect string as: user:pass@@@hostname:port/cmd
@@ -573,7 +574,7 @@ int cmdline_process_param(const char *p, char *value,
     }
     if ( !strcmp(p, "-auto_store_sshkey") || !strcmp(p, "-auto-store-sshkey") ) {
 	RETURN(1);
-	SetAutoStoreSSHKey();
+	SetAutoStoreSSHKeyFlag( 1 ) ;
     }
 #endif
 #ifdef MOD_ADB

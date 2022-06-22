@@ -254,9 +254,14 @@ BOOL RegDelTree (HKEY hKeyRoot, LPCTSTR lpSubKey) {
     lResult = RegOpenKeyEx (hKeyRoot, lpSubKey, 0, KEY_READ, &hKey) ;
 
     if (lResult != ERROR_SUCCESS) {
-        if (lResult == ERROR_FILE_NOT_FOUND) { printf("Key not found.\n"); return TRUE; } 
-        else {printf("Error opening key.\n");return FALSE;}
-    	}
+        if (lResult == ERROR_FILE_NOT_FOUND) { 
+		//printf("Key not found.\n") ;
+		return TRUE ; 
+	} else {
+		//printf("Error opening key.\n") ;
+		return FALSE ;
+	}
+    }
 
     // Enumerate the keys
     dwSize = MAX_PATH;

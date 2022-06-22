@@ -20,6 +20,7 @@ In **KiTTY** some new command-line options are available:
 * **-iconfile**: choose an external icon file
 * **-initdelay**: delay (in seconds) before initial configured actions (send to tray, autocommand ...). Default is 2.0
 * **-keygen**: start the integrated ssh key generator
+* **-knock**: set port knocking sequence
 * **-kload**: load a **.ktx** file (that contains session settings)
 * **-launcher**: start [the session launcher](SessionLauncher.md)
 * **-localproxy**: define a local proxy for new [Cygterm](cygtermd.md) feature
