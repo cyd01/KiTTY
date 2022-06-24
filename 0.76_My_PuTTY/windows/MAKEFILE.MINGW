@@ -209,7 +209,7 @@ pageant.exe: aqsync.o be_misc.o callback.o conf.o ecc.o errsock.o marshal.o \
 		winpgnt.o winpgntc.o winsecur.o winselgui.o winutils.o \
 		notiming.o \
 		kitty_commun.o kitty_crypt.o kitty_registry.o
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,pageant.map aqsync.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,pageant.map aqsync.o \
 		be_misc.o callback.o conf.o ecc.o errsock.o marshal.o \
 		memory.o misc.o mpint.o pageant.o pageant.res.o sshaes.o \
 		sshargon2.o sshauxcrypt.o sshblake2.o sshdes.o sshdss.o \
@@ -426,7 +426,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o pockle.o primecandidate.o millerrabin.o mpunsafe.o \
 		void.o $(UTF8MOUSE_OBJS)
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
 		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o logging.o \
 		mainchan.o marshal.o memory.o minibidi.o misc.o miscucs.o \
@@ -475,7 +475,7 @@ puttygen.exe: conf.o ecc.o import.o marshal.o memory.o millerrabin.o misc.o \
 		winmisc.o winmiscs.o winnoise.o winnojmp.o winpgen.o \
 		winsecur.o winstore.o wintime.o winutils.o \
 		kitty_commun.o kitty_crypt.o kitty_registry.o kitty_keygen.o kitty_store.o kitty_tools.o
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,puttygen.map conf.o ecc.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,puttygen.map conf.o ecc.o \
 		import.o marshal.o memory.o millerrabin.o misc.o mpint.o \
 		mpunsafe.o notiming.o pockle.o primecandidate.o \
 		puttygen.res.o smallprimes.o sshaes.o sshargon2.o \
@@ -501,7 +501,7 @@ puttytel.exe: be_misc.o be_nos_s.o callback.o cmdline.o conf.o config.o \
 		winhelp.o winhsock.o winjump.o winmisc.o winmiscs.o winnet.o \
 		winprint.o winproxy.o winsecur.o winselgui.o winser.o \
 		winstore.o wintime.o winucs.o winutils.o
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,puttytel.map be_misc.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,puttytel.map be_misc.o \
 		be_nos_s.o callback.o cmdline.o conf.o config.o dialog.o \
 		errsock.o ldisc.o logging.o marshal.o memory.o minibidi.o \
 		misc.o miscucs.o nocproxy.o nogss.o norand.o pinger.o \
@@ -2218,7 +2218,7 @@ putty_notrans.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o \
 		void.o $(UTF8MOUSE_OBJS)
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
 		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o \
 		ldiscucs.o logging.o mainchan.o marshal.o memory.o \
@@ -2282,7 +2282,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o sshbcrypt.o pockle.o primecandidate.o millerrabin.o mpunsafe.o \
 		void.o $(UTF8MOUSE_OBJS)
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
 		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o logging.o \
 		mainchan.o marshal.o memory.o minibidi.o misc.o miscucs.o \

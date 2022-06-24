@@ -1055,6 +1055,31 @@ static HANDLE access_random_seed(int action)
         }
     }
 
+if( get_param("INIFILE")==SAVEMODE_DIR ) {
+	char InitDir[4096] ;
+	int i ;
+	if( GetModuleFileName( NULL, (LPTSTR)InitDir, 4096 ) ) {
+		if( strlen( InitDir ) > 0 ) {
+			i = strlen( InitDir ) -1 ;
+			do {
+				if( InitDir[i] == '\\' ) { InitDir[i]='\0' ; i = 0 ; }
+				i-- ;
+			} while( i >= 0 ) ;
+		}
+	} else { 
+		strcpy( InitDir, "" ) ; 
+	}
+	
+    /*
+     * Test start directory
+     */
+    {
+	//DWORD len = strlen(InitialDirectory) ;
+        if( try_random_seed_and_free(
+                dupcat(InitDir, "\\PUTTY.RND"), action, &rethandle) )
+	return rethandle;
+    }
+} else {
     /*
      * Next, try the user's local Application Data directory,
      * followed by their non-local one. This is found using the
@@ -1120,7 +1145,7 @@ static HANDLE access_random_seed(int action)
                 dupcat(windir, "\\PUTTY.RND"), action, &rethandle))
 	return rethandle;
     }
-
+}
     /*
      * If even that failed, give up.
      */

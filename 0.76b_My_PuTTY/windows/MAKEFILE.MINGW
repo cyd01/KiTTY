@@ -426,7 +426,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \
 		import.o sshrsag.o sshdssg.o sshprime.o sshecdsag.o bcrypt.o pockle.o primecandidate.o millerrabin.o mpunsafe.o \
 		void.o $(UTF8MOUSE_OBJS)
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
 		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o logging.o \
 		mainchan.o marshal.o memory.o minibidi.o misc.o dup_mb_to_wc.o \
