@@ -16,7 +16,7 @@
 #include "marshal.h"
 #include "ssh.h"
 #include "sshcr.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshppl.h"
 #include "sshchan.h"
 #ifndef NO_GSSAPI

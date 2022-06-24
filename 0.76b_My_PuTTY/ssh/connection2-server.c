@@ -10,7 +10,7 @@
 #include "sshppl.h"
 #include "sshchan.h"
 #include "sshcr.h"
-#include "ssh2connection.h"
+#include "connection2.h"
 #include "sshserver.h"
 
 void ssh2connection_server_configure(

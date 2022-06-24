@@ -7,11 +7,11 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshppl.h"
 #include "sshchan.h"
 #include "sshcr.h"
-#include "ssh1connection.h"
+#include "connection1.h"
 
 static int ssh1_rportfwd_cmp(void *av, void *bv)
 {

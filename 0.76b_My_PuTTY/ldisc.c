@@ -11,7 +11,21 @@
 
 #include "putty.h"
 #include "terminal.h"
-#include "ldisc.h"
+struct Ldisc_tag {
+    Terminal *term;
+    Backend *backend;
+    Seat *seat;
+
+    /*
+     * Values cached out of conf.
+     */
+    bool telnet_keyboard, telnet_newline;
+    int protocol, localecho, localedit;
+
+    char *buf;
+    size_t buflen, bufsiz;
+    bool quotenext;
+};
 
 #define ECHOING (ldisc->localecho == FORCE_ON || \
                  (ldisc->localecho == AUTO && \

@@ -9,7 +9,7 @@
 #include "putty.h"
 #include "mpint.h"
 #include "ssh.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshppl.h"
 #include "sshchan.h"
 

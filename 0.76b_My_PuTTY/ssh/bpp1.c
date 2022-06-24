@@ -6,7 +6,7 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshcr.h"
 
 struct ssh1_bpp_state {

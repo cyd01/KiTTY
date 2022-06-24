@@ -7,7 +7,7 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshppl.h"
 #include "sshcr.h"
 

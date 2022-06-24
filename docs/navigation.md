@@ -48,6 +48,7 @@
   ----
   * [Menu key shortcuts definition](pages/MenuShortcuts.md)
   * [New command-line options](pages/CommandLine.md)
+  * [Default kitty.ini configuration file](https://github.com/cyd01/KiTTY/blob/master/kitty_ini.txt)
 
 [Bonus]()
 

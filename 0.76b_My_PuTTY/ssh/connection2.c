@@ -6,11 +6,11 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshppl.h"
 #include "sshchan.h"
 #include "sshcr.h"
-#include "ssh2connection.h"
+#include "connection2.h"
 
 #ifdef MOD_RECONNECT
 int GetAutoreconnectFlag( void ) ;

@@ -7712,9 +7712,11 @@ void make_title( char * res, char * fmt, const char * title ) {
 				strcat(b,k+1);
 				nb++;
 			}
+			res[1023]='\0';
 		}
 		insert(res,b,p) ;
 	}
+	res[1023]='\0';
 }
 
 
@@ -7730,7 +7732,7 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	char *title ;
 
 	if( title_in==NULL ) { return ; }
-	title = (char*)malloc(strlen(title_in)+1); strcpy(title,title_in);
+	title = (char*)malloc(strlen(title_in)+1024); strcpy(title,title_in);
 
 	if( (title[0]=='_')&&(title[1]=='_') ) { // Mode commande a distance
 		if( ManageLocalCmd( MainHwnd, title+2 ) ) { free(title); return ; }

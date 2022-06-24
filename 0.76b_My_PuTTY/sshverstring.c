@@ -8,7 +8,7 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshcr.h"
 
 #define PREFIX_MAXLEN 64

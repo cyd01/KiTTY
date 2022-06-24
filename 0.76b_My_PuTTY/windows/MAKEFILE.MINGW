@@ -105,7 +105,7 @@ RC = $(TOOLPATH)windres
 
 CFLAGS = -Wall -O2 -std=gnu99 -Wvla -D_WINDOWS -DWIN32S_COMPAT \
 		-D_NO_OLDNAMES -D__USE_MINGW_ANSI_STDIO=1 -I.././ \
-		-I../charset/ -I../windows/ -I../unix/ -I../crypto/ -I../proxy/ -I../terminal/ -I../utils/
+		-I../charset/ -I../windows/ -I../unix/ -I../crypto/ -I../proxy/ -I../ssh/ -I../terminal/ -I../utils/
 LDFLAGS = -s
 RCFLAGS = $(RCINC) --define WIN32=1 --define _WIN32=1 --define WINVER=0x0400 \
 		-I.././ -I../charset/ -I../windows/ -I../unix/
@@ -199,7 +199,7 @@ CFLAGS_PLINK = -Wall -O2 -D_WINDOWS -DWIN32S_COMPAT \
 all: pageant.exe plink.exe pscp.exe psftp.exe psocks.exe putty.exe \
 		puttygen.exe puttytel.exe testcrypt.exe
 
-pageant.exe: aqsync.o be_misc.o callback.o conf.o ecc.o errsock.o marshal.o \
+pageant.exe: aqsync.o be_misc.o callback.o conf.o ecc-arithmetic.o errsock.o marshal.o \
 		memory.o misc.o mpint.o pageant.o pageant.res.o aes.o \
 		argon2.o sshauxcrypt.o blake2.o des.o sshdss.o \
 		sshecc.o sshhmac.o sshmd5.o sshpubk.o sshrsa.o sshsh256.o \
@@ -210,7 +210,7 @@ pageant.exe: aqsync.o be_misc.o callback.o conf.o ecc.o errsock.o marshal.o \
 		notiming.o \
 		kitty_commun.o kitty_crypt.o kitty_registry.o
 	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,pageant.map aqsync.o \
-		be_misc.o callback.o conf.o ecc.o errsock.o marshal.o \
+		be_misc.o callback.o conf.o ecc-arithmetic.o errsock.o marshal.o \
 		memory.o misc.o mpint.o pageant.o pageant.res.o aes.o \
 		argon2.o sshauxcrypt.o blake2.o des.o sshdss.o \
 		sshecc.o sshhmac.o sshmd5.o sshpubk.o sshrsa.o sshsh256.o \
@@ -227,16 +227,16 @@ pageant.exe: aqsync.o be_misc.o callback.o conf.o ecc.o errsock.o marshal.o \
 plink.exe: agentf.o aqsync.o \
 		be_all_s_plink.o \
 		be_misc.o callback.o clicons.o \
-		cmdline.o conf.o console.o cproxy.o ecc.o errsock.o \
+		cmdline.o conf.o console.o cproxy.o ecc-arithmetic.o errsock.o \
 		ldisc_plink.o \
 		logging.o mainchan.o marshal.o memory.o misc.o dup_mb_to_wc.o \
 		mpint.o noterm.o nullplug.o pgssapi.o pinger.o plink.res.o \
 		portfwd.o proxy.o raw.o rlogin.o sessprep.o settings.o ssh.o \
-		ssh1bpp.o ssh1censor.o ssh1connection.o \
-		ssh1connection-client.o ssh1login.o ssh2bpp.o ssh2bpp-bare.o \
-		ssh2censor.o ssh2connection.o ssh2connection-client.o \
-		ssh2kex-client.o ssh2transhk.o ssh2transport.o \
-		ssh2userauth.o aes.o arcfour.o argon2.o sshauxcrypt.o \
+		bpp1.o censor1.o connection1.o \
+		connection1-client.o login1.o bpp2.o bpp-bare.o \
+		censor2.o connection2.o connection2-client.o \
+		kex2-client.o transient-hostkey-cache.o transport2.o \
+		userauth2-client.o aes.o arcfour.o argon2.o sshauxcrypt.o \
 		blake2.o blowfish.o sshccp.o sshcommon.o crc32.o \
 		crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o sshgssc.o \
 		sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o sshrand.o \
@@ -253,16 +253,16 @@ plink.exe: agentf.o aqsync.o \
 	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,plink.map agentf.o aqsync.o \
 		be_all_s_plink.o \
 		be_misc.o callback.o clicons.o cmdline.o conf.o \
-		console.o cproxy.o ecc.o errsock.o \
+		console.o cproxy.o ecc-arithmetic.o errsock.o \
 		ldisc_plink.o \
 		logging.o \
 		mainchan.o marshal.o memory.o misc.o dup_mb_to_wc.o mpint.o \
 		noterm.o nullplug.o pgssapi.o pinger.o plink.res.o portfwd.o \
-		proxy.o raw.o rlogin.o sessprep.o settings.o ssh.o ssh1bpp.o \
-		ssh1censor.o ssh1connection.o ssh1connection-client.o \
-		ssh1login.o ssh2bpp.o ssh2bpp-bare.o ssh2censor.o \
-		ssh2connection.o ssh2connection-client.o ssh2kex-client.o \
-		ssh2transhk.o ssh2transport.o ssh2userauth.o aes.o \
+		proxy.o raw.o rlogin.o sessprep.o settings.o ssh.o bpp1.o \
+		censor1.o connection1.o connection1-client.o \
+		login1.o bpp2.o bpp-bare.o censor2.o \
+		connection2.o connection2-client.o kex2-client.o \
+		transient-hostkey-cache.o transport2.o userauth2-client.o aes.o \
 		arcfour.o argon2.o sshauxcrypt.o blake2.o blowfish.o \
 		sshccp.o sshcommon.o crc32.o crc-attack-detector.o des.o diffie-hellman.o \
 		sshdss.o sshecc.o sshgssc.o sshhmac.o sshmac.o sshmd5.o \
@@ -282,15 +282,15 @@ plink.exe: agentf.o aqsync.o \
 		-lwsock32
 
 pscp.exe: agentf.o aqsync.o be_misc.o be_ssh.o callback.o clicons.o \
-		cmdline.o conf.o console.o cproxy.o ecc.o errsock.o \
+		cmdline.o conf.o console.o cproxy.o ecc-arithmetic.o errsock.o \
 		logging.o mainchan.o marshal.o memory.o misc.o dup_mb_to_wc.o \
 		mpint.o nullplug.o pgssapi.o pinger.o portfwd.o proxy.o \
 		pscp.o pscp.res.o psftpcommon.o settings.o sftp.o \
-		sftpcommon.o ssh.o ssh1bpp.o ssh1censor.o ssh1connection.o \
-		ssh1connection-client.o ssh1login.o ssh2bpp.o ssh2bpp-bare.o \
-		ssh2censor.o ssh2connection.o ssh2connection-client.o \
-		ssh2kex-client.o ssh2transhk.o ssh2transport.o \
-		ssh2userauth.o aes.o arcfour.o argon2.o sshauxcrypt.o \
+		sftpcommon.o ssh.o bpp1.o censor1.o connection1.o \
+		connection1-client.o login1.o bpp2.o bpp-bare.o \
+		censor2.o connection2.o connection2-client.o \
+		kex2-client.o transient-hostkey-cache.o transport2.o \
+		userauth2-client.o aes.o arcfour.o argon2.o sshauxcrypt.o \
 		blake2.o blowfish.o sshccp.o sshcommon.o crc32.o \
 		crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o sshgssc.o \
 		sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o sshrand.o \
@@ -305,14 +305,14 @@ pscp.exe: agentf.o aqsync.o be_misc.o be_ssh.o callback.o clicons.o \
 		kitty_commun.o kitty_ssh.o kitty_tools.o kitty_registry.o kitty_store.o
 	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,pscp.map agentf.o aqsync.o be_misc.o \
 		be_ssh.o callback.o clicons.o cmdline.o conf.o console.o \
-		cproxy.o ecc.o errsock.o logging.o mainchan.o marshal.o \
+		cproxy.o ecc-arithmetic.o errsock.o logging.o mainchan.o marshal.o \
 		memory.o misc.o dup_mb_to_wc.o mpint.o nullplug.o pgssapi.o \
 		pinger.o portfwd.o proxy.o pscp.o pscp.res.o psftpcommon.o \
-		settings.o sftp.o sftpcommon.o ssh.o ssh1bpp.o ssh1censor.o \
-		ssh1connection.o ssh1connection-client.o ssh1login.o \
-		ssh2bpp.o ssh2bpp-bare.o ssh2censor.o ssh2connection.o \
-		ssh2connection-client.o ssh2kex-client.o ssh2transhk.o \
-		ssh2transport.o ssh2userauth.o aes.o arcfour.o \
+		settings.o sftp.o sftpcommon.o ssh.o bpp1.o censor1.o \
+		connection1.o connection1-client.o login1.o \
+		bpp2.o bpp-bare.o censor2.o connection2.o \
+		connection2-client.o kex2-client.o transient-hostkey-cache.o \
+		transport2.o userauth2-client.o aes.o arcfour.o \
 		argon2.o sshauxcrypt.o blake2.o blowfish.o sshccp.o \
 		sshcommon.o crc32.o crc-attack-detector.o des.o diffie-hellman.o sshdss.o \
 		sshecc.o sshgssc.o sshhmac.o sshmac.o sshmd5.o sshprng.o \
@@ -331,15 +331,15 @@ pscp.exe: agentf.o aqsync.o be_misc.o be_ssh.o callback.o clicons.o \
 		-lwsock32
 
 psftp.exe: agentf.o aqsync.o be_misc.o be_ssh.o callback.o clicons.o \
-		cmdline.o conf.o console.o cproxy.o ecc.o errsock.o \
+		cmdline.o conf.o console.o cproxy.o ecc-arithmetic.o errsock.o \
 		logging.o mainchan.o marshal.o memory.o misc.o dup_mb_to_wc.o \
 		mpint.o nullplug.o pgssapi.o pinger.o portfwd.o proxy.o \
 		psftp.o psftp.res.o psftpcommon.o settings.o sftp.o \
-		sftpcommon.o ssh.o ssh1bpp.o ssh1censor.o ssh1connection.o \
-		ssh1connection-client.o ssh1login.o ssh2bpp.o ssh2bpp-bare.o \
-		ssh2censor.o ssh2connection.o ssh2connection-client.o \
-		ssh2kex-client.o ssh2transhk.o ssh2transport.o \
-		ssh2userauth.o aes.o arcfour.o argon2.o sshauxcrypt.o \
+		sftpcommon.o ssh.o bpp1.o censor1.o connection1.o \
+		connection1-client.o login1.o bpp2.o bpp-bare.o \
+		censor2.o connection2.o connection2-client.o \
+		kex2-client.o transient-hostkey-cache.o transport2.o \
+		userauth2-client.o aes.o arcfour.o argon2.o sshauxcrypt.o \
 		blake2.o blowfish.o sshccp.o sshcommon.o crc32.o \
 		crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o sshgssc.o \
 		sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o sshrand.o \
@@ -354,14 +354,14 @@ psftp.exe: agentf.o aqsync.o be_misc.o be_ssh.o callback.o clicons.o \
 		kitty_commun.o kitty_ssh.o kitty_tools.o kitty_registry.o kitty_store.o
 	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,psftp.map agentf.o aqsync.o \
 		be_misc.o be_ssh.o callback.o clicons.o cmdline.o conf.o \
-		console.o cproxy.o ecc.o errsock.o logging.o mainchan.o \
+		console.o cproxy.o ecc-arithmetic.o errsock.o logging.o mainchan.o \
 		marshal.o memory.o misc.o dup_mb_to_wc.o mpint.o nullplug.o \
 		pgssapi.o pinger.o portfwd.o proxy.o psftp.o psftp.res.o \
-		psftpcommon.o settings.o sftp.o sftpcommon.o ssh.o ssh1bpp.o \
-		ssh1censor.o ssh1connection.o ssh1connection-client.o \
-		ssh1login.o ssh2bpp.o ssh2bpp-bare.o ssh2censor.o \
-		ssh2connection.o ssh2connection-client.o ssh2kex-client.o \
-		ssh2transhk.o ssh2transport.o ssh2userauth.o aes.o \
+		psftpcommon.o settings.o sftp.o sftpcommon.o ssh.o bpp1.o \
+		censor1.o connection1.o connection1-client.o \
+		login1.o bpp2.o bpp-bare.o censor2.o \
+		connection2.o connection2-client.o kex2-client.o \
+		transient-hostkey-cache.o transport2.o userauth2-client.o aes.o \
 		arcfour.o argon2.o sshauxcrypt.o blake2.o blowfish.o \
 		sshccp.o sshcommon.o crc32.o crc-attack-detector.o des.o diffie-hellman.o \
 		sshdss.o sshecc.o sshgssc.o sshhmac.o sshmac.o sshmd5.o \
@@ -398,15 +398,15 @@ psocks.exe: be_misc.o callback.o conf.o console.o errsock.o logging.o \
 		../../mini/mini.a 
 
 putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
-		conf.o config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o \
+		conf.o config.o cproxy.o dialog.o ecc-arithmetic.o errsock.o ldisc.o \
 		logging.o mainchan.o marshal.o memory.o minibidi.o misc.o \
 		dup_mb_to_wc.o mpint.o nullplug.o pgssapi.o pinger.o portfwd.o \
 		proxy.o putty.res.o raw.o rlogin.o sessprep.o settings.o \
-		sizetip.o smallprimes.o ssh.o ssh1bpp.o ssh1censor.o ssh1connection.o \
-		ssh1connection-client.o ssh1login.o ssh2bpp.o ssh2bpp-bare.o \
-		ssh2censor.o ssh2connection.o ssh2connection-client.o \
-		ssh2kex-client.o ssh2transhk.o ssh2transport.o \
-		ssh2userauth.o aes.o arcfour.o argon2.o sshauxcrypt.o \
+		sizetip.o smallprimes.o ssh.o bpp1.o censor1.o connection1.o \
+		connection1-client.o login1.o bpp2.o bpp-bare.o \
+		censor2.o connection2.o connection2-client.o \
+		kex2-client.o transient-hostkey-cache.o transport2.o \
+		userauth2-client.o aes.o arcfour.o argon2.o sshauxcrypt.o \
 		blake2.o blowfish.o sshccp.o sshcommon.o crc32.o \
 		crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o sshgssc.o \
 		sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o sshrand.o \
@@ -428,15 +428,15 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		void.o $(UTF8MOUSE_OBJS)
 	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
-		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o logging.o \
+		config.o cproxy.o dialog.o ecc-arithmetic.o errsock.o ldisc.o logging.o \
 		mainchan.o marshal.o memory.o minibidi.o misc.o dup_mb_to_wc.o \
 		mpint.o nullplug.o pgssapi.o pinger.o portfwd.o proxy.o \
 		putty.res.o raw.o rlogin.o sessprep.o settings.o sizetip.o smallprimes.o \
-		ssh.o ssh1bpp.o ssh1censor.o ssh1connection.o \
-		ssh1connection-client.o ssh1login.o ssh2bpp.o ssh2bpp-bare.o \
-		ssh2censor.o ssh2connection.o ssh2connection-client.o \
-		ssh2kex-client.o ssh2transhk.o ssh2transport.o \
-		ssh2userauth.o aes.o arcfour.o argon2.o sshauxcrypt.o \
+		ssh.o bpp1.o censor1.o connection1.o \
+		connection1-client.o login1.o bpp2.o bpp-bare.o \
+		censor2.o connection2.o connection2-client.o \
+		kex2-client.o transient-hostkey-cache.o transport2.o \
+		userauth2-client.o aes.o arcfour.o argon2.o sshauxcrypt.o \
 		blake2.o blowfish.o sshccp.o sshcommon.o crc32.o \
 		crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o sshgssc.o \
 		sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o sshrand.o \
@@ -464,7 +464,7 @@ putty.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		#/c/Windows/system32/crypt32.dll /c/windows/system32/ncrypt.dll \
 		# -lcomctl32 -lwinmm -lwinspool -lole32 
 		
-puttygen.exe: conf.o ecc.o import.o marshal.o memory.o millerrabin.o misc.o \
+puttygen.exe: conf.o ecc-arithmetic.o import.o marshal.o memory.o millerrabin.o misc.o \
 		mpint.o mpunsafe.o notiming.o pockle.o primecandidate.o \
 		puttygen.res.o smallprimes.o aes.o argon2.o \
 		sshauxcrypt.o bcrypt.o blake2.o blowfish.o des.o \
@@ -475,7 +475,7 @@ puttygen.exe: conf.o ecc.o import.o marshal.o memory.o millerrabin.o misc.o \
 		winmisc.o winmiscs.o winnoise.o winnojmp.o winpgen.o \
 		winsecur.o winstore.o wintime.o winutils.o \
 		kitty_commun.o kitty_crypt.o kitty_registry.o kitty_keygen.o kitty_store.o kitty_tools.o
-	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,puttygen.map conf.o ecc.o \
+	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,puttygen.map conf.o ecc-arithmetic.o \
 		import.o marshal.o memory.o millerrabin.o misc.o mpint.o \
 		mpunsafe.o notiming.o pockle.o primecandidate.o \
 		puttygen.res.o smallprimes.o aes.o argon2.o \
@@ -515,14 +515,14 @@ puttytel.exe: be_misc.o be_nos_s.o callback.o cmdline.o conf.o config.o \
 		-ladvapi32 -lcomdlg32 -lgdi32 \
 		-limm32 -lole32 -lshell32 -luser32
 
-testcrypt.exe: ecc.o marshal.o memory.o millerrabin.o mpint.o mpunsafe.o \
+testcrypt.exe: ecc-arithmetic.o marshal.o memory.o millerrabin.o mpint.o mpunsafe.o \
 		pockle.o primecandidate.o smallprimes.o aes.o arcfour.o \
 		argon2.o sshauxcrypt.o blake2.o blowfish.o sshccp.o \
 		crc32.o crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshdssg.o \
 		sshecc.o sshecdsag.o sshhmac.o sshmd5.o sshprime.o sshprng.o \
 		sshpubk.o sshrsa.o sshrsag.o sshsh256.o sshsh512.o sshsha.o \
 		sshsha3.o testcrypt.o tree234.o utils.o winmiscs.o
-	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,testcrypt.map ecc.o marshal.o \
+	$(CC) $(LDFLAGS) -o $@ -Wl,-Map,testcrypt.map ecc-arithmetic.o marshal.o \
 		memory.o millerrabin.o mpint.o mpunsafe.o pockle.o \
 		primecandidate.o smallprimes.o aes.o arcfour.o \
 		argon2.o sshauxcrypt.o blake2.o blowfish.o sshccp.o \
@@ -638,7 +638,7 @@ dialog.o: ../dialog.c ../putty.h ../dialog.h ../defs.h ../puttyps.h \
 		../tree234.h ../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../dialog.c
 
-ecc.o: ../crypto/ecc-arithmetic.c ../ssh.h ../mpint.h ../crypto/ecc.h ../puttymem.h ../tree234.h \
+ecc-arithmetic.o: ../crypto/ecc-arithmetic.c ../ssh.h ../mpint.h ../crypto/ecc.h ../puttymem.h ../tree234.h \
 		../network.h ../misc.h ../sshttymodes.h ../defs.h \
 		../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../crypto/ecc-arithmetic.c
@@ -737,7 +737,7 @@ import.o: ../import.c ../putty.h ../ssh.h ../mpint.h ../misc.h ../defs.h \
 		../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../import.c
 
-ldisc.o: ../ldisc.c ../putty.h ../terminal/terminal.h ../ldisc.h ../defs.h \
+ldisc.o: ../ldisc.c ../putty.h ../terminal/terminal.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../tree234.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../windows/winhelp.h \
@@ -770,7 +770,7 @@ memory.o: ../utils/memory.c ../defs.h ../puttymem.h ../misc.h ../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../utils/memory.c
 
 millerrabin.o: ../keygen/millerrabin.c ../ssh.h ../sshkeygen.h ../mpint.h \
-		../mpunsafe.h ../puttymem.h ../tree234.h ../network.h \
+		../keygen/mpunsafe.h ../puttymem.h ../tree234.h ../network.h \
 		../misc.h ../sshttymodes.h ../defs.h ../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../keygen/millerrabin.c
 	
@@ -795,13 +795,13 @@ dup_mb_to_wc.o: ../utils/dup_mb_to_wc.c ../putty.h ../misc.h ../defs.h ../puttyp
 		../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../utils/dup_mb_to_wc.c
 
-mpint.o: ../mpint.c ../defs.h ../misc.h ../puttymem.h ../mpint.h \
-		../mpint_i.h ../marshal.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../mpint.c
+mpint.o: ../crypto/mpint.c ../defs.h ../misc.h ../puttymem.h ../mpint.h \
+		../crypto/mpint_i.h ../marshal.h
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../crypto/mpint.c
 
-mpunsafe.o: ../mpunsafe.c ../defs.h ../misc.h ../puttymem.h ../mpint.h \
-		../mpint_i.h ../marshal.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../mpunsafe.c
+mpunsafe.o: ../keygen/mpunsafe.c ../defs.h ../misc.h ../puttymem.h ../mpint.h \
+		../crypto/mpint_i.h ../marshal.h
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../keygen/mpunsafe.c
 
 nocmdline.o: ../nocmdline.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../windows/winstuff.h \
@@ -839,11 +839,11 @@ notiming.o: ../notiming.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../notiming.c
 
-nullplug.o: ../nullplug.c ../putty.h ../defs.h ../puttyps.h ../network.h \
+nullplug.o: ../stubs/nullplug.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../nullplug.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../stubs/nullplug.c
 
 osxlaunch.o: ../unix/osxlaunch.c
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../unix/osxlaunch.c
@@ -862,11 +862,11 @@ pageant.res.o: ../windows/pageant.rc ../windows/rcstuff.h \
 		../windows/win_res.h ../version.h ../licence.h
 	$(RC) $(RCFL) $(RCFLAGS) ../windows/pageant.rc -o pageant.res.o
 
-pgssapi.o: ../pgssapi.c ../putty.h ../pgssapi.h ../defs.h ../puttyps.h \
+pgssapi.o: ../ssh/pgssapi.c ../putty.h ../ssh/pgssapi.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
 		../windows/winstuff.h ../unix/unix.h ../puttymem.h \
 		../tree234.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../pgssapi.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/pgssapi.c
 
 pinger.o: ../pinger.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../windows/winstuff.h \
@@ -878,22 +878,22 @@ plink.res.o: ../windows/plink.rc ../windows/rcstuff.h ../windows/putty.ico \
 		../windows/version.rc2 ../version.h ../licence.h
 	$(RC) $(RCFL) $(RCFLAGS) ../windows/plink.rc -o plink.res.o
 
-pockle.o: ../pockle.c ../ssh.h ../sshkeygen.h ../mpint.h ../mpunsafe.h \
+pockle.o: ../keygen/pockle.c ../ssh.h ../sshkeygen.h ../mpint.h ../keygen/mpunsafe.h \
 		../tree234.h ../puttymem.h ../network.h ../misc.h \
 		../sshttymodes.h ../defs.h ../marshal.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../pockle.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../keygen/pockle.c
 
-portfwd.o: ../portfwd.c ../putty.h ../ssh.h ../sshchan.h ../defs.h \
+portfwd.o: ../ssh/portfwd.c ../putty.h ../ssh.h ../sshchan.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../portfwd.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/portfwd.c
 
-primecandidate.o: ../primecandidate.c ../ssh.h ../mpint.h ../mpunsafe.h \
+primecandidate.o: ../keygen/primecandidate.c ../ssh.h ../mpint.h ../keygen/mpunsafe.h \
 		../sshkeygen.h ../puttymem.h ../tree234.h ../network.h \
 		../misc.h ../sshttymodes.h ../defs.h ../marshal.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../primecandidate.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../keygen/primecandidate.c
 
 procnet.o: ../unix/procnet.c ../misc.h ../defs.h ../puttymem.h ../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../unix/procnet.c
@@ -961,17 +961,17 @@ puttytel.res.o: ../windows/puttytel.rc ../windows/rcstuff.h \
 		../windows/version.rc2 ../version.h ../licence.h
 	$(RC) $(RCFL) $(RCFLAGS) ../windows/puttytel.rc -o puttytel.res.o
 
-raw.o: ../raw.c ../putty.h ../defs.h ../puttyps.h ../network.h ../misc.h \
+raw.o: ../otherbackends/raw.c ../putty.h ../defs.h ../puttyps.h ../network.h ../misc.h \
 		../marshal.h ../sshsignals.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../raw.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../otherbackends/raw.c
 
-rlogin.o: ../rlogin.c ../putty.h ../defs.h ../puttyps.h ../network.h \
+rlogin.o: ../otherbackends/rlogin.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../rlogin.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../otherbackends/rlogin.c
 
 sbcs.o: ../charset/sbcs.c ../charset/charset.h ../charset/internal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../charset/sbcs.c
@@ -979,47 +979,47 @@ sbcs.o: ../charset/sbcs.c ../charset/charset.h ../charset/internal.h
 sbcsdat.o: ../charset/sbcsdat.c ../charset/charset.h ../charset/internal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../charset/sbcsdat.c
 
-scpserver.o: ../scpserver.c ../putty.h ../ssh.h ../sshcr.h ../sshchan.h \
+scpserver.o: ../ssh/scpserver.c ../putty.h ../ssh.h ../sshcr.h ../sshchan.h \
 		../sftp.h ../defs.h ../puttyps.h ../network.h ../misc.h \
 		../marshal.h ../sshsignals.h ../puttymem.h ../tree234.h \
 		../sshttymodes.h ../windows/winstuff.h ../unix/unix.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../scpserver.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/scpserver.c
 
-sesschan.o: ../sesschan.c ../putty.h ../ssh.h ../sshchan.h ../sshserver.h \
+sesschan.o: ../ssh/sesschan.c ../putty.h ../ssh.h ../sshchan.h ../sshserver.h \
 		../sftp.h ../sshsignals.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../puttymem.h \
 		../tree234.h ../sshttymodes.h ../windows/winstuff.h \
 		../unix/unix.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sesschan.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/sesschan.c
 
-sessprep.o: ../sessprep.c ../putty.h ../defs.h ../puttyps.h ../network.h \
+sessprep.o: ../utils/sessprep.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sessprep.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../utils/sessprep.c
 
 settings.o: ../settings.c ../putty.h ../storage.h ../sshgssc.h ../sshgss.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
-		../sshsignals.h ../pgssapi.h ../windows/winstuff.h \
+		../sshsignals.h ../ssh/pgssapi.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
 		../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../settings.c -DMASTER_PASSWORD=`cat ../../masterpassword.txt`
 
-sftp.o: ../sftp.c ../misc.h ../tree234.h ../sftp.h ../defs.h ../puttymem.h \
+sftp.o: ../ssh/sftp.c ../misc.h ../tree234.h ../ssh/sftp.h ../defs.h ../puttymem.h \
 		../marshal.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sftp.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/sftp.c
 
-sftpcommon.o: ../sftpcommon.c ../misc.h ../sftp.h ../defs.h ../puttymem.h \
+sftpcommon.o: ../ssh/sftpcommon.c ../misc.h ../ssh/sftp.h ../defs.h ../puttymem.h \
 		../marshal.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sftpcommon.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/sftpcommon.c
 
-sftpserver.o: ../sftpserver.c ../putty.h ../ssh.h ../sftp.h ../defs.h \
+sftpserver.o: ../ssh/sftpserver.c ../putty.h ../ssh.h ../ssh/sftp.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sftpserver.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/sftpserver.c
 
 sizetip.o: ../windows/sizetip.c ../putty.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
@@ -1031,172 +1031,172 @@ slookup.o: ../charset/slookup.c ../charset/charset.h ../charset/internal.h \
 		../charset/enum.c ../charset/sbcsdat.c ../charset/utf8.c
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../charset/slookup.c
 
-smallprimes.o: ../smallprimes.c ../ssh.h ../sshkeygen.h ../puttymem.h \
+smallprimes.o: ../keygen/smallprimes.c ../ssh.h ../sshkeygen.h ../puttymem.h \
 		../tree234.h ../network.h ../misc.h ../sshttymodes.h \
 		../defs.h ../marshal.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../smallprimes.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../keygen/smallprimes.c
 
-ssh.o: ../ssh.c ../putty.h ../pageant.h ../tree234.h ../storage.h \
-		../marshal.h ../ssh.h ../sshcr.h ../sshbpp.h ../sshppl.h \
+ssh.o: ../ssh/ssh.c ../putty.h ../pageant.h ../tree234.h ../storage.h \
+		../marshal.h ../ssh.h ../sshcr.h ../ssh/bpp.h ../sshppl.h \
 		../sshchan.h ../sshgssc.h ../sshgss.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../sshsignals.h ../puttymem.h \
-		../sshttymodes.h ../pgssapi.h ../windows/winstuff.h \
+		../sshttymodes.h ../ssh/pgssapi.h ../windows/winstuff.h \
 		../unix/unix.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/ssh.c
 
-ssh1bpp.o: ../ssh1bpp.c ../putty.h ../ssh.h ../sshbpp.h ../sshcr.h ../defs.h \
+bpp1.o: ../ssh/bpp1.c ../putty.h ../ssh.h ../ssh/bpp.h ../sshcr.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh1bpp.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/bpp1.c
 
-ssh1censor.o: ../ssh1censor.c ../putty.h ../ssh.h ../defs.h ../puttyps.h \
+censor1.o: ../ssh/censor1.c ../putty.h ../ssh.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
 		../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh1censor.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/censor1.c
 
-ssh1connection.o: ../ssh1connection.c ../putty.h ../ssh.h ../sshbpp.h \
-		../sshppl.h ../sshchan.h ../sshcr.h ../ssh1connection.h \
+connection1.o: ../ssh/connection1.c ../putty.h ../ssh.h ../ssh/bpp.h \
+		../sshppl.h ../sshchan.h ../sshcr.h ../ssh/connection1.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh1connection.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/connection1.c
 
-ssh1connection-client.o: ../ssh1connection-client.c ../putty.h ../ssh.h \
-		../sshbpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
-		../ssh1connection.h ../defs.h ../puttyps.h ../network.h \
+connection1-client.o: ../ssh/connection1-client.c ../putty.h ../ssh.h \
+		../ssh/bpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
+		../ssh/connection1.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../puttymem.h \
 		../tree234.h ../sshttymodes.h ../windows/winstuff.h \
 		../unix/unix.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh1connection-client.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/connection1-client.c
 
 ssh1connection-server.o: ../ssh1connection-server.c ../putty.h ../ssh.h \
-		../sshbpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
-		../ssh1connection.h ../sshserver.h ../defs.h ../puttyps.h \
+		../ssh/bpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
+		../ssh/connection1.h ../sshserver.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
 		../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh1connection-server.c
 
-ssh1login.o: ../ssh1login.c ../putty.h ../ssh.h ../mpint.h ../sshbpp.h \
+login1.o: ../ssh/login1.c ../putty.h ../ssh.h ../mpint.h ../ssh/bpp.h \
 		../sshppl.h ../sshcr.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../puttymem.h \
 		../tree234.h ../sshttymodes.h ../windows/winstuff.h \
 		../unix/unix.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh1login.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/login1.c
 
-ssh1login-server.o: ../ssh1login-server.c ../putty.h ../mpint.h ../ssh.h \
-		../sshbpp.h ../sshppl.h ../sshcr.h ../sshserver.h \
+login1-server.o: ../ssh/login1-server.c ../putty.h ../mpint.h ../ssh.h \
+		../ssh/bpp.h ../sshppl.h ../sshcr.h ../sshserver.h \
 		../sshkeygen.h ../defs.h ../puttyps.h ../network.h ../misc.h \
 		../marshal.h ../sshsignals.h ../puttymem.h ../tree234.h \
 		../sshttymodes.h ../windows/winstuff.h ../unix/unix.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh1login-server.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/login1-server.c
 
-ssh2bpp.o: ../ssh2bpp.c ../putty.h ../ssh.h ../sshbpp.h ../sshcr.h ../defs.h \
+bpp2.o: ../ssh/bpp2.c ../putty.h ../ssh.h ../ssh/bpp.h ../sshcr.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2bpp.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/bpp2.c
 
-ssh2bpp-bare.o: ../ssh2bpp-bare.c ../putty.h ../ssh.h ../sshbpp.h ../sshcr.h \
+bpp-bare.o: ../ssh/bpp-bare.c ../putty.h ../ssh.h ../ssh/bpp.h ../sshcr.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2bpp-bare.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/bpp-bare.c
 
-ssh2censor.o: ../ssh2censor.c ../putty.h ../ssh.h ../defs.h ../puttyps.h \
+censor2.o: ../ssh/censor2.c ../putty.h ../ssh.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
 		../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2censor.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/censor2.c
 
-ssh2connection.o: ../ssh2connection.c ../putty.h ../ssh.h ../sshbpp.h \
-		../sshppl.h ../sshchan.h ../sshcr.h ../ssh2connection.h \
+connection2.o: ../ssh/connection2.c ../putty.h ../ssh.h ../ssh/bpp.h \
+		../sshppl.h ../sshchan.h ../sshcr.h ../ssh/connection2.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2connection.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/connection2.c
 
-ssh2connection-client.o: ../ssh2connection-client.c ../putty.h ../ssh.h \
-		../sshbpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
-		../ssh2connection.h ../defs.h ../puttyps.h ../network.h \
+connection2-client.o: ../ssh/connection2-client.c ../putty.h ../ssh.h \
+		../ssh/bpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
+		../ssh/connection2.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../puttymem.h \
 		../tree234.h ../sshttymodes.h ../windows/winstuff.h \
 		../unix/unix.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2connection-client.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/connection2-client.c
 
-ssh2connection-server.o: ../ssh2connection-server.c ../putty.h ../ssh.h \
-		../sshbpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
-		../ssh2connection.h ../sshserver.h ../defs.h ../puttyps.h \
+connection2-server.o: ../ssh/connection2-server.c ../putty.h ../ssh.h \
+		../ssh/bpp.h ../sshppl.h ../sshchan.h ../sshcr.h \
+		../ssh/connection2.h ../sshserver.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
 		../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2connection-server.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/connection2-server.c
 
-ssh2kex-client.o: ../ssh2kex-client.c ../putty.h ../ssh.h ../sshbpp.h \
-		../sshppl.h ../sshcr.h ../storage.h ../ssh2transport.h \
+kex2-client.o: ../ssh/kex2-client.c ../putty.h ../ssh.h ../ssh/bpp.h \
+		../sshppl.h ../sshcr.h ../storage.h ../ssh/transport2.h \
 		../mpint.h ../defs.h ../puttyps.h ../network.h ../misc.h \
 		../marshal.h ../sshsignals.h ../puttymem.h ../tree234.h \
 		../sshttymodes.h ../sshgssc.h ../sshgss.h \
-		../windows/winstuff.h ../unix/unix.h ../pgssapi.h \
+		../windows/winstuff.h ../unix/unix.h ../ssh/pgssapi.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2kex-client.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/kex2-client.c
 
-ssh2kex-server.o: ../ssh2kex-server.c ../putty.h ../ssh.h ../sshbpp.h \
+kex2-server.o: ../ssh/kex2-server.c ../putty.h ../ssh.h ../ssh/bpp.h \
 		../sshppl.h ../sshcr.h ../sshserver.h ../sshkeygen.h \
-		../storage.h ../ssh2transport.h ../mpint.h ../defs.h \
+		../storage.h ../ssh/transport2.h ../mpint.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../sshgssc.h ../sshgss.h ../windows/winstuff.h \
-		../unix/unix.h ../pgssapi.h ../windows/winhelp.h \
+		../unix/unix.h ../ssh/pgssapi.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2kex-server.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/kex2-server.c
 
-ssh2transhk.o: ../ssh2transhk.c ../putty.h ../ssh.h ../defs.h ../puttyps.h \
+transient-hostkey-cache.o: ../ssh/transient-hostkey-cache.c ../putty.h ../ssh.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
 		../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2transhk.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/transient-hostkey-cache.c
 
-ssh2transport.o: ../ssh2transport.c ../putty.h ../ssh.h ../sshbpp.h \
+transport2.o: ../ssh/transport2.c ../putty.h ../ssh.h ../ssh/bpp.h \
 		../sshppl.h ../sshcr.h ../sshserver.h ../storage.h \
-		../ssh2transport.h ../mpint.h ../defs.h ../puttyps.h \
+		../ssh/transport2.h ../mpint.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../sshsignals.h \
 		../puttymem.h ../tree234.h ../sshttymodes.h ../sshgssc.h \
 		../sshgss.h ../windows/winstuff.h ../unix/unix.h \
-		../pgssapi.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2transport.c
+		../ssh/pgssapi.h ../windows/winhelp.h ../charset/charset.h
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/transport2.c
 
-ssh2userauth.o: ../ssh2userauth.c ../putty.h ../ssh.h ../sshbpp.h \
+userauth2-client.o: ../ssh/userauth2-client.c ../putty.h ../ssh.h ../ssh/bpp.h \
 		../sshppl.h ../sshcr.h ../sshgssc.h ../sshgss.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
-		../pgssapi.h ../windows/winstuff.h ../unix/unix.h \
+		../ssh/pgssapi.h ../windows/winstuff.h ../unix/unix.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2userauth.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/userauth2-client.c
 
-ssh2userauth-server.o: ../ssh2userauth-server.c ../putty.h ../ssh.h \
-		../sshbpp.h ../sshppl.h ../sshcr.h ../sshserver.h \
+userauth2-server.o: ../ssh/userauth2-server.c ../putty.h ../ssh.h \
+		../ssh/bpp.h ../sshppl.h ../sshcr.h ../sshserver.h \
 		../sshgssc.h ../sshgss.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../sshsignals.h ../puttymem.h \
-		../tree234.h ../sshttymodes.h ../pgssapi.h \
+		../tree234.h ../sshttymodes.h ../ssh/pgssapi.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
 		../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh2userauth-server.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/userauth2-server.c
 
-aes.o: ../crypto/aes.c ../ssh.h ../mpint_i.h ../puttymem.h ../tree234.h \
+aes.o: ../crypto/aes.c ../ssh.h ../crypto/mpint_i.h ../puttymem.h ../tree234.h \
 		../network.h ../misc.h ../sshttymodes.h ../defs.h \
 		../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../crypto/aes.c
@@ -1231,12 +1231,12 @@ blowfish.o: ../crypto/blowfish.c ../ssh.h ../crypto/blowfish.h ../puttymem.h ../
 		../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../crypto/blowfish.c
 
-sshccp.o: ../sshccp.c ../ssh.h ../mpint_i.h ../puttymem.h ../tree234.h \
+sshccp.o: ../sshccp.c ../ssh.h ../crypto/mpint_i.h ../puttymem.h ../tree234.h \
 		../network.h ../misc.h ../sshttymodes.h ../defs.h \
 		../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sshccp.c
 
-sshcommon.o: ../sshcommon.c ../putty.h ../mpint.h ../ssh.h ../sshbpp.h \
+sshcommon.o: ../sshcommon.c ../putty.h ../mpint.h ../ssh.h ../ssh/bpp.h \
 		../sshppl.h ../sshchan.h ../sshttymodes.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h \
@@ -1252,7 +1252,7 @@ crc-attack-detector.o: ../ssh/crc-attack-detector.c ../misc.h ../ssh.h ../defs.h
 		../marshal.h ../tree234.h ../network.h ../sshttymodes.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../ssh/crc-attack-detector.c
 
-des.o: ../crypto/des.c ../ssh.h ../mpint_i.h ../puttymem.h ../tree234.h \
+des.o: ../crypto/des.c ../ssh.h ../crypto/mpint_i.h ../puttymem.h ../tree234.h \
 		../network.h ../misc.h ../sshttymodes.h ../defs.h \
 		../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../crypto/des.c
@@ -1283,7 +1283,7 @@ sshecdsag.o: ../sshecdsag.c ../ssh.h ../sshkeygen.h ../mpint.h ../puttymem.h \
 
 sshgssc.o: ../sshgssc.c ../putty.h ../sshgssc.h ../misc.h ../defs.h \
 		../puttyps.h ../network.h ../marshal.h ../sshsignals.h \
-		../pgssapi.h ../sshgss.h ../puttymem.h ../windows/winstuff.h \
+		../ssh/pgssapi.h ../sshgss.h ../puttymem.h ../windows/winstuff.h \
 		../unix/unix.h ../tree234.h ../windows/winhelp.h \
 		../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sshgssc.c
@@ -1300,12 +1300,12 @@ sshmd5.o: ../sshmd5.c ../ssh.h ../puttymem.h ../tree234.h ../network.h \
 		../misc.h ../sshttymodes.h ../defs.h ../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sshmd5.c
 
-sshprime.o: ../sshprime.c ../ssh.h ../mpint.h ../mpunsafe.h ../sshkeygen.h \
+sshprime.o: ../sshprime.c ../ssh.h ../mpint.h ../keygen/mpunsafe.h ../sshkeygen.h \
 		../puttymem.h ../tree234.h ../network.h ../misc.h \
 		../sshttymodes.h ../defs.h ../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sshprime.c
 
-sshprng.o: ../sshprng.c ../putty.h ../ssh.h ../mpint_i.h ../defs.h \
+sshprng.o: ../sshprng.c ../putty.h ../ssh.h ../crypto/mpint_i.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
@@ -1336,11 +1336,11 @@ sshrsag.o: ../sshrsag.c ../ssh.h ../sshkeygen.h ../mpint.h ../puttymem.h \
 		../defs.h ../marshal.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sshrsag.c
 
-sshserver.o: ../sshserver.c ../putty.h ../ssh.h ../sshbpp.h ../sshppl.h \
+sshserver.o: ../sshserver.c ../putty.h ../ssh.h ../ssh/bpp.h ../sshppl.h \
 		../sshchan.h ../sshserver.h ../sshgssc.h ../sshgss.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
-		../pgssapi.h ../windows/winstuff.h ../unix/unix.h \
+		../ssh/pgssapi.h ../windows/winstuff.h ../unix/unix.h \
 		../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sshserver.c
 
@@ -1374,7 +1374,7 @@ sshutils.o: ../sshutils.c ../putty.h ../ssh.h ../sshchan.h ../defs.h \
 		../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../sshutils.c
 
-sshverstring.o: ../sshverstring.c ../putty.h ../ssh.h ../sshbpp.h ../sshcr.h \
+sshverstring.o: ../sshverstring.c ../putty.h ../ssh.h ../ssh/bpp.h ../sshcr.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
@@ -1499,7 +1499,7 @@ uxgen.o: ../unix/uxgen.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../unix/uxgen.c
 
-uxgss.o: ../unix/uxgss.c ../putty.h ../pgssapi.h ../sshgss.h ../sshgssc.h \
+uxgss.o: ../unix/uxgss.c ../putty.h ../ssh/pgssapi.h ../sshgss.h ../sshgssc.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../windows/winstuff.h ../unix/unix.h \
 		../puttymem.h ../tree234.h ../windows/winhelp.h \
@@ -1665,7 +1665,7 @@ uxutils.o: ../unix/uxutils.c ../putty.h ../ssh.h ../unix/uxutils.h ../defs.h \
 		../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../unix/uxutils.c
 
-version.o: ../version.c ../putty.h ../ssh.h ../empty.h ../version.h \
+version.o: ../version.c ../putty.h ../ssh.h ../version.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../sshsignals.h ../puttymem.h ../tree234.h ../sshttymodes.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
@@ -1744,7 +1744,7 @@ window.o: ../windows/window.c ../putty.h ../terminal/terminal.h ../storage.h \
 	-DMASTER_PASSWORD=`cat ../../masterpassword.txt` \
 	-DMOD_INTEGRATED_AGENT -DMOD_INTEGRATED_KEYGEN
 
-wingss.o: ../windows/wingss.c ../putty.h ../pgssapi.h ../sshgss.h \
+wingss.o: ../windows/wingss.c ../putty.h ../ssh/pgssapi.h ../sshgss.h \
 		../sshgssc.h ../misc.h ../defs.h ../puttyps.h ../network.h \
 		../marshal.h ../sshsignals.h ../puttymem.h \
 		../windows/winstuff.h ../unix/unix.h ../tree234.h \
@@ -1903,7 +1903,7 @@ winsftp.o: ../windows/winsftp.c ../putty.h ../psftp.h ../ssh.h \
 
 winshare.o: ../windows/winshare.c ../tree234.h ../putty.h ../network.h \
 		../proxy/proxy.h ../ssh.h ../windows/wincapi.h \
-		../windows/winsecur.h ../noshare.c ../defs.h ../puttyps.h \
+		../windows/winsecur.h ../ssh/nosharing.c ../defs.h ../puttyps.h \
 		../misc.h ../marshal.h ../sshsignals.h ../puttymem.h \
 		../sshttymodes.h ../windows/winstuff.h ../unix/unix.h \
 		../windows/winhelp.h ../charset/charset.h
@@ -2193,15 +2193,15 @@ xml:
 	cat ../../kitty.xml | sed 's/<Program_Version>.*<\/Program_Version>/<Program_Version>'`cat version.txt`'<\/Program_Version>/' | sed 	's/<Program_Release_Month>.*<\/Program_Release_Month>/<Program_Release_Month>'`date +"%m"`'<\/Program_Release_Month>/' | sed 	's/<Program_Release_Day>.*<\/Program_Release_Day>/<Program_Release_Day>'`date +"%d"`'<\/Program_Release_Day>/' | sed 's/<Program_Release_Year>.*<\/Program_Release_Year>/<Program_Release_Year>'`date +"%Y"`'<\/Program_Release_Year>/' | sed 's/<File_Size_Bytes>.*<\/File_Size_Bytes>/<File_Size_Bytes>'`ls -l putty.exe|awk '{print $5}'`'<\/File_Size_Bytes>/' > kitty.xml
 
 putty_notrans.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
-		conf.o config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o \
+		conf.o config.o cproxy.o dialog.o ecc-arithmetic.o errsock.o ldisc.o \
 		ldiscucs.o logging.o mainchan.o marshal.o memory.o \
 		minibidi.o misc.o dup_mb_to_wc.o mpint.o nullplug.o pgssapi.o \
 		pinger.o portfwd.o proxy.o putty.res.o raw.o rlogin.o \
-		sercfg.o sessprep.o settings.o sizetip.o ssh.o ssh1bpp.o \
-		ssh1censor.o ssh1connection.o ssh1connection-client.o \
-		ssh1login.o ssh2bpp.o ssh2bpp-bare.o ssh2censor.o \
-		ssh2connection.o ssh2connection-client.o ssh2kex-client.o \
-		ssh2transhk.o ssh2transport.o ssh2userauth.o aes.o \
+		sercfg.o sessprep.o settings.o sizetip.o ssh.o bpp1.o \
+		censor1.o connection1.o connection1-client.o \
+		login1.o bpp2.o bpp-bare.o censor2.o \
+		connection2.o connection2-client.o kex2-client.o \
+		transient-hostkey-cache.o transport2.o userauth2-client.o aes.o \
 		arcfour.o sshauxcrypt.o blowfish.o sshccp.o sshcommon.o \
 		crc32.o crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o \
 		sshgssc.o sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o \
@@ -2220,15 +2220,15 @@ putty_notrans.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		void.o $(UTF8MOUSE_OBJS)
 	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
-		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o \
+		config.o cproxy.o dialog.o ecc-arithmetic.o errsock.o ldisc.o \
 		ldiscucs.o logging.o mainchan.o marshal.o memory.o \
 		minibidi.o misc.o dup_mb_to_wc.o mpint.o nullplug.o pgssapi.o \
 		pinger.o portfwd.o proxy.o putty.res.o raw.o rlogin.o \
-		sercfg.o sessprep.o settings.o sizetip.o ssh.o ssh1bpp.o \
-		ssh1censor.o ssh1connection.o ssh1connection-client.o \
-		ssh1login.o ssh2bpp.o ssh2bpp-bare.o ssh2censor.o \
-		ssh2connection.o ssh2connection-client.o ssh2kex-client.o \
-		ssh2transhk.o ssh2transport.o ssh2userauth.o aes.o \
+		sercfg.o sessprep.o settings.o sizetip.o ssh.o bpp1.o \
+		censor1.o connection1.o connection1-client.o \
+		login1.o bpp2.o bpp-bare.o censor2.o \
+		connection2.o connection2-client.o kex2-client.o \
+		transient-hostkey-cache.o transport2.o userauth2-client.o aes.o \
 		arcfour.o sshauxcrypt.o blowfish.o sshccp.o sshcommon.o \
 		crc32.o crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o \
 		sshgssc.o sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o \
@@ -2252,15 +2252,15 @@ putty_notrans.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
 		-lwsock32 -lpsapi
 
 putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o \
-		conf.o config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o \
+		conf.o config.o cproxy.o dialog.o ecc-arithmetic.o errsock.o ldisc.o \
 		logging.o mainchan.o marshal.o memory.o minibidi.o misc.o \
 		dup_mb_to_wc.o mpint.o nullplug.o pgssapi.o pinger.o portfwd.o \
 		proxy.o putty.res.o raw.o rlogin.o sessprep.o settings.o \
-		sizetip.o smallprimes.o ssh.o ssh1bpp.o ssh1censor.o ssh1connection.o \
-		ssh1connection-client.o ssh1login.o ssh2bpp.o ssh2bpp-bare.o \
-		ssh2censor.o ssh2connection.o ssh2connection-client.o \
-		ssh2kex-client.o ssh2transhk.o ssh2transport.o \
-		ssh2userauth.o aes.o arcfour.o argon2.o sshauxcrypt.o \
+		sizetip.o smallprimes.o ssh.o bpp1.o censor1.o connection1.o \
+		connection1-client.o login1.o bpp2.o bpp-bare.o \
+		censor2.o connection2.o connection2-client.o \
+		kex2-client.o transient-hostkey-cache.o transport2.o \
+		userauth2-client.o aes.o arcfour.o argon2.o sshauxcrypt.o \
 		blake2.o blowfish.o sshccp.o sshcommon.o crc32.o \
 		crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o sshgssc.o \
 		sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o sshrand.o \
@@ -2284,15 +2284,15 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		void.o $(UTF8MOUSE_OBJS)
 	$(CC) -mwindows $(LDFLAGS) -o $@ -Wl,-Map,putty.map agentf.o \
 		aqsync.o be_all_s.o be_misc.o callback.o cmdline.o conf.o \
-		config.o cproxy.o dialog.o ecc.o errsock.o ldisc.o logging.o \
+		config.o cproxy.o dialog.o ecc-arithmetic.o errsock.o ldisc.o logging.o \
 		mainchan.o marshal.o memory.o minibidi.o misc.o dup_mb_to_wc.o \
 		mpint.o nullplug.o pgssapi.o pinger.o portfwd.o proxy.o \
 		putty.res.o raw.o rlogin.o sessprep.o settings.o sizetip.o smallprimes.o \
-		ssh.o ssh1bpp.o ssh1censor.o ssh1connection.o \
-		ssh1connection-client.o ssh1login.o ssh2bpp.o ssh2bpp-bare.o \
-		ssh2censor.o ssh2connection.o ssh2connection-client.o \
-		ssh2kex-client.o ssh2transhk.o ssh2transport.o \
-		ssh2userauth.o aes.o arcfour.o argon2.o sshauxcrypt.o \
+		ssh.o bpp1.o censor1.o connection1.o \
+		connection1-client.o login1.o bpp2.o bpp-bare.o \
+		censor2.o connection2.o connection2-client.o \
+		kex2-client.o transient-hostkey-cache.o transport2.o \
+		userauth2-client.o aes.o arcfour.o argon2.o sshauxcrypt.o \
 		blake2.o blowfish.o sshccp.o sshcommon.o crc32.o \
 		crc-attack-detector.o des.o diffie-hellman.o sshdss.o sshecc.o sshgssc.o \
 		sshhmac.o sshmac.o sshmd5.o sshprng.o sshpubk.o sshrand.o \

@@ -6,11 +6,11 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshbpp.h"
+#include "bpp.h"
 #include "sshppl.h"
 #include "sshchan.h"
 #include "sshcr.h"
-#include "ssh1connection.h"
+#include "connection1.h"
 
 void ssh1_connection_direction_specific_setup(
     struct ssh1_connection_state *s)

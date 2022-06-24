@@ -3,14 +3,7 @@
 
 The **KiTTY** binary is built with [MinGW32](http://mingw.org/).
 
-In order to compile **KiTTY**, on your Windows PC:
-
-  * get the source code from the SVN or Git repository (see Download page)
-  * start the MinGW environment
-  * dig into the Windows directory
-  * run the command `make -f MAKEFILE.MINGW putty.exe`
-
-On **Linux** machine it is also possible to cross compile. Example with our cross-compile docker image:
+The best way to compile **KiTTY** is to use our cross-compile docker image:
 
 **For 32 bits compilation**
 ```bash
