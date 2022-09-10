@@ -3042,7 +3042,11 @@ static void insch(Terminal *term, int n)
 
 static void term_update_raw_mouse_mode(Terminal *term)
 {
+#ifdef MOD_PERSO
+    bool want_raw = (term->xterm_mouse_mode && !term->xterm_mouse_forbidden);
+#else
     bool want_raw = (term->xterm_mouse != 0 && !term->xterm_mouse_forbidden);
+#endif
     win_set_raw_mouse_mode(term->win, want_raw);
     term->win_pointer_shape_pending = true;
     term->win_pointer_shape_raw = want_raw;
