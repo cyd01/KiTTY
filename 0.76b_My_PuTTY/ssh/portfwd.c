@@ -8,7 +8,7 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 
 /*
  * Enumeration of values that live in the 'socks_state' field of

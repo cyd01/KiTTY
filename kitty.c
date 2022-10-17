@@ -1925,39 +1925,42 @@ void RunSessionWithCurrentSettings( HWND hwnd, Conf *conf, const char * host, co
 //SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) );
 void SetNewIcon( HWND hwnd, char * iconefile, int icone, const int mode ) {
 	
-	HICON hIcon = NULL ;
-	if( (strlen(iconefile)>0) && existfile(iconefile) ) { 
-		hIcon = LoadImage(NULL, iconefile, IMAGE_ICON, 32, 32, LR_LOADFROMFILE|LR_SHARED) ; 
-		}
+	HICON hIcon = NULL, hIconBig = NULL ;
+	if( (strlen(iconefile)>0) && existfile(iconefile) ) {
+		hIcon = LoadImage(NULL, iconefile, IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_LOADFROMFILE|LR_SHARED) ; 
+		hIconBig = LoadImage(NULL, iconefile, IMAGE_ICON, 0, 0, LR_LOADFROMFILE|LR_SHARED|LR_DEFAULTSIZE) ; 
+	}
 
-	if(hIcon) {
-		SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon) ; 
+	if( hIcon || hIconBig ) {
+		if(!hIcon) hIcon = hIconBig ;
+		if(!hIconBig) hIconBig = hIcon ;
+		SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIconBig) ; 
 		SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon) ;
 		TrayIcone.hIcon = hIcon ;
 		//DeleteObject( hIcon ) ; 
-		}
-	else {
-	if( mode == SI_INIT ) {
-		if( icone!=0 ) IconeNum = icone - 1 ;
-		hIcon = LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) ;
-		SendMessage( hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon );
-		SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon );
-		TrayIcone.hIcon = hIcon ;
-		}
-	else {
-		if( IconeFlag==0 ) return ;
-		if( IconeFlag <= 0 ) { IconeNum = 0 ; } 
-		else {
-			if( mode == SI_RANDOM ) { 
-				SYSTEMTIME st ;
-				GetSystemTime( &st ) ;
-				IconeNum = ( GetCurrentProcessId() * time( NULL ) ) % NumberOfIcons ; 
-			} else { IconeNum++ ; if( IconeNum >= NumberOfIcons ) IconeNum = 0 ; }
+	} else {
+		if( mode == SI_INIT ) {
+			if( icone!=0 ) IconeNum = icone - 1 ;
+			hIcon = LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) ;
+			SendMessage( hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon );
+			SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon );
+			TrayIcone.hIcon = hIcon ;
+		} else {
+			if( IconeFlag==0 ) return ;
+			if( IconeFlag <= 0 ) { IconeNum = 0 ; 
+			} else {
+				if( mode == SI_RANDOM ) { 
+					SYSTEMTIME st ;
+					GetSystemTime( &st ) ;
+					IconeNum = ( GetCurrentProcessId() * time( NULL ) ) % NumberOfIcons ; 
+				} else { 
+					IconeNum++ ; if( IconeNum >= NumberOfIcons ) IconeNum = 0 ; 
+				}
 			}
-		hIcon = LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) ;
-		SendMessage( hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon );	
-		SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon );
-		TrayIcone.hIcon = hIcon ;
+			hIcon = LoadIcon( hInstIcons, MAKEINTRESOURCE(IDI_MAINICON_0 + IconeNum ) ) ;
+			SendMessage( hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon );	
+			SendMessage( hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon );
+			TrayIcone.hIcon = hIcon ;
 		}
 	}
 	Shell_NotifyIcon(NIM_MODIFY, &TrayIcone);

@@ -9,7 +9,7 @@
 #include "putty.h"
 #include "ssh.h"
 #include "sshppl.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 
 static void mainchan_free(Channel *chan);
 static void mainchan_open_confirmation(Channel *chan);

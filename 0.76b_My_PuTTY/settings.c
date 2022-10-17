@@ -8,8 +8,8 @@
 #include "putty.h"
 #include "storage.h"
 #ifndef NO_GSSAPI
-#include "sshgssc.h"
-#include "sshgss.h"
+#include "ssh/gssc.h"
+#include "ssh/gss.h"
 #endif
 
 /* rutty: */

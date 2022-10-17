@@ -489,7 +489,7 @@ struct SessionSpecial {
     int arg;
 };
 
-/* Needed by both sshchan.h and sshppl.h */
+/* Needed by both ssh/channel.h and sshppl.h */
 typedef void (*add_special_fn_t)(
     void *ctx, const char *text, SessionSpecialCode code, int arg);
 

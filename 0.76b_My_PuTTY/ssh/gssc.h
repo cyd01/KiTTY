@@ -4,7 +4,7 @@
 #ifndef NO_GSSAPI
 
 #include "pgssapi.h"
-#include "sshgss.h"
+#include "ssh/gss.h"
 
 typedef struct gssapi_ssh_gss_ctx {
     OM_uint32 maj_stat;

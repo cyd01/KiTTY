@@ -6,8 +6,8 @@
 #define PUTTY_SSH2TRANSPORT_H
 
 #ifndef NO_GSSAPI
-#include "sshgssc.h"
-#include "sshgss.h"
+#include "ssh/gssc.h"
+#include "ssh/gss.h"
 #define MIN_CTXT_LIFETIME 5     /* Avoid rekey with short lifetime (seconds) */
 #define GSS_KEX_CAPABLE (1<<0)  /* Can do GSS KEX */
 #define GSS_CRED_UPDATED (1<<1) /* Cred updated since previous delegation */

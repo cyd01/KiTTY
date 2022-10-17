@@ -2,7 +2,7 @@
 
 #include <string.h>
 #include <limits.h>
-#include "sshgssc.h"
+#include "ssh/gssc.h"
 #include "misc.h"
 
 #ifndef NO_GSSAPI

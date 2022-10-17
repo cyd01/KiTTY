@@ -8,7 +8,7 @@
 #include "ssh.h"
 #include "bpp.h"
 #include "sshppl.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 #include "sshcr.h"
 #include "connection2.h"
 

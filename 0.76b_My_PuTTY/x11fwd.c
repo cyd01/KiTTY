@@ -9,7 +9,7 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 #include "tree234.h"
 
 static inline uint16_t GET_16BIT_X11(char endian, const void *p)

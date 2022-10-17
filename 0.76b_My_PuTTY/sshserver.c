@@ -9,7 +9,7 @@
 #include "ssh.h"
 #include "sshbpp.h"
 #include "sshppl.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 #include "sshserver.h"
 #ifndef NO_GSSAPI
 #include "sshgssc.h"

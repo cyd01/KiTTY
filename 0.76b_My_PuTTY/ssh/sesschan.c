@@ -9,7 +9,7 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 #include "sshserver.h"
 #include "sftp.h"
 

@@ -12,8 +12,8 @@
 #include "sshcr.h"
 
 #ifndef NO_GSSAPI
-#include "sshgssc.h"
-#include "sshgss.h"
+#include "ssh/gssc.h"
+#include "ssh/gss.h"
 #endif
 
 #define BANNER_LIMIT 131072

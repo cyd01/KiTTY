@@ -8,7 +8,7 @@
 
 #include "putty.h"
 #include "ssh.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 
 /* ----------------------------------------------------------------------
  * Centralised standard methods for other channel implementations to

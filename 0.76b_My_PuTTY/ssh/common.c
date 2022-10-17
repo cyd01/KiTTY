@@ -11,7 +11,7 @@
 #include "ssh.h"
 #include "bpp.h"
 #include "sshppl.h"
-#include "sshchan.h"
+#include "ssh/channel.h"
 
 /* ----------------------------------------------------------------------
  * Implementation of PacketQueue.
