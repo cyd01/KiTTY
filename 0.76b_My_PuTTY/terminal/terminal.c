@@ -1369,6 +1369,9 @@ static void power_on(Terminal *term, bool clear)
     term->savecurs.x = term->savecurs.y = 0;
     term->alt_savecurs.x = term->alt_savecurs.y = 0;
     term->alt_t = term->marg_t = 0;
+#ifdef MOD_FAR2L
+    term->far2l_ext = 0;
+#endif
     if (term->rows != -1)
 	term->alt_b = term->marg_b = term->rows - 1;
     else

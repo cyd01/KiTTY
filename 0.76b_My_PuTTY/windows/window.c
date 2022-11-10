@@ -788,6 +788,9 @@ void RestartSession( void ) {
 		SetTimer(wgs.term_hwnd, TIMER_RECONNECT, 10, NULL) ;
 	}
 	
+#ifdef MOD_FAR2L
+    term->far2l_ext = 0;
+#endif
 	PostMessage(wgs.term_hwnd,WM_KEYDOWN,VK_RETURN ,0) ;
 	PostMessage(wgs.term_hwnd,WM_KEYUP,VK_RETURN ,1) ;
 }
