@@ -1433,7 +1433,7 @@ typedef FingerprintType TD_fptype;
                                        arg6, arg7, arg8, arg9));        \
     }
 
-#include "testcrypt.h"
+#include "test/testcrypt.h"
 
 #undef FUNC9
 #undef FUNC8
@@ -1477,7 +1477,7 @@ static void process_line(BinarySource *in, strbuf *out)
 #define FUNC8(ret,fn,x,y,z,v,w,u,t,s)   DISPATCH_INTERNAL(#fn,handle_##fn);
 #define FUNC9(ret,fn,x,y,z,v,w,u,t,s,r) DISPATCH_INTERNAL(#fn,handle_##fn);
 
-#include "testcrypt.h"
+#include "test/testcrypt.h"
 
 #undef FUNC9
 #undef FUNC8

@@ -8,9 +8,9 @@
 #include "mpint.h"
 #include "ssh.h"
 #include "sshbpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "sshcr.h"
-#include "sshserver.h"
+#include "ssh/server.h"
 #include "sshkeygen.h"
 
 struct ssh1_login_server_state {

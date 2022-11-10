@@ -4,8 +4,9 @@
   record and replay putty, scripting the easy way
 */
 
-extern Ldisc *ldisc;  /* defined in window.c */
-extern HWND MainHwnd;    /* in winstuff.h */
+//extern void *ldisc;  /* defined in window.c */
+static Ldisc *ldisc;
+//extern HWND hwnd;    /* in winstuff.h */
 
 
 /* sort of copy of prompt_keyfile in winpgen.c

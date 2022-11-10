@@ -8,7 +8,7 @@
 #include "putty.h"
 #include "ssh.h"
 #include "bpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "ssh/channel.h"
 #include "sshcr.h"
 #include "connection1.h"

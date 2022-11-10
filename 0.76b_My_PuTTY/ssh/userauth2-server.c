@@ -8,9 +8,9 @@
 #include "putty.h"
 #include "ssh.h"
 #include "sshbpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "sshcr.h"
-#include "sshserver.h"
+#include "ssh/server.h"
 
 #ifndef NO_GSSAPI
 #include "sshgssc.h"

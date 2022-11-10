@@ -7,11 +7,11 @@
 #include "putty.h"
 #include "ssh.h"
 #include "sshbpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "ssh/channel.h"
 #include "sshcr.h"
 #include "ssh1connection.h"
-#include "sshserver.h"
+#include "ssh/server.h"
 
 static size_t ssh1sesschan_write(SshChannel *c, bool is_stderr,
                                  const void *, size_t);

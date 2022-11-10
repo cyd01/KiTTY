@@ -459,13 +459,13 @@ typedef enum {
     /*
      * Send a POSIX-style signal. (Useful in SSH and also pterm.)
      *
-     * We use the master list in sshsignals.h to define these enum
+     * We use the master list in ssh/signal-list.h to define these enum
      * values, which will come out looking like names of the form
      * SS_SIGABRT, SS_SIGINT etc.
      */
     #define SIGNAL_MAIN(name, text) SS_SIG ## name,
     #define SIGNAL_SUB(name) SS_SIG ## name,
-    #include "sshsignals.h"
+    #include "ssh/signal-list.h"
     #undef SIGNAL_MAIN
     #undef SIGNAL_SUB
 
@@ -489,7 +489,7 @@ struct SessionSpecial {
     int arg;
 };
 
-/* Needed by both ssh/channel.h and sshppl.h */
+/* Needed by both ssh/channel.h and ssh/ppl.h */
 typedef void (*add_special_fn_t)(
     void *ctx, const char *text, SessionSpecialCode code, int arg);
 
@@ -1024,6 +1024,10 @@ struct SeatVtable {
      */
     size_t (*output)(Seat *seat, bool is_stderr, const void *data, size_t len);
 
+#ifdef MOD_RUTTY
+/* rutty */
+    size_t (*output_local)(Seat *seat, bool is_stderr, const void *data, size_t len);
+#endif
     /*
      * Called when the back end wants to indicate that EOF has arrived
      * on the server-to-client stream. Returns false to indicate that
@@ -1238,6 +1242,13 @@ struct SeatVtable {
 static inline size_t seat_output(
     Seat *seat, bool err, const void *data, size_t len)
 { return seat->vt->output(seat, err, data, len); }
+
+#ifdef MOD_RUTTY
+/* rutty */
+static inline size_t seat_output_local(Seat *seat, bool err, const void *data, size_t len)
+{ return seat->vt->output_local(seat, err, data, len); }
+#endif
+
 static inline bool seat_eof(Seat *seat)
 { return seat->vt->eof(seat); }
 static inline int seat_get_userpass_input(

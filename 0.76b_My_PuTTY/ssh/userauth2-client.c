@@ -8,7 +8,7 @@
 #include "putty.h"
 #include "ssh.h"
 #include "bpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "sshcr.h"
 
 #ifndef NO_GSSAPI

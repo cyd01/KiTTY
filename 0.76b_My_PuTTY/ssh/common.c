@@ -10,7 +10,7 @@
 #include "mpint.h"
 #include "ssh.h"
 #include "bpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "ssh/channel.h"
 
 /* ----------------------------------------------------------------------
@@ -407,7 +407,7 @@ struct ssh_ttymodes get_ttymodes_from_conf(Seat *seat, Conf *conf)
     } modes_names_types[] = {
         #define TTYMODE_CHAR(name, val, index) { #name, val, TYPE_CHAR },
         #define TTYMODE_FLAG(name, val, field, mask) { #name, val, TYPE_BOOL },
-        #include "sshttymodes.h"
+        #include "ssh/ttymode-list.h"
         #undef TTYMODE_CHAR
         #undef TTYMODE_FLAG
     };

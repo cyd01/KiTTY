@@ -1,21 +1,8 @@
-/* script.c  version 0.14.08
+/* script.c  version 0.15.00
 
  part of rutty - a modified version of putty
- Copyright 2013, Ernst Dijk
+ Copyright 2013-2014, Ernst Dijk
 */
-
-/* proto's 
-*/
-void script_setsend(ScriptData * scriptdata);
-void script_record_stop(ScriptData * scriptdata);
-BOOL script_record_line(ScriptData * scriptdata, int remote);
-int script_cond_chk(char *ref, int rc, char *data, int dc);
-void script_cond_set(char * cond, int *p, char *in, int sz);
-int script_chkline(ScriptData * scriptdata);
-void script_timeout(void *ctx, long now);
-void script_sendline(void *ctx, long now);
-void script_sendchar(void *ctx, long now);
-void script_getline(ScriptData * scriptdata);
 
 
 /* init scriptdata structure
@@ -105,12 +92,12 @@ BOOL script_sendfile(ScriptData * scriptdata, Filename * scriptfile)
     if(scriptdata->enable && !scriptdata->except)  /* start timeout if wait for prompt is enabled */
     {
       scriptdata->send = FALSE;
-      scriptdata->latest = schedule_timer(scriptdata->timeout, (timer_fn_t)script_timeout, scriptdata);
+      scriptdata->latest = schedule_timer(scriptdata->timeout, script_timeout, scriptdata);
     }
     else
     {
       scriptdata->send = TRUE;
-      schedule_timer(scriptdata->line_delay, (timer_fn_t)script_sendline, scriptdata);
+      schedule_timer(scriptdata->line_delay, script_sendline, scriptdata);
     }
     return TRUE;
  }
@@ -271,7 +258,7 @@ void script_sendline(void *ctx, long now)
 
     if(scriptdata->char_delay>1)
     {
-      schedule_timer(scriptdata->char_delay, (timer_fn_t)script_sendchar, scriptdata);
+      schedule_timer(scriptdata->char_delay, script_sendchar, scriptdata);
       return;
     }
 
@@ -290,11 +277,11 @@ void script_sendline(void *ctx, long now)
     if(scriptdata->enable)
     {
       scriptdata->send = FALSE;
-      scriptdata->latest = schedule_timer(scriptdata->timeout, (timer_fn_t)script_timeout, scriptdata);
+      scriptdata->latest = schedule_timer(scriptdata->timeout, script_timeout, scriptdata);
     }
     else
     {
-      schedule_timer(scriptdata->line_delay, (timer_fn_t)script_sendline, scriptdata);
+      schedule_timer(scriptdata->line_delay, script_sendline, scriptdata);
     }
     return;
 }
@@ -323,7 +310,7 @@ void script_sendchar(void *ctx, long now)
    /* set timer for next */
    if(scriptdata->nextline_cc < scriptdata->nextline_c)
    {
-     schedule_timer(scriptdata->char_delay, (timer_fn_t)script_sendchar, scriptdata);
+     schedule_timer(scriptdata->char_delay, script_sendchar, scriptdata);
      return;
    }
 
@@ -334,11 +321,11 @@ void script_sendchar(void *ctx, long now)
    if(scriptdata->enable)
     {
       scriptdata->send = FALSE;
-      scriptdata->latest = schedule_timer(scriptdata->timeout, (timer_fn_t)script_timeout, scriptdata);
+      scriptdata->latest = schedule_timer(scriptdata->timeout, script_timeout, scriptdata);
     }
     else
     {
-      schedule_timer(scriptdata->line_delay, (timer_fn_t)script_sendline, scriptdata);
+      schedule_timer(scriptdata->line_delay, script_sendline, scriptdata);
     }
    return;
  }
@@ -354,6 +341,7 @@ void script_timeout(void *ctx, long now)
     if(abs(now - scriptdata->latest)<50)
     {
       script_close(scriptdata);
+      logevent(NULL, "script timeout !");
       script_fail("script timeout !");
     }
 }
@@ -382,9 +370,12 @@ int script_chkline(ScriptData * scriptdata)
 /* copy condition from settings or scriptfile to scriptdata structure
    there are 2 options:
    condition line  - the complete line must mach before the script is continued or halted
-   "word1" "word2" - if one of these words is found the script is continued or halted
+   "word1"word2"   - if one of these words is found the script is continued or halted
                      note: the first char must be "
-
+   !!BUG: "word1" "word2" never workt ! you had to enter "word1"word2"
+   !!to be compatible with older versions I don't change it
+   !!the only change is that it now can be "word1""word2"
+                     
    'waitfor' and 'halton' are string lists, strings seperated by \0
    lateron we compare it backwards, from end to start, to make that easier the terminating \0 is at start !
 */
@@ -412,14 +403,16 @@ void script_cond_set(char * cond, int *p, char *in, int sz)
     {
       if(sz>script_cond_size)
         sz = script_cond_size;  /* word list to large, use only first part */
-      i++;
+      i++;  //skip staring "
       while(i<sz)
       {
         cond[(*p)++] = '\0';
-        while(i<sz && in[i]!='"')
+        while(i<sz && in[i]!='"')  //copy upto end or " 
           cond[(*p)++] = in[i++];
-        i++;
-        while(i<sz && in[i]==' ')
+        i++;  
+        while(i<sz && in[i]==' ')  //skip spaces after/between " 
+          i++;
+        while(i<sz && in[i]=='"')  //skip aditional "
           i++;
       }
     }
@@ -441,7 +434,7 @@ int script_cond_chk(char *ref, int rc, char *data, int dc)
       do {
            rcc--;
            dcc--;
-      } while (rcc>=0 && dcc>=0 && ref[rcc]==data[dcc]);
+      } while (rcc>=0 && dcc>=0 && ref[rcc]!= '\0' && ref[rcc]==data[dcc]);
 
       if(ref[rcc]=='\0')
         return TRUE;
@@ -472,12 +465,12 @@ void script_setsend(ScriptData * scriptdata)
     if(script_chkline(scriptdata))  /* new condition - restart timeout */
     {
       scriptdata->send = FALSE;
-      scriptdata->latest = schedule_timer(scriptdata->timeout, (timer_fn_t)script_timeout, scriptdata);
+      scriptdata->latest = schedule_timer(scriptdata->timeout, script_timeout, scriptdata);
     }
     else  /* data - set line delay timer */
     {
       scriptdata->send = TRUE;
-      schedule_timer(scriptdata->line_delay, (timer_fn_t)script_sendline, scriptdata);
+      schedule_timer(scriptdata->line_delay, script_sendline, scriptdata);
     }
 }
 
@@ -525,7 +518,7 @@ void script_remote(ScriptData * scriptdata, const char * data, int len)
         script_fail("script halted");
         return;
       }
-
+      
       /* test for waitfor, e.g. the prompt to send the next line */
       if(scriptdata->enable && !scriptdata->send)
       {
@@ -540,7 +533,13 @@ void script_remote(ScriptData * scriptdata, const char * data, int len)
         }
       }
     }
-  }
+    
+    if (ruttyAHK && (ruttyAHK_prompt_c > 0))   //special for AHK: prompt found - send message to ahk
+    {
+      if(script_cond_chk(ruttyAHK_prompt_s, ruttyAHK_prompt_c, scriptdata->remotedata, scriptdata->remotedata_c))
+        script_ahk_out(ruttyAHK_prompt, &(scriptdata->remotedata[script_cond_size]), (scriptdata->remotedata_c - script_cond_size)); 
+    }
+  }  
 }
 
 
@@ -622,9 +621,18 @@ BOOL script_record_line(ScriptData * scriptdata, int remote)
 {
     int fail = FALSE;
 
+    //special for AHK: send line complete/buffer full data - send message to ahk
+    if(ruttyAHK)
+    {
+      if(remote)
+        script_ahk_out(ruttyAHK_received, &(scriptdata->remotedata[script_cond_size]), (scriptdata->remotedata_c - script_cond_size));
+      else
+        script_ahk_out(ruttyAHK_transmit, scriptdata->localdata, scriptdata->localdata_c);      
+    }
+    
     if(scriptdata->scriptrecord == NULL)
       return FALSE;
-
+    
     if(remote)
     {
       fputc(scriptdata->cond_charR, scriptdata->scriptrecord);

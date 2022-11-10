@@ -1612,7 +1612,7 @@ enum {
     /* TTY modes with opcodes defined consistently in the SSH specs. */
     #define TTYMODE_CHAR(name, val, index) SSH_TTYMODE_##name = val,
     #define TTYMODE_FLAG(name, val, field, mask) SSH_TTYMODE_##name = val,
-    #include "sshttymodes.h"
+    #include "ssh/ttymode-list.h"
     #undef TTYMODE_CHAR
     #undef TTYMODE_FLAG
 

@@ -2581,7 +2581,7 @@ int ManageLocalCmd( HWND hwnd, const char * cmd ) {
 	} else if( (cmd[0]=='p')&&(cmd[1]=='l')&&(cmd[2]==':') ) { // __pl: Lance une commande plink
 		RunExternPlink( hwnd, cmd+3 ) ;
 		return 1 ;
-	} else if( (cmd[0]=='t')&&(cmd[1]=='i')&&(cmd[2]=='\0') ) { // __ti: Recuperation du titre de la fenetres
+	} else if( (cmd[0]=='t')&&(cmd[1]=='i')&&(cmd[2]=='\0') ) { // __ti: Recuperation du titre de la fenetre
 		GetWindowText( hwnd, buffer, 1024 ) ;
 		sprintf( title, "printf \"\\033]0;%s\\007\"\n", buffer ) ;
 		SendStrToTerminal( title, strlen(title) ) ;

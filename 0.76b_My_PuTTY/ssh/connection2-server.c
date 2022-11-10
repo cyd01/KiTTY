@@ -7,11 +7,11 @@
 #include "putty.h"
 #include "ssh.h"
 #include "sshbpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "ssh/channel.h"
 #include "sshcr.h"
 #include "connection2.h"
-#include "sshserver.h"
+#include "ssh/server.h"
 
 void ssh2connection_server_configure(
     PacketProtocolLayer *ppl, const SftpServerVtable *sftpserver_vt,

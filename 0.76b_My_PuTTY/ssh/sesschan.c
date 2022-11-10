@@ -10,7 +10,7 @@
 #include "putty.h"
 #include "ssh.h"
 #include "ssh/channel.h"
-#include "sshserver.h"
+#include "ssh/server.h"
 #include "sftp.h"
 
 struct agentfwd {
@@ -575,7 +575,7 @@ bool sesschan_send_signal(Channel *chan, ptrlen signame)
     #define SIGNAL_SUB(name) \
         if (ptrlen_eq_string(signame, #name)) code = SS_SIG ## name;
     #define SIGNAL_MAIN(name, text) SIGNAL_SUB(name)
-    #include "sshsignals.h"
+    #include "ssh/signal-list.h"
     #undef SIGNAL_MAIN
     #undef SIGNAL_SUB
 

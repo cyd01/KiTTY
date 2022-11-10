@@ -2852,6 +2852,8 @@ void setup_config_box(struct controlbox *b, bool midsession,
 #ifdef MOD_RUTTY
     if( !GetPuttyFlag() && (GetRuttyFlag()>0) ) {
 	ctrl_settitle(b, "Session/Scripting", "Scripting (RuTTY patch)");
+  if (!midsession)
+  {
 	s = ctrl_getset(b, "Session/Scripting", "Start", NULL);
 	 ctrl_filesel(s, "Script filename:", 'f',
 		"Scr Files (*.scr, *.txt)\0*.scr;*.txt\0All Files (*.*)\0*\0\0\0"
@@ -2863,6 +2865,7 @@ void setup_config_box(struct controlbox *b, bool midsession,
           "Replay", I(SCRIPT_PLAY),
           "Record", I(SCRIPT_RECORD),
           NULL);
+  }
 
    	s = ctrl_getset(b, "Session/Scripting", "Scripting", NULL);
     

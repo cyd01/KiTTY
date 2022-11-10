@@ -1,7 +1,7 @@
-/* script.h  version 0.14.08
+/* script.h  version 0.15.00
 
  part of rutty - a modified version of putty
- Copyright 2013, Ernst Dijk
+ Copyright 2013-2014, Ernst Dijk
 */
 
 #ifndef script_h
@@ -44,6 +44,8 @@ struct scriptDATA {
    int remotedata_c;
    char localdata[script_line_size];
    int localdata_c;
+   
+   int ahk;
 };
 typedef struct scriptDATA ScriptData;
 
@@ -64,12 +66,28 @@ void script_remote(ScriptData * scriptdata, const char * data, int len);
 void script_local(ScriptData * scriptdata, const char * data, int len);
 BOOL script_record(ScriptData * scriptdata, Filename * script_filename);
 
+void script_setsend(ScriptData * scriptdata);
+void script_record_stop(ScriptData * scriptdata);
+BOOL script_record_line(ScriptData * scriptdata, int remote);
+int script_cond_chk(char *ref, int rc, char *data, int dc);
+void script_cond_set(char * cond, int *p, char *in, int sz);
+int script_chkline(ScriptData * scriptdata);
+void script_timeout(void *ctx, long now);
+void script_sendline(void *ctx, long now);
+void script_sendchar(void *ctx, long now);
+void script_getline(ScriptData * scriptdata);
+
 
 /* script_win.c */
-int prompt_scriptfile(HWND hwnd, char * filename);
-void script_fail(char * message);
-void script_menu(ScriptData * scriptdata);
+//int prompt_scriptfile(HWND hwnd, char * filename);
+//void script_fail(char * message);
+//void script_menu(ScriptData * scriptdata);
 
+
+/* script_ahk.c */
+//BOOL script_ahk_send(ScriptData * scriptdata, COPYDATASTRUCT *cds);
+//BOOL script_ahk_set(ScriptData * scriptdata, COPYDATASTRUCT *cds);
+//void script_ahk_out(int mode, char *dat, int siz);
 
 #endif
 

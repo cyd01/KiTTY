@@ -17,7 +17,7 @@
 #include "ssh.h"
 #include "sshcr.h"
 #include "bpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "ssh/channel.h"
 #ifndef NO_GSSAPI
 #include "ssh/gssc.h"

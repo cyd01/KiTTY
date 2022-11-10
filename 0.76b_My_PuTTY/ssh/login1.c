@@ -9,7 +9,7 @@
 #include "ssh.h"
 #include "mpint.h"
 #include "bpp.h"
-#include "sshppl.h"
+#include "ssh/ppl.h"
 #include "sshcr.h"
 
 typedef struct agent_key {
