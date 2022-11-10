@@ -5704,6 +5704,10 @@ void WriteCountUpAndPath( void ) ;
 // Initialisation spécifique a KiTTY
 void InitWinMain( void ) ;
 
+// Initialisation des shortcuts
+void InitShortcuts( void ) ;
+int DefineShortcuts( char * buf ) ;
+
 // Gestion de commandes a distance
 int ManageLocalCmd( HWND hwnd, const char * cmd ) ;
 
