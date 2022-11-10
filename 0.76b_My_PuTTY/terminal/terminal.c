@@ -3299,6 +3299,9 @@ static void do_osc(Terminal *term)
                 }
 
                 DWORD len;
+#ifdef MOD_FAR2L
+		DWORD zero = 0;
+#endif
 
                 // next from the end byte is command
                 switch (d_out[d_count-2]) {
@@ -3308,9 +3311,10 @@ static void do_osc(Terminal *term)
                         reply_size = 5;
                         reply = malloc(reply_size);
 
+#ifndef MOD_FAR2L
                         // fixme: unimplemented
                         DWORD zero = 0;
-
+#endif
                         memcpy(reply, &zero, sizeof(DWORD));
 
                         break;
@@ -3718,6 +3722,27 @@ static void do_osc(Terminal *term)
 
                                 break;
                         }
+#ifdef MOD_FAR2L
+                        break;
+                    case 'p':
+
+                        reply_size = 3; // reserved byte, bits byte, id byte
+                        reply = malloc(reply_size);
+
+                        reply[0] = 0;
+                        reply[1] = 24;
+
+                        break;
+
+                    default:
+
+                        // not implemented
+
+                        reply_size = 5;
+                        reply = malloc(reply_size);
+
+                        memcpy(reply, &zero, sizeof(DWORD));
+#endif
 
                         break;
                 }
