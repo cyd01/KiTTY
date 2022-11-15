@@ -5765,13 +5765,13 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
 
         // send escape seq
 
-        if (backend) {
+       if (backend) {
 		char* str = "\x1b_f2l";
         	backend_send(backend, str, strlen(str));
 
-        	backend_send(backend, out, count);
+		backend_send(backend, out, count);
 
-        	char* str2 = "\x07";
+		char* str2 = "\x07";
         	backend_send(backend, str2, strlen(str2));
 	}
 

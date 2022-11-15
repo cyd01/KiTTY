@@ -1,0 +1,96 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.209.4/containers/ubuntu
+{
+	// nicely name your dev container environment (shown at left-hand bottom corner in VSCODE)
+	"name": "${containerWorkspaceFolderBasename}",
+
+	// directly use our image  
+	// "image": "docker.io/cyd01/cross-gcc:latest",
+
+	// you can instead build an image using the included Dockerfile to do some tuning required at development only
+	// if required, tune Dockerfile, comment image and uncomment the following to trigger build at dev container creation
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": {
+			"HOST_USER": "${localEnv:USER}",
+			"HOST_HOME": "${localEnv:HOME}",
+			"HOST_SHELL": "${localEnv:SHELL}",
+			"BASE_IMAGE_NAME": "docker.io/cyd01/cross-gcc",
+			"BASE_IMAGE_TAG": "latest"
+		}
+	},
+
+	// mount your workspace: we mount in the exact same folder as the host one  
+	"workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
+	// you can choose to mount your workspace parent directory instead
+	//"workspaceMount": "source=${localWorkspaceFolder}/..,target=${localWorkspaceFolder}/..,type=bind,consistency=cached",
+	
+	// directory to use as workspace inside container: you can tune it if required
+	"workspaceFolder": "${localWorkspaceFolder}",
+
+	"mounts": [
+		"source=${localEnv:HOME},target=${localEnv:HOME}/host,type=bind,consistency=cached"
+	],
+
+	// VSCOde settings and extensions
+	"settings": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 4,
+		"terminal.explorerKind": "integrated",
+		"terminal.integrated.allowChords": false,
+		"terminal.integrated.drawBoldTextInBrightColors": false,
+		"terminal.integrated.experimentalLinkProvider": false,
+		"terminal.integrated.rendererType": "auto"
+	},
+	"extensions": [
+		"bierner.markdown-mermaid",
+		"dbaeumer.vscode-eslint",
+		"golang.go",
+		"sonatypecommunity.vscode-iq-plugin"
+	],
+	// run custom 
+	"postAttachCommand": "/usr/local/scripts/postAttach.sh",
+	// run in network host mode to acces published ports in local demo environments
+	"runArgs": [
+		"--network", "host"
+	],
+
+	"remoteEnv": {
+		// forward some locally defined environment variables to container
+		"HISTFILE": "${localEnv:HISTFILE}",
+		"HISTSIZE": "${localEnv:HISTSIZE}",
+		// helpful variable so you go back to your local workspace folder
+		"WORKSPACE": "${localWorkspaceFolder}",
+		//
+		// set to 1 to debug postAttach.sh 
+		"SCRIPTS_DEBUG": "1",
+		//
+		// default value for CGO_ENABLED is 0 in baseimage
+		// so it you really want to overwrite it, do it here
+		// "CGO_ENABLED": "1",
+		//
+		// HOST_FILES is used by postAttach to create symlinks to your host home files
+		// default means HISTFILE (e.g. bash_history) and .netrc
+		// you may say "default anotherfile" to also symlink that other file
+		"HOST_FILES": "default"
+	},
+
+	// user to start container with : make it root to allow VSCode to install/configure things.
+	// DO NOT CHANGE
+	"containerUser": "root",
+	// user to exec inside the container
+	// ubuntu if using base image
+	//"remoteUser": "ubuntu",
+	// your local user name if using a custom built image with your user in it
+	"remoteUser": "${localEnv:USER}",
+
+	// update remote user uid : true by default 
+	// added here to remind you remoteUser ids must be adjusted 
+	"updateRemoteUserUID": true,
+	
+	"features": {
+		// this one is required for docker operations
+		// it will also add docker VSCODE extension
+		"docker-from-docker": "latest"
+	}
+}
