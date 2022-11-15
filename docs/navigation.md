@@ -23,6 +23,7 @@
   * [Automatic command](pages/AutomaticCommand.md)
   * [Force CR/LF on enter key](pages/ForceCRLF.md)
   * [Running a locally saved script on a remote session](pages/LocalScript.md)
+  * [Standard output to clipboard](pages/StdoutToClipboard.md)
 
 [Graphical]()
 
