@@ -5700,8 +5700,8 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
         // shift keys. But PuTTY is not a console app, so why not to send
         // all information about control keys state that we actually have here?
         // Using bits not used by any other status for backward compatibility.
-        #define RIGHT_SHIFT_PRESSED 0x1000
-        #define LEFT_SHIFT_PRESSED 0x2000
+        #define RIGHT_SHIFT_PRESSED 0x0400
+        #define LEFT_SHIFT_PRESSED 0x0200
         if (GetAsyncKeyState(VK_LSHIFT)) { ctrl |= RIGHT_SHIFT_PRESSED; }
         if (GetAsyncKeyState(VK_RSHIFT)) { ctrl |= LEFT_SHIFT_PRESSED; }
         // end
