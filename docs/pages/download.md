@@ -38,8 +38,8 @@ You can also get virus analysis from our official CDN [fosshub.com](https://www.
 
 ## KiTTY source code
 * The KiTTY source code is available from
-    * our main subversion repository ```svn checkout http://svn.9bis.com/sandbox/kitty/trunk/```
     * Github.com ```git clone https://github.com/cyd01/KiTTY.git ```
 * or using your browser 
-    * [http://svn.9bis.com/websvn](http://svn.9bis.com/websvn "KiTTY at our svn")
     * [https://github.com/cyd01/KiTTY](https://github.com/cyd01/KiTTY "KiTTY at Github")
+
+> *SVN repository is not available anymore*

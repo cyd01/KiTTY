@@ -8,7 +8,7 @@
 #include <assert.h>
 
 #include "putty.h"
-#include "win_res.h"
+#include "putty-rc.h"
 
 #ifdef NO_HTMLHELP
 

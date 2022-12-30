@@ -14,7 +14,7 @@
 #include "misc.h"
 #include "tree234.h"
 #include "winsecur.h"
-#include "wincapi.h"
+#include "cryptoapi.h"
 #include "pageant.h"
 #include "licence.h"
 #include "pageant-rc.h"

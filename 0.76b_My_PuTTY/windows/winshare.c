@@ -13,7 +13,7 @@
 #include "proxy.h"
 #include "ssh.h"
 
-#include "wincapi.h"
+#include "cryptoapi.h"
 #include "winsecur.h"
 
 #define CONNSHARE_PIPE_PREFIX "\\\\.\\pipe\\putty-connshare"

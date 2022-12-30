@@ -1,4 +1,4 @@
-#include "win_res.h"
+#include "putty-rc.h"
 
 #ifdef EMBED_CHM
 ID_CUSTOM_CHMFILE TYPE_CUSTOM_CHMFILE "../doc/putty.chm"

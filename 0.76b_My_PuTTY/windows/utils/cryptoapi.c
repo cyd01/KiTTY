@@ -9,7 +9,7 @@
 #include "putty.h"
 #include "ssh.h"
 
-#include "wincapi.h"
+#include "cryptoapi.h"
 
 DEF_WINDOWS_FUNCTION(CryptProtectMemory);
 

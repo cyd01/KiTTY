@@ -15,7 +15,8 @@
 #include "putty.h"
 #include "terminal.h"
 //#include "ldisc.h"
-#include "win_res.h"
+//#include "win_res.h"
+#include "putty-rc.h"
 
 // Include specifiques Windows (windows.h doit imperativement etre declare en premier)
 #include <windows.h>

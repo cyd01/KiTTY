@@ -43,6 +43,7 @@ static void variable_pitch_handler(union control *ctrl, dlgparam *dlg,
 #include "kitty.h"
 int get_param( const char * val ) ;
 char * get_param_str( const char * val ) ;
+int GetPuttyFlag(void) ;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 void DisableBackgroundImage( void ) ;
 #endif

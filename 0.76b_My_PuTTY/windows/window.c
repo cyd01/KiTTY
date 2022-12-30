@@ -27,7 +27,7 @@
 #include "putty.h"
 #include "terminal.h"
 #include "storage.h"
-#include "win_res.h"
+#include "putty-rc.h"
 #include "winsecur.h"
 #include "winseat.h"
 #include "tree234.h"
