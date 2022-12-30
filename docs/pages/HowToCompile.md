@@ -8,13 +8,13 @@ The best way to compile **KiTTY** is to use our cross-compile docker image:
 **For 32 bits compilation**
 ```bash
 mkdir -p builds 2> /dev/null || rm -f builds/*.exe
-docker run --rm -it -v $(pwd)/builds:/builds cyd01/cross-gcc "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
+docker run --rm -it -v $(pwd)/builds:/builds cyd01/cross-gcc "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross ; cd /builds ; ls -l"
 ```
 
 **For 64 bits compilation**
 ```bash
 mkdir -p builds 2> /dev/null || rm -f builds/*.exe
-docker run --rm -it -v $(pwd)/builds:/builds cyd01/cross-gcc "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 ; cd /builds ; ls -l"
+docker run --rm -it -v $(pwd)/builds:/builds cyd01/cross-gcc "git clone https://github.com/cyd01/KiTTY.git ; cd KiTTY/0.76b_My_PuTTY/windows ; make -f MAKEFILE.MINGW cross64 ; cd /builds ; ls -l"
 ```
 
 The **kitty.exe** and other stuff will be available into **/builds** directory.

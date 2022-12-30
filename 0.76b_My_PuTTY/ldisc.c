@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include "putty.h"
-#include "terminal.h"
+#include "terminal/terminal.h"
 struct Ldisc_tag {
     Terminal *term;
     Backend *backend;

@@ -4,7 +4,7 @@
  */
 
 #include "putty.h"
-#include "terminal.h"
+#include "terminal/terminal.h"
 
 void term_nopaste(Terminal *term)
 {

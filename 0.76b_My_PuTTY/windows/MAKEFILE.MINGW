@@ -827,17 +827,17 @@ norand.o: ../norand.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../norand.c
 
-noterm.o: ../noterm.c ../putty.h ../terminal/terminal.h ../defs.h ../puttyps.h \
+noterm.o: ../stubs/noterm.c ../putty.h ../terminal/terminal.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../marshal.h ../ssh/signal-list.h \
 		../tree234.h ../windows/winstuff.h ../unix/unix.h \
 		../puttymem.h ../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../noterm.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../stubs/noterm.c
 
-notiming.o: ../notiming.c ../putty.h ../defs.h ../puttyps.h ../network.h \
+notiming.o: ../stubs/notiming.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../ssh/signal-list.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h ../tree234.h \
 		../windows/winhelp.h ../charset/charset.h
-	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../notiming.c
+	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../stubs/notiming.c
 
 nullplug.o: ../stubs/nullplug.c ../putty.h ../defs.h ../puttyps.h ../network.h \
 		../misc.h ../marshal.h ../ssh/signal-list.h ../windows/winstuff.h \
@@ -904,7 +904,7 @@ proxy.o: ../proxy/proxy.c ../putty.h ../network.h ../proxy/proxy.h ../defs.h \
 		../tree234.h ../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS) $(XFLAGS) -c ../proxy/proxy.c
 
-pscp.o: ../pscp.c ../putty.h ../psftp.h ../ssh.h ../sftp.h ../storage.h \
+pscp.o: ../pscp.c ../putty.h ../psftp.h ../ssh.h ../ssh/sftp.h ../storage.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../ssh/signal-list.h ../puttymem.h ../tree234.h ../ssh/ttymode-list.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
@@ -915,7 +915,7 @@ pscp.res.o: ../windows/pscp.rc ../windows/rcstuff.h ../windows/pscp.ico \
 		../windows/version.rc2 ../version.h ../licence.h
 	$(RC) $(RCFL) $(RCFLAGS) ../windows/pscp.rc -o pscp.res.o
 
-psftp.o: ../psftp.c ../putty.h ../psftp.h ../storage.h ../ssh.h ../sftp.h \
+psftp.o: ../psftp.c ../putty.h ../psftp.h ../storage.h ../ssh.h ../ssh/sftp.h \
 		../defs.h ../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../ssh/signal-list.h ../puttymem.h ../tree234.h ../ssh/ttymode-list.h \
 		../windows/winstuff.h ../unix/unix.h ../windows/winhelp.h \
@@ -926,7 +926,7 @@ psftp.res.o: ../windows/psftp.rc ../windows/rcstuff.h ../windows/pscp.ico \
 		../windows/version.rc2 ../version.h ../licence.h
 	$(RC) $(RCFL) $(RCFLAGS) ../windows/psftp.rc -o psftp.res.o
 
-psftpcommon.o: ../psftpcommon.c ../putty.h ../sftp.h ../psftp.h ../defs.h \
+psftpcommon.o: ../psftpcommon.c ../putty.h ../ssh/sftp.h ../psftp.h ../defs.h \
 		../puttyps.h ../network.h ../misc.h ../marshal.h \
 		../ssh/signal-list.h ../windows/winstuff.h ../unix/unix.h \
 		../puttymem.h ../tree234.h ../windows/winhelp.h \
@@ -1992,7 +1992,7 @@ be_all_s_plink.o: ../be_all_s.c ../putty.h ../puttyps.h ../network.h ../misc.h \
 		../windows/winhelp.h ../charset/charset.h
 	$(CC) $(COMPAT) $(CFLAGS_PLINK) $(XFLAGS) -o be_all_s_plink.o -c ../be_all_s.c
 
-ldisc_plink.o: ../ldisc.c ../putty.h ../terminal/terminal.h ../ldisc.h ../puttyps.h \
+ldisc_plink.o: ../ldisc.c ../putty.h ../terminal/terminal.h ../defs.h ../puttyps.h \
 		../network.h ../misc.h ../tree234.h ../windows/winstuff.h \
 		../unix/unix.h ../puttymem.h \
 		../windows/winhelp.h ../charset/charset.h
@@ -2308,6 +2308,7 @@ putty_portable.exe: agentf.o aqsync.o be_all_s.o be_misc.o callback.o cmdline.o 
 		winselgui.o winser.o winshare.o winstore.o wintime.o \
 		winucs.o winutils.o winx11.o x11fwd.o \
 		adb.o \
+		cencode.o cdecode.o \
 		kitty_portable.o kitty_commun_portable.o kitty_crypt.o kitty_image.o kitty_proxy.o kitty_registry.o kitty_ssh.o \
 		kitty_store.o kitty_tools.o kitty_win.o \
 		urlhack.o pageant_integrated.o winpgnt_integrated.o winpgen_integrated.o winpzmodem.o \

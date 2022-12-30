@@ -86,17 +86,7 @@ size_t t_strftime( char *s, size_t max, const char *format, const struct tm tm, 
 	int p, i = 1 ;
 	//struct tm tm ;
 	size_t res = 0 ;
-/*
-	tm.tm_sec = st.wSecond ;
-	tm.tm_min = st.wMinute ;
-	tm.tm_hour = st.wHour ;
-	tm.tm_mday = st.wDay ;
-	tm.tm_mon = st.wMonth - 1 ;
-	tm.tm_year = st.wYear - 1900 ;
-	tm.tm_wday = st.wDayOfWeek - 1 ;
-	tm.tm_yday = 0 ;
-	tm.tm_isdst = 0 ;
-*/
+
 	if( (nfor = (char*) malloc( strlen( format ) + 1024 )) == NULL ) return 0 ;
 	strcpy( nfor, format ) ;
 
@@ -239,8 +229,13 @@ static void logfopen_callback(void *vctx, int mode)
 	/* Write header line into log file. */
 	tm = ltime();
 	strftime(buf, 24, "%Y.%m.%d %H:%M:%S", &tm);
+#ifdef MOD_PERSO
+	logprintf(ctx, "=~=~=~=~=~=~=~=~=~=~=~= KiTTY log %s"
+		  " =~=~=~=~=~=~=~=~=~=~=~=\r\n", buf);
+#else
 	logprintf(ctx, "=~=~=~=~=~=~=~=~=~=~=~= PuTTY log %s"
 		  " =~=~=~=~=~=~=~=~=~=~=~=\r\n", buf);
+#endif
     }
 
     event = dupprintf("%s session log (%s mode) to file: %s",
