@@ -7665,7 +7665,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
     return -1;
 }
 
-#ifdef MOD_PERSO
+#ifdef MOD_PERSO1
 /* Creer un titre de fenetre a partir d'un schema donne
 	%%f: le folder auquel apprtient le session
 	%%h: le hostname
@@ -7769,7 +7769,7 @@ void set_title_internal(TermWin *tw, const char *title) {
 }
 
 static void wintw_set_title(TermWin *tw, const char *title_in) {
-	char *buffer, fmt[256]="%s" ;
+	char *buffer, fmt[1024]="%s" ;
 	char *title ;
 
 	if( title_in==NULL ) { return ; }
@@ -7811,9 +7811,11 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	}
 	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) { strcat( buffer, " (PROTECTED)" ) ; }
 	if( conf_get_bool(conf, CONF_alwaysontop) ) if( strstr(buffer, " (ONTOP)")==NULL ) { strcat( buffer, " (ONTOP)" ) ; }
-	if( conf_get_bool(conf, CONF_ssh_tunnel_print_in_title) ) if( strstr(buffer, " (SOCKS: ")==NULL ) { 
-		make_title( fmt, " (SOCKS: %s)", "%%d") ; 
-		strcat( buffer, fmt ) ;
+	if( conf_get_bool(conf, CONF_ssh_tunnel_print_in_title) ) {
+		if( strstr(buffer, " (SOCKS: ")==NULL ) { 
+			make_title( fmt, " (SOCKS: %s)", "%%d") ; 
+			strcat( buffer, fmt ) ;
+		}
 	}
 	set_title_internal( tw, buffer ) ;
 	free(title);
