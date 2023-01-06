@@ -3559,6 +3559,10 @@ static void do_osc(Terminal *term)
 
                                             if (OpenClipboard(NULL)) {
 
+                                                // some clients don't flush the buffer before setting data,
+                                                // so we'll do that here just in case
+                                                EmptyClipboard();
+
                                                 if (!SetClipboardData(fmt, (HANDLE)hData)) {
                                                     GlobalFree(hData);
                                                 } else {
