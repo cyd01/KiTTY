@@ -7665,7 +7665,7 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
     return -1;
 }
 
-#ifdef MOD_PERSO1
+#ifdef MOD_PERSO
 /* Creer un titre de fenetre a partir d'un schema donne
 	%%f: le folder auquel apprtient le session
 	%%h: le hostname
@@ -7679,26 +7679,43 @@ if( !get_param("PUTTY") && conf_get_int(conf, CONF_disablealtgr) ) {
 Ex: %%P://%%u@%%h:%%p
 Ex: %%f / %%s
 */
-void make_title( char * res, char * fmt, const char * title ) {
-	int p;
-	char b[1024] ;
-	int port ;
-	
+char * make_title( char * fmt, const char * title ) {
+	int p ;
+	char * res = NULL ;
+	res = (char *)malloc( strlen(fmt)+strlen(title)+1 ) ;
 	sprintf( res, fmt, title ) ;
 
-	while( (p=poss( "%%s", res)) > 0 ) { del(res,p,3); if(strlen(conf_get_str(conf,CONF_sessionname))>0) insert(res,conf_get_str(conf,CONF_sessionname),p); }
-	while( (p=poss( "%%h", res)) > 0 ) { 
-		del(res,p,3);
-		if( conf_get_int(conf,CONF_protocol) == PROT_SERIAL ) {
-			insert(res,conf_get_str(conf,CONF_serline),p);
-		} else {
-			insert(res,conf_get_str(conf,CONF_host),p);
+	while( (p=poss( "%%s", res)) > 0 ) {
+		del( res, p, 3 ) ;
+		res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_sessionname))+1 ) ;
+		if( strlen(conf_get_str(conf,CONF_sessionname))>0 )  {
+			insert( res, conf_get_str(conf,CONF_sessionname), p ) ; 
 		}
 	}
-	while( (p=poss( "%%u", res)) > 0 ) { del(res,p,3); insert(res,conf_get_str(conf,CONF_username),p); }
-	while( (p=poss( "%%f", res)) > 0 ) { del(res,p,3); if(strlen(conf_get_str(conf,CONF_folder))>0) insert(res,conf_get_str(conf,CONF_folder),p); }
-	
-	port = conf_get_int(conf,CONF_port); 
+	while( (p=poss( "%%h", res)) > 0 ) { 
+		del( res, p, 3 ) ;
+		if( conf_get_int(conf,CONF_protocol) == PROT_SERIAL ) {
+			res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_serline))+1 ) ;
+			insert( res, conf_get_str(conf,CONF_serline), p ) ;
+		} else {
+			res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_host))+1 ) ;
+			insert( res, conf_get_str(conf,CONF_host), p ) ;
+		}
+	}
+	while( (p=poss( "%%u", res)) > 0 ) {
+		del( res, p ,3 ) ;
+		res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_username))+1 ) ;
+		insert( res, conf_get_str(conf,CONF_username), p ) ;
+	}
+	while( (p=poss( "%%f", res)) > 0 ) {
+		del( res, p , 3 ) ;
+		res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_folder))+1 ) ;
+		if(strlen(conf_get_str(conf,CONF_folder))>0) {
+			insert(res,conf_get_str(conf,CONF_folder),p); 
+		}
+	}
+	char b[256] ;
+	int port = conf_get_int( conf, CONF_port ); 
 	switch(conf_get_int(conf,CONF_protocol)) {
 		case PROT_RAW: strcpy(b,"raw"); break;
 		case PROT_TELNET: strcpy(b,"telnet"); if(port==-1) port=23 ; break;
@@ -7706,60 +7723,81 @@ void make_title( char * res, char * fmt, const char * title ) {
 		case PROT_SSH: strcpy(b,"ssh"); if(port==-1) port=22 ; break;
 		case PROT_SERIAL: strcpy(b,"serial"); break;
 	}
-	while( (p=poss( "%%P", res)) > 0 ) { del(res,p,3); insert(res,b,p); }
-	
-	sprintf(b,"%d", port ) ; 
-	while( (p=poss( "%%p", res)) > 0 ) { del(res,p,3); insert(res,b,p); }
-	
-	sprintf(b,"%ld", GetCurrentProcessId() ) ; 
-	while( (p=poss( "%%i", res)) > 0 ) { del(res,p,3); insert(res,b,p); }
+	while( (p=poss( "%%P", res)) > 0 ) {
+		del( res, p, 3 ) ;
+		res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
+		insert( res, b , p ) ; 
+	}
+	sprintf( b, "%d", port ) ; 
+	while( (p=poss( "%%p", res)) > 0 ) {
+		del( res, p, 3 ) ;
+		res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
+		insert( res, b, p ) ; 
+	}
+	sprintf(b,"%ld", GetCurrentProcessId() ) ;
+	while( (p=poss( "%%i", res)) > 0 ) {
+		del( res, p, 3 ) ;
+		res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
+		insert( res, b, p) ;
+	}
 	while( (p=poss( "%%d", res)) > 0 ) { // forward port dynamic
 		char *key, *val, *k;
 		int nb=0 ;
-		del(res,p,3) ;
-		b[0]='\0';
-		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
+		del( res, p, 3 ) ;
+		char *bb = (char*)malloc(1) ;
+		bb[0] = '\0' ;
+		for( val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key ) ;
 			val != NULL;
 			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
-			k=key; if( (k[0]=='4')||(k[0]=='6') ) { k++; }
+			k=key; 
+			if( (k[0]=='4')||(k[0]=='6') ) { k++ ; }
 			if( (k[0]=='L') && (!strcmp(val,"D")) ) {
-				if(nb!=0) {strcat(b,"|");}
-				strcat(b,k+1);
+				bb = (char*)realloc( bb, strlen(bb)+strlen(k)+3 ) ;
+				if( nb!=0 ) { strcat( bb, "|" ) ; }
+				strcat( bb, k+1 ) ;
 				switch( GetPortFwdState( atoi(k+1), GetCurrentProcessId() ) ) {
 					case -1: 
 						break ;
 					case 0: 
-						strcat(b,"+");
+						strcat(bb,"+");
 						break ;
 					default:
-						strcat(b,"~");
+						strcat(bb,"~");
 				}
 				nb++;
 			}
 		}
-		insert(res,b,p) ;
+		if( bb!=NULL ) { 
+			insert( res, bb, p ) ; 
+		}
+		free(bb) ;
 	}
 	while( (p=poss( "%%l", res)) > 0 ) { // forward port locaux
 		char *key, *val, *k;
 		int nb=0 ;
-		del(res,p,3) ;
-		b[0]='\0';
+		del( res, p, 3 ) ;
+		char *bb = (char*)malloc(1) ;
+		bb[0] = '\0' ;
 		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
 			val != NULL;
 			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
-			k=key; if( (k[0]=='4')||(k[0]=='6') ) { k++; }
+			k=key;
+			if( (k[0]=='4')||(k[0]=='6') ) { k++; }
 			if( (k[0]=='L') && (strcmp(val,"D")) ) {
-				if(nb!=0) {strcat(b,"|");}
-				strcat(b,k+1);
+				bb = (char*)realloc( bb, strlen(bb)+strlen(k)+3 ) ;
+				if( nb!=0 ) { strcat( bb, "|" ) ; }
+				strcat( bb, k+1 ) ;
 				nb++;
 			}
 			res[1023]='\0';
 		}
-		insert(res,b,p) ;
+		if( bb != NULL ) {
+			insert( res, bb, p ) ;
+		}
 	}
-	res[1023]='\0';
+	
+	return res ;
 }
-
 
 void set_title_internal(TermWin *tw, const char *title) {
     sfree(window_name);
@@ -7767,23 +7805,24 @@ void set_title_internal(TermWin *tw, const char *title) {
     if (conf_get_bool(conf, CONF_win_name_always) || !IsIconic(wgs.term_hwnd))
         SetWindowText(wgs.term_hwnd, title);
 }
-
 static void wintw_set_title(TermWin *tw, const char *title_in) {
-	char *buffer, fmt[1024]="%s" ;
-	char *title ;
+	char *buffer=NULL, *fmt=NULL, *title=NULL ;
 
 	if( title_in==NULL ) { return ; }
-	title = (char*)malloc(strlen(title_in)+1024); strcpy(title,title_in);
+	
+	title = (char*)malloc( strlen(title_in)+1 ) ; strcpy( title, title_in ) ;
 
 	if( (title[0]=='_')&&(title[1]=='_') ) { // Mode commande a distance
-		if( ManageLocalCmd( MainHwnd, title+2 ) ) { free(title); return ; }
+		if( ManageLocalCmd( MainHwnd, title+2 ) ) { free( title ) ; return ; }
 	}
 	
-	if( !GetTitleBarFlag() ) { set_title_internal( tw, title ) ; free(title) ; return ; }
+	if( !GetTitleBarFlag() ) { set_title_internal( tw, title ) ; free( title ) ; return ; }
 		
-	if( strstr(title, " (PROTECTED)")==(title+strlen(title)-12) ) 
-		{ title[strlen(title)-12]='\0' ; }
-
+	if( strstr( title, " (PROTECTED)")==( title+strlen(title)-12 ) ) {
+		title[strlen(title)-12]='\0' ; 
+	}
+	
+	fmt = (char*)malloc( 3 ) ; strcpy( fmt,"%s" ) ;
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 	buffer = (char*) malloc( strlen( title ) + strlen( conf_get_str(conf,CONF_host)) + strlen( conf_get_filename(conf,CONF_bg_image_filename)->path ) + 40 ) ; 
 	if( GetBackgroundImageFlag() && GetImageViewerFlag() && (!PuttyFlag) ) { sprintf( buffer, "%s", conf_get_filename(conf,CONF_bg_image_filename)->path ) ; }
@@ -7794,48 +7833,62 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	if( GetSizeFlag() && (!IsZoomed( MainHwnd )) ) {
 		if( strlen( title ) > 0 ) {
 			if( title[strlen(title)-1] == ']' ) {
-				make_title( buffer, "%s", title ) ;
-			} else { 
+				free( buffer ) ;
+				buffer = make_title( "%s", title ) ;
+			} else {
+				fmt = (char*)realloc( fmt, 5+16+1+16+1+1 ) ;
 				sprintf( fmt, "%%s [%dx%d]", conf_get_int(conf,CONF_height), conf_get_int(conf,CONF_width)) ;
-				make_title( buffer, fmt, title ) ;
+				free(buffer) ;
+				buffer = make_title( fmt, title ) ;
 			}
 		} else {
+			buffer=(char*)realloc( buffer, strlen(conf_get_str(conf,CONF_host))+2+16+1+16+3+strlen(appname)+1 ) ;
 			sprintf( buffer, "%s [%dx%d] - %s", conf_get_str(conf,CONF_host), conf_get_int(conf,CONF_height), conf_get_int(conf,CONF_width), appname ) ;
 		}
 	} else {
 		if( strlen( title ) > 0 ) { 
-			make_title( buffer, "%s", title ) ; 
+			free(buffer) ;
+			buffer = make_title( "%s", title ) ; 
 		} else {
+			buffer=(char*)realloc( buffer, strlen(conf_get_str(conf,CONF_host))+3+strlen(appname)+1 ) ;
 			sprintf( buffer, "%s - %s", conf_get_str(conf,CONF_host), appname ) ;
 		}
 	}
-	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) { strcat( buffer, " (PROTECTED)" ) ; }
-	if( conf_get_bool(conf, CONF_alwaysontop) ) if( strstr(buffer, " (ONTOP)")==NULL ) { strcat( buffer, " (ONTOP)" ) ; }
+	if( GetProtectFlag() ) if( strstr(buffer, " (PROTECTED)")==NULL ) { 
+		buffer=(char*)realloc( buffer, strlen(buffer)+strlen(" (PROTECTED)")+1 ) ;
+		strcat( buffer, " (PROTECTED)" ) ;
+	}
+	if( conf_get_bool(conf, CONF_alwaysontop) ) if( strstr(buffer, " (ONTOP)")==NULL ) { 
+		buffer=(char*)realloc( buffer, strlen(buffer)+strlen(" (ONTOP)")+1 ) ;
+		strcat( buffer, " (ONTOP)" ) ; 
+	}
 	if( conf_get_bool(conf, CONF_ssh_tunnel_print_in_title) ) {
 		if( strstr(buffer, " (SOCKS: ")==NULL ) { 
-			make_title( fmt, " (SOCKS: %s)", "%%d") ; 
+			free(fmt) ;
+			fmt = make_title( " (SOCKS: %s)", "%%d") ;
+			buffer=(char*)realloc( buffer, strlen(buffer)+strlen(fmt)+1 ) ;
 			strcat( buffer, fmt ) ;
 		}
 	}
+	
 	set_title_internal( tw, buffer ) ;
-	free(title);
-	free(buffer);
+	
+	if( title!=NULL ) { free(title) ; }
+	if( buffer!=NULL ) { free(buffer) ; }
+	if( fmt!=NULL ) {free(fmt) ; }
 }
-	
-static void wintw_set_icon_title(TermWin *tw, const char *title2)
+
+static void wintw_set_icon_title(TermWin *tw, const char *title_in)
 {
-	char title[1024]="",buf[512]=""; ;
-	int i=0;
-	do { buf[i]=title2[i]; i++ ; }
-	while ( (i<511)&&(title2[i]!='\0') ) ;
-	buf[i+1]='\0';
-	
-	make_title( title, "%s", buf ) ;
+	char * title = make_title( "%s", title_in ) ;
+
     sfree(icon_name);
     icon_name = snewn(1 + strlen(title), char);
     strcpy(icon_name, title);
     if (conf_get_bool(conf, CONF_win_name_always) || !IsIconic(wgs.term_hwnd))
         SetWindowText(wgs.term_hwnd, title);
+	
+	if( title!=NULL ) { free(title) ; }
 }
 #else
 static void wintw_set_title(TermWin *tw, const char *title)

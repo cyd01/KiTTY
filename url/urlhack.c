@@ -23,7 +23,7 @@ static unsigned int link_regions_current_pos;
 
 // Regex with http://, https://, ftp://, mailto: and ssh:// links
 
-const char* urlhack_default_regex = "((ht|f)tp(s?):\\/\\/[0-9a-zA-Z]([-\\.\\w]*[0-9a-zA-Z])*([:](0-9)+)*(\\/?)([-a-zA-Z0-9\\.\\?\\,\\'\\/\\\\\\+=&%\\$#_]*)?)|(mailto:[a-zA-Z0-9\\-_\\.]+@[a-zA-Z0-9\\-_\\.]+\\.[a-z]{2,})|(ssh:\\/\\/([a-zA-Z0-9\\-_]+(:[^@]*)?@)?[a-zA-Z0-9\\-_\\.]+(:[0-9]{2,5})?(\\/[a-zA-Z0-9\\-_]+)?))" ;
+const char* urlhack_default_regex = "((ht|f)tp(s?):\\/\\/[0-9a-zA-Z]([-\\.\\w]*[0-9a-zA-Z])*([:](0-9)+)*(\\/?)([-a-zA-Z0-9\\.\\?\\,\\'\\/\\\\\\+=&%\\$#_]*)?)|(mailto:[a-zA-Z0-9\\-_\\.]+@[a-zA-Z0-9\\-_\\.]+\\.[a-z]{2,})|(ssh:\\/\\/([-a-zA-Z0-9_]+([:][^@]*)?@)?[-a-zA-Z0-9_\\.]+((:[0-9]{2,5})?(\\/[-a-zA-Z0-9_]+)?)?)" ;
 
 //const char* urlhack_default_regex = "(((((https?|ftp):\\/\\/)|www\\.)(([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost|([a-zA-Z0-9\\-]+\\.)*[a-zA-Z0-9\\-]+\\.(com|net|org|info|biz|int|gov|name|edu|[a-zA-Z][a-zA-Z]))(:[0-9]+)?((\\/|\\?)[^ \"]*[^ ,;\\.:\">)]?)?)|(mailto:[a-zA-Z0-9\\-_\\.]+@[a-zA-Z0-9\\-_\\.]+\\.[a-z]{2,})|(ssh:\\/\\/([a-zA-Z0-9\\-_]+(:[^@]*)?@)?[a-zA-Z0-9\\-_\\.]+(:[0-9]{2,5})?(\\/[a-zA-Z0-9\\-_]+)?))" ;
 

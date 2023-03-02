@@ -574,7 +574,7 @@ LRESULT CALLBACK Launcher_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 		case WM_COMMAND: {//Commandes du menu
 			switch( LOWORD(wParam) ) {
 				case IDM_ABOUT:
-					MessageBox(hwnd,"     TTY Launcher\nSession launcher for TTY terminal emulator\n(c), 2009-2022","About", MB_OK ) ;
+					MessageBox(hwnd,"     TTY Launcher\nSession launcher for TTY terminal emulator\n(c), 2009-2023","About", MB_OK ) ;
 					break ;
 				case IDM_QUIT:
 					ResShell = Shell_NotifyIcon(NIM_DELETE, &TrayIcone) ;

@@ -49,5 +49,5 @@ BEGIN
 	
 	NOTEPAD_FILE_FILTER	"Text files, (*.txt, *.ini)|*.txt;*.ini|C/C++ files, (*.c, *.cpp, *.h, *.rc)|*.c;*.cpp;*.h;*.rc|Script files, (*.ksh, *.sh)|*.ksh;*.sh\0SQL files, (*.sql)|*.sql|All files, (*.*)|*.*\0"
 	
-	NOTEPAD_STR_LICENCE "                mNotepad 1.0\nwritten by Cyd, 2022, for the Telnet/SSH client TTY"
+	NOTEPAD_STR_LICENCE "                mNotepad 1.0\nwritten by Cyd, 2023, for the Telnet/SSH client TTY"
 END
