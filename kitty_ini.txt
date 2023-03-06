@@ -215,6 +215,9 @@ zmodem=yes
 ; Clear scrollback
 ;clearscrollback=
 
+; Clear log file
+;clearslogfile=
+
 ; Close and restart current session
 ;closerestart=
 

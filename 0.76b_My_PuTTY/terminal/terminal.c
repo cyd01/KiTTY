@@ -3557,11 +3557,11 @@ static void do_osc(Terminal *term)
                                             memcpy(GData,buffer,BufferSize);
                                             GlobalUnlock(hData);
 
-                                            if (OpenClipboard(NULL)) {
+                                            // some clients don't flush the buffer before setting data,
+                                            // so we'll do that here just in case
+                                            EmptyClipboard();
 
-                                                // some clients don't flush the buffer before setting data,
-                                                // so we'll do that here just in case
-                                                EmptyClipboard();
+                                            if (OpenClipboard(NULL)) {
 
                                                 if (!SetClipboardData(fmt, (HANDLE)hData)) {
                                                     GlobalFree(hData);
