@@ -5702,8 +5702,8 @@ if( (GetKeyState(VK_MENU)&0x8000) && (wParam==VK_SPACE) ) {
         // Using bits not used by any other status for backward compatibility.
         #define RIGHT_SHIFT_PRESSED 0x0400
         #define LEFT_SHIFT_PRESSED 0x0200
-        if (GetAsyncKeyState(VK_LSHIFT)) { ctrl |= RIGHT_SHIFT_PRESSED; }
-        if (GetAsyncKeyState(VK_RSHIFT)) { ctrl |= LEFT_SHIFT_PRESSED; }
+        if (GetAsyncKeyState(VK_LSHIFT)) { ctrl |= SHIFT_PRESSED; ctrl |= RIGHT_SHIFT_PRESSED; }
+        if (GetAsyncKeyState(VK_RSHIFT)) { ctrl |= SHIFT_PRESSED; ctrl |= LEFT_SHIFT_PRESSED; }
         // end
         if ((lParam & ( 1 << 24 )) >> 24) { ctrl |= ENHANCED_KEY; }
         if ((((u_short)GetKeyState(VK_NUMLOCK)) & 0xffff) != 0) { ctrl |= NUMLOCK_ON; }
