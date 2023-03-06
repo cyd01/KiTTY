@@ -1,25 +1,16 @@
 /*
- * winmiscs.c: Windows-specific standalone functions. Has the same
- * relationship to winmisc.c that utils.c does to misc.c, but the
- * corresponding name 'winutils.c' was already taken.
+ * 'Minefield' - a crude Windows memory debugger, similar in concept
+ * to the old Unix 'Electric Fence'. The main difference is that
+ * Electric Fence can be imposed on a program from outside, via
+ * LD_PRELOAD, whereas this has to be included in the program at
+ * compile time with its own cooperation.
+ *
+ * This module provides the Minefield allocator. Actually enabling it
+ * is done by a #define in force when the main utils/memory.c is
+ * compiled.
  */
 
 #include "putty.h"
-
-#ifndef NO_SECUREZEROMEMORY
-/*
- * Windows implementation of smemclr (see misc.c) using SecureZeroMemory.
- */
-void smemclr(void *b, size_t n) {
-    if (b && n > 0)
-        SecureZeroMemory(b, n);
-}
-#endif
-
-#ifdef MINEFIELD
-/*
- * Minefield - a Windows equivalent for Electric Fence
- */
 
 #define PAGESIZE 4096
 
@@ -233,53 +224,4 @@ void *minefield_c_realloc(void *p, size_t size)
     memcpy(q, p, (oldsize < size ? oldsize : size));
     minefield_free(p);
     return q;
-}
-
-#endif				/* MINEFIELD */
-
-#if defined _MSC_VER && _MSC_VER < 1800
-
-/*
- * Work around lack of strtoumax in older MSVC libraries
- */
-uintmax_t strtoumax(const char *nptr, char **endptr, int base)
-{
-    return _strtoui64(nptr, endptr, base);
-}
-
-#endif
-
-#if defined _M_ARM || defined _M_ARM64
-
-bool platform_aes_hw_available(void)
-{
-    return IsProcessorFeaturePresent(PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE);
-}
-
-bool platform_sha256_hw_available(void)
-{
-    return IsProcessorFeaturePresent(PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE);
-}
-
-bool platform_sha1_hw_available(void)
-{
-    return IsProcessorFeaturePresent(PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE);
-}
-
-bool platform_sha512_hw_available(void)
-{
-    /* As of 2020-12-24, as far as I can tell from docs.microsoft.com,
-     * Windows on Arm does not yet provide a PF_ARM_V8_* flag for the
-     * SHA-512 architecture extension. */
-    return false;
-}
-
-#endif
-
-bool is_console_handle(HANDLE handle)
-{
-    DWORD ignored_output;
-    if (GetConsoleMode(handle, &ignored_output))
-        return true;
-    return false;
 }

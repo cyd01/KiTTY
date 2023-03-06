@@ -130,6 +130,7 @@ static tree234 *sktree;
 int get_param( const char * val ) ;
 #endif
 #ifdef MOD_ZMODEM
+int GetPuttyFlag(void) ;
 static int curpass;
 #endif
 

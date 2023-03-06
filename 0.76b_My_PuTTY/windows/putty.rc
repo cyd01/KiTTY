@@ -3,7 +3,7 @@
 #define APPNAME "PuTTY"
 #define APPDESC "SSH, Telnet, Rlogin, and SUPDUP client"
 
-#include "winhelp.rc2"
+#include "help.rc2"
 
 IDI_MAINICON ICON "putty.ico"
 

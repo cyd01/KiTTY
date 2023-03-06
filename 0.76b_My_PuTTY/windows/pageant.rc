@@ -14,7 +14,7 @@
 #define APPDESC "PuTTY SSH authentication agent"
 #endif
 
-#include "winhelp.rc2"
+#include "help.rc2"
 
 #ifdef MOD_INTEGRATED_AGENT
 900 ICON "pageant.ico"

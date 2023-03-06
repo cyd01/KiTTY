@@ -8,7 +8,7 @@
 #define APPNAME_KEYGEN "PuTTYgen"
 #define APPDESC_KEYGEN "PuTTY SSH key generation utility"
 
-#include "winhelp.rc2"
+#include "help.rc2"
 #include "puttygen-rc.h"
 
 800 ICON "puttygen.ico"
