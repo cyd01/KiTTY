@@ -685,22 +685,23 @@ static void start_backend(void)
 		    start_backend() ;
 		    return ;
 		}
-	    } else {
+	    } else if( !is_backend_first_connected ) {
 	        MessageBox(NULL, msg, str, MB_OK);
 	    }
         }
 	sfree(str);
 	sfree(msg);
+	SetSSHConnected(0) ;
+	queue_toplevel_callback(close_session, NULL);
+	session_closed = true;
 	if( GetAutoreconnectFlag() && conf_get_int(conf,CONF_failure_reconnect) && is_backend_first_connected ) {
 	    SetConnBreakIcon(wgs.term_hwnd) ;
-	    SetSSHConnected(0) ;
-	    queue_toplevel_callback(close_session, NULL);
-	    session_closed = true;
 	    lp_eventlog(&wgs.logpolicy, "Unable to connect, trying to reconnect...") ; 
 	    SetTimer(wgs.term_hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
+	}
+	if( is_backend_first_connected ) {
 	    return ;
 	}
-	else
 #else
 	char *str = dupprintf("%s Error", appname);
         char *msg = dupprintf("Unable to open connection to\n%s\n%s",
