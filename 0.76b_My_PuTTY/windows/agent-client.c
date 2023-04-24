@@ -10,7 +10,7 @@
 #include "pageant.h" /* for AGENT_MAX_MSGLEN */
 
 #ifndef NO_SECURITY
-#include "winsecur.h"
+#include "security-api.h"
 #include "cryptoapi.h"
 #endif
 

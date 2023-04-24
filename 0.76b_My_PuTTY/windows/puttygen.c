@@ -11,7 +11,7 @@
 #include "ssh.h"
 #include "sshkeygen.h"
 #include "licence.h"
-#include "winsecur.h"
+#include "security-api.h"
 #include "puttygen-rc.h"
 
 #include <commctrl.h>

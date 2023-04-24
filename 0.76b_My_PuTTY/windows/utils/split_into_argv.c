@@ -1,198 +1,4 @@
 /*
- * winutils.c: miscellaneous Windows utilities for GUI apps
- */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "putty.h"
-#include "misc.h"
-
-#ifdef TESTMODE
-/* Definitions to allow this module to be compiled standalone for testing
- * split_into_argv(). */
-#define smalloc malloc
-#define srealloc realloc
-#define sfree free
-#endif
-
-/*
- * GetOpenFileName/GetSaveFileName tend to muck around with the process'
- * working directory on at least some versions of Windows.
- * Here's a wrapper that gives more control over this, and hides a little
- * bit of other grottiness.
- */
-
-struct filereq_tag {
-    TCHAR cwd[MAX_PATH];
-};
-
-/*
- * `of' is expected to be initialised with most interesting fields, but
- * this function does some administrivia. (assume `of' was memset to 0)
- * save==1 -> GetSaveFileName; save==0 -> GetOpenFileName
- * `state' is optional.
- */
-bool request_file(filereq *state, OPENFILENAME *of, bool preserve, bool save)
-{
-    TCHAR cwd[MAX_PATH]; /* process CWD */
-    bool ret;
-
-    /* Get process CWD */
-    if (preserve) {
-        DWORD r = GetCurrentDirectory(lenof(cwd), cwd);
-        if (r == 0 || r >= lenof(cwd))
-            /* Didn't work, oh well. Stop trying to be clever. */
-            preserve = false;
-    }
-
-    /* Open the file requester, maybe setting lpstrInitialDir */
-    {
-#ifdef OPENFILENAME_SIZE_VERSION_400
-        of->lStructSize = OPENFILENAME_SIZE_VERSION_400;
-#else
-        of->lStructSize = sizeof(*of);
-#endif
-        of->lpstrInitialDir = (state && state->cwd[0]) ? state->cwd : NULL;
-        /* Actually put up the requester. */
-        ret = save ? GetSaveFileName(of) : GetOpenFileName(of);
-    }
-
-    /* Get CWD left by requester */
-    if (state) {
-        DWORD r = GetCurrentDirectory(lenof(state->cwd), state->cwd);
-        if (r == 0 || r >= lenof(state->cwd))
-            /* Didn't work, oh well. */
-            state->cwd[0] = '\0';
-    }
-
-    /* Restore process CWD */
-    if (preserve)
-        /* If it fails, there's not much we can do. */
-        (void) SetCurrentDirectory(cwd);
-
-    return ret;
-}
-
-filereq *filereq_new(void)
-{
-    filereq *ret = snew(filereq);
-    ret->cwd[0] = '\0';
-    return ret;
-}
-
-void filereq_free(filereq *state)
-{
-    sfree(state);
-}
-
-/*
- * Message box with optional context help.
- */
-
-static HWND message_box_owner;
-
-/* Callback function to launch context help. */
-static VOID CALLBACK message_box_help_callback(LPHELPINFO lpHelpInfo)
-{
-    const char *context = NULL;
-#define CHECK_CTX(name) \
-    do { \
-        if (lpHelpInfo->dwContextId == WINHELP_CTXID_ ## name) \
-            context = WINHELP_CTX_ ## name; \
-    } while (0)
-    CHECK_CTX(errors_hostkey_absent);
-    CHECK_CTX(errors_hostkey_changed);
-    CHECK_CTX(errors_cantloadkey);
-    CHECK_CTX(option_cleanup);
-    CHECK_CTX(pgp_fingerprints);
-#undef CHECK_CTX
-    if (context)
-        launch_help(message_box_owner, context);
-}
-
-int message_box(HWND owner, LPCTSTR text, LPCTSTR caption,
-                DWORD style, DWORD helpctxid)
-{
-    MSGBOXPARAMS mbox;
-
-    /*
-     * We use MessageBoxIndirect() because it allows us to specify a
-     * callback function for the Help button.
-     */
-    mbox.cbSize = sizeof(mbox);
-    /* Assumes the globals `hinst' and `hwnd' have sensible values. */
-    mbox.hInstance = hinst;
-    mbox.hwndOwner = message_box_owner = owner;
-    mbox.lpfnMsgBoxCallback = &message_box_help_callback;
-    mbox.dwLanguageId = LANG_NEUTRAL;
-    mbox.lpszText = text;
-    mbox.lpszCaption = caption;
-    mbox.dwContextHelpId = helpctxid;
-    mbox.dwStyle = style;
-    if (helpctxid != 0 && has_help()) mbox.dwStyle |= MB_HELP;
-    return MessageBoxIndirect(&mbox);
-}
-
-/*
- * Display the fingerprints of the PGP Master Keys to the user.
- */
-void pgp_fingerprints_msgbox(HWND owner)
-{
-    message_box(
-        owner,
-        "These are the fingerprints of the PuTTY PGP Master Keys. They can\n"
-        "be used to establish a trust path from this executable to another\n"
-        "one. See the manual for more information.\n"
-        "(Note: these fingerprints have nothing to do with SSH!)\n"
-        "\n"
-        "PuTTY Master Key as of " PGP_MASTER_KEY_YEAR
-        " (" PGP_MASTER_KEY_DETAILS "):\n"
-        "  " PGP_MASTER_KEY_FP "\n\n"
-        "Previous Master Key (" PGP_PREV_MASTER_KEY_YEAR
-        ", " PGP_PREV_MASTER_KEY_DETAILS "):\n"
-        "  " PGP_PREV_MASTER_KEY_FP,
-        "PGP fingerprints", MB_ICONINFORMATION | MB_OK,
-        HELPCTXID(pgp_fingerprints));
-}
-
-/*
- * Helper function to remove the border around a dialog item such as
- * a read-only edit control.
- */
-void MakeDlgItemBorderless(HWND parent, int id)
-{
-    HWND child = GetDlgItem(parent, id);
-    LONG_PTR style = GetWindowLongPtr(child, GWL_STYLE);
-    LONG_PTR exstyle = GetWindowLongPtr(child, GWL_EXSTYLE);
-    style &= ~WS_BORDER;
-    exstyle &= ~(WS_EX_CLIENTEDGE | WS_EX_STATICEDGE | WS_EX_WINDOWEDGE);
-    SetWindowLongPtr(child, GWL_STYLE, style);
-    SetWindowLongPtr(child, GWL_EXSTYLE, exstyle);
-    SetWindowPos(child, NULL, 0, 0, 0, 0,
-                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-}
-
-/*
- * Handy wrapper around GetDlgItemText which doesn't make you invent
- * an arbitrary length limit on the output string. Returned string is
- * dynamically allocated; caller must free.
- */
-char *GetDlgItemText_alloc(HWND hwnd, int id)
-{
-    char *ret = NULL;
-    size_t size = 0;
-
-    do {
-        sgrowarray_nm(ret, size, size);
-        GetDlgItemText(hwnd, id, ret, size);
-    } while (!memchr(ret, '\0', size-1));
-
-    return ret;
-}
-
-/*
  * Split a complete command line into argc/argv, attempting to do it
  * exactly the same way the Visual Studio C library would do it (so
  * that our console utilities, which receive argc and argv already
@@ -210,6 +16,8 @@ char *GetDlgItemText_alloc(HWND hwnd, int id)
  * treat the rest as a raw string, you can. If you don't want to,
  * `argstart' can be safely left NULL.
  */
+
+#include "putty.h"
 
 /*
  * The precise argument-breaking rules vary with compiler version, or
@@ -242,6 +50,9 @@ char *GetDlgItemText_alloc(HWND hwnd, int id)
  * That only leaves the interesting question of what happens when one
  * or more backslashes precedes two or more double quotes, starting
  * inside a double-quoted string.
+ *
+ * Modern Visual Studio (as of 2021)
+ * ---------------------------------
  *
  * I investigated this in an ordinary CLI program, using the
  * toolchain's crt0 to split a command line of the form
@@ -279,6 +90,9 @@ char *GetDlgItemText_alloc(HWND hwnd, int id)
  * either opens or closes a quoted string, and if it closes one, it
  * generates a literal " as a side effect.
  *
+ * Older Visual Studio
+ * -------------------
+ *
  * But here's the corresponding table from the older Visual Studio 7:
  *
  *                      backslashes
@@ -299,48 +113,47 @@ char *GetDlgItemText_alloc(HWND hwnd, int id)
  *        10   0,3,n  |  0,4,y  1,3,n  1,4,y  2,3,n
  *        11   0,4,n  |  0,4,n  1,4,n  1,4,n  2,4,n
  *
- * There is very weird mod-3 behaviour going on here in the
- * number of quotes, and it even applies when there aren't any
- * backslashes! How ghastly.
+ * There is very weird mod-3 behaviour going on here in the number of
+ * quotes, and it even applies when there aren't any backslashes! How
+ * ghastly.
  *
  * With a bit of thought, this extremely odd diagram suddenly
- * coalesced itself into a coherent, if still ghastly, model of
- * how things work:
+ * coalesced itself into a coherent, if still ghastly, model of how
+ * things work:
  *
- *  - As before, backslashes are only special when one or more
- *    of them appear contiguously before at least one double
- *    quote. In this situation the backslashes do exactly what
- *    you'd expect: each one quotes the next thing in front of
- *    it, so you end up with n/2 literal backslashes (if n is
- *    even) or (n-1)/2 literal backslashes and a literal quote
- *    (if n is odd). In the latter case the double quote
- *    character right after the backslashes is used up.
+ *  - As before, backslashes are only special when one or more of them
+ *    appear contiguously before at least one double quote. In this
+ *    situation the backslashes do exactly what you'd expect: each one
+ *    quotes the next thing in front of it, so you end up with n/2
+ *    literal backslashes (if n is even) or (n-1)/2 literal
+ *    backslashes and a literal quote (if n is odd). In the latter
+ *    case the double quote character right after the backslashes is
+ *    used up.
  *
- *  - After that, any remaining double quotes are processed. A
- *    string of contiguous unescaped double quotes has a mod-3
- *    behaviour:
+ *  - After that, any remaining double quotes are processed. A string
+ *    of contiguous unescaped double quotes has a mod-3 behaviour:
  *
  *     * inside a quoted segment, a quote ends the segment.
- *     * _immediately_ after ending a quoted segment, a quote
- *       simply produces a literal quote.
- *     * otherwise, outside a quoted segment, a quote begins a
- *       quoted segment.
+ *     * _immediately_ after ending a quoted segment, a quote simply
+ *       produces a literal quote.
+ *     * otherwise, outside a quoted segment, a quote begins a quoted
+ *       segment.
  *
- *    So, for example, if we started inside a quoted segment
- *    then two contiguous quotes would close the segment and
- *    produce a literal quote; three would close the segment,
- *    produce a literal quote, and open a new segment. If we
- *    started outside a quoted segment, then two contiguous
- *    quotes would open and then close a segment, producing no
- *    output (but potentially creating a zero-length argument);
- *    but three quotes would open and close a segment and then
- *    produce a literal quote.
- */
-
-/*
- * We select between two behaviours depending on the version of Visual
- * Studio (see large comment below). I don't know exactly when the bug
- * fix happened, but I know that VS7 had the odd mod-3 behaviour.
+ *    So, for example, if we started inside a quoted segment then two
+ *    contiguous quotes would close the segment and produce a literal
+ *    quote; three would close the segment, produce a literal quote,
+ *    and open a new segment. If we started outside a quoted segment,
+ *    then two contiguous quotes would open and then close a segment,
+ *    producing no output (but potentially creating a zero-length
+ *    argument); but three quotes would open and close a segment and
+ *    then produce a literal quote.
+ *
+ * I don't know exactly when the bug fix happened, but I know that VS7
+ * had the odd mod-3 behaviour. So the #if below will ensure that
+ * modern (2015 onwards) versions of VS use the new more sensible
+ * behaviour, and VS7 uses the old one. Things in between may be
+ * wrong; if anyone cares, patches to change the cutoff version in
+ * this #if are welcome.
  */
 #if _MSC_VER < 1400
 #define MOD3 1
@@ -455,7 +268,7 @@ void split_into_argv(char *cmdline, int *argc, char ***argv,
     if (argstart) *argstart = outputargstart; else sfree(outputargstart);
 }
 
-#ifdef TESTMODE
+#ifdef TEST
 
 const struct argv_test {
     const char *cmdline;
@@ -652,6 +465,12 @@ const struct argv_test {
 #endif /* MOD3 */
 };
 
+void out_of_memory(void)
+{
+    fprintf(stderr, "out of memory!\n");
+    exit(2);
+}
+
 int main(int argc, char **argv)
 {
     int i, j;
@@ -692,27 +511,29 @@ int main(int argc, char **argv)
         }
 
         if (!strcmp(argv[1], "-split") && argc > 2) {
-            char *str = malloc(20 + strlen(argv[0]) + strlen(argv[2]));
-            char *p, *q;
+            strbuf *cmdline = strbuf_new();
+            char *p;
 
-            q = str + sprintf(str, "%s -splat ", argv[0]);
+            put_fmt(cmdline, "%s -splat ", argv[0]);
             printf("    {\"");
-            for (p = argv[2]; *p; p++, q++) {
-                switch (*p) {
-                  case '/':  printf("\\\\"); *q = '\\'; break;
-                  case '\'': printf("\\\""); *q = '"';  break;
-                  case '_':  printf(" ");    *q = ' ';  break;
-                  default:   putchar(*p);    *q = *p;   break;
-                }
+            size_t args_start = cmdline->len;
+            for (p = argv[2]; *p; p++) {
+                char c = (*p == '/' ? '\\' :
+                          *p == '\'' ? '"' :
+                          *p == '_' ? ' ' :
+                          *p);
+                put_byte(cmdline, c);
             }
-            *p = '\0';
+            write_c_string_literal(stdout, ptrlen_from_asciz(
+                                       cmdline->s + args_start));
             printf("\", {");
             fflush(stdout);
 
-            system(str);
+            system(cmdline->s);
 
             printf("}},\n");
 
+            strbuf_free(cmdline);
             return 0;
         }
 
@@ -745,6 +566,83 @@ int main(int argc, char **argv)
             return 0;
         }
 
+        if (!strcmp(argv[1], "-tabulate")) {
+            char table[] = "\
+ *                      backslashes                   \n\
+ *                                                    \n\
+ *               0         1      2      3      4     \n\
+ *                                                    \n\
+ *         0          |                               \n\
+ *            --------+-----------------------------  \n\
+ *         1          |                               \n\
+ *    q    2          |                               \n\
+ *    u    3          |                               \n\
+ *    o    4          |                               \n\
+ *    t    5          |                               \n\
+ *    e    6          |                               \n\
+ *    s    7          |                               \n\
+ *         8          |                               \n\
+";
+            char *linestarts[14];
+            char *p = table;
+            for (i = 0; i < lenof(linestarts); i++) {
+                linestarts[i] = p;
+                p += strcspn(p, "\n");
+                if (*p) p++;
+            }
+
+            for (i = 0; i < lenof(argv_tests); i++) {
+                const struct argv_test *test = &argv_tests[i];
+                const char *q = test->cmdline;
+
+                /* Skip tests that aren't telling us something about
+                 * the behaviour _inside_ a quoted string */
+                if (*q != '"')
+                    continue;
+
+                q++;
+
+                assert(*q == 'a');
+                q++;
+                int backslashes_in = 0, quotes_in = 0;
+                while (*q == '\\') {
+                    q++;
+                    backslashes_in++;
+                }
+                while (*q == '"') {
+                    q++;
+                    quotes_in++;
+                }
+
+                q = test->argv[0];
+                assert(*q == 'a');
+                q++;
+                int backslashes_out = 0, quotes_out = 0;
+                while (*q == '\\') {
+                    q++;
+                    backslashes_out++;
+                }
+                while (*q == '"') {
+                    q++;
+                    quotes_out++;
+                }
+                assert(*q == 'b');
+                q++;
+                bool in_quoted_string = (*q == ' ');
+
+                int x = (backslashes_in == 0 ? 15 : 18 + 7 * backslashes_in);
+                int y = (quotes_in == 0 ? 4 : 5 + quotes_in);
+                char *buf = dupprintf("%d,%d,%c",
+                                      backslashes_out, quotes_out,
+                                      in_quoted_string ? 'y' : 'n');
+                memcpy(linestarts[y] + x, buf, strlen(buf));
+                sfree(buf);
+            }
+
+            fputs(table, stdout);
+            return 0;
+        }
+
         fprintf(stderr, "unrecognised option: \"%s\"\n", argv[1]);
         return 1;
     }
@@ -753,18 +651,21 @@ int main(int argc, char **argv)
      * If we get here, we were invoked with no arguments, so just
      * run the tests.
      */
+    int passes = 0, fails = 0;
 
     for (i = 0; i < lenof(argv_tests); i++) {
         int ac;
         char **av;
+        bool failed = false;
 
-        split_into_argv(argv_tests[i].cmdline, &ac, &av);
+        split_into_argv((char *)argv_tests[i].cmdline, &ac, &av, NULL);
 
         for (j = 0; j < ac && argv_tests[i].argv[j]; j++) {
             if (strcmp(av[j], argv_tests[i].argv[j])) {
                 printf("failed test %d (|%s|) arg %d: |%s| should be |%s|\n",
                        i, argv_tests[i].cmdline,
                        j, av[j], argv_tests[i].argv[j]);
+                failed = true;
             }
 #ifdef VERBOSE
             else {
@@ -774,15 +675,33 @@ int main(int argc, char **argv)
             }
 #endif
         }
-        if (j < ac)
+        if (j < ac) {
             printf("failed test %d (|%s|): %d args returned, should be %d\n",
                    i, argv_tests[i].cmdline, ac, j);
-        if (argv_tests[i].argv[j])
+            failed = true;
+        }
+        if (argv_tests[i].argv[j]) {
             printf("failed test %d (|%s|): %d args returned, should be more\n",
                    i, argv_tests[i].cmdline, ac);
+            failed = true;
+        }
+
+        if (failed)
+            fails++;
+        else
+            passes++;
     }
 
-    return 0;
+    printf("passed %d failed %d (%s mode)\n",
+           passes, fails,
+#if MOD3
+           "mod 3"
+#else
+           "mod 2"
+#endif
+        );
+
+    return fails != 0;
 }
 
-#endif
+#endif /* TEST */

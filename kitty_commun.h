@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "putty.h"
 
-#include "winstuff.h"
+#include "platform.h"
 #include <windows.h>
 
 // Flag permettant d'activer l'acces a du code particulier permettant d'avoir plus d'info dans le kitty.dmp

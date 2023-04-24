@@ -13,7 +13,7 @@
 
 #if !defined NO_SECURITY
 
-#include "winsecur.h"
+#include "security-api.h"
 
 typedef struct NamedPipeServerSocket {
     /* Parameters for (repeated) creation of named pipe objects */

@@ -28,8 +28,8 @@
 #include "terminal.h"
 #include "storage.h"
 #include "putty-rc.h"
-#include "winsecur.h"
-#include "winseat.h"
+#include "security-api.h"
+#include "win-gui-seat.h"
 #include "tree234.h"
 
 #ifndef NO_MULTIMON

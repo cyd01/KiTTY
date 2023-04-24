@@ -13,7 +13,7 @@
 
 #if !defined NO_SECURITY
 
-#include "winsecur.h"
+#include "security-api.h"
 
 HANDLE connect_to_named_pipe(const char *pipename, char **err)
 {

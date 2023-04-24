@@ -14,7 +14,7 @@
 #include "ssh.h"
 
 #include "cryptoapi.h"
-#include "winsecur.h"
+#include "security-api.h"
 
 #define CONNSHARE_PIPE_PREFIX "\\\\.\\pipe\\putty-connshare"
 #define CONNSHARE_MUTEX_PREFIX "Local\\putty-connshare-mutex"

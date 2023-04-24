@@ -86,9 +86,15 @@ BEGIN
 
     ICON "", IDC_HK_ICON, 10, 18, 0, 0
 
+#ifdef MOD_PERSO
+    PUSHBUTTON "&Cancel", IDCANCEL, 288, 128, 40, 14
+    PUSHBUTTON "&Accept", IDC_HK_ACCEPT, 168, 128, 40, 14
+    PUSHBUTTON "Connect &Once", IDC_HK_ONCE, 216, 128, 64, 14
+#else
     PUSHBUTTON "Cancel", IDCANCEL, 288, 128, 40, 14
     PUSHBUTTON "Accept", IDC_HK_ACCEPT, 168, 128, 40, 14
     PUSHBUTTON "Connect Once", IDC_HK_ONCE, 216, 128, 64, 14
+#endif
     PUSHBUTTON "More info...", IDC_HK_MOREINFO, 60, 128, 64, 14
     PUSHBUTTON "Help", IDHELP, 12, 128, 40, 14
 
@@ -117,9 +123,15 @@ BEGIN
 
     ICON "", IDC_HK_ICON, 10, 16, 0, 0
 
+#ifdef MOD_PERSO
+    PUSHBUTTON "&Cancel", IDCANCEL, 288, 168, 40, 14
+    PUSHBUTTON "&Accept", IDC_HK_ACCEPT, 168, 168, 40, 14
+    PUSHBUTTON "Connect &Once", IDC_HK_ONCE, 216, 168, 64, 14
+#else
     PUSHBUTTON "Cancel", IDCANCEL, 288, 168, 40, 14
     PUSHBUTTON "Accept", IDC_HK_ACCEPT, 168, 168, 40, 14
     PUSHBUTTON "Connect Once", IDC_HK_ONCE, 216, 168, 64, 14
+#endif
     PUSHBUTTON "More info...", IDC_HK_MOREINFO, 60, 168, 64, 14
     PUSHBUTTON "Help", IDHELP, 12, 168, 40, 14
 

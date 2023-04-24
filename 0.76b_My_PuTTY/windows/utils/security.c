@@ -1,5 +1,5 @@
 /*
- * winsecur.c: implementation of winsecur.h.
+ * winsecur.c: implementation of security-api.h.
  */
 
 #include <stdio.h>
@@ -9,7 +9,7 @@
 
 #if !defined NO_SECURITY
 
-#include "winsecur.h"
+#include "security-api.h"
 
 /* Initialised once, then kept around to reuse forever */
 static PSID worldsid, networksid, usersid;

@@ -12,7 +12,7 @@
 #include "putty.h"
 #include "ssh.h"
 #include "putty-rc.h"
-#include "winseat.h"
+#include "win-gui-seat.h"
 #include "storage.h"
 #include "dialog.h"
 #include "licence.h"

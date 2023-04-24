@@ -10,7 +10,7 @@
 #include "putty.h"
 #include "psftp.h"
 #include "ssh.h"
-#include "winsecur.h"
+#include "security-api.h"
 
 #ifdef MOD_PERSO
 #include <winerror.h>

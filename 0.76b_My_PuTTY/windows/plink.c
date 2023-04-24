@@ -10,7 +10,7 @@
 #include "putty.h"
 #include "storage.h"
 #include "tree234.h"
-#include "winsecur.h"
+#include "security-api.h"
 
 #ifdef MOD_PERSO
 // Flag pour le fonctionnement en mode "portable" (gestion par fichiers)
