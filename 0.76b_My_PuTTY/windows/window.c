@@ -4555,8 +4555,8 @@ free(cmd);
 		else return DefWindowProc(hwnd, message, wParam, lParam);
 	break;
 	
-	case WM_COPYDATA: {  // Reception d'un de donnees dans un message
-#ifdef MOD_RUTTY
+	case WM_COPYDATA: {  // Receive data in message
+#ifdef MOD_RUTTY1
        COPYDATASTRUCT *cds;
        cds = (COPYDATASTRUCT *) lParam;
        if (cds->dwData == ruttyAHK_send)
@@ -4578,15 +4578,15 @@ free(cmd);
          return 0;  /* not our message */
     } 
 #else
-		PCOPYDATASTRUCT pMyCDS = (PCOPYDATASTRUCT) lParam;
-			switch( pMyCDS->dwData ) {	
-				case 1: // Reception d'une chaine de caracteres a envoyer dans le terminal
-					if( pMyCDS->cbData > 0 ) {
-						SendKeyboardPlus( hwnd, (char*)pMyCDS->lpData ) ;
-					}
-					break ;
-			}
+	PCOPYDATASTRUCT pMyCDS = (PCOPYDATASTRUCT) lParam;
+		switch( pMyCDS->dwData ) {	
+			case 1: // Reception of data string to send in terminal
+				if( pMyCDS->cbData > 0 ) {
+					SendKeyboardPlus( hwnd, (char*)pMyCDS->lpData ) ;
+				}
+				break ;
 		}
+	}
 #endif
 	break ;
 
@@ -7813,13 +7813,13 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	if( title_in==NULL ) { return ; }
 	
 	title = (char*)malloc( strlen(title_in)+1 ) ; strcpy( title, title_in ) ;
-
-	if( (title[0]=='_')&&(title[1]=='_') ) { // Mode commande a distance
+	
+	if( (title[0]=='_')&&(title[1]=='_') ) { // Remote command
 		if( ManageLocalCmd( MainHwnd, title+2 ) ) { free( title ) ; return ; }
 	}
 	
 	if( !GetTitleBarFlag() ) { set_title_internal( tw, title ) ; free( title ) ; return ; }
-		
+	
 	if( strstr( title, " (PROTECTED)")==( title+strlen(title)-12 ) ) {
 		title[strlen(title)-12]='\0' ; 
 	}

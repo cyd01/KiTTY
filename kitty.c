@@ -1767,28 +1767,31 @@ void SendAutoCommand( HWND hwnd, const char * cmd ) {
 	}
 }
 
-// Command sender (envoi d'une meme commande a toutes les fenetres)
+// Command sender (send a command to all windows)
 BOOL CALLBACK SendCommandProc( HWND hwnd, LPARAM lParam ) {
 	char buffer[256] ;
 	GetClassName( hwnd, buffer, 256 ) ;
-	if( !strcmp( buffer, KiTTYClassName ) )
-	if( hwnd != MainHwnd ) {
-		COPYDATASTRUCT data;
-		data.dwData = 1 ;
-		data.cbData = strlen( (char*)lParam ) + 1 ;
-		data.lpData = (char*)lParam ;
-		SendMessage( hwnd, WM_COPYDATA, (WPARAM)(HWND)MainHwnd, (LPARAM) (LPVOID)&data ) ;
-		NbWindows++ ;
+	if( !strcmp( buffer, KiTTYClassName ) ) {
+		if( hwnd != MainHwnd ) {
+			COPYDATASTRUCT data;
+			data.dwData = 1 ;
+			data.cbData = strlen( (char*)lParam ) + 1 ;
+			data.lpData = (char*)lParam ;
+			SendMessage( hwnd, WM_COPYDATA, (WPARAM)(HWND)MainHwnd, (LPARAM) (LPVOID)&data ) ;
+			NbWindows++ ;
 		}
-	return TRUE ;
 	}
+	return TRUE ;
+}
 
 int SendCommandAllWindows( HWND hwnd, char * cmd ) {
 	NbWindows=0 ;
 	if( cmd==NULL ) return 0 ;
-	if( strlen(cmd) > 0 ) EnumWindows( SendCommandProc, (LPARAM)cmd ) ;
-	return NbWindows ;
+	if( strlen(cmd) > 0 ) {
+		EnumWindows( SendCommandProc, (LPARAM)cmd ) ;
 	}
+	return NbWindows ;
+}
 	
 // Gestion de la taille des fenetres de la meme classe
 BOOL CALLBACK ResizeWinListProc( HWND hwnd, LPARAM lParam ) {
@@ -1808,10 +1811,10 @@ BOOL CALLBACK ResizeWinListProc( HWND hwnd, LPARAM lParam ) {
 		//SetWindowPos( hwnd, 0, 0, 0, rc->right-rc->left+1, rc->bottom-rc->top+1, SWP_NOZORDER|SWP_NOMOVE|SWP_NOREPOSITION|SWP_NOACTIVATE ) ;
 		//SetWindowPos( hwnd, 0, 0, 0, 50,50, SWP_NOZORDER|SWP_NOMOVE|SWP_NOREPOSITION|SWP_NOACTIVATE);
 		NbWindows++ ;
-		}
+	}
 
 	return TRUE ;
-	}
+}
 
 int ResizeWinList( HWND hwnd, int width, int height ) {
 	NbWindows=0 ;
@@ -1822,7 +1825,7 @@ int ResizeWinList( HWND hwnd, int width, int height ) {
 	EnumWindows( ResizeWinListProc, (LPARAM)&rc ) ;
 	SetForegroundWindow( hwnd ) ;
 	return NbWindows ;
-	}
+}
 
 void set_title( TermWin *tw, const char *title ) { return win_set_title(tw,title) ; } // Disparue avec la version 0.71
 void ManageProtect( HWND hwnd, TermWin *tw, char * title ) {
@@ -2566,7 +2569,9 @@ ds() { printf "\033]0;__ds:`pwd`\007" ; }
 # Duplique une session sur le meme user, meme host, meme repertoire
 dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
 */
+static int LocalCmdFlag = 1 ;
 int ManageLocalCmd( HWND hwnd, const char * cmd ) {
+	//if( !LocalCmdFlag ) { return 0; }
 	char buffer[1024] = "", title[1024] = "" ;
 	if( debug_flag ) { debug_logevent( "Local command: %s", cmd ) ;  }
 	if( cmd == NULL ) return 0 ; 
@@ -3433,25 +3438,30 @@ BOOL CALLBACK EnumWindowsProc( HWND hwnd, LPARAM lParam ) {
 	char buffer[256] ;
 	GetClassName( hwnd, buffer, 256 ) ;
 	
-	if( (!strcmp( buffer, appname )) || (!strcmp( buffer, "PuTTYConfigBox" )) ) NbWindows++ ;
+	if( (!strcmp( buffer, appname )) || (!strcmp( buffer, "PuTTYConfigBox" )) ) {
+		NbWindows++ ;
+	}
 	
 	return TRUE ;
-	}
+}
 
 // Decompte le nombre de fenetre de la meme classe que KiTTY
 int WindowsCount( HWND hwnd ) {
 	char buffer[256] ;
 	NbWindows = 0 ;
 	
-	if( GetClassName( hwnd, buffer, 256 ) == 0 ) NbWindows = 1 ;
-	else {
-		if( !strcmp( buffer, "" ) ) NbWindows = 1 ;
+	if( GetClassName( hwnd, buffer, 256 ) == 0 ) {
+		NbWindows = 1 ;
+	} else {
+		if( !strcmp( buffer, "" ) ) {
+			NbWindows = 1 ;
 		}
+	}
 
 	EnumWindows( EnumWindowsProc, 0 ) ;
 	return NbWindows ;
-	}
-	
+}
+
 	
 // Gestion de la fenetre d'affichage des portforward
 // Mettre la liste des port forward dans le presse-papier et l'afficher a l'ecran
@@ -5296,10 +5306,14 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "KiPP", buffer ) != 0 ) {
 		if( decryptstring( GetCryptSaltFlag(), buffer, MASTER_PASSWORD ) ) ManagePassPhrase( buffer ) ;
 	}
+	if( ReadParameter( INIT_SECTION, "localcmd", buffer ) ) {
+		if( !stricmp( buffer, "NO" ) ) LocalCmdFlag = 0 ;
+		if( !stricmp( buffer, "YES" ) ) LocalCmdFlag = 1 ;
+	}
 	if( ReadParameter( INIT_SECTION, "maxblinkingtime", buffer ) ) { MaxBlinkingTime=2*atoi(buffer);if(MaxBlinkingTime<0) MaxBlinkingTime=0; }
 	if( ReadParameter( INIT_SECTION, "mouseshortcuts", buffer ) ) { 
-		if( !stricmp( buffer, "NO" ) ) MouseShortcutsFlag = 0 ; 
-		if( !stricmp( buffer, "YES" ) ) MouseShortcutsFlag = 1 ; 
+		if( !stricmp( buffer, "NO" ) ) MouseShortcutsFlag = 0 ;
+		if( !stricmp( buffer, "YES" ) ) MouseShortcutsFlag = 1 ;
 	}
 	if( ReadParameter( INIT_SECTION, "paste", buffer ) ) { if( !stricmp( buffer, "YES" ) ) PasteCommandFlag = 1 ; }
 	if( ReadParameter( INIT_SECTION, "pastesize", buffer ) ) { if( atoi(buffer)>0 ) SetPasteSize( atoi(buffer) ) ; }
@@ -5338,7 +5352,7 @@ void LoadParameters( void ) {
 			WinSCPPath = (char*) malloc( strlen(buffer) + 1 ) ; strcpy( WinSCPPath, buffer ) ;
 		}
 	}
-	if( ReadParameter( INIT_SECTION, "wintitle", buffer ) ) {  if( !stricmp( buffer, "NO" ) ) TitleBarFlag = 0 ; }
+	if( ReadParameter( INIT_SECTION, "wintitle", buffer ) ) { if( !stricmp( buffer, "NO" ) ) TitleBarFlag = 0 ; }
 #ifdef MOD_PROXY
 	if( ReadParameter( "ConfigBox", "proxyselection", buffer ) ) {
 		if( !stricmp( buffer, "YES" ) ) { SetProxySelectionFlag(1) ; }

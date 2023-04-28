@@ -164,7 +164,7 @@ CFLAGS += 	 \
 		-DMOD_ZMODEM \
 		-DMOD_PROXY \
 		-DMOD_FAR2L \
-		-I.././ -I../../ \
+-I.././ -I../../ \
 		-I../charset/ -I../windows/ -I../unix/ -I../mac/ \
 		-I../macosx \
 		-I../../base64 \
@@ -173,7 +173,6 @@ CFLAGS += 	 \
 
 
 #		-DMOD_TUTTYCOLOR 
-
 
 # Autre flag a gérer
 # Ajouter  -DMOD_NOPASSWORD \ pour compiler une version sans possibilité de sauvegarder le mot de passe

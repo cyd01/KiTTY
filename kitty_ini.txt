@@ -125,6 +125,9 @@ icon=yes
 ; KiClassName: change the internal software name to be the same as PuTTY
 ;KiClassName=PuTTY
 
+; localcmd: manage local commands (starting with __)
+;localcmd=yes
+
 ; maxblinkingtime: maximum blinks (in system tray) where receiving bell signal
 maxblinkingtime=5
 
