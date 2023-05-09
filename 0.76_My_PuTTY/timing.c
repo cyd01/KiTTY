@@ -137,10 +137,12 @@ unsigned long schedule_timer(int ticks, timer_fn_t fn, void *ctx)
     }
 
     first = (struct timer *)index234(timers, 0);
-    if (first == t) {
+    if (first == t || first != NULL && first->now + 10 * (TICKSPERSEC) < now) {
 	/*
 	 * This timer is the very first on the list, so we must
 	 * notify the front end.
+	 * Also notify if the first timer has seriously missed its run time,
+	 * most likely due to a system sleep event.
 	 */
 	timer_change_notify(first->now);
     }
