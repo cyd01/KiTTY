@@ -3855,6 +3855,69 @@ static void do_osc(Terminal *term)
 #endif
             }
             break;
+#ifdef MOD_PERSO
+          case 52:
+            {
+                int status = MessageBox(NULL,
+                    "Allow OSC52 clipboard sync?", "PyTTY", MB_OKCANCEL);
+
+                if (status == IDOK) {
+
+                    base64_decodestate _d_state;
+                    base64_init_decodestate(&_d_state);
+                    char* d_out = malloc(term->osc_strlen);
+                    int d_count = base64_decode_block(
+                        term->osc_string+1, term->osc_strlen-1, d_out, &_d_state);
+
+                    uint32_t fmt;
+                    char* buffer = NULL;
+                    int BufferSize = 0;
+
+                    int cnt = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, d_count, NULL, 0);
+                    if (cnt > 0) {
+                        buffer = calloc(cnt + 1, sizeof(wchar_t));
+                        MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, d_count, (PWCHAR)buffer, cnt);
+                    }
+
+                    fmt = CF_UNICODETEXT;
+                    BufferSize = (wcslen((PWCHAR)buffer) + 1) * sizeof(WCHAR);
+
+                    HGLOBAL hData;
+                    void *GData;
+
+                    if (buffer && (hData=GlobalAlloc(GMEM_MOVEABLE,BufferSize))) {
+
+                        if ((GData=GlobalLock(hData))) {
+
+                            memcpy(GData,buffer,BufferSize);
+                            GlobalUnlock(hData);
+
+                            if (OpenClipboard(NULL)) {
+
+                                EmptyClipboard();
+
+                                if (!SetClipboardData(fmt, (HANDLE)hData)) {
+                                    GlobalFree(hData);
+                                }
+
+                                CloseClipboard();
+
+                            } else {
+                                GlobalFree(hData);
+                            }
+
+                        } else {
+                            GlobalFree(hData);
+                        }
+                    }
+
+                    free(buffer);
+                    free(d_out);
+                }
+
+                break;
+            }
+#endif
           case 4:
             if (term->ldisc && !strcmp(term->osc_string, "?")) {
                 unsigned index = term->esc_args[1];

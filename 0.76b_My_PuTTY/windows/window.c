@@ -698,6 +698,7 @@ static void start_backend(void)
 	    SetConnBreakIcon(wgs.term_hwnd) ;
 	    lp_eventlog(&wgs.logpolicy, "Unable to connect, trying to reconnect...") ; 
 	    SetTimer(wgs.term_hwnd, TIMER_RECONNECT, GetReconnectDelay()*1000, NULL) ; 
+	    return ;
 	}
 	if( is_backend_first_connected ) {
 	    return ;
