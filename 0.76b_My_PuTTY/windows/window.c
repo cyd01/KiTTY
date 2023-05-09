@@ -7814,9 +7814,9 @@ static void wintw_set_title(TermWin *tw, const char *title_in) {
 	
 	title = (char*)malloc( strlen(title_in)+1 ) ; strcpy( title, title_in ) ;
 	
-	if( (title[0]=='_')&&(title[1]=='_') ) { // Remote command
-		if( ManageLocalCmd( MainHwnd, title+2 ) ) { free( title ) ; return ; }
-	}
+	//if( (title[0]=='_')&&(title[1]=='_') ) { // Remote command ==> moved in terminal.c
+	//	if( ManageLocalCmd( MainHwnd, title+2 ) ) { free( title ) ; return ; }
+	//}
 	
 	if( !GetTitleBarFlag() ) { set_title_internal( tw, title ) ; free( title ) ; return ; }
 	

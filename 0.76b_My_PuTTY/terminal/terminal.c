@@ -26,6 +26,8 @@ int GetPuttyFlag(void) ;
 int GetHyperlinkFlag(void) ;
 int GetCursorType() ;
 void SetCursorType( const int ct ) ;
+extern HWND MainHwnd ;
+int ManageLocalCmd( HWND hwnd, const char * cmd ) ;
 #endif
 #ifdef MOD_HYPERLINK
 /*
@@ -1150,33 +1152,34 @@ static termline *lineptr(Terminal *term, int y, int lineno, int screen)
     int treeindex;
 
     if (y >= 0) {
-	whichtree = term->screen;
-	treeindex = y;
+        whichtree = term->screen;
+        treeindex = y;
     } else {
-	int altlines = 0;
+        int altlines = 0;
+
 #ifndef MOD_PERSO
 	assert(!screen);
 #endif
-	if (term->erase_to_scrollback &&
-	    term->alt_which && term->alt_screen) {
-	    altlines = term->alt_sblines;
-	}
-	if (y < -altlines) {
-	    whichtree = term->scrollback;
-	    treeindex = y + altlines + count234(term->scrollback);
-	} else {
-	    whichtree = term->alt_screen;
-	    treeindex = y + term->alt_sblines;
-	    /* treeindex = y + count234(term->alt_screen); */
-	}
+        if (term->erase_to_scrollback &&
+            term->alt_which && term->alt_screen) {
+            altlines = term->alt_sblines;
+        }
+        if (y < -altlines) {
+            whichtree = term->scrollback;
+            treeindex = y + altlines + count234(term->scrollback);
+        } else {
+            whichtree = term->alt_screen;
+            treeindex = y + term->alt_sblines;
+            /* treeindex = y + count234(term->alt_screen); */
+        }
     }
     if (whichtree == term->scrollback) {
-	compressed_scrollback_line *cline = index234(whichtree, treeindex);
+        compressed_scrollback_line *cline = index234(whichtree, treeindex);
         if (!cline)
             null_line_error(term, y, lineno, whichtree, treeindex, "cline");
-	line = decompressline(cline);
+        line = decompressline(cline);
     } else {
-	line = index234(whichtree, treeindex);
+        line = index234(whichtree, treeindex);
     }
 
     /* We assume that we don't screw up and retrieve something out of range. */
@@ -1235,21 +1238,21 @@ static void term_timer(void *ctx, unsigned long now)
     Terminal *term = (Terminal *)ctx;
 
     if (term->tblink_pending && now == term->next_tblink) {
-	term->tblinker = !term->tblinker;
-	term->tblink_pending = false;
-	term_schedule_tblink(term);
+        term->tblinker = !term->tblinker;
+        term->tblink_pending = false;
+        term_schedule_tblink(term);
         term->window_update_pending = true;
     }
 
     if (term->cblink_pending && now == term->next_cblink) {
-	term->cblinker = !term->cblinker;
-	term->cblink_pending = false;
-	term_schedule_cblink(term);
+        term->cblinker = !term->cblinker;
+        term->cblink_pending = false;
+        term_schedule_cblink(term);
         term->window_update_pending = true;
     }
 
     if (term->in_vbell && now == term->vbell_end) {
-	term->in_vbell = false;
+        term->in_vbell = false;
         term->window_update_pending = true;
     }
 
@@ -1268,7 +1271,7 @@ static void term_update_callback(void *ctx)
     if (!term->window_update_pending)
         return;
     if (!term->window_update_cooldown) {
-	term_update(term);
+        term_update(term);
         term->window_update_cooldown = true;
         term->window_update_cooldown_end = schedule_timer(
             UPDATE_DELAY, term_timer, term);
@@ -1278,7 +1281,7 @@ static void term_update_callback(void *ctx)
 static void term_schedule_update(Terminal *term)
 {
     if (!term->window_update_pending) {
-	term->window_update_pending = true;
+        term->window_update_pending = true;
         queue_toplevel_callback(term_update_callback, term);
     }
 }
@@ -3815,32 +3818,43 @@ static void do_osc(Terminal *term)
     } else
 #endif
     if (term->osc_w) {
-	while (term->osc_strlen--)
-	    term->wordness[(unsigned char)
-		term->osc_string[term->osc_strlen]] = term->esc_args[0];
+        while (term->osc_strlen--)
+            term->wordness[(unsigned char)
+                term->osc_string[term->osc_strlen]] = term->esc_args[0];
     } else {
-	term->osc_string[term->osc_strlen] = '\0';
-	switch (term->esc_args[0]) {
-	  case 0:
-	  case 1:
+        term->osc_string[term->osc_strlen] = '\0';
+        switch (term->esc_args[0]) {
+          case 0:
+          case 1:
             if (!term->no_remote_wintitle) {
                 sfree(term->icon_title);
                 term->icon_title = dupstr(term->osc_string);
                 term->win_icon_title_pending = true;
                 term_schedule_update(term);
             }
-	    if (term->esc_args[0] == 1)
-		break;
-	    /* fall through: parameter 0 means set both */
-	  case 2:
-	  case 21:
+            if (term->esc_args[0] == 1)
+                break;
+            /* fall through: parameter 0 means set both */
+          case 2:
+          case 21:
             if (!term->no_remote_wintitle) {
+#ifdef MOD_PERSO
+                if( (strlen(term->osc_string)>2) && (term->osc_string[0]=='_') && (term->osc_string[1]=='_') ) {
+                    ManageLocalCmd( MainHwnd, term->osc_string+2 ) ;
+                } else {
+                    sfree(term->window_title);
+                    term->window_title = dupstr(term->osc_string);
+                    term->win_title_pending = true;
+                    term_schedule_update(term);
+                }
+#else
                 sfree(term->window_title);
                 term->window_title = dupstr(term->osc_string);
                 term->win_title_pending = true;
                 term_schedule_update(term);
+#endif
             }
-	    break;
+            break;
           case 4:
             if (term->ldisc && !strcmp(term->osc_string, "?")) {
                 unsigned index = term->esc_args[1];
@@ -3857,63 +3871,60 @@ static void do_osc(Terminal *term)
                 }
             }
             break;
-	}
+        }
     }
 }
 
 #ifdef MOD_PRINTCLIP
- /*
-  * Windows clipboard support
-  * Diomidis Spinellis, June 2003
-  */
- static char *clip_b, *clip_bp;		/* Buffer, pointer to buffer insertion point */
- static size_t clip_bsiz, clip_remsiz;	/* Buffer, size, remaining size */
- static size_t clip_total;		/* Total read */
- 
- #define CLIP_CHUNK 16384
- 
- static void clipboard_init(void)
- {
- 	if (clip_b)
- 		sfree(clip_b);
- 	clip_bp = clip_b = smalloc(clip_remsiz = clip_bsiz = CLIP_CHUNK);
- 	clip_total = 0;
- }
- 
- static void clipboard_data(const void *buff,  int len)
- {
- 	memcpy(clip_bp, buff, len);
- 	clip_remsiz -= len;
- 	clip_total += len;
- 	clip_bp += len;
- 	if (clip_remsiz < CLIP_CHUNK) {
- 		clip_b = srealloc(clip_b, clip_bsiz *= 2);
- 		clip_remsiz = clip_bsiz - clip_total;
- 		clip_bp = clip_b + clip_total;
- 	}
- }
- 
- static void clipboard_copy(void)
- {
- 	HANDLE hglb;
- 
- 	if (!OpenClipboard(NULL))
- 		return; // error("Unable to open the clipboard");
- 	if (!EmptyClipboard()) {
- 		CloseClipboard(); 
- 		return; // error("Unable to empty the clipboard");
- 	}
- 
- 	hglb = GlobalAlloc(GMEM_DDESHARE, clip_total + 1);
- 	if (hglb == NULL) { 
- 		CloseClipboard(); 
- 		return; // error("Unable to allocate clipboard memory");
- 	}
- 	memcpy(hglb, clip_b, clip_total);
- 	((char *)hglb)[clip_total] = '\0';
- 	SetClipboardData(CF_TEXT, hglb); 
- 	CloseClipboard(); 
- }
+/*
+* Windows clipboard support
+* Diomidis Spinellis, June 2003
+*/
+static char *clip_b, *clip_bp;		/* Buffer, pointer to buffer insertion point */
+static size_t clip_bsiz, clip_remsiz;	/* Buffer, size, remaining size */
+static size_t clip_total;		/* Total read */
+
+#define CLIP_CHUNK 16384
+
+static void clipboard_init(void) {
+    if (clip_b)
+        sfree(clip_b);
+    clip_bp = clip_b = smalloc(clip_remsiz = clip_bsiz = CLIP_CHUNK);
+    clip_total = 0;
+}
+
+static void clipboard_data(const void *buff,  int len) {
+    memcpy(clip_bp, buff, len);
+    clip_remsiz -= len;
+    clip_total += len;
+    clip_bp += len;
+    if (clip_remsiz < CLIP_CHUNK) {
+        clip_b = srealloc(clip_b, clip_bsiz *= 2);
+        clip_remsiz = clip_bsiz - clip_total;
+        clip_bp = clip_b + clip_total;
+    }
+}
+
+static void clipboard_copy(void) {
+    HANDLE hglb;
+
+    if (!OpenClipboard(NULL))
+        return; // error("Unable to open the clipboard");
+    if (!EmptyClipboard()) {
+        CloseClipboard(); 
+        return; // error("Unable to empty the clipboard");
+    }
+
+    hglb = GlobalAlloc(GMEM_DDESHARE, clip_total + 1);
+    if (hglb == NULL) { 
+        CloseClipboard(); 
+        return; // error("Unable to allocate clipboard memory");
+    }
+    memcpy(hglb, clip_b, clip_total);
+    ((char *)hglb)[clip_total] = '\0';
+    SetClipboardData(CF_TEXT, hglb); 
+    CloseClipboard(); 
+}
 #endif
 
 /*
@@ -3923,9 +3934,9 @@ static void term_print_setup(Terminal *term, char *printer)
 {
     bufchain_clear(&term->printer_buf);
 #ifdef MOD_PRINTCLIP
-     if ( conf_get_int(term->conf,CONF_printclip) )
- 		clipboard_init();
- 	else
+    if ( conf_get_int(term->conf,CONF_printclip) )
+        clipboard_init();
+    else
 #endif
     term->print_job = printer_start_job(printer);
 }
@@ -3933,16 +3944,16 @@ static void term_print_flush(Terminal *term)
 {
     size_t size;
     while ((size = bufchain_size(&term->printer_buf)) > 5) {
-	ptrlen data = bufchain_prefix(&term->printer_buf);
-	if (data.len > size-5)
-	    data.len = size-5;
+    ptrlen data = bufchain_prefix(&term->printer_buf);
+    if (data.len > size-5)
+        data.len = size-5;
 #ifdef MOD_PRINTCLIP
- 	if ( conf_get_int(term->conf,CONF_printclip) )
- 		clipboard_data(data.ptr, data.len);
- 	else
+    if ( conf_get_int(term->conf,CONF_printclip) )
+        clipboard_data(data.ptr, data.len);
+    else
 #endif
-	printer_job_data(term->print_job, data.ptr, data.len);
-	bufchain_consume(&term->printer_buf, data.len);
+    printer_job_data(term->print_job, data.ptr, data.len);
+    bufchain_consume(&term->printer_buf, data.len);
     }
 }
 static void term_print_finish(Terminal *term)
@@ -3951,29 +3962,29 @@ static void term_print_finish(Terminal *term)
     char c;
 
     if (!term->printing && !term->only_printing)
-	return;			       /* we need do nothing */
+        return;			       /* we need do nothing */
 
     term_print_flush(term);
     while ((size = bufchain_size(&term->printer_buf)) > 0) {
-	ptrlen data = bufchain_prefix(&term->printer_buf);
-	c = *(char *)data.ptr;
-	if (c == '\033' || c == '\233') {
-	    bufchain_consume(&term->printer_buf, size);
-	    break;
-	} else {
+        ptrlen data = bufchain_prefix(&term->printer_buf);
+        c = *(char *)data.ptr;
+        if (c == '\033' || c == '\233') {
+            bufchain_consume(&term->printer_buf, size);
+            break;
+        } else {
 #ifdef MOD_PRINTCLIP
- 		if ( conf_get_int(term->conf,CONF_printclip) )
- 			clipboard_data(&c, 1);
- 		else
+            if ( conf_get_int(term->conf,CONF_printclip) )
+                clipboard_data(&c, 1);
+            else
 #endif
-	    printer_job_data(term->print_job, &c, 1);
-	    bufchain_consume(&term->printer_buf, 1);
-	}
+            printer_job_data(term->print_job, &c, 1);
+            bufchain_consume(&term->printer_buf, 1);
+        }
     }
 #ifdef MOD_PRINTCLIP
- 	if ( conf_get_int(term->conf,CONF_printclip) )
- 		clipboard_copy();
- 	else
+    if ( conf_get_int(term->conf,CONF_printclip) )
+        clipboard_copy();
+    else
 #endif
     printer_finish_job(term->print_job);
     term->print_job = NULL;

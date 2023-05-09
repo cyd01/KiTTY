@@ -2571,129 +2571,129 @@ dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
 */
 static int LocalCmdFlag = 1 ;
 int ManageLocalCmd( HWND hwnd, const char * cmd ) {
-	//if( !LocalCmdFlag ) { return 0; }
-	char buffer[1024] = "", title[1024] = "" ;
-	if( debug_flag ) { debug_logevent( "Local command: %s", cmd ) ;  }
-	if( cmd == NULL ) return 0 ; 
-	if( (cmd[2] != ':')&&(cmd[2] != '\0') ) return 0 ;
-	if( (cmd[2] == ':')&&( strlen( cmd ) <= 3 ) ) return 0 ;
-	if( (cmd[0]=='p')&&(cmd[1]=='w')&&(cmd[2]==':') ) { // __pw: nouveau remote directory
-		if( RemotePath!= NULL ) free( RemotePath ) ;
-		RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
-		strcpy( RemotePath, cmd+3 ) ;
-		return 1 ;
-	} else if( (cmd[0]=='r')&&(cmd[1]=='v')&&(cmd[2]==':') ) { // __rv: Reception d'un fichiers
-		GetOneFile( hwnd, RemotePath, cmd+3 ) ;
-		return 1 ;
-	} else if( (cmd[0]=='p')&&(cmd[1]=='l')&&(cmd[2]==':') ) { // __pl: Lance une commande plink
-		RunExternPlink( hwnd, cmd+3 ) ;
-		return 1 ;
-	} else if( (cmd[0]=='t')&&(cmd[1]=='i')&&(cmd[2]=='\0') ) { // __ti: Recuperation du titre de la fenetre
-		GetWindowText( hwnd, buffer, 1024 ) ;
-		sprintf( title, "printf \"\\033]0;%s\\007\"\n", buffer ) ;
-		SendStrToTerminal( title, strlen(title) ) ;
-		return 1 ;
-	} else if( (cmd[0]=='i')&&(cmd[1]=='n')&&(cmd[2]==':') ) { // __in: Affiche d'information dans le log
-		debug_logevent(cmd+3) ;
-		return 1 ;
-	} else if( (cmd[0]=='w')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ws: Lance WinSCP dans un repertoire donne
-		if( RemotePath!= NULL ) free( RemotePath ) ;
-		RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
-		strcpy( RemotePath, cmd+3 ) ;
-		StartWinSCP( hwnd, RemotePath, NULL, NULL ) ;
-		// free( RemotePath ) ; RemotePath = NULL ;
-		return 1 ;
-	} else if( (cmd[0]=='w')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __wt: Lance WinSCP dans sur un host et un user donné et dans un repertoire donné
-		char host[1024]="";char user[256]="";
-		int i;
-		if( RemotePath!= NULL ) free( RemotePath ) ;
-		RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
-		strcpy(host,cmd+3);i=poss(":",host);
-		strcpy(user,host+i);
-		host[i-1]='\0';
-		i=poss(":",user);
-		strcpy( RemotePath, user+i ) ;
-		user[i-1]='\0';
-		StartWinSCP( hwnd, RemotePath, host, user ) ;
-		// free( RemotePath ) ; RemotePath = NULL ;
-		return 1 ;
-	} else if( (cmd[0]=='i')&&(cmd[1]=='e')&&(cmd[2]==':') ) { // __ie: Lance un navigateur sur le lien
-		if( strlen(cmd+3)>0 ) {
-			urlhack_launch_url(!conf_get_int(conf,CONF_url_defbrowser)?conf_get_filename(conf,CONF_url_browser)->path:NULL, (const char *)(cmd+3));
-			return 1;
-			}
-	} else if( (cmd[0]=='d')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ds: Lance une session dupliquee dans le meme repertoire ds() { printf "\033]0;__ds:`pwd`\007" ; }
-		if( RemotePath!= NULL ) free( RemotePath ) ;
-		RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
-		strcpy( RemotePath, cmd+3 ) ;
-		RunSessionWithCurrentSettings( hwnd, conf, NULL, NULL, NULL, 0, RemotePath ) ;
-		return 1 ;
-	} else if( (cmd[0]=='d')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __dt: Lance une session dupliquee dans le meme repertoire, meme host, meme user dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
-		char host[1024]="";char user[256]="";
-		int i;
-		if( RemotePath!= NULL ) free( RemotePath ) ;
-		RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
-		strcpy(host,cmd+3);i=poss(":",host);
-		strcpy(user,host+i);
-		host[i-1]='\0';
-		i=poss(":",user);
-		strcpy( RemotePath, user+i ) ;
-		user[i-1]='\0';
-		RunSessionWithCurrentSettings( hwnd, conf, host, user, NULL, 0, RemotePath ) ;
-		return 1 ;
-	} else if( (cmd[0]=='l')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ls: envoie un script sauvegardé localement (comme fait le CTRL+F2)
-		RunScriptFile( hwnd, cmd+3 ) ;
-		return 1 ;
-	} else if( (cmd[0]=='c')&&(cmd[1]=='m')&&(cmd[2]==':') ) { // __cm: Execute une commande externe
-		RunCommand( hwnd, cmd+3 ) ;
-		return 1 ;
-	}
-	return 0 ;
+    //if( !LocalCmdFlag ) { return 0; }
+    char buffer[1024] = "", title[1024] = "" ;
+    if( debug_flag ) { debug_logevent( "Local command: %s", cmd ) ; }
+    if( cmd == NULL ) return 0 ;
+    if( (cmd[2] != ':')&&(cmd[2] != '\0') ) return 0 ;
+    if( (cmd[2] == ':')&&( strlen( cmd ) <= 3 ) ) return 0 ;
+    if( (cmd[0]=='p')&&(cmd[1]=='w')&&(cmd[2]==':') ) { // __pw: nouveau remote directory
+        if( RemotePath!= NULL ) free( RemotePath ) ;
+        RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
+        strcpy( RemotePath, cmd+3 ) ;
+        return 1 ;
+    } else if( (cmd[0]=='r')&&(cmd[1]=='v')&&(cmd[2]==':') ) { // __rv: Reception d'un fichiers
+        GetOneFile( hwnd, RemotePath, cmd+3 ) ;
+        return 1 ;
+    } else if( (cmd[0]=='p')&&(cmd[1]=='l')&&(cmd[2]==':') ) { // __pl: Lance une commande plink
+        RunExternPlink( hwnd, cmd+3 ) ;
+        return 1 ;
+    } else if( (cmd[0]=='t')&&(cmd[1]=='i')&&(cmd[2]=='\0') ) { // __ti: Recuperation du titre de la fenetre
+        GetWindowText( hwnd, buffer, 1024 ) ;
+        sprintf( title, "printf \"\\033]0;%s\\007\"\n", buffer ) ;
+        SendStrToTerminal( title, strlen(title) ) ;
+        return 1 ;
+    } else if( (cmd[0]=='i')&&(cmd[1]=='n')&&(cmd[2]==':') ) { // __in: Affiche d'information dans le log
+        debug_logevent(cmd+3) ;
+        return 1 ;
+    } else if( (cmd[0]=='w')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ws: Lance WinSCP dans un repertoire donne
+        if( RemotePath!= NULL ) free( RemotePath ) ;
+        RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
+        strcpy( RemotePath, cmd+3 ) ;
+        StartWinSCP( hwnd, RemotePath, NULL, NULL ) ;
+        return 1 ;
+    } else if( (cmd[0]=='w')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __wt: Lance WinSCP dans sur un host et un user donné et dans un repertoire donné
+        char host[1024]="";char user[256]="";
+        int i;
+        if( RemotePath!= NULL ) free( RemotePath ) ;
+        RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
+        strcpy(host,cmd+3);i=poss(":",host);
+        strcpy(user,host+i);
+        host[i-1]='\0';
+        i=poss(":",user);
+        strcpy( RemotePath, user+i ) ;
+        user[i-1]='\0';
+        StartWinSCP( hwnd, RemotePath, host, user ) ;
+        // free( RemotePath ) ; RemotePath = NULL ;
+        return 1 ;
+    } else if( (cmd[0]=='i')&&(cmd[1]=='e')&&(cmd[2]==':') ) { // __ie: Lance un navigateur sur le lien
+        if( strlen(cmd+3)>0 ) {
+            urlhack_launch_url(!conf_get_int(conf,CONF_url_defbrowser)?conf_get_filename(conf,CONF_url_browser)->path:NULL, (const char *)(cmd+3));
+            return 1;
+        }
+    } else if( (cmd[0]=='d')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ds: Lance une session dupliquee dans le meme repertoire ds() { printf "\033]0;__ds:`pwd`\007" ; }
+        if( RemotePath!= NULL ) free( RemotePath ) ;
+        RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
+        strcpy( RemotePath, cmd+3 ) ;
+        if( debug_flag ) { debug_logevent( "Start the same session in remote path: %s", RemotePath ) ; }
+        RunSessionWithCurrentSettings( hwnd, conf, NULL, NULL, NULL, 0, RemotePath ) ;
+        return 1 ;
+    } else if( (cmd[0]=='d')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __dt: Lance une session dupliquee dans le meme repertoire, meme host, meme user dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
+        char host[1024]="";char user[256]="";
+        int i;
+        if( RemotePath!= NULL ) free( RemotePath ) ;
+        RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
+        strcpy(host,cmd+3);i=poss(":",host);
+        strcpy(user,host+i);
+        host[i-1]='\0';
+        i=poss(":",user);
+        strcpy( RemotePath, user+i ) ;
+        user[i-1]='\0';
+        RunSessionWithCurrentSettings( hwnd, conf, host, user, NULL, 0, RemotePath ) ;
+        return 1 ;
+    } else if( (cmd[0]=='l')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ls: envoie un script sauvegardé localement (comme fait le CTRL+F2)
+        RunScriptFile( hwnd, cmd+3 ) ;
+        return 1 ;
+    } else if( (cmd[0]=='c')&&(cmd[1]=='m')&&(cmd[2]==':') ) { // __cm: Execute une commande externe
+        RunCommand( hwnd, cmd+3 ) ;
+        return 1 ;
+    }
+    return 0 ;
 }
 
 // Recupere les coordonnees de la fenetre
 void GetWindowCoord( HWND hwnd ) {
-	RECT rc ;
-	GetWindowRect( hwnd, &rc ) ;
+    RECT rc ;
+    GetWindowRect( hwnd, &rc ) ;
 
-	conf_set_int(conf,CONF_xpos,rc.left);
-	conf_set_int(conf,CONF_ypos,rc.top);
+    conf_set_int(conf,CONF_xpos,rc.left);
+    conf_set_int(conf,CONF_ypos,rc.top);
 
-	conf_set_int(conf,CONF_windowstate,IsZoomed( hwnd ));
+    conf_set_int(conf,CONF_windowstate,IsZoomed( hwnd ));
 }
 
 // Sauve les coordonnees de la fenetre
 void SaveWindowCoord( Conf * conf ) {
-	char key[1024], session[1024] ;
-	if( conf_get_bool(conf,CONF_saveonexit) )
-	if( conf_get_str(conf,CONF_sessionname)!= NULL )
-	if( strlen( conf_get_str(conf,CONF_sessionname) ) > 0 ) {
-		if( IniFileFlag == SAVEMODE_REG ) {
-			mungestr( conf_get_str(conf,CONF_sessionname), session ) ;
-			sprintf( key, "%s\\Sessions\\%s", TEXT(PUTTY_REG_POS), session ) ;
-			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermXPos", conf_get_int(conf,CONF_xpos) ) ;
-			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermYPos", conf_get_int(conf,CONF_ypos) ) ;
-			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermWidth", conf_get_int(conf,CONF_width) ) ;
-			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermHeight", conf_get_int(conf,CONF_height) ) ;
-			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "WindowState", conf_get_int(conf,CONF_windowstate) ) ;
-			RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TransparencyValue", conf_get_int(conf,CONF_transparencynumber) ) ;
-		} else { 
-			int xpos=conf_get_int(conf,CONF_xpos)
-				, ypos=conf_get_int(conf,CONF_ypos)
-				, width=conf_get_int(conf,CONF_width)
-				, height=conf_get_int(conf,CONF_height)
-				, windowstate=conf_get_int(conf,CONF_windowstate)
-				, transparency=conf_get_int(conf,CONF_transparencynumber);
-			load_settings( conf_get_str(conf,CONF_sessionname), conf ) ;
-			conf_set_int(conf,CONF_xpos,xpos) ; 
-			conf_set_int(conf,CONF_ypos,ypos) ; 
-			conf_set_int(conf,CONF_width,width) ;
-			conf_set_int(conf,CONF_height,height) ;
-			conf_set_int(conf,CONF_windowstate,windowstate) ; 
-			conf_set_int(conf,CONF_transparencynumber,transparency) ; 
-			save_settings( conf_get_str(conf,CONF_sessionname), conf ) ;
-		}
-	}
+    char key[1024], session[1024] ;
+    if( conf_get_bool(conf,CONF_saveonexit) )
+    if( conf_get_str(conf,CONF_sessionname)!= NULL )
+    if( strlen( conf_get_str(conf,CONF_sessionname) ) > 0 ) {
+        if( IniFileFlag == SAVEMODE_REG ) {
+            mungestr( conf_get_str(conf,CONF_sessionname), session ) ;
+            sprintf( key, "%s\\Sessions\\%s", TEXT(PUTTY_REG_POS), session ) ;
+            RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermXPos", conf_get_int(conf,CONF_xpos) ) ;
+            RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermYPos", conf_get_int(conf,CONF_ypos) ) ;
+            RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermWidth", conf_get_int(conf,CONF_width) ) ;
+            RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TermHeight", conf_get_int(conf,CONF_height) ) ;
+            RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "WindowState", conf_get_int(conf,CONF_windowstate) ) ;
+            RegTestOrCreateDWORD( HKEY_CURRENT_USER, key, "TransparencyValue", conf_get_int(conf,CONF_transparencynumber) ) ;
+        } else { 
+            int xpos=conf_get_int(conf,CONF_xpos)
+                , ypos=conf_get_int(conf,CONF_ypos)
+                , width=conf_get_int(conf,CONF_width)
+                , height=conf_get_int(conf,CONF_height)
+                , windowstate=conf_get_int(conf,CONF_windowstate)
+                , transparency=conf_get_int(conf,CONF_transparencynumber);
+            load_settings( conf_get_str(conf,CONF_sessionname), conf ) ;
+            conf_set_int(conf,CONF_xpos,xpos) ; 
+            conf_set_int(conf,CONF_ypos,ypos) ; 
+            conf_set_int(conf,CONF_width,width) ;
+            conf_set_int(conf,CONF_height,height) ;
+            conf_set_int(conf,CONF_windowstate,windowstate) ; 
+            conf_set_int(conf,CONF_transparencynumber,transparency) ; 
+            save_settings( conf_get_str(conf,CONF_sessionname), conf ) ;
+        }
+    }
 }
 
 // Gestion de la fonction winroll
