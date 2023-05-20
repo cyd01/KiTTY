@@ -7772,6 +7772,7 @@ char * make_title( char * fmt, const char * title ) {
 			}
 		}
 		if( bb!=NULL ) { 
+			res = (char*)realloc( res, strlen(res)+strlen(bb)+1 ) ;
 			insert( res, bb, p ) ; 
 		}
 		free(bb) ;
@@ -7793,9 +7794,9 @@ char * make_title( char * fmt, const char * title ) {
 				strcat( bb, k+1 ) ;
 				nb++;
 			}
-			res[1023]='\0';
 		}
 		if( bb != NULL ) {
+			res = (char*)realloc( res, strlen(res)+strlen(bb)+1 ) ;
 			insert( res, bb, p ) ;
 		}
 	}
