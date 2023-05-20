@@ -2571,7 +2571,7 @@ dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
 */
 static int LocalCmdFlag = 1 ;
 int ManageLocalCmd( HWND hwnd, const char * cmd ) {
-    //if( !LocalCmdFlag ) { return 0; }
+    if( !LocalCmdFlag ) { return 0; }
     char buffer[1024] = "", title[1024] = "" ;
     if( debug_flag ) { debug_logevent( "Local command: %s", cmd ) ; }
     if( cmd == NULL ) return 0 ;
