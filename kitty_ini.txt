@@ -128,6 +128,9 @@ icon=yes
 ; localcmd: manage local commands (starting with __)
 ;localcmd=yes
 
+; localunsecurecmd: manage local unsecure commands ( ___pl, __ds, __cm, __ie )
+;localunsecurecmd=no
+
 ; maxblinkingtime: maximum blinks (in system tray) where receiving bell signal
 maxblinkingtime=5
 
