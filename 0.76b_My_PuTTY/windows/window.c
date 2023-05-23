@@ -7684,124 +7684,124 @@ Ex: %%P://%%u@%%h:%%p
 Ex: %%f / %%s
 */
 char * make_title( char * fmt, const char * title ) {
-	int p ;
-	char * res = NULL ;
-	res = (char *)malloc( strlen(fmt)+strlen(title)+1 ) ;
-	sprintf( res, fmt, title ) ;
+    int p ;
+    char * res = NULL ;
+    res = (char *)malloc( strlen(fmt)+strlen(title)+1 ) ;
+    sprintf( res, fmt, title ) ;
 
-	while( (p=poss( "%%s", res)) > 0 ) {
-		del( res, p, 3 ) ;
-		res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_sessionname))+1 ) ;
-		if( strlen(conf_get_str(conf,CONF_sessionname))>0 )  {
-			insert( res, conf_get_str(conf,CONF_sessionname), p ) ; 
-		}
-	}
-	while( (p=poss( "%%h", res)) > 0 ) { 
-		del( res, p, 3 ) ;
-		if( conf_get_int(conf,CONF_protocol) == PROT_SERIAL ) {
-			res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_serline))+1 ) ;
-			insert( res, conf_get_str(conf,CONF_serline), p ) ;
-		} else {
-			res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_host))+1 ) ;
-			insert( res, conf_get_str(conf,CONF_host), p ) ;
-		}
-	}
-	while( (p=poss( "%%u", res)) > 0 ) {
-		del( res, p ,3 ) ;
-		res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_username))+1 ) ;
-		insert( res, conf_get_str(conf,CONF_username), p ) ;
-	}
-	while( (p=poss( "%%f", res)) > 0 ) {
-		del( res, p , 3 ) ;
-		res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_folder))+1 ) ;
-		if(strlen(conf_get_str(conf,CONF_folder))>0) {
-			insert(res,conf_get_str(conf,CONF_folder),p); 
-		}
-	}
-	char b[256] ;
-	int port = conf_get_int( conf, CONF_port ); 
-	switch(conf_get_int(conf,CONF_protocol)) {
-		case PROT_RAW: strcpy(b,"raw"); break;
-		case PROT_TELNET: strcpy(b,"telnet"); if(port==-1) port=23 ; break;
-		case PROT_RLOGIN: strcpy(b,"rlogin"); break;
-		case PROT_SSH: strcpy(b,"ssh"); if(port==-1) port=22 ; break;
-		case PROT_SERIAL: strcpy(b,"serial"); break;
-	}
-	while( (p=poss( "%%P", res)) > 0 ) {
-		del( res, p, 3 ) ;
-		res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
-		insert( res, b , p ) ; 
-	}
-	sprintf( b, "%d", port ) ; 
-	while( (p=poss( "%%p", res)) > 0 ) {
-		del( res, p, 3 ) ;
-		res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
-		insert( res, b, p ) ; 
-	}
-	sprintf(b,"%ld", GetCurrentProcessId() ) ;
-	while( (p=poss( "%%i", res)) > 0 ) {
-		del( res, p, 3 ) ;
-		res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
-		insert( res, b, p) ;
-	}
-	while( (p=poss( "%%d", res)) > 0 ) { // forward port dynamic
-		char *key, *val, *k;
-		int nb=0 ;
-		del( res, p, 3 ) ;
-		char *bb = (char*)malloc(1) ;
-		bb[0] = '\0' ;
-		for( val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key ) ;
-			val != NULL;
-			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
-			k=key; 
-			if( (k[0]=='4')||(k[0]=='6') ) { k++ ; }
-			if( (k[0]=='L') && (!strcmp(val,"D")) ) {
-				bb = (char*)realloc( bb, strlen(bb)+strlen(k)+3 ) ;
-				if( nb!=0 ) { strcat( bb, "|" ) ; }
-				strcat( bb, k+1 ) ;
-				switch( GetPortFwdState( atoi(k+1), GetCurrentProcessId() ) ) {
-					case -1: 
-						break ;
-					case 0: 
-						strcat(bb,"+");
-						break ;
-					default:
-						strcat(bb,"~");
-				}
-				nb++;
-			}
-		}
-		if( bb!=NULL ) { 
-			res = (char*)realloc( res, strlen(res)+strlen(bb)+1 ) ;
-			insert( res, bb, p ) ; 
-		}
-		free(bb) ;
-	}
-	while( (p=poss( "%%l", res)) > 0 ) { // forward port locaux
-		char *key, *val, *k;
-		int nb=0 ;
-		del( res, p, 3 ) ;
-		char *bb = (char*)malloc(1) ;
-		bb[0] = '\0' ;
-		for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
-			val != NULL;
-			val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
-			k=key;
-			if( (k[0]=='4')||(k[0]=='6') ) { k++; }
-			if( (k[0]=='L') && (strcmp(val,"D")) ) {
-				bb = (char*)realloc( bb, strlen(bb)+strlen(k)+3 ) ;
-				if( nb!=0 ) { strcat( bb, "|" ) ; }
-				strcat( bb, k+1 ) ;
-				nb++;
-			}
-		}
-		if( bb != NULL ) {
-			res = (char*)realloc( res, strlen(res)+strlen(bb)+1 ) ;
-			insert( res, bb, p ) ;
-		}
-	}
-	
-	return res ;
+    while( (p=poss( "%%s", res)) > 0 ) {
+        del( res, p, 3 ) ;
+        res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_sessionname))+1 ) ;
+        if( strlen(conf_get_str(conf,CONF_sessionname))>0 )  {
+            insert( res, conf_get_str(conf,CONF_sessionname), p ) ; 
+        }
+    }
+    while( (p=poss( "%%h", res)) > 0 ) { 
+        del( res, p, 3 ) ;
+        if( conf_get_int(conf,CONF_protocol) == PROT_SERIAL ) {
+            res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_serline))+1 ) ;
+            insert( res, conf_get_str(conf,CONF_serline), p ) ;
+        } else {
+            res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_host))+1 ) ;
+            insert( res, conf_get_str(conf,CONF_host), p ) ;
+        }
+    }
+    while( (p=poss( "%%u", res)) > 0 ) {
+        del( res, p ,3 ) ;
+        res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_username))+1 ) ;
+        insert( res, conf_get_str(conf,CONF_username), p ) ;
+    }
+    while( (p=poss( "%%f", res)) > 0 ) {
+        del( res, p , 3 ) ;
+        res = (char*)realloc( res, strlen(res)+strlen(conf_get_str(conf,CONF_folder))+1 ) ;
+        if(strlen(conf_get_str(conf,CONF_folder))>0) {
+            insert(res,conf_get_str(conf,CONF_folder),p); 
+        }
+    }
+    char b[256] ;
+    int port = conf_get_int( conf, CONF_port ); 
+    switch(conf_get_int(conf,CONF_protocol)) {
+        case PROT_RAW: strcpy(b,"raw"); break;
+        case PROT_TELNET: strcpy(b,"telnet"); if(port==-1) port=23 ; break;
+        case PROT_RLOGIN: strcpy(b,"rlogin"); break;
+        case PROT_SSH: strcpy(b,"ssh"); if(port==-1) port=22 ; break;
+        case PROT_SERIAL: strcpy(b,"serial"); break;
+    }
+    while( (p=poss( "%%P", res)) > 0 ) {
+        del( res, p, 3 ) ;
+        res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
+        insert( res, b , p ) ; 
+    }
+    sprintf( b, "%d", port ) ; 
+    while( (p=poss( "%%p", res)) > 0 ) {
+        del( res, p, 3 ) ;
+        res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
+        insert( res, b, p ) ; 
+    }
+    sprintf(b,"%ld", GetCurrentProcessId() ) ;
+    while( (p=poss( "%%i", res)) > 0 ) {
+        del( res, p, 3 ) ;
+        res = (char*)realloc( res, strlen(res)+strlen(b)+1 ) ;
+        insert( res, b, p) ;
+    }
+    while( (p=poss( "%%d", res)) > 0 ) { // forward port dynamic
+        char *key, *val, *k;
+        int nb=0 ;
+        del( res, p, 3 ) ;
+        char *bb = (char*)malloc(1) ;
+        bb[0] = '\0' ;
+        for( val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key ) ;
+            val != NULL;
+            val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
+            k=key; 
+            if( (k[0]=='4')||(k[0]=='6') ) { k++ ; }
+            if( (k[0]=='L') && (!strcmp(val,"D")) ) {
+                bb = (char*)realloc( bb, strlen(bb)+strlen(k)+3 ) ;
+                if( nb!=0 ) { strcat( bb, "|" ) ; }
+                strcat( bb, k+1 ) ;
+                switch( GetPortFwdState( atoi(k+1), GetCurrentProcessId() ) ) {
+                    case -1: 
+                        break ;
+                    case 0: 
+                        strcat(bb,"+");
+                        break ;
+                    default:
+                        strcat(bb,"~");
+                }
+                nb++;
+            }
+        }
+        if( bb!=NULL ) { 
+            res = (char*)realloc( res, strlen(res)+strlen(bb)+1 ) ;
+            insert( res, bb, p ) ; 
+        }
+        free(bb) ;
+    }
+    while( (p=poss( "%%l", res)) > 0 ) { // forward port locaux
+        char *key, *val, *k;
+        int nb=0 ;
+        del( res, p, 3 ) ;
+        char *bb = (char*)malloc(1) ;
+        bb[0] = '\0' ;
+        for (val = conf_get_str_strs(conf, CONF_portfwd, NULL, &key);
+            val != NULL;
+            val = conf_get_str_strs(conf, CONF_portfwd, key, &key)) {
+            k=key;
+            if( (k[0]=='4')||(k[0]=='6') ) { k++; }
+            if( (k[0]=='L') && (strcmp(val,"D")) ) {
+                bb = (char*)realloc( bb, strlen(bb)+strlen(k)+3 ) ;
+                if( nb!=0 ) { strcat( bb, "|" ) ; }
+                strcat( bb, k+1 ) ;
+                nb++;
+            }
+        }
+        if( bb != NULL ) {
+            res = (char*)realloc( res, strlen(res)+strlen(bb)+1 ) ;
+            insert( res, bb, p ) ;
+        }
+    }
+
+    return res ;
 }
 
 void set_title_internal(TermWin *tw, const char *title) {

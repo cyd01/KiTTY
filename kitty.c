@@ -2027,17 +2027,18 @@ void RunScriptFile( HWND hwnd, const char * filename ) {
 	}
 
 void OpenAndSendScriptFile( HWND hwnd ) {
-	char filename[4096], buffer[4096] ;
-	if( ReadParameter( INIT_SECTION, "scriptfilefilter", buffer ) ) {
-		buffer[4090]='\0';
-		}
-	else strcpy( buffer, "Script files (*.ksh,*.sh)|*.ksh;*.sh|SQL files (*.sql)|*.sql|All files (*.*)|*.*|" ) ;
-	if( buffer[strlen(buffer)-1]!='|' ) strcat( buffer, "|" ) ;
-	if( OpenFileName( hwnd, filename, "Open file...", buffer ) ) {
-		RunScriptFile( hwnd, filename ) ;
-		}
-	}
-	
+    char filename[4096], buffer[4096] ;
+    if( ReadParameter( INIT_SECTION, "scriptfilefilter", buffer ) ) {
+        buffer[4090]='\0';
+    } else { 
+        strcpy( buffer, "Script files (*.ksh,*.sh)|*.ksh;*.sh|SQL files (*.sql)|*.sql|All files (*.*)|*.*|" ) ;
+    }
+    if( buffer[strlen(buffer)-1]!='|' ) strcat( buffer, "|" ) ;
+    if( OpenFileName( hwnd, filename, "Open file...", buffer ) ) {
+        RunScriptFile( hwnd, filename ) ;
+    }
+}
+
 // Envoi d'un fichier par SCP vers la racine du compte
 int SearchPSCP( void ) ;
 static int nb_pscp_run = 0 ;
@@ -2196,357 +2197,371 @@ void SendFile( HWND hwnd ) {
 	}
 
 
-// Lancement d'une commande plink.exe
-/* ALIAS UNIX A DEFINIR POUR EXECUTER LA COMMANDE
+// Start a plink command
+/*
 run() { printf "\033]0;__pl:$*\007" ; }
 */
 int SearchPlink( void ) ;
 void RunExternPlink( HWND hwnd, const char * cmd ) {
-	char buffer[4096], plinkpath[4096]="", b1[256] ;
-	
-	if( PlinkPath==NULL ) {
-		if( IniFileFlag == SAVEMODE_REG ) return ;
-		else if( !SearchPlink() ) return ;
-		}
-	if( !existfile( PlinkPath ) ) {
-		if( IniFileFlag == SAVEMODE_REG ) return ;
-		else if( !SearchPlink() ) return ;
-		}
-		
-	if( !GetShortPathName( PlinkPath, plinkpath, 4095 ) ) return ;
+    char buffer[4096], plinkpath[4096]="", b1[256] ;
 
-	strcpy( buffer, "" ) ;
-	sprintf( buffer, "%s ", plinkpath ) ;
-		
-	//if( GetAutoStoreSSHKeyFlag() ) strcat( buffer, "-auto-store-sshkey " ) ;
+    if( PlinkPath==NULL ) {
+        if( IniFileFlag == SAVEMODE_REG ) return ;
+        else if( !SearchPlink() ) return ;
+    }
+    if( !existfile( PlinkPath ) ) {
+        if( IniFileFlag == SAVEMODE_REG ) return ;
+        else if( !SearchPlink() ) return ;
+    }
 
-	if( strlen( conf_get_str(conf, CONF_sftpconnect) ) == 0 ) {
-		sprintf( b1, "-P %d ", conf_get_int(conf, CONF_port)) ;
-		strcat( buffer, b1 ) ;
-	}
-	
-	if( conf_get_int(conf,CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
-		strcat( buffer, "-2 " ) ;
-	}
+    if( !GetShortPathName( PlinkPath, plinkpath, 4095 ) ) return ;
 
-	if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
-		strcat( buffer, "-pw \"" ) ;
-		char bufpass[1024] ;
-		strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
-		MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
-		strcat( buffer, "\" " ) ;
-	}
+    strcpy( buffer, "" ) ;
+    sprintf( buffer, "%s ", plinkpath ) ;
 
-	if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
-		strcat( buffer, "-i \"" ) ;
-		strcat( buffer, conf_get_filename(conf,CONF_keyfile)->path ) ;
-		strcat( buffer, "\" " ) ;
-		}		
+    //if( GetAutoStoreSSHKeyFlag() ) strcat( buffer, "-auto-store-sshkey " ) ;
 
-	strcat( buffer, "\"" ) ;
-	
-	if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
-			strcat( buffer, conf_get_str(conf, CONF_sftpconnect) ) ;
-	} else {	
-		strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
-		if( poss( ":", conf_get_str(conf,CONF_host) )>0 ) { strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; }
-		else { strcat( buffer, conf_get_str(conf,CONF_host) ) ; }
-	}
-	strcat( buffer, "\" " );
-	
-	strcat( buffer, "\"" ) ; strcat( buffer, cmd ) ; strcat(buffer,"\"") ;
-	
-	chdir( InitialDirectory ) ;
-	if( debug_flag ) { debug_logevent( "Run: %s", buffer) ; }
-	if( system( buffer ) ) MessageBox( NULL, buffer, "Execute problem", MB_OK|MB_ICONERROR  ) ;
+    if( strlen( conf_get_str(conf, CONF_sftpconnect) ) == 0 ) {
+        sprintf( b1, "-P %d ", conf_get_int(conf, CONF_port)) ;
+        strcat( buffer, b1 ) ;
+    }
+
+    if( conf_get_int(conf,CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
+        strcat( buffer, "-2 " ) ;
+    }
+
+    if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
+        strcat( buffer, "-pw \"" ) ;
+        char bufpass[1024] ;
+        strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
+        MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
+        strcat( buffer, "\" " ) ;
+    }
+
+    if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
+        strcat( buffer, "-i \"" ) ;
+        strcat( buffer, conf_get_filename(conf,CONF_keyfile)->path ) ;
+        strcat( buffer, "\" " ) ;
+    }
+
+    strcat( buffer, "\"" ) ;
+
+    if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
+        strcat( buffer, conf_get_str(conf, CONF_sftpconnect) ) ;
+    } else {
+        strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
+        if( poss( ":", conf_get_str(conf,CONF_host) )>0 ) { strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; }
+        else { strcat( buffer, conf_get_str(conf,CONF_host) ) ; }
+    }
+    strcat( buffer, "\" " );
+
+    strcat( buffer, "\"" ) ; strcat( buffer, cmd ) ; strcat(buffer,"\"") ;
+
+    chdir( InitialDirectory ) ;
+    if( debug_flag ) { debug_logevent( "Run: %s", buffer) ; }
+    if( system( buffer ) ) { MessageBox( NULL, buffer, "Execute problem", MB_OK|MB_ICONERROR  ) ; }
 }
-	
-// Reception d'un fichier par pscp
-/* ALIAS UNIX A DEFINIR POUR RECUPERER UN FICHIER
+
+// Get a remote file throught scp
+/*
 get()
 {
 echo "\033]0;__pw:"`pwd`"\007"
 for file in ${*} ; do echo "\033]0;__rv:"${file}"\007" ; done
 }
-Il faut ensuite simplement taper: get filename
-C'est traite dans KiTTY par la fonction ManageLocalCmd
 */
 void GetOneFile( HWND hwnd, char * directory, const char * filename ) {
-	char buffer[4096], pscppath[4096]="", pscpport[4096]="22", dir[4096]=".", b1[256] ;
-	int p;
-	
-	if( PSCPPath==NULL ) {
-		if( IniFileFlag == SAVEMODE_REG ) return ;
-		else if( !SearchPSCP() ) return ;
-	}
-	if( !existfile( PSCPPath ) ) {
-		if( IniFileFlag == SAVEMODE_REG ) return ;
-		else if( !SearchPSCP() ) return ;
-	}
-		
-	if( !GetShortPathName( PSCPPath, pscppath, 4095 ) ) return ;
+    char buffer[4096], pscppath[4096]="", pscpport[4096]="22", dir[4096]=".", b1[256] ;
+    int p;
 
-	if( ReadParameter( INIT_SECTION, "downloaddir", dir ) ) {
-		if( !existdirectory( dir ) )
-			strcpy( dir, InitialDirectory ) ;
-	}
-	if(strlen( dir ) == 0) strcpy( dir, InitialDirectory ) ;
+    if( PSCPPath==NULL ) {
+        if( IniFileFlag == SAVEMODE_REG ) return ;
+        else if( !SearchPSCP() ) return ;
+    }
+    if( !existfile( PSCPPath ) ) {
+        if( IniFileFlag == SAVEMODE_REG ) return ;
+        else if( !SearchPSCP() ) return ;
+    }
 
-	strcpy( buffer, "" ) ;
-	
-	if( nb_pscp_run<4 ) { sprintf( buffer, "start %s ", pscppath ) ; nb_pscp_run++ ; 
-	} else { sprintf( buffer, "%s ", pscppath ) ; nb_pscp_run = 0 ; }
+    if( !GetShortPathName( PSCPPath, pscppath, 4095 ) ) return ;
 
-	if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
-		strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ; strcat( buffer, " " ) ;
-	}
-	if( conf_get_int(conf, CONF_winscpprot)==0 ) { strcat( buffer, "-scp " ) ; 
-	} else { strcat( buffer, "-sftp " ) ; }	
-	
-	//if( GetAutoStoreSSHKeyFlag() ) strcat( buffer, "-auto-store-sshkey " ) ;
-	
-	if( ReadParameter( INIT_SECTION, "pscpport", pscpport ) ) {
-		pscpport[17]='\0';
-		if( !strcmp( pscpport,"*" ) ) sprintf( pscpport, "%d", conf_get_int(conf,CONF_port) ) ;
-		strcat( buffer, "-P " ) ;
-		strcat( buffer, pscpport ) ;
-		strcat( buffer, " " ) ;
-	} else {
-		if( (p=poss(":",conf_get_str(conf, CONF_sftpconnect) )) > 0 ) {
-			sprintf( b1, "-P %d ", atoi(conf_get_str(conf, CONF_sftpconnect)+p) ) ;
-		} else {
-			sprintf( b1, "-P %d ", conf_get_int(conf, CONF_port) ) ;
-		}
-		strcat( buffer, b1 ) ;
-	}
-	
-	if( conf_get_int(conf,CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
-		strcat( buffer, "-2 " ) ;
-		}
-	if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
-		strcat( buffer, "-pw \"" ) ;
-		char bufpass[1024] ;
-		strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
-		MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
-		strcat( buffer, "\" " ) ;
-	}
-	if( strlen( conf_get_str(conf,CONF_portknockingoptions)) > 0 ) {
-		strcat( buffer, "-knock \"" ) ;
-		strcat( buffer, conf_get_str(conf,CONF_portknockingoptions) ) ;
-		strcat( buffer, "\" " ) ;
-	}
-	if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
-		strcat( buffer, "-i \"" ) ;
-		strcat( buffer, conf_get_filename(conf,CONF_keyfile)->path ) ;
-		strcat( buffer, "\" " ) ;
-	}
-	
-	strcat( buffer, "\"" ) ; 
-	if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
-		strcpy( b1, conf_get_str(conf, CONF_sftpconnect) ) ;
-		if( (p=poss(":",b1)) > 0 ) { b1[p-1]='\0'; }
-		strcat( buffer, b1 ) ;
-	} else {		
-		strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
-		if( poss( ":", conf_get_str(conf,CONF_host) )>0 ) { strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; 
-		} else { 
-			strcat( buffer, conf_get_str(conf,CONF_host) ) ; 
-		}
-	}
-	strcat( buffer, ":" ) ; 
-	
-	if( filename[0]=='/' ) { strcat(buffer, filename ) ; 
-	} else {
-		if( (directory!=NULL) && (strlen(directory)>0) && (strlen(filename)>0) ) {
-			strcat( buffer, directory ) ; strcat( buffer, "/" ) ; strcat( buffer, filename ) ;
-		} else if( (directory!=NULL) && (strlen(directory)>0) ) {
-			strcat(buffer, directory ) ; strcat( buffer, "/*") ; 
-		} else { 
-			strcat(buffer, filename ) ; 
-		}
-	}
-	strcat( buffer, "\" \"" ) ; strcat( buffer, dir ) ; strcat( buffer, "\"" ) ;
-	//strcat( buffer, " > kitty.log 2>&1" ) ; //if( !system( buffer ) ) unlink( "kitty.log" ) ;
+    if( ReadParameter( INIT_SECTION, "downloaddir", dir ) ) {
+        if( !existdirectory( dir ) ) { strcpy( dir, InitialDirectory ) ; }
+    }
 
-	chdir( InitialDirectory ) ;
+    if(strlen( dir ) == 0) { strcpy( dir, InitialDirectory ) ; }
 
-	if( debug_flag ) { debug_logevent( "Get on file: %s", buffer) ; }
-	if( system( buffer ) ) MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ;
-	
-	//debug_log("%s\n",buffer);//MessageBox( NULL, buffer, "Info",MB_OK );
-	
-	memset(buffer,0,strlen(buffer));
+    strcpy( buffer, "" ) ;
+
+    if( nb_pscp_run<4 ) {
+        sprintf( buffer, "start %s ", pscppath ) ;
+        nb_pscp_run++ ; 
+    } else {
+        sprintf( buffer, "%s ", pscppath ) ;
+        nb_pscp_run = 0 ; 
+    }
+
+    if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
+        strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ;
+        strcat( buffer, " " ) ;
+    }
+    if( conf_get_int(conf, CONF_winscpprot)==0 ) {
+        strcat( buffer, "-scp " ) ; 
+    } else {
+        strcat( buffer, "-sftp " ) ;
+    }
+
+    //if( GetAutoStoreSSHKeyFlag() ) strcat( buffer, "-auto-store-sshkey " ) ;
+
+    if( ReadParameter( INIT_SECTION, "pscpport", pscpport ) ) {
+        pscpport[17]='\0';
+        if( !strcmp( pscpport,"*" ) ) sprintf( pscpport, "%d", conf_get_int(conf,CONF_port) ) ;
+        strcat( buffer, "-P " ) ;
+        strcat( buffer, pscpport ) ;
+        strcat( buffer, " " ) ;
+    } else {
+        if( (p=poss(":",conf_get_str(conf, CONF_sftpconnect) )) > 0 ) {
+            sprintf( b1, "-P %d ", atoi(conf_get_str(conf, CONF_sftpconnect)+p) ) ;
+        } else {
+            sprintf( b1, "-P %d ", conf_get_int(conf, CONF_port) ) ;
+        }
+        strcat( buffer, b1 ) ;
+    }
+
+    if( conf_get_int(conf,CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
+        strcat( buffer, "-2 " ) ;
+        }
+    if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
+        strcat( buffer, "-pw \"" ) ;
+        char bufpass[1024] ;
+        strcpy( bufpass,conf_get_str(conf,CONF_password) ) ;
+        MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
+        strcat( buffer, "\" " ) ;
+    }
+    if( strlen( conf_get_str(conf,CONF_portknockingoptions)) > 0 ) {
+        strcat( buffer, "-knock \"" ) ;
+        strcat( buffer, conf_get_str(conf,CONF_portknockingoptions) ) ;
+        strcat( buffer, "\" " ) ;
+    }
+    if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
+        strcat( buffer, "-i \"" ) ;
+        strcat( buffer, conf_get_filename(conf,CONF_keyfile)->path ) ;
+        strcat( buffer, "\" " ) ;
+    }
+
+    strcat( buffer, "\"" ) ; 
+    if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
+        strcpy( b1, conf_get_str(conf, CONF_sftpconnect) ) ;
+        if( (p=poss(":",b1)) > 0 ) { b1[p-1]='\0'; }
+        strcat( buffer, b1 ) ;
+    } else {
+        strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
+        if( poss( ":", conf_get_str(conf,CONF_host) )>0 ) {
+            strcat( buffer, "[" ) ;
+            strcat( buffer, conf_get_str(conf,CONF_host) ) ;
+            strcat( buffer, "]" ) ; 
+        } else { 
+            strcat( buffer, conf_get_str(conf,CONF_host) ) ; 
+        }
+    }
+    strcat( buffer, ":" ) ; 
+
+    if( filename[0]=='/' ) {
+        strcat(buffer, filename ) ;
+    } else {
+        if( (directory!=NULL) && (strlen(directory)>0) && (strlen(filename)>0) ) {
+            strcat( buffer, directory ) ; strcat( buffer, "/" ) ; strcat( buffer, filename ) ;
+        } else if( (directory!=NULL) && (strlen(directory)>0) ) {
+            strcat(buffer, directory ) ; strcat( buffer, "/*") ; 
+        } else { 
+            strcat(buffer, filename ) ; 
+        }
+    }
+    strcat( buffer, "\" \"" ) ; strcat( buffer, dir ) ; strcat( buffer, "\"" ) ;
+    //strcat( buffer, " > kitty.log 2>&1" ) ; //if( !system( buffer ) ) unlink( "kitty.log" ) ;
+
+    chdir( InitialDirectory ) ;
+
+    if( debug_flag ) { debug_logevent( "Get on file: %s", buffer) ; }
+    if( system( buffer ) ) { MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ; }
+
+    //debug_log("%s\n",buffer);//MessageBox( NULL, buffer, "Info",MB_OK );
+
+    memset(buffer,0,strlen(buffer));
 }
 
-// Reception d'un fichier par SCP
+// Get a remote file throught SCP
 void GetFile( HWND hwnd ) {
-	char buffer[4096]="", b1[256], *pst ;
-	char dir[4096], pscppath[4096]="", pscpport[4096]="22" ;
-	int p;
-	
-	if( conf_get_int(conf,CONF_protocol) != PROT_SSH ) {
-		MessageBox( hwnd, "This function is only available with SSH connections.", "Error", MB_OK|MB_ICONERROR ) ;
-		return ;
-	}
+    char buffer[4096]="", b1[256], *pst ;
+    char dir[4096], pscppath[4096]="", pscpport[4096]="22" ;
+    int p;
 
-	if( PSCPPath==NULL ) {
-		if( IniFileFlag == SAVEMODE_REG ) return ;
-		else if( !SearchPSCP() ) return ;
-	}
-	if( !existfile( PSCPPath ) ) {
-		if( IniFileFlag == SAVEMODE_REG ) return ;
-		else if( !SearchPSCP() ) return ;
-	}
-		
-	if( !GetShortPathName( PSCPPath, pscppath, 4095 ) ) return ;
+    if( conf_get_int(conf,CONF_protocol) != PROT_SSH ) {
+        MessageBox( hwnd, "This function is only available with SSH connections.", "Error", MB_OK|MB_ICONERROR ) ;
+        return ;
+    }
 
-	if (!IsClipboardFormatAvailable(CF_TEXT)) return ;
-	
-	if( OpenClipboard(NULL) ) {
-		HGLOBAL hglb ;
-		
-		if( (hglb = GetClipboardData( CF_TEXT ) ) != NULL ) {
-			if( ( pst = GlobalLock( hglb ) ) != NULL ) {
+    if( PSCPPath==NULL ) {
+        if( IniFileFlag == SAVEMODE_REG ) return ;
+        else if( !SearchPSCP() ) return ;
+    }
+
+    if( !existfile( PSCPPath ) ) {
+        if( IniFileFlag == SAVEMODE_REG ) return ;
+        else if( !SearchPSCP() ) return ;
+    }
+
+    if( !GetShortPathName( PSCPPath, pscppath, 4095 ) ) return ;
+
+    if (!IsClipboardFormatAvailable(CF_TEXT)) return ;
+
+    if( OpenClipboard(NULL) ) {
+        HGLOBAL hglb ;
+
+        if( (hglb = GetClipboardData( CF_TEXT ) ) != NULL ) {
+            if( ( pst = GlobalLock( hglb ) ) != NULL ) {
 //sprintf(buffer,"#%s#%d",pst,strlen(pst));MessageBox(hwnd,buffer,"Info",MB_OK);
-				while( (pst[strlen(pst)-1]=='\n')||(pst[strlen(pst)-1]=='\r')||(pst[strlen(pst)-1]==' ')||(pst[strlen(pst)-1]=='\t') ) pst[strlen(pst)-1]='\0' ;
+                while( (pst[strlen(pst)-1]=='\n')||(pst[strlen(pst)-1]=='\r')||(pst[strlen(pst)-1]==' ')||(pst[strlen(pst)-1]=='\t') ) { pst[strlen(pst)-1]='\0' ; }
 //sprintf(buffer,"#%s#%d",pst,strlen(pst));MessageBox(hwnd,buffer,"Info",MB_OK);
-				strcpy( buffer, "" ) ;
-				if( strlen( pst ) > 0 ) {
-					if( ReadParameter( INIT_SECTION, "downloaddir", dir ) ) {
-						if( !existdirectory( dir ) )
-						strcpy( dir, InitialDirectory ) ;
-					} else if( OpenDirName( hwnd, dir ) ) {
-						if( !existdirectory( dir ) ) { GlobalUnlock( hglb ) ; CloseClipboard(); return ; }
-						//strcpy( dir, InitialDirectory ) ;
-					} else { 
-						return ; 
-					}
-					//else { strcpy( dir, InitialDirectory ) ; }
+                strcpy( buffer, "" ) ;
+                if( strlen( pst ) > 0 ) {
+                    if( ReadParameter( INIT_SECTION, "downloaddir", dir ) ) {
+                        if( !existdirectory( dir ) ) {
+                            strcpy( dir, InitialDirectory ) ;
+                        }
+                    } else if( OpenDirName( hwnd, dir ) ) {
+                        if( !existdirectory( dir ) ) { GlobalUnlock( hglb ) ; CloseClipboard(); return ; }
+                        //strcpy( dir, InitialDirectory ) ;
+                    } else { 
+                        return ; 
+                    }
+                    //else { strcpy( dir, InitialDirectory ) ; }
 
-					sprintf( buffer, "start %s ", pscppath ) ;
-					if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
-						strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ; strcat( buffer, " " ) ;
-					}
-					if( conf_get_int(conf, CONF_winscpprot)==0 ) { 
-						strcat( buffer, "-scp " ) ; 
-					} else { 
-						strcat( buffer, "-sftp " ) ; 
-					}
-					if( conf_get_int(conf,CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
-						strcat( buffer, "-2 " ) ;
-					}
-					if( ReadParameter( INIT_SECTION, "pscpport", pscpport ) ) {
-						pscpport[17]='\0';
-						if( !strcmp( pscpport,"*" ) ) sprintf( pscpport, "%d", conf_get_int(conf,CONF_port) ) ;
-						strcat( buffer, "-P " ) ;
-						strcat( buffer, pscpport ) ;
-						strcat( buffer, " " ) ;
-					} else {
-						if( (p=poss(":",conf_get_str(conf, CONF_sftpconnect) )) > 0 ) {
-							sprintf( b1, "-P %d ", atoi(conf_get_str(conf, CONF_sftpconnect)+p) ) ;
-						} else {
-							sprintf( b1, "-P %d ", conf_get_int(conf, CONF_port) ) ;
-						}
-						strcat( buffer, b1 ) ;
-					}
-					if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
-						strcat( buffer, "-pw \"" ) ;
-						char bufpass[1024] ;
-						strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
-						MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
-						strcat( buffer, "\" " ) ;
-					}
-					if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
-						strcat( buffer, "-i \"" ) ;
-						strcat( buffer, conf_get_filename(conf,CONF_keyfile)->path ) ;
-						strcat( buffer, "\" " ) ;
-					}
-					if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
-						strcpy( b1, conf_get_str(conf, CONF_sftpconnect) ) ;
-						if( (p=poss(":",b1)) > 0 ) { b1[p-1]='\0'; }
-						strcat( buffer, b1 ) ;
-					} else {		
-						strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
-						if( poss( ":", conf_get_str(conf,CONF_host))>0 ) { 
-							strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; 
-						} else { 
-							strcat( buffer, conf_get_str(conf,CONF_host) ) ; 
-						}
-					}
-					strcat( buffer, ":" ) ;
-					strcat( buffer, pst ) ; strcat( buffer, " \"" ) ;
-					strcat( buffer, dir ) ; strcat( buffer, "\"" ) ;
-				}
-				GlobalUnlock( hglb ) ;
-			}
-		}
-		CloseClipboard();
-	}
-	if( strlen( buffer ) > 0 ) {
-		chdir( InitialDirectory ) ;
-		if( debug_flag ) { debug_logevent("Get file: %s", buffer) ; }
-		if( system( buffer ) ) MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ;
-		//if( !system( buffer ) ) unlink( "kitty.log" ) ;
-	}
+                    sprintf( buffer, "start %s ", pscppath ) ;
+                    if( strlen(conf_get_str(conf, CONF_pscpoptions))>0 ) {
+                        strcat( buffer, conf_get_str(conf, CONF_pscpoptions) ) ;
+                        strcat( buffer, " " ) ;
+                    }
+                    if( conf_get_int(conf, CONF_winscpprot)==0 ) {
+                        strcat( buffer, "-scp " ) ; 
+                    } else {
+                        strcat( buffer, "-sftp " ) ; 
+                    }
+                    if( conf_get_int(conf,CONF_sshprot) == 3 ) { // SSH-2 Only (voir putty.h)
+                        strcat( buffer, "-2 " ) ;
+                    }
+                    if( ReadParameter( INIT_SECTION, "pscpport", pscpport ) ) {
+                        pscpport[17]='\0';
+                        if( !strcmp( pscpport,"*" ) ) { sprintf( pscpport, "%d", conf_get_int(conf,CONF_port) ) ; }
+                        strcat( buffer, "-P " ) ;
+                        strcat( buffer, pscpport ) ;
+                        strcat( buffer, " " ) ;
+                    } else {
+                        if( (p=poss(":",conf_get_str(conf, CONF_sftpconnect) )) > 0 ) {
+                            sprintf( b1, "-P %d ", atoi(conf_get_str(conf, CONF_sftpconnect)+p) ) ;
+                        } else {
+                            sprintf( b1, "-P %d ", conf_get_int(conf, CONF_port) ) ;
+                        }
+                        strcat( buffer, b1 ) ;
+                    }
+                    if( strlen( conf_get_str(conf,CONF_password) ) > 0 ) {
+                        strcat( buffer, "-pw \"" ) ;
+                        char bufpass[1024] ;
+                        strcpy( bufpass, conf_get_str(conf,CONF_password) ) ;
+                        MASKPASS(GetCryptSaltFlag(),bufpass); strcat( buffer, bufpass ) ; memset(bufpass,0,strlen(bufpass));
+                        strcat( buffer, "\" " ) ;
+                    }
+                    if( strlen( conf_get_filename(conf,CONF_keyfile)->path ) > 0 ) {
+                        strcat( buffer, "-i \"" ) ;
+                        strcat( buffer, conf_get_filename(conf,CONF_keyfile)->path ) ;
+                        strcat( buffer, "\" " ) ;
+                    }
+                    if( strlen( conf_get_str(conf, CONF_sftpconnect) ) > 0 ) {
+                        strcpy( b1, conf_get_str(conf, CONF_sftpconnect) ) ;
+                        if( (p=poss(":",b1)) > 0 ) { b1[p-1]='\0'; }
+                        strcat( buffer, b1 ) ;
+                    } else {
+                        strcat( buffer, conf_get_str(conf,CONF_username) ) ; strcat( buffer, "@" ) ;
+                        if( poss( ":", conf_get_str(conf,CONF_host))>0 ) { 
+                            strcat( buffer, "[" ) ; strcat( buffer, conf_get_str(conf,CONF_host) ) ; strcat( buffer, "]" ) ; 
+                        } else { 
+                            strcat( buffer, conf_get_str(conf,CONF_host) ) ; 
+                        }
+                    }
+                    strcat( buffer, ":" ) ;
+                    strcat( buffer, pst ) ; strcat( buffer, " \"" ) ;
+                    strcat( buffer, dir ) ; strcat( buffer, "\"" ) ;
+                }
+                GlobalUnlock( hglb ) ;
+            }
+        }
+        CloseClipboard();
+    }
+    if( strlen( buffer ) > 0 ) {
+        chdir( InitialDirectory ) ;
+        if( debug_flag ) { debug_logevent("Get file: %s", buffer) ; }
+        if( system( buffer ) ) { MessageBox( NULL, buffer, "Transfer problem", MB_OK|MB_ICONERROR  ) ; }
+        //if( !system( buffer ) ) unlink( "kitty.log" ) ;
+    }
 }
-	
-// Lancement d'un commande locale (Lancement Internet Explorer par exemple)
+
+// Start a locale commande (Internet Explorer for example)
 void RunCmd( HWND hwnd ) {
-	char buffer[4096]="", * pst = NULL ;
-	if (!IsClipboardFormatAvailable(CF_TEXT)) return ;
-	if( OpenClipboard(NULL) ) {
-		HGLOBAL hglb ;
-		
-		if( (hglb = GetClipboardData( CF_TEXT ) ) != NULL ) {
-			if( ( pst = GlobalLock( hglb ) ) != NULL ) {
-				sprintf( buffer, "%s", pst ) ;
-				GlobalUnlock( hglb ) ;
-			}
-		}
-		CloseClipboard();
-	}
-	if( strlen( buffer ) > 0 ) {
-		chdir( InitialDirectory ) ;
-		//system( buffer ) ;
-		STARTUPINFO si ;
-  		PROCESS_INFORMATION pi ;
-		ZeroMemory( &si, sizeof(si) );
-		si.cb = sizeof(si);
-		ZeroMemory( &pi, sizeof(pi) );
-		if( !CreateProcess(NULL, buffer, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi) ) {
-			ShellExecute(hwnd, "open", buffer,0, 0, SW_SHOWDEFAULT);
-		}
-	}
+    char buffer[4096]="", * pst = NULL ;
+    if (!IsClipboardFormatAvailable(CF_TEXT)) return ;
+    if( OpenClipboard(NULL) ) {
+        HGLOBAL hglb ;
+
+        if( (hglb = GetClipboardData( CF_TEXT ) ) != NULL ) {
+            if( ( pst = GlobalLock( hglb ) ) != NULL ) {
+                sprintf( buffer, "%s", pst ) ;
+                GlobalUnlock( hglb ) ;
+            }
+        }
+        CloseClipboard();
+    }
+    if( strlen( buffer ) > 0 ) {
+        chdir( InitialDirectory ) ;
+        //system( buffer ) ;
+        STARTUPINFO si ;
+        PROCESS_INFORMATION pi ;
+        ZeroMemory( &si, sizeof(si) );
+        si.cb = sizeof(si);
+        ZeroMemory( &pi, sizeof(pi) );
+        if( !CreateProcess(NULL, buffer, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi) ) {
+            ShellExecute(hwnd, "open", buffer,0, 0, SW_SHOWDEFAULT);
+        }
+    }
 }
-	
-// Gestion de commandes a distance
+
+// Manage local commands
 static char * RemotePath = NULL ;
 char * GetRemotePath() { return RemotePath ; }
-/* Sauvegarde le répertoire distant dans la variable RemotePath 
+/* Save remote path in RemotePath variable
 pw() { printf "\033]0;__pw:`pwd`\007" ; }
 */
-/* Execution de commande en local
+/* Execute a local command
 cmd()
 {
 if [ $# -eq 0 ] ; then echo "Usage: cmd command" ; return 0 ; fi
 printf "\033]0;__cm:"$@"\007"
 }
 */
-/* Envoi d'un fichier sauvegardé en local
+/* Send a file that is present locally
 scriptfile()
 {
 if [ $# -eq 0 ] ; then echo "Usage: scriptfile filename" ; return 0 ; fi
 printf "\033]0;__ls:"$@"\007"
 }
 */
-/* Lance internet explorer
+/* Start default browser
 ie()
 {
 if [ $# -eq 0 ] ; then echo "Usage: ie url" ; return 0 ; fi
 printf "\033]0;__ie:"$@"\007"
 }
 */
-/* Copie tout ce qui est reçu dans le pipe vers le presse-papier
+/* Copy stdin into clipboard
 function wcl {
   echo -ne '\e''[5i'
   cat $*
@@ -2554,55 +2569,69 @@ function wcl {
   echo "Copied to Windows clipboard" 1>&2
 }
 */
-/* Lance WinSCP dans le répertoire courant
+/* Start WinSCP pointing into the same directory
 winscp() { printf "\033]0;__ws:"`pwd`"\007" ; printf "\033]0;__ti\007" ; }
 winscp() { echo -ne "\033];__ws:${PWD}\007" ; }
 */
-/* Lance WinSCP sur un user et un host dans un répertoire donnés
+/* Start WinSCP with specific user, host and directory
 wt() { printf "\033]0;__wt:"$(hostname)":"${USER}":"`pwd`"\007" ; printf "\033]0;__ti\007" ; }
 */
-/* Executer une commande locale
-lcmd() { if [ $# -eq 0 ] ; then echo "Usage: cmd command" ; return 0 ; fi ; printf "\033]0;__cm:"$*"\007" ; }
-*/
-/* Lance une session dupliquee dans le meme repertoire 
+/* Start a duplicated session into the same directory
 ds() { printf "\033]0;__ds:`pwd`\007" ; }
-# Duplique une session sur le meme user, meme host, meme repertoire
+# Start a duplicated session with specific user, host and directory
 dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
 */
 static int LocalCmdFlag = 1 ;
+static int LocalUnsecureCmdFlag = 0 ;
 int ManageLocalCmd( HWND hwnd, const char * cmd ) {
-    if( !LocalCmdFlag ) { return 0; }
+
+    if( !LocalCmdFlag ) { return 0 ; } // Disable all __xy commands
+    
     char buffer[1024] = "", title[1024] = "" ;
     if( debug_flag ) { debug_logevent( "Local command: %s", cmd ) ; }
     if( cmd == NULL ) return 0 ;
     if( (cmd[2] != ':')&&(cmd[2] != '\0') ) return 0 ;
     if( (cmd[2] == ':')&&( strlen( cmd ) <= 3 ) ) return 0 ;
-    if( (cmd[0]=='p')&&(cmd[1]=='w')&&(cmd[2]==':') ) { // __pw: nouveau remote directory
+    
+    if( (cmd[0]=='d')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __dt: start a duplicated session in same directory, same host and same user : dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
+        char host[1024]="";char user[256]="";
+        int i;
+        if( RemotePath!= NULL ) free( RemotePath ) ;
+        RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
+        strcpy(host,cmd+3);i=poss(":",host);
+        strcpy(user,host+i);
+        host[i-1]='\0';
+        i=poss(":",user);
+        strcpy( RemotePath, user+i ) ;
+        user[i-1]='\0';
+        RunSessionWithCurrentSettings( hwnd, conf, host, user, NULL, 0, RemotePath ) ;
+        return 1 ;
+    } else if( (cmd[0]=='i')&&(cmd[1]=='n')&&(cmd[2]==':') ) { // __in: print informations in log
+        debug_logevent(cmd+3) ;
+        return 1 ;
+    } else if( (cmd[0]=='l')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ls: start a local script in remote session
+        RunScriptFile( hwnd, cmd+3 ) ;
+        return 1 ;
+    } else if( (cmd[0]=='p')&&(cmd[1]=='w')&&(cmd[2]==':') ) { // __pw: new remote directory
         if( RemotePath!= NULL ) free( RemotePath ) ;
         RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
         strcpy( RemotePath, cmd+3 ) ;
         return 1 ;
-    } else if( (cmd[0]=='r')&&(cmd[1]=='v')&&(cmd[2]==':') ) { // __rv: Reception d'un fichiers
+    } else if( (cmd[0]=='r')&&(cmd[1]=='v')&&(cmd[2]==':') ) { // __rv: getting one file
         GetOneFile( hwnd, RemotePath, cmd+3 ) ;
         return 1 ;
-    } else if( (cmd[0]=='p')&&(cmd[1]=='l')&&(cmd[2]==':') ) { // __pl: Lance une commande plink
-        RunExternPlink( hwnd, cmd+3 ) ;
-        return 1 ;
-    } else if( (cmd[0]=='t')&&(cmd[1]=='i')&&(cmd[2]=='\0') ) { // __ti: Recuperation du titre de la fenetre
+    } else if( (cmd[0]=='t')&&(cmd[1]=='i')&&(cmd[2]=='\0') ) { // __ti: getting remote window title
         GetWindowText( hwnd, buffer, 1024 ) ;
         sprintf( title, "printf \"\\033]0;%s\\007\"\n", buffer ) ;
         SendStrToTerminal( title, strlen(title) ) ;
         return 1 ;
-    } else if( (cmd[0]=='i')&&(cmd[1]=='n')&&(cmd[2]==':') ) { // __in: Affiche d'information dans le log
-        debug_logevent(cmd+3) ;
-        return 1 ;
-    } else if( (cmd[0]=='w')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ws: Lance WinSCP dans un repertoire donne
+    } else if( (cmd[0]=='w')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ws: start WinSCP into provided directory
         if( RemotePath!= NULL ) free( RemotePath ) ;
         RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
         strcpy( RemotePath, cmd+3 ) ;
         StartWinSCP( hwnd, RemotePath, NULL, NULL ) ;
         return 1 ;
-    } else if( (cmd[0]=='w')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __wt: Lance WinSCP dans sur un host et un user donné et dans un repertoire donné
+    } else if( (cmd[0]=='w')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __wt: start WinSCP on a provided host, with a specific user and in a directory
         char host[1024]="";char user[256]="";
         int i;
         if( RemotePath!= NULL ) free( RemotePath ) ;
@@ -2616,42 +2645,33 @@ int ManageLocalCmd( HWND hwnd, const char * cmd ) {
         StartWinSCP( hwnd, RemotePath, host, user ) ;
         // free( RemotePath ) ; RemotePath = NULL ;
         return 1 ;
-    } else if( (cmd[0]=='i')&&(cmd[1]=='e')&&(cmd[2]==':') ) { // __ie: Lance un navigateur sur le lien
-        if( strlen(cmd+3)>0 ) {
-            urlhack_launch_url(!conf_get_int(conf,CONF_url_defbrowser)?conf_get_filename(conf,CONF_url_browser)->path:NULL, (const char *)(cmd+3));
-            return 1;
-        }
-    } else if( (cmd[0]=='d')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ds: Lance une session dupliquee dans le meme repertoire ds() { printf "\033]0;__ds:`pwd`\007" ; }
+    }
+    
+    if( !LocalUnsecureCmdFlag ) { return 0 ; } // Disable only unsecure __xy commands
+    if( (cmd[0]=='c')&&(cmd[1]=='m')&&(cmd[2]==':') ) { // __cm: run an external command locally
+        RunCommand( hwnd, cmd+3 ) ;
+        return 1 ;
+    } else if( (cmd[0]=='d')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ds: start a duplicated session un same directory : ds() { printf "\033]0;__ds:`pwd`\007" ; }
         if( RemotePath!= NULL ) free( RemotePath ) ;
         RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
         strcpy( RemotePath, cmd+3 ) ;
         if( debug_flag ) { debug_logevent( "Start the same session in remote path: %s", RemotePath ) ; }
         RunSessionWithCurrentSettings( hwnd, conf, NULL, NULL, NULL, 0, RemotePath ) ;
         return 1 ;
-    } else if( (cmd[0]=='d')&&(cmd[1]=='t')&&(cmd[2]==':') ) { // __dt: Lance une session dupliquee dans le meme repertoire, meme host, meme user dt() { printf "\033]0;__dt:"$(hostname)":"${USER}":"`pwd`"\007" ; }
-        char host[1024]="";char user[256]="";
-        int i;
-        if( RemotePath!= NULL ) free( RemotePath ) ;
-        RemotePath = (char*) malloc( strlen( cmd ) - 2 ) ;
-        strcpy(host,cmd+3);i=poss(":",host);
-        strcpy(user,host+i);
-        host[i-1]='\0';
-        i=poss(":",user);
-        strcpy( RemotePath, user+i ) ;
-        user[i-1]='\0';
-        RunSessionWithCurrentSettings( hwnd, conf, host, user, NULL, 0, RemotePath ) ;
-        return 1 ;
-    } else if( (cmd[0]=='l')&&(cmd[1]=='s')&&(cmd[2]==':') ) { // __ls: envoie un script sauvegardé localement (comme fait le CTRL+F2)
-        RunScriptFile( hwnd, cmd+3 ) ;
-        return 1 ;
-    } else if( (cmd[0]=='c')&&(cmd[1]=='m')&&(cmd[2]==':') ) { // __cm: Execute une commande externe
-        RunCommand( hwnd, cmd+3 ) ;
+    } else if( (cmd[0]=='i')&&(cmd[1]=='e')&&(cmd[2]==':') ) { // __ie: start default browser on provided URL
+        if( strlen(cmd+3)>0 ) {
+            urlhack_launch_url(!conf_get_int(conf,CONF_url_defbrowser)?conf_get_filename(conf,CONF_url_browser)->path:NULL, (const char *)(cmd+3));
+            return 1;
+        }
+    } else if( (cmd[0]=='p')&&(cmd[1]=='l')&&(cmd[2]==':') ) { // __pl: start a plink command
+        RunExternPlink( hwnd, cmd+3 ) ;
         return 1 ;
     }
+    
     return 0 ;
 }
 
-// Recupere les coordonnees de la fenetre
+// Get window coodinates
 void GetWindowCoord( HWND hwnd ) {
     RECT rc ;
     GetWindowRect( hwnd, &rc ) ;
@@ -2662,7 +2682,7 @@ void GetWindowCoord( HWND hwnd ) {
     conf_set_int(conf,CONF_windowstate,IsZoomed( hwnd ));
 }
 
-// Sauve les coordonnees de la fenetre
+// Save window coordinates
 void SaveWindowCoord( Conf * conf ) {
     char key[1024], session[1024] ;
     if( conf_get_bool(conf,CONF_saveonexit) )
@@ -2698,39 +2718,39 @@ void SaveWindowCoord( Conf * conf ) {
 
 // Gestion de la fonction winroll
 void ManageWinrol( HWND hwnd, int resize_action ) {
-	RECT rcClient ;
-	int mode = -1 ;
-	
-	if( resize_action==RESIZE_DISABLED ) {
-	    	mode = GetWindowLong(hwnd, GWL_STYLE) ;
-		resize_action = RESIZE_TERM ;
-		SetWindowLongPtr( hwnd, GWL_STYLE, mode|WS_THICKFRAME|WS_MAXIMIZEBOX ) ;
-		SetWindowPos( hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
-	}
+    RECT rcClient ;
+    int mode = -1 ;
 
-	if( WinHeight == -1 ) {
-		GetWindowRect(hwnd, &rcClient) ;
-		WinHeight  = rcClient.bottom-rcClient.top ;
-		resize(0, rcClient.right-rcClient.left) ;
-		MoveWindow( hwnd, rcClient.left, rcClient.top, rcClient.right-rcClient.left, 0, TRUE ) ;
-	} else {
-		GetWindowRect(hwnd, &rcClient) ;
-		rcClient.bottom = rcClient.top + WinHeight ;
-		resize(WinHeight, -1) ;
-		MoveWindow( hwnd, rcClient.left, rcClient.top, rcClient.right-rcClient.left, WinHeight, TRUE ) ;
-		WinHeight = -1 ;
-	}
-		
-	if( mode != -1 ) {
-	    //winmode &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
-		SetWindowLongPtr(hwnd, GWL_STYLE, mode ) ;
-		SetWindowPos( hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
-		resize_action = RESIZE_DISABLED ;
-	}
+    if( resize_action==RESIZE_DISABLED ) {
+        mode = GetWindowLong(hwnd, GWL_STYLE) ;
+        resize_action = RESIZE_TERM ;
+        SetWindowLongPtr( hwnd, GWL_STYLE, mode|WS_THICKFRAME|WS_MAXIMIZEBOX ) ;
+        SetWindowPos( hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
+    }
 
-	InvalidateRect(hwnd, NULL, TRUE);
+    if( WinHeight == -1 ) {
+        GetWindowRect(hwnd, &rcClient) ;
+        WinHeight  = rcClient.bottom-rcClient.top ;
+        resize(0, rcClient.right-rcClient.left) ;
+        MoveWindow( hwnd, rcClient.left, rcClient.top, rcClient.right-rcClient.left, 0, TRUE ) ;
+    } else {
+        GetWindowRect(hwnd, &rcClient) ;
+        rcClient.bottom = rcClient.top + WinHeight ;
+        resize(WinHeight, -1) ;
+        MoveWindow( hwnd, rcClient.left, rcClient.top, rcClient.right-rcClient.left, WinHeight, TRUE ) ;
+        WinHeight = -1 ;
+    }
+
+    if( mode != -1 ) {
+        //winmode &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
+        SetWindowLongPtr(hwnd, GWL_STYLE, mode ) ;
+        SetWindowPos( hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER ) ;
+        resize_action = RESIZE_DISABLED ;
+    }
+
+    InvalidateRect(hwnd, NULL, TRUE);
 }
-	
+
 #if (defined MOD_BACKGROUNDIMAGE) && (!defined FLJ)
 BOOL load_bg_bmp() ;
 void clean_bg( void ) ;
@@ -5309,6 +5329,10 @@ void LoadParameters( void ) {
 	if( ReadParameter( INIT_SECTION, "localcmd", buffer ) ) {
 		if( !stricmp( buffer, "NO" ) ) LocalCmdFlag = 0 ;
 		if( !stricmp( buffer, "YES" ) ) LocalCmdFlag = 1 ;
+	}
+	if( ReadParameter( INIT_SECTION, "localunsecurecmd", buffer ) ) {
+		if( !stricmp( buffer, "NO" ) ) LocalUnsecureCmdFlag = 0 ;
+		if( !stricmp( buffer, "YES" ) ) LocalUnsecureCmdFlag = 1 ;
 	}
 	if( ReadParameter( INIT_SECTION, "maxblinkingtime", buffer ) ) { MaxBlinkingTime=2*atoi(buffer);if(MaxBlinkingTime<0) MaxBlinkingTime=0; }
 	if( ReadParameter( INIT_SECTION, "mouseshortcuts", buffer ) ) { 
