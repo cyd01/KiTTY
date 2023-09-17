@@ -3637,6 +3637,7 @@ static void do_osc(Terminal *term)
 
                                                 if (gfmt == CF_TEXT) {
 
+                                                    n = wcsnlen((wchar_t *)pClipData, n / sizeof(wchar_t));
                                                     ClipTextSize = WideCharToMultiByte(
                                                         CP_UTF8,
                                                         0,
@@ -3649,7 +3650,6 @@ static void do_osc(Terminal *term)
                                                     ) + 1;
 
                                                     if (ClipTextSize >= 0) {
-                                                        n = wcsnlen((wchar_t *)pClipData, n / sizeof(wchar_t));
                                                         ClipText = calloc(ClipTextSize + 1, 1);
                                                         if (ClipText) {
                                                             WideCharToMultiByte(
@@ -3856,67 +3856,91 @@ static void do_osc(Terminal *term)
             }
             break;
 #ifdef MOD_PERSO
-          case 52:
-            {
-                int status = MessageBox(NULL,
-                    "Allow OSC52 clipboard sync?", "PyTTY", MB_OKCANCEL);
+case 52:
+{
+    char *env_check = getenv("OSC52ALLOWED");
+    int status = IDOK; // Default to IDOK
+    
+    if (!env_check || strlen(env_check) == 0) {
+        status = MessageBox(NULL,
+            "Allow OSC52 clipboard sync?", "PyTTY", MB_OKCANCEL);
+    }
+    
+    if (status == IDOK) {
+        base64_decodestate _d_state;
+        base64_init_decodestate(&_d_state);
+        char* d_out = malloc(term->osc_strlen);
+        
+        if (!d_out) {
+            // Failed to allocate memory
+            break;
+        }
 
-                if (status == IDOK) {
+        int d_count = base64_decode_block(
+            term->osc_string+1, term->osc_strlen-1, d_out, &_d_state);
 
-                    base64_decodestate _d_state;
-                    base64_init_decodestate(&_d_state);
-                    char* d_out = malloc(term->osc_strlen);
-                    int d_count = base64_decode_block(
-                        term->osc_string+1, term->osc_strlen-1, d_out, &_d_state);
+        uint32_t fmt;
+        wchar_t* buffer = NULL; // Changed to wchar_t
 
-                    uint32_t fmt;
-                    char* buffer = NULL;
-                    int BufferSize = 0;
-
-                    int cnt = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, d_count, NULL, 0);
-                    if (cnt > 0) {
-                        buffer = calloc(cnt + 1, sizeof(wchar_t));
-                        MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, d_count, (PWCHAR)buffer, cnt);
-                    }
-
-                    fmt = CF_UNICODETEXT;
-                    BufferSize = (wcslen((PWCHAR)buffer) + 1) * sizeof(WCHAR);
-
-                    HGLOBAL hData;
-                    void *GData;
-
-                    if (buffer && (hData=GlobalAlloc(GMEM_MOVEABLE,BufferSize))) {
-
-                        if ((GData=GlobalLock(hData))) {
-
-                            memcpy(GData,buffer,BufferSize);
-                            GlobalUnlock(hData);
-
-                            if (OpenClipboard(NULL)) {
-
-                                EmptyClipboard();
-
-                                if (!SetClipboardData(fmt, (HANDLE)hData)) {
-                                    GlobalFree(hData);
-                                }
-
-                                CloseClipboard();
-
-                            } else {
-                                GlobalFree(hData);
-                            }
-
-                        } else {
-                            GlobalFree(hData);
-                        }
-                    }
-
-                    free(buffer);
-                    free(d_out);
-                }
-
+        int cnt = MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, d_count, NULL, 0);
+        if (cnt > 0) {
+            buffer = calloc(cnt + 1, sizeof(wchar_t));
+            
+            if (!buffer) {
+                // Failed to allocate memory
+                free(d_out);
                 break;
             }
+            
+            MultiByteToWideChar(CP_UTF8, 0, (LPCCH)d_out, d_count, buffer, cnt);
+        }
+
+        fmt = CF_UNICODETEXT;
+
+        if (buffer) {
+            int BufferSize = (wcslen(buffer) + 1) * sizeof(wchar_t);
+
+            HGLOBAL hData = GlobalAlloc(GMEM_MOVEABLE, BufferSize);
+            
+            if (!hData) {
+                // Failed to allocate global memory
+                free(buffer);
+                free(d_out);
+                break;
+            }
+
+            void *GData = GlobalLock(hData);
+            
+            if (!GData) {
+                // Failed to lock global memory
+                GlobalFree(hData);
+                free(buffer);
+                free(d_out);
+                break;
+            }
+
+            memcpy(GData, buffer, BufferSize);
+            GlobalUnlock(hData);
+
+            if (OpenClipboard(NULL)) {
+                EmptyClipboard();
+                
+                if (!SetClipboardData(fmt, (HANDLE)hData)) {
+                    GlobalFree(hData);
+                }
+                
+                CloseClipboard();
+            } else {
+                GlobalFree(hData);
+            }
+        }
+
+        free(buffer);
+        free(d_out);
+    }
+
+    break;
+}
 #endif
           case 4:
             if (term->ldisc && !strcmp(term->osc_string, "?")) {
