@@ -502,6 +502,10 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, bool has_help,
 			HELPCTX(no_help),
 			conf_checkbox_handler,
 			I(CONF_ctrl_tab_switch));
+		ctrl_checkbox(s, "Warn before OSC52 clipboard sync", NO_SHORTCUT,
+		  HELPCTX(no_help),
+		  conf_checkbox_handler, I(CONF_osc52_warn_before_cliboard_sync)); 
+
 		}
 #endif
     ctrl_checkbox(s, "Full screen on Alt-Enter", 'f',

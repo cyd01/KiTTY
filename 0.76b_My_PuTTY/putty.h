@@ -1842,6 +1842,7 @@ NORETURN void cleanup_exit(int);
         X(BOOL, NONE, no_focus_rep) /* totally disable mouse reporting */ \
 	X(INT, NONE, scrolllines) /* Options for Scroll Lines per Wheel */ \
 	X(BOOL, NONE, ssh_tunnel_print_in_title) /* print dynamic port number in window title */ \
+	X(BOOL, NONE, osc52_warn_before_cliboard_sync) /* Warn before clipboard sync */ \
 /* #endif */ \
 /* #ifdef MOD_PROXY */ \
 	X(STR, NONE, proxyselection) /* Options for proxy selection */ \

@@ -949,6 +949,7 @@ void save_open_settings(settings_w *sesskey, Conf *conf)
     write_setting_b(sesskey, "NoFocusReporting", conf_get_bool(conf, CONF_no_focus_rep));
     write_setting_i(sesskey, "LinesAtAScroll", conf_get_int(conf, CONF_scrolllines));
     write_setting_b(sesskey, "SSHTunnelInTitle", conf_get_bool(conf, CONF_ssh_tunnel_print_in_title));
+    write_setting_b(sesskey, "OSC52WarnBeforeClipboardSync", conf_get_bool(conf, CONF_osc52_warn_before_cliboard_sync));
 #endif
 #ifdef MOD_PORTKNOCKING
 	write_setting_s(sesskey, "PortKnocking", conf_get_str(conf, CONF_portknockingoptions) );
@@ -1640,6 +1641,7 @@ void load_open_settings(settings_r *sesskey, Conf *conf)
     gppb(sesskey, "NoFocusReporting", true, conf, CONF_no_focus_rep);
     gppi(sesskey, "LinesAtAScroll", -1, conf, CONF_scrolllines);
     gppb(sesskey, "SSHTunnelInTitle", false, conf, CONF_ssh_tunnel_print_in_title);
+    gppb(sesskey, "OSC52WarnBeforeClipboardSync", false, conf, CONF_osc52_warn_before_cliboard_sync);
 #endif
 #ifdef MOD_PORTKNOCKING
 	gpps(sesskey, "PortKnocking", "", conf, CONF_portknockingoptions );

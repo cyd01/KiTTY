@@ -3861,7 +3861,7 @@ static void do_osc(Terminal *term)
               char *env_check = getenv("OSC52ALLOWED");
               int status = IDOK; // Default to IDOK
               
-              if (!env_check || strlen(env_check) == 0) {
+              if( conf_get_bool(term->conf, CONF_osc52_warn_before_cliboard_sync) && (!env_check || strlen(env_check) == 0)) {
                   status = MessageBox(NULL,
                       "Allow OSC52 clipboard sync?", "PyTTY", MB_OKCANCEL);
               }

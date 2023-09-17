@@ -13,3 +13,5 @@ Then load this key into you **Kageant**.
 When the session that needs to use this key starts, and connects to **Kageant** a pop-up shows up and ask for usage confirmation:
 
 ![](../img/ex_kageant.jpg)
+
+>Thanks to [Patrick Cernko](https://people.mpi-klsb.mpg.de/~pcernko/pageant.html) for this patch.
