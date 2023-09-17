@@ -3631,6 +3631,7 @@ static void do_osc(Terminal *term)
 
                                                 if (gfmt == CF_TEXT) {
 
+                                                    n = wcsnlen((wchar_t *)pClipData, n / sizeof(wchar_t));
                                                     ClipTextSize = WideCharToMultiByte(
                                                         CP_UTF8,
                                                         0,
@@ -3643,7 +3644,6 @@ static void do_osc(Terminal *term)
                                                     ) + 1;
 
                                                     if (ClipTextSize >= 0) {
-                                                        n = wcsnlen((wchar_t *)pClipData, n / sizeof(wchar_t));
                                                         ClipText = calloc(ClipTextSize + 1, 1);
                                                         if (ClipText) {
                                                             WideCharToMultiByte(
